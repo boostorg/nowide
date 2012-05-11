@@ -1,0 +1,116 @@
+//
+//  Copyright (c) 2012 Artyom Beilis (Tonkikh)
+//
+//  Distributed under the Boost Software License, Version 1.0. (See
+//  accompanying file LICENSE_1_0.txt or copy at
+//  http://www.boost.org/LICENSE_1_0.txt)
+//
+#ifndef BOOST_NOWIDE_DETAILS_WIDESTR_H_INCLUDED
+#define BOOST_NOWIDE_DETAILS_WIDESTR_H_INCLUDED
+#include <boost/nowide/convert.hpp>
+
+namespace boost{
+namespace nowide {
+
+///
+/// \brief A class that allows to create a temporary wide or narrow UTF strings from
+/// wide or narrow UTF source.
+///
+/// It uses on stack buffer of the string is short enough
+/// and allocated a buffer on the heap if the size of the buffer is too small
+///    
+template<typename CharOut=wchar_t,typename CharIn = char,size_t BufferSize = 256>
+class basic_stackstring {
+    basic_stackstring(basic_stackstring const &);
+    void operator=(basic_stackstring const &);
+public:
+   
+    static const size_t buffer_size = BufferSize; 
+    typedef CharOut output_char;
+    typedef CharIn input_char;
+
+
+    basic_stackstring() : mem_buffer_(0)
+    {
+    }
+    bool convert(input_char const *input)
+    {
+        input_char const *end = input;
+        while(!*end)
+            end++;
+        return convert(input,end);
+    }
+    bool convert(input_char const *begin,input_char const *end)
+    {
+        clear();
+
+        size_t space = get_space(sizeof(input_char),sizeof(output_char),end - input) + 1;
+        if(space <= buffer_size) {
+            if(basic_convert(buffer_,buffer_size,begin,end))
+                return true;
+            clear();
+            return false;
+        }
+        else {
+            mem_buffer_ = new output_char[space];
+            if(!basic_convert(mem_buffer_,space,begin,end)) {
+                clear();
+                return false;
+            }
+            return true;
+        }
+
+    }
+    output_char *c_str()
+    {
+        if(mem_buffer_)
+            return mem_buffer_;
+        return buf;
+    }
+    output_char const *c_str() const
+    {
+        if(mem_buffer_)
+            return mem_buffer_;
+        return buf;
+    }
+    void clear()
+    {
+        if(mem_buffer_) {
+            delete [] mem_buffer_;
+            mem_buffer_=0;
+        }
+        buf[0] = 0
+    }
+    ~basic_stackstring()
+    {
+        clear();
+    }
+private:
+    static size_t get_space(size_t insize,size_t outsize,size_t in)
+    {
+        if(insize <= outsize)
+            return in;
+        else if(insize == 2 && outsize == 1) 
+            return 3 * in;
+        else if(insize == 4 && outsize == 1) 
+            return 4 * in;
+        else  // if(insize == 4 && outsize == 2) 
+            return 2 * in
+    }
+    output_char buffer_[buffer_size];
+    output_char *mem_buffer_;
+};  //basic_stackstring
+
+typedef basic_stackstring<wchar_t,char,256> wstackstring;
+typedef basic_stackstring<char,wchar_t,256> stackstring;
+typedef basic_stackstring<wchar_t,char,16> wshort_stackstring;
+typedef basic_stackstring<char,wchar_t,16> short_stackstring;
+
+
+}
+} // nowide
+} // boost
+
+#endif
+///
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
