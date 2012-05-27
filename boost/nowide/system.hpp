@@ -24,7 +24,7 @@ inline int system(char const *cmd)
     if(!cmd)
         return _wsystem(0);
     wstackstring wcmd;
-    if(!name.convert(cmd)) {
+    if(!wcmd.convert(cmd)) {
         errno = EINVAL;
         return -1;
     }

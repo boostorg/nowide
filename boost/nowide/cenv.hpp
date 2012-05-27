@@ -11,7 +11,7 @@
 #include <string>
 #include <stdexcept>
 #include <stdlib.h>
-#include <boost/nowide/config.hpp>
+#include <boost/config.hpp>
 #include <boost/nowide/stackstring.hpp>
 
 #ifdef BOOST_WINDOWS
@@ -24,9 +24,9 @@ namespace boost {
         using ::getenv;
         using ::setenv;
         using ::unsetenv;
-        using ::putenv
+        using ::putenv;
         #else
-        char *getenv(char const *key)
+        inline char *getenv(char const *key)
         {
             static stackstring value;
             
@@ -42,8 +42,8 @@ namespace boost {
             if(n == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND)
                 return 0;
             if(n >= buf_size) {
-                tmp.resize(n+1,'\0');
-                n = GetEnvironmentVariableW(name.c_str(),&tmp[0].tmp.size() - 1);
+                tmp.resize(n+1,L'\0');
+                n = GetEnvironmentVariableW(name.c_str(),&tmp[0],tmp.size() - 1);
                 // The size may have changed
                 if(n >= tmp.size() - 1)
                     return 0;
@@ -53,14 +53,14 @@ namespace boost {
                 return 0;
             return value.c_str();
         }
-        int setenv(char const *key,char const *value,int override)
+        inline int setenv(char const *key,char const *value,int override)
         {
             wshort_stackstring name;
             if(!name.convert(key))
                 return -1;
             if(!override) {
-                wchar_t unused;
-                if(GetEnvironmentVariableW(name.c_str(),&unused,1)==0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND)
+                wchar_t unused[2];
+                if(!(GetEnvironmentVariableW(name.c_str(),unused,2)==0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND))
                     return 0;
             }
             wstackstring wval;
@@ -70,7 +70,7 @@ namespace boost {
                 return 0;
             return -1;
         }
-        int unsetenv(char const *key)
+        inline int unsetenv(char const *key)
         {
             wshort_stackstring name;
             if(!name.convert(key))
@@ -79,7 +79,7 @@ namespace boost {
                 return 0;
             return -1;
         }
-        int putenv(char *string)
+        inline int putenv(char *string)
         {
             char const *key = string;
             char const *key_end = string;
@@ -95,7 +95,7 @@ namespace boost {
             if(!wvalue.convert(key_end+1))
                 return -1;
 
-            if(SetEnvironmentVariableW(name.c_str(),wval.c_str()))
+            if(SetEnvironmentVariableW(wkey.c_str(),wvalue.c_str()))
                 return 0;
             return -1;
         }

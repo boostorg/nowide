@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <boost/config.hpp>
 #include <boost/nowide/convert.hpp>
-#include <boost/nowise/stackstring.hpp>
+#include <boost/nowide/stackstring.hpp>
 
 #ifdef BOOST_MSVC
 #  pragma warning(push)
@@ -33,7 +33,7 @@ inline FILE *freopen(char const *file_name,char const *mode,FILE *stream)
 {
     wstackstring wname;
     wshort_stackstring wmode;
-    if(!name.convert(file_name) || !wmode.convert(mode))
+    if(!wname.convert(file_name) || !wmode.convert(mode))
         return 0;
     return _wfreopen(wname.c_str(),wmode.c_str(),stream);
 }
@@ -41,7 +41,7 @@ inline FILE *fopen(char const *file_name,char const *mode)
 {
     wstackstring wname;
     wshort_stackstring wmode;
-    if(!name.convert(file_name) || !wmode.convert(mode))
+    if(!wname.convert(file_name) || !wmode.convert(mode))
         return 0;
     return _wfopen(wname.c_str(),wmode.c_str());
 }

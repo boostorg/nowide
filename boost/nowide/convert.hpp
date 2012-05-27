@@ -30,9 +30,9 @@ namespace boost {
                 return 0;
             buffer_size --;
             while(source_begin!=source_end) {
-                using namespace boost::locale::conv;
-                utf::code_point c = utf_traits<CharIn>::template decode<CharIn const *(source_begin,source_end);
-                if(c==utf::illegal || c==utf::incomplete) {
+                using namespace boost::locale::utf;
+                code_point c = utf_traits<CharIn>::template decode<CharIn const *>(source_begin,source_end);
+                if(c==illegal || c==incomplete) {
                     rv = 0;
                     break;
                 }
@@ -41,12 +41,27 @@ namespace boost {
                     rv=0;
                     break;
                 }
-                buffer = utf_traits<CharOut>::template encode<Char *>(c,buffer);
+                buffer = utf_traits<CharOut>::template encode<CharOut *>(c,buffer);
                 buffer_size -= width;
             }
             *buffer++ = 0;
             return rv;
         }
+
+        /// \cond INTERNAL
+        namespace details {
+            //
+            // wcslen defined only in C99... So we will not use it
+            //
+            template<typename Char>
+            Char const *basic_strend(Char const *s)
+            {
+                while(*s)
+                    s++;
+                return s;
+            }
+        }
+        /// \end 
 
         ///
         /// Convert NUL terminated UTF source string to NUL terminated \a output string of size at
@@ -57,7 +72,7 @@ namespace boost {
         ///
         inline char *convert(char *output,size_t output_size,wchar_t const *source)
         {
-            return basic_convert(output,output_size,source,source+wcslen(source));
+            return basic_convert(output,output_size,source,details::basic_strend(source));
         }
         ///
         /// Convert UTF text in range [begin,end) to NUL terminated \a output string of size at
@@ -79,7 +94,7 @@ namespace boost {
         ///
         inline wchar_t *convert(wchar_t *output,size_t output_size,char const *source)
         {
-            return basic_convert(output,output_size,source,source+strlen(source));
+            return basic_convert(output,output_size,source,details::basic_strend(source));
         }
         ///
         /// Convert UTF text in range [begin,end) to NUL terminated \a output string of size at
@@ -90,7 +105,7 @@ namespace boost {
         ///
         inline wchar_t *convert(wchar_t *output,size_t output_size,char const *begin,char const *end)
         {
-            return basic_convert(output,output_size,source,begin,end);
+            return basic_convert(output,output_size,begin,end);
         }
 
 

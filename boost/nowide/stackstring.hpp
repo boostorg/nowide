@@ -8,6 +8,8 @@
 #ifndef BOOST_NOWIDE_DETAILS_WIDESTR_H_INCLUDED
 #define BOOST_NOWIDE_DETAILS_WIDESTR_H_INCLUDED
 #include <boost/nowide/convert.hpp>
+#include <string.h>
+#include <algorithm>
 
 namespace boost{
 namespace nowide {
@@ -21,30 +23,55 @@ namespace nowide {
 ///    
 template<typename CharOut=wchar_t,typename CharIn = char,size_t BufferSize = 256>
 class basic_stackstring {
-    basic_stackstring(basic_stackstring const &);
-    void operator=(basic_stackstring const &);
 public:
    
     static const size_t buffer_size = BufferSize; 
     typedef CharOut output_char;
     typedef CharIn input_char;
 
+    basic_stackstring(basic_stackstring const &other) : 
+	mem_buffer_(0)
+    {
+	    clear();
+	    if(other.mem_buffer_) {
+		    size_t len = 0;
+		    while(other.mem_buffer_[len])
+			    len ++;
+		    mem_buffer_ = new output_char[len + 1];
+		    memcpy(mem_buffer_,other.mem_buffer_,sizeof(output_char) * (len+1));
+	    }
+	    else {
+		    memcpy(buffer_,other.buffer_,buffer_size * sizeof(output_char));
+	    }
+    }
+    
+    void swap(basic_stackstring &other)
+    {
+	    std::swap(mem_buffer_,other.mem_buffer_);
+	    for(size_t i=0;i<buffer_size;i++)
+		    std::swap(buffer_[i],other.buffer_[i]);
+    }
+    basic_stackstring &operator=(basic_stackstring const &other)
+    {
+	    if(this != &other) {
+		    basic_stackstring tmp(other);
+		    swap(tmp);		    
+	    }
+	    return *this;
+    }
 
     basic_stackstring() : mem_buffer_(0)
     {
     }
     bool convert(input_char const *input)
     {
-        input_char const *end = input;
-        while(!*end)
-            end++;
-        return convert(input,end);
+        return convert(input,details::basic_strend(input));
     }
     bool convert(input_char const *begin,input_char const *end)
     {
         clear();
 
-        size_t space = get_space(sizeof(input_char),sizeof(output_char),end - input) + 1;
+        size_t space = get_space(sizeof(input_char),sizeof(output_char),end - begin) + 1;
         if(space <= buffer_size) {
             if(basic_convert(buffer_,buffer_size,begin,end))
                 return true;
@@ -65,13 +92,13 @@ public:
     {
         if(mem_buffer_)
             return mem_buffer_;
-        return buf;
+        return buffer_;
     }
     output_char const *c_str() const
     {
         if(mem_buffer_)
             return mem_buffer_;
-        return buf;
+        return buffer_;
     }
     void clear()
     {
@@ -79,7 +106,7 @@ public:
             delete [] mem_buffer_;
             mem_buffer_=0;
         }
-        buf[0] = 0
+        buffer_[0] = 0;
     }
     ~basic_stackstring()
     {
@@ -95,7 +122,7 @@ private:
         else if(insize == 4 && outsize == 1) 
             return 4 * in;
         else  // if(insize == 4 && outsize == 2) 
-            return 2 * in
+            return 2 * in;
     }
     output_char buffer_[buffer_size];
     output_char *mem_buffer_;
@@ -107,7 +134,6 @@ typedef basic_stackstring<wchar_t,char,16> wshort_stackstring;
 typedef basic_stackstring<char,wchar_t,16> short_stackstring;
 
 
-}
 } // nowide
 } // boost
 

@@ -5,10 +5,10 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_???_H_INCLUDED
-#define BOOST_NOWIDE_???_H_INCLUDED
+#ifndef BOOST_NOWIDE_ARGS_HPP_INCLUDED
+#define BOOST_NOWIDE_ARGS_HPP_INCLUDED
 
-#include <boost/config.h>
+#include <boost/config.hpp>
 #include <boost/nowide/stackstring.hpp>
 #include <vector>
 #ifdef BOOST_WINDOWS
@@ -45,7 +45,7 @@ namespace boost {
                 if(!wargv) {
                     argc = 0;
                     static char *dummy = 0;
-                    argv = dummy;
+                    argv = &dummy;
                     return;
                 }
                 try{ 
@@ -80,13 +80,13 @@ namespace boost {
                     for(wstrings_end = wstrings;*wstrings_end;wstrings_end+=wcslen(wstrings_end)+1)
                         count++;
                     if(env_.convert(wstrings,wstrings_end)) {
-                        envp_.resize(count,0);
+                        envp_.resize(count+1,0);
                         char *p=env_.c_str();
                         for(int i=0;i<count;i++) {
                             envp_[i] = p;
                             p+=strlen(p)+1;
                         }
-                        en = &evnp_[0];
+                        en = &envp_[0];
                     }
                 }
                 catch(...) {
@@ -109,6 +109,5 @@ namespace boost {
 } // boost
 #endif
 
-#endif
 ///
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
