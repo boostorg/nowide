@@ -14,7 +14,7 @@
 namespace boost {
     namespace nowide {
         ///
-        /// Template function that converts a buffer of UTF sequence in range [source_begin,source_end)
+        /// \brief Template function that converts a buffer of UTF sequence in range [source_begin,source_end)
         /// to the output \a buffer of size \a buffer_size.
         ///
         /// In case of success a NUL terminated string returned (buffer), otherwise 0 is returned.
@@ -61,7 +61,7 @@ namespace boost {
                 return s;
             }
         }
-        /// \end 
+        /// \endcond
 
         ///
         /// Convert NUL terminated UTF source string to NUL terminated \a output string of size at

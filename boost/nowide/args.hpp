@@ -17,7 +17,7 @@
 
 namespace boost {
     namespace nowide {
-        #ifndef BOOST_WINDOWS
+        #if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_DOXYGEN)
         class args {
         public:
             args(int &,char **&) {}
@@ -26,12 +26,25 @@ namespace boost {
 
         #else
 
+        ///
+        /// \brief args is a class that fixes standard main() function arguments and changes them to UTF-8 under 
+        /// Microsoft Windows.
+        ///
+        /// \note the class owns the memory of the newly allocated strings
+        ///
         class args {
         public:
+            
+            ///
+            /// Fix command line agruments 
+            ///
             args(int &argc,char **&argv)
             {
                 fix_args(argc,argv);
             }
+            ///
+            /// Fix command line agruments and environment
+            ///
             args(int &argc,char **&argv,char **&en)
             {
                 fix_args(argc,argv);

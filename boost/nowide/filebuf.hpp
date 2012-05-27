@@ -17,17 +17,32 @@
 
 namespace boost {
 namespace nowide {
-#if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_FSTREAM_TESTS)
+#if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_FSTREAM_TESTS) && !defined(BOOST_NOWIDE_DOXYGEN)
     using std::basic_filebuf;
     using std::filebuf;
 #else // Windows
     
+    ///
+    /// \brief This forward declaration defined the basic_filebuf type.
+    ///
+    /// it is implemented and specialized for CharType = char, it behaves
+    /// implements std::filebuf over standard C I/O
+    ///
     template<typename CharType,typename Traits = std::char_traits<CharType> >
     class basic_filebuf;
     
+    ///
+    /// \brief This is implementation of std::filebuf
+    ///
+    /// it is implemented and specialized for CharType = char, it behaves
+    /// implements std::filebuf over standard C I/O
+    ///
     template<>
     class basic_filebuf<char> : public std::basic_streambuf<char> {
     public:
+        ///
+        /// Creates new filebuf
+        ///
         basic_filebuf() : 
             buffer_size_(4),
             buffer_(0),
@@ -49,10 +64,16 @@ namespace nowide {
                 delete [] buffer_;
         }
         
+        ///
+        /// Same as std::filebuf::open but s is UTF-8 string
+        ///
         basic_filebuf *open(std::string const &s,std::ios_base::openmode mode)
         {
             return open(s.c_str(),mode);
         }
+        ///
+        /// Same as std::filebuf::open but s is UTF-8 string
+        ///
         basic_filebuf *open(char const *s,std::ios_base::openmode mode)
         {
             if(file_) {
@@ -76,6 +97,9 @@ namespace nowide {
             file_ = f;
             return this;
         }
+        ///
+        /// Same as std::filebuf::close()
+        ///
         basic_filebuf *close()
         {
             bool res = sync() == 0;
@@ -86,6 +110,9 @@ namespace nowide {
             }
             return res ? this : 0;
         }
+        ///
+        /// Same as std::filebuf::is_open()
+        ///
         bool is_open() const
         {
             return file_ != 0;
@@ -166,28 +193,6 @@ namespace nowide {
 #else
 #endif        
         
-        int fixg()
-        {
-            if(gptr()!=egptr()) {
-                std::streamsize off = gptr() - egptr();
-                setg(0,0,0);
-                if(fseek(file_,off,SEEK_CUR) != 0)
-                    return -1;
-            }
-            setg(0,0,0);
-            return 0;
-        }
-        
-        int fixp()
-        {
-            if(pptr()!=0) {
-                int r = sync();
-                setp(0,0);
-                return r;
-            }
-            return 0;
-        }
-        
         int overflow(int c)
         {
 #ifdef BOOST_NOWIDE_DEBUG_FILEBUF
@@ -257,16 +262,6 @@ namespace nowide {
             return pubseekoff(-1,std::ios::cur);
         }
 
-        void reset(FILE *f = 0)
-        {
-            sync();
-            if(file_) {
-                fclose(file_);
-                file_ = 0;
-            }
-            file_ = f;
-        }
-        
         std::streampos seekoff(std::streamoff off,
                             std::ios_base::seekdir seekdir,
                             std::ios_base::openmode /*m*/)
@@ -299,6 +294,39 @@ namespace nowide {
             return seekoff(std::streamoff(off),std::ios_base::beg,m);
         }
     private:
+        int fixg()
+        {
+            if(gptr()!=egptr()) {
+                std::streamsize off = gptr() - egptr();
+                setg(0,0,0);
+                if(fseek(file_,off,SEEK_CUR) != 0)
+                    return -1;
+            }
+            setg(0,0,0);
+            return 0;
+        }
+        
+        int fixp()
+        {
+            if(pptr()!=0) {
+                int r = sync();
+                setp(0,0);
+                return r;
+            }
+            return 0;
+        }
+
+        void reset(FILE *f = 0)
+        {
+            sync();
+            if(file_) {
+                fclose(file_);
+                file_ = 0;
+            }
+            file_ = f;
+        }
+        
+        
         static wchar_t const *get_mode(std::ios_base::openmode mode)
         {
             //
@@ -354,6 +382,9 @@ namespace nowide {
         std::ios::openmode mode_;
     };
     
+    ///
+    /// \brief Convinience typedef
+    ///
     typedef basic_filebuf<char> filebuf;
     
     #endif // windows

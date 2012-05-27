@@ -128,9 +128,21 @@ private:
     output_char *mem_buffer_;
 };  //basic_stackstring
 
+///
+/// Convinience typedef
+///
 typedef basic_stackstring<wchar_t,char,256> wstackstring;
+///
+/// Convinience typedef
+///
 typedef basic_stackstring<char,wchar_t,256> stackstring;
+///
+/// Convinience typedef
+///
 typedef basic_stackstring<wchar_t,char,16> wshort_stackstring;
+///
+/// Convinience typedef
+///
 typedef basic_stackstring<char,wchar_t,16> short_stackstring;
 
 

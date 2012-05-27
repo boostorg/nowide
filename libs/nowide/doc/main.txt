@@ -1,0 +1,212 @@
+//
+//  Copyright (c) 2009-2011 Artyom Beilis (Tonkikh)
+//
+//  Distributed under the Boost Software License, Version 1.0. (See
+//  accompanying file LICENSE_1_0.txt or copy at
+//  http://www.boost.org/LICENSE_1_0.txt)
+//
+
+
+/*!
+
+\mainpage Boost.Nowide
+
+Table of Contents:
+
+- \ref main 
+    - \ref main_rationale 
+        - \ref main_the_problem 
+        - \ref main_the_solution 
+        - \ref main_wide 
+        - \ref main_reading 
+- \ref using
+- \ref technical 
+    - \ref technical_imple 
+    - \ref technical_cio 
+
+
+\section main What is Boost.Nowide
+
+Boost.Nowide is a library implemented by Artyom Beilis
+that make cross platform Unicode aware programming
+ieasier.
+
+
+
+\subsection main_rationale Rationale
+\subsubsection main_the_problem The Problem
+
+Consider a simple application that splits a big file into chunks, such that 
+they can be sent by e-mail. It requires doing few very simple taks:
+
+- Access command line arguments: <code>int main(int argc,char **argv)</code>
+- Open a input file, open several output files: <code>std::fstream::open(char const *,std::ios::openmode m)</code>
+- Remove the files in case of fault: <code>std::remove(char const *file)</code>
+- Print a progress report into console: <code>std::cout << file_name </code>
+
+Unfortunately it is impossible to implement this simple task in a plain C++
+if the file names contain non-ASCII characters
+
+The simple program that uses the API would work on the systems that use UTF-8
+internally -- the vast majority of Unix-Line operating systems: Linux, Mac OS X, 
+Solaris, BSD. But it would fail on files like <code>War and Peace - Война и мир - מלחמה ושלום.zip</code>
+under Microsoft Windows because the native Windows Unicode aware API is Wide-API - UTF-16.
+
+This,  even a trivial task is very hard to implement in cross platform manner.
+
+\subsubsection main_the_solution The Solution
+
+Boost.Nowide provides a set of standard library functions that are UTF-8 aware and 
+makes Unicode aware programming easier.
+
+The library provides:
+
+- Easy to use functions for converting UTF-8 to/from UTF-16
+- A class to fixing \c argc, \c argc and \c env \c main parameters to use UTF-8
+- UTF-8 aware functions
+    - \c stdio.h functions:
+        - \c fopen
+        - \c freopen
+        - \c remove
+        - \c rename
+    - \c stdlib.h functions
+        - \c system
+        - \c getenv
+        - \c setenv
+        - \c unsetenv
+        - \c putenv
+    - \c fstream
+        - \c filebuf
+        - \c fstream/ofstream/ifstream
+    - \c iostream
+        - \c cout
+        - \c cerr
+        - \c clog
+        - \c cin 
+
+
+\subsubsection main_wide Why Not Narrow and Wide? 
+
+Why not to provide both Wide and Narrow implementations so the
+developer can choose to use Wide characters on Unix-Like platforms
+
+Several reasons:
+
+- \c wchar_t is not really portable, it can be 2 bytes, 4 bytes or even 1 byte making Unicode aware programming harder
+- Standard C and C++ library uses narrow strings for OS interactions. This library follows this general rule. There is
+  no such thing as <code>fopen(wchar_t const *,wchar_t const *)</code> in the standard library, so it is better
+  to stick to the standards rather than re-implement Wide API in "Microsoft Windows Style"
+
+
+\subsubsection main_reading Further Reading
+
+- <a href="http://www.utf8everywhere.org/">www.utf8everywhere.org</a>
+- <a href="http://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approaches/">Windows console i/o approaches</a>
+
+\section using Using The Library
+
+The library is mostly header only library, only console I/O requires separate compilation under Windows.
+
+As a developer you are expected to to \c boost::nowide functions instead of the function avalible in the
+\c std namespace.
+
+For example, Unicode unaware implementation of line counter:
+\code
+<fstream>
+<iostream>
+
+int main(int argc,char **argv)
+{
+    if(argc!=2) {
+        std::cerr << "Usage: file_name" << std::endl;
+        return 1;
+    }
+
+    std::ifstream f(argv[2]);
+    if(!f) {
+        std::cerr << "Can't open a file " << argv[2] << std::endl;
+        return 1;
+    }
+    int total_lines = 0
+    while(f) {
+        if(f.get() == '\n)
+            total_lines++;
+    }
+    f.close();
+    std::cout << "File " << argv[2] << " has " << total_lines << " lines" << std::endl;
+    return 0;
+}
+\endcode
+
+To make this program handle Unicode properly we do the following changes:
+
+
+\code
+<boost/nowide/args.hpp>
+<boost/nowide/fstream.hpp>
+<boost/nowide/iostream.hpp>
+
+int main(int argc,char **argv)
+{
+    boost::nowide::args a(argc,argv); // Fix arguments - make them UTF-8
+    if(argc!=2) {
+        boost::nowide::cerr << "Usage: file_name" << std::endl; // Unicode aware console
+        return 1;
+    }
+
+    boost::nowide::ifstream f(argv[2]); // argv[2] - is UTF-8
+    if(!f) {
+        // the console can display UTF-8
+        boost::nowide::cerr << "Can't open a file " << argv[2] << std::endl;
+        return 1;
+    }
+    int total_lines = 0
+    while(f) {
+        if(f.get() == '\n)
+            total_lines++;
+    }
+    f.close();
+    // the console can display UTF-8
+    boost::nowide::cout << "File " << argv[2] << " has " << total_lines << " lines" << std::endl;
+    return 0;
+}
+\endcode
+
+This is very simple and straight forward approach helps writing Unicode aware programs.
+
+\section technical Technical Details
+\subsection technical_imple Windows vs POSIX
+
+The library provide UTF-8 aware functions for Microsoft Windows in  \c boost::nowide namespace that usually lay in \c std:: namespace,
+for example \c std::fopen goes to \c boost::nowide::fopen. 
+
+Under POSIX platforms the boost::nowide::fopen and all other functions are aliases to standard library functions:
+
+\code
+namespace boost {
+namespace nowide {
+#ifdef BOOST_WINDOWS
+inline FILE *fopen(char const *name,char const *mode)
+{
+    ...
+}
+#else
+using std::fopen
+#endif
+} // nowide
+} // boost
+\endcode
+
+\subsection technical_cio Console I/O
+
+Console I/O implemented as wrapper over ReadConsoleW/WriteConsoleW unless
+the stream is not "atty" like a pipe than ReadFile/WriteFile is used.
+
+This approach eliminates a need of manual code page handling. If TrueType
+fonts are used the Unicode aware input and output would work.
+
+
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+

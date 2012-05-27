@@ -9,11 +9,9 @@
 #include <boost/nowide/iostream.hpp>
 #include <boost/nowide/convert.hpp>
 #include <stdio.h>
-#ifndef BOOST_WINDOWS
-# error "This code shold be used only under Windows platforms"
-#endif
-
 #include <vector>
+
+#ifdef BOOST_WINDOWS
 
 #ifndef NOMINMAX
 # define NOMINMAX
@@ -75,14 +73,16 @@ namespace details {
                 return -1;
             wchar_t *out = wbuffer_;
             uf::code_point c;
+            size_t decoded = 0;
             while(p < e && (c = uf::utf_traits<char>::decode(p,e))!=uf::illegal && c!=uf::incomplete) {
                 out = uf::utf_traits<wchar_t>::encode(c,out);
+                decoded = p-b;
             }
             if(c==uf::illegal)
                 return -1;
             if(!WriteConsoleW(handle_,wbuffer_,out - wbuffer_,0,0))
                 return -1;
-            return p - b;
+            return decoded;
         }
         
         static const int buffer_size = 1024;
@@ -175,17 +175,18 @@ namespace details {
             wchar_t *e = b + wsize_;
             wchar_t *p = b;
             uf::code_point c;
+            wsize_ = e-p;
             while(p < e && (c = uf::utf_traits<wchar_t>::decode(p,e))!=uf::illegal && c!=uf::incomplete) {
                 out = uf::utf_traits<char>::encode(c,out);
+                wsize_ = e-p;
             }
             
             if(c==uf::illegal)
                 return -1;
             
-            wsize_ = (e-p);
             
             if(c==uf::incomplete) {
-                memmove(b,p,sizeof(wchar_t)*wsize_);
+                memmove(b,e-wsize_,sizeof(wchar_t)*wsize_);
             }
             
             return out - buffer_;
@@ -254,5 +255,6 @@ namespace {
 } // nowide
 } // boost
 
+#endif
 ///
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

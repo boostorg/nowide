@@ -16,7 +16,7 @@
 
 namespace boost {
     namespace nowide {
-        #ifndef BOOST_WINDOWS
+        #if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_DOXYGEN)
         using std::cout;
         using std::cerr;
         using std::cin;
@@ -53,10 +53,29 @@ namespace boost {
         
         /// \endcond
 
-
+        ///
+        /// \brief Same as std::cin, but uses UTF-8
+        ///
+        /// Note, the stream is not synchronized with stdio and not affected by std::ios::sync_with_stdio
+        /// 
         extern BOOST_NOWIDE_DECL details::winconsole_istream cin;
+        ///
+        /// \brief Same as std::cout, but uses UTF-8
+        ///
+        /// Note, the stream is not synchronized with stdio and not affected by std::ios::sync_with_stdio
+        /// 
         extern BOOST_NOWIDE_DECL details::winconsole_ostream cout;
+        ///
+        /// \brief Same as std::cerr, but uses UTF-8
+        ///
+        /// Note, the stream is not synchronized with stdio and not affected by std::ios::sync_with_stdio
+        /// 
         extern BOOST_NOWIDE_DECL details::winconsole_ostream cerr;
+        ///
+        /// \brief Same as std::clog, but uses UTF-8
+        ///
+        /// Note, the stream is not synchronized with stdio and not affected by std::ios::sync_with_stdio
+        /// 
         extern BOOST_NOWIDE_DECL details::winconsole_ostream clog;
 
         #endif

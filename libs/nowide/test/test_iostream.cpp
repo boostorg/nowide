@@ -21,8 +21,16 @@ int main(int argc,char **argv)
             TEST(boost::nowide::cin.get() == c);
         }
         std::string v1,v2;
+        boost::nowide::cout << "Normal I/O:" << std::endl;
         boost::nowide::cout << example << std::endl;
         boost::nowide::cerr << example << std::endl;
+        
+        boost::nowide::cout << "Flushing each character:" << std::endl;
+        
+        for(char const *s=example;*s;s++) {
+            boost::nowide::cout << *s << std::flush;
+            TEST(boost::nowide::cout);
+        }
         
         TEST(boost::nowide::cout);
         TEST(boost::nowide::cerr);

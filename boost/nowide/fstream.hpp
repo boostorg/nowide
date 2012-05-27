@@ -23,7 +23,7 @@ namespace boost {
 /// of std namespace (i.e. not on Windows)
 ///
 namespace nowide {
-#if !defined BOOST_WINDOWS  && !defined BOOST_NOWIDE_FSTREAM_TESTS
+#if !defined(BOOST_WINDOWS)  && !defined(BOOST_NOWIDE_FSTREAM_TESTS) && !defined(BOOST_NOWIDE_DOXYGEN)
 
     using std::basic_ifstream;
     using std::basic_ofstream;
@@ -32,11 +32,9 @@ namespace nowide {
     using std::ofstream;
     using std::fstream;
 
-#endif
-    
-#if defined(BOOST_WINDOWS) || defined(BOOST_DOXYGEN_DOCS) || defined(BOOST_NOWIDE_FSTREAM_TESTS)
+#else
     ///
-    /// Same as std::basic_ifstream<char> but accepts UTF-8 strings under Windows
+    /// \brief Same as std::basic_ifstream<char> but accepts UTF-8 strings under Windows
     ///
     template<typename CharType,typename Traits = std::char_traits<CharType> >
     class basic_ifstream : public std::basic_istream<CharType,Traits>
@@ -99,7 +97,7 @@ namespace nowide {
     };
 
     ///
-    /// Same as std::basic_ofstream<char> but accepts UTF-8 strings under Windows
+    /// \brief Same as std::basic_ofstream<char> but accepts UTF-8 strings under Windows
     ///
 
     template<typename CharType,typename Traits = std::char_traits<CharType> >
@@ -161,7 +159,7 @@ namespace nowide {
     };
 
     ///
-    /// Same as std::basic_fstream<char> but accepts UTF-8 strings under Windows
+    /// \brief Same as std::basic_fstream<char> but accepts UTF-8 strings under Windows
     ///
 
     template<typename CharType,typename Traits = std::char_traits<CharType> >
@@ -224,7 +222,7 @@ namespace nowide {
 
 
     ///
-    /// Same as std::filebuf but accepts UTF-8 strings under Windows
+    /// \brief Same as std::filebuf but accepts UTF-8 strings under Windows
     ///
     typedef basic_filebuf<char> filebuf;
     ///

@@ -9,7 +9,6 @@
 #include <boost/nowide/system.hpp>
 #include <boost/nowide/args.hpp>
 #include <boost/nowide/cenv.hpp>
-#include <boost/nowide/cppenv.hpp>
 #include <iostream>
 #include "test.hpp"
 
@@ -23,30 +22,21 @@ int main(int argc,char **argv,char **env)
             TEST(argv[1]==example);
             TEST(argv[2] == 0);
             TEST(boost::nowide::getenv("BOOST_NOWIDE_TEST"));
-            TEST(boost::nowide::has_enironment("BOOST_NOWIDE_TEST"));
             TEST(boost::nowide::getenv("BOOST_NOWIDE_TEST_NONE") == 0);
-            TEST(!boost::nowide::has_enironment("BOOST_NOWIDE_TEST_NONE"));
             TEST(boost::nowide::getenv("BOOST_NOWIDE_TEST")==example);
-            TEST(boost::nowide::get_environment("BOOST_NOWIDE_TEST")==example);
-            TEST(boost::nowide::get_environment("BOOST_NOWIDE_TEST","default")==example);
-            TEST(boost::nowide::get_environment("BOOST_NOWIDE_TEST_NONE","default")=="default");
             std::string sample = "BOOST_NOWIDE_TEST=" + example;
             bool found = false;
-            std::map<std::string,std::string> strs = boost::nowide::get_environment_strings();
-            size_t total = 0;
             for(char **e=env;*e!=0;e++) {
                 char *key_end = strchr(*e,'=');
                 TEST(key_end);
                 std::string key = std::string(*e,key_end);
                 std::string value = key_end + 1;
-                TEST(strs.count(key) == 1);
-                TEST(strs[key]==value);
+                TEST(getenv(key.c_str()));
+                TEST(boost::nowide::getenv(key.c_str()) == value);
                 if(*e == sample)
                     found = true;
-                total ++;
             }
             TEST(found);
-            TEST(strs.size() == total);
             std::cout << "Subprocess ok" << std::endl;
         }
         else if(argc==2 && argv[1][0]=='-') {
@@ -66,27 +56,18 @@ int main(int argc,char **argv,char **env)
                     #endif
                 }
                 return 0;
-            case '1':
-                TEST(boost::nowide::set_environment(std::string("BOOST_NOWIDE_TEST"),example) == 0);
-                TEST(boost::nowide::set_environment(std::string("BOOST_NOWIDE_TEST_NONE"),example) == 0);
-                TEST(boost::nowide::unset_environment(std::string("BOOST_NOWIDE_TEST_NONE")) == 0);
-                break;
-            case '2':
-                TEST(boost::nowide::set_environment("BOOST_NOWIDE_TEST",example.c_str()) == 0);
-                TEST(boost::nowide::set_environment("BOOST_NOWIDE_TEST_NONE",example.c_str()) == 0);
-                TEST(boost::nowide::unset_environment("BOOST_NOWIDE_TEST_NONE") == 0);
-                break;
-            case '3':
+            case 'n':
                 TEST(boost::nowide::setenv("BOOST_NOWIDE_TEST",example.c_str(),1) == 0);
                 TEST(boost::nowide::setenv("BOOST_NOWIDE_TEST_NONE",example.c_str(),1) == 0);
                 TEST(boost::nowide::unsetenv("BOOST_NOWIDE_TEST_NONE") == 0);
                 break;
             default:
-                std::cout << "Invalid parameters expected '-1/-2/-3/-w'" << std::endl;
+                std::cout << "Invalid parameters expected '-n/-w'" << std::endl;
                 return 1;
             }
-            std::string command  = argv[0];
-            command += " ";
+            std::string command = "\"";
+            command += argv[0];
+            command += "\" ";
             command += example;
             TEST(boost::nowide::system(command.c_str()) == 0);
             std::cout << "Parent ok" << std::endl;

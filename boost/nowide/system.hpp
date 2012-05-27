@@ -13,12 +13,18 @@
 #include <boost/nowide/stackstring.hpp>
 namespace boost {
 namespace nowide {
-#ifndef BOOST_WINDOWS
+
+#if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_DOXYGEN)
 
 using ::system;
 
 #else // Windows
 
+///
+/// Same as std::system but cmd is UTF-8.
+///
+/// If the input is not valid UTF-8, -1 returned and errno set to EINVAL
+///
 inline int system(char const *cmd)
 {
     if(!cmd)
