@@ -14,6 +14,12 @@
 #include <ostream>
 #include <istream>
 
+#ifdef BOOST_MSVC
+#  pragma warning(push)
+#  pragma warning(disable : 4251)
+#endif
+
+
 namespace boost {
     namespace nowide {
         #if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_DOXYGEN)
@@ -82,6 +88,11 @@ namespace boost {
 
     } // nowide
 } // boost
+
+#ifdef BOOST_MSVC
+#  pragma warning(pop)
+#endif
+
 
 #endif
 ///

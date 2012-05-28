@@ -1,4 +1,4 @@
-# Boost System Library Build Jamfile
+# Boost Nowide Library Build Jamfile
 
 # (C) Copyright Beman Dawes 2002, 2006, Artyom Beilis 2012
 # 
@@ -19,8 +19,8 @@ SOURCES = iostream ;
 
 lib boost_nowide
    : $(SOURCES).cpp
-   : <link>shared:<define>BOOST_SYSTEM_DYN_LINK=1
-     <link>static:<define>BOOST_SYSTEM_STATIC_LINK=1
+   : <link>shared:<define>BOOST_NOWIDE_DYN_LINK=1
+     <link>static:<define>BOOST_NOWIDE_STATIC_LINK=1
    ;
 
-boost-install boost_system ;
+boost-install boost_nowide ;

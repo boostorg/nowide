@@ -10,6 +10,11 @@
 #include <iostream>
 #include "test.hpp"
 
+#ifdef BOOST_MSVC
+#  pragma warning(disable : 4996)
+#endif
+
+
 int main()
 {
     try {

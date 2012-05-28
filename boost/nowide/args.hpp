@@ -91,12 +91,14 @@ namespace boost {
                     wchar_t *wstrings_end = 0;
                     int count = 0;
                     for(wstrings_end = wstrings;*wstrings_end;wstrings_end+=wcslen(wstrings_end)+1)
-                        count++;
+                            count++;
                     if(env_.convert(wstrings,wstrings_end)) {
                         envp_.resize(count+1,0);
                         char *p=env_.c_str();
+                        int pos = 0;
                         for(int i=0;i<count;i++) {
-                            envp_[i] = p;
+                            if(*p!='=')
+                                envp_[pos++] = p;
                             p+=strlen(p)+1;
                         }
                         en = &envp_[0];

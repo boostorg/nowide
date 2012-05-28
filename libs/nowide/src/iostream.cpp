@@ -31,7 +31,7 @@ namespace details {
         {
             if(handle_) {
                 DWORD dummy;
-                isatty_ = GetConsoleMode(handle_,&dummy);
+                isatty_ = GetConsoleMode(handle_,&dummy) == TRUE;
             }
         }
     protected:
@@ -65,7 +65,8 @@ namespace details {
             char const *b = p;
             char const *e = p+n;
             if(!isatty_) {
-                if(!WriteFile(handle_,p,n,0,0))
+                DWORD size=0;
+                if(!WriteFile(handle_,p,n,&size,0) || static_cast<int>(size) != n)
                     return -1;
                 return n;
             }
@@ -101,7 +102,7 @@ namespace details {
         {
             if(handle_) {
                 DWORD dummy;
-                isatty_ = GetConsoleMode(handle_,&dummy);
+                isatty_ = GetConsoleMode(handle_,&dummy) == TRUE;
             }
         } 
         

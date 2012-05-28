@@ -15,6 +15,12 @@
 #include <streambuf>
 #include <stdio.h>
 
+#ifdef BOOST_MSVC
+#  pragma warning(push)
+#  pragma warning(disable : 4996 4244)
+#endif
+
+
 namespace boost {
 namespace nowide {
 #if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_FSTREAM_TESTS) && !defined(BOOST_NOWIDE_DOXYGEN)
@@ -391,6 +397,11 @@ namespace nowide {
     
 } // nowide
 } // boost
+
+#ifdef BOOST_MSVC
+#  pragma warning(pop)
+#endif
+
 
 #endif
 

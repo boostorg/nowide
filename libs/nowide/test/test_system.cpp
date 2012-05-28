@@ -11,6 +11,7 @@
 #include <boost/nowide/cenv.hpp>
 #include <iostream>
 #include "test.hpp"
+#include <stdio.h>
 
 int main(int argc,char **argv,char **env)
 {
@@ -27,11 +28,13 @@ int main(int argc,char **argv,char **env)
             std::string sample = "BOOST_NOWIDE_TEST=" + example;
             bool found = false;
             for(char **e=env;*e!=0;e++) {
-                char *key_end = strchr(*e,'=');
+				char *eptr = *e;
+				//printf("%s\n",eptr);
+                char *key_end = strchr(eptr,'=');
                 TEST(key_end);
-                std::string key = std::string(*e,key_end);
+                std::string key = std::string(eptr,key_end);
                 std::string value = key_end + 1;
-                TEST(getenv(key.c_str()));
+		        TEST(boost::nowide::getenv(key.c_str()));
                 TEST(boost::nowide::getenv(key.c_str()) == value);
                 if(*e == sample)
                     found = true;

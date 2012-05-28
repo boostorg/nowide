@@ -8,14 +8,29 @@
 # See library home page at http://www.boost.org/libs/system
 
 project
+    #: requirements <library>/boost/nowide//boost_nowide
     ;
     
    test-suite "nowide"
-       : [ run test_convert.cpp ]
-         [ run test_env.cpp ]
-	 [ run test_fstream.cpp ]
-	 [ run test_iostream.cpp : : : <library>/boost/nowide//boost_nowide ]
-	 [ run test_stdio.cpp ]
-	 [ run test_system.cpp : "-w" : : : test_system_w ]
-	 [ run test_system.cpp : "-n" : : : test_system_n ]
+        :   [ run test_convert.cpp ]
+            [ run test_fstream.cpp ]
+            [ run test_stdio.cpp ]
+            [ run test_env.cpp      :       : 
+                :   <toolset>msvc:<linkflags>shell32.lib ]
+                
+            [ run test_system.cpp   : "-w"  :
+                :   <toolset>msvc:<linkflags>shell32.lib : test_system_w ]
+                
+            [ run test_system.cpp   : "-n"  :
+                :   <toolset>msvc:<linkflags>shell32.lib : test_system_n ]
+                
+            [ run test_iostream.cpp : : 
+                :   <library>/boost/nowide//boost_nowide
+                    <link>static 
+                : test_iostream_static ]
+                
+            [ run test_iostream.cpp : : 
+                :   <library>/boost/nowide//boost_nowide
+                    <link>shared
+                : test_iostream_shared ]
          ;
