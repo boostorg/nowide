@@ -20,6 +20,8 @@ Table of Contents:
         - \ref main_wide 
         - \ref main_reading 
 - \ref using
+    - \ref using_standard
+    - \ref using_custom
 - \ref technical 
     - \ref technical_imple 
     - \ref technical_cio 
@@ -29,7 +31,7 @@ Table of Contents:
 
 Boost.Nowide is a library implemented by Artyom Beilis
 that make cross platform Unicode aware programming
-ieasier.
+easier.
 
 
 
@@ -104,6 +106,7 @@ Several reasons:
 - <a href="http://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approaches/">Windows console i/o approaches</a>
 
 \section using Using The Library
+\subsection using_standard Standard Features
 
 The library is mostly header only library, only console I/O requires separate compilation under Windows.
 
@@ -173,6 +176,47 @@ int main(int argc,char **argv)
 \endcode
 
 This is very simple and straight forward approach helps writing Unicode aware programs.
+    
+\subsection using_custom Custom API
+
+Of course this simple set of functions does not cover all needs. However if you need
+to access Wide API from Windows application using UTF-8 encoding internally you can use
+functions like \c boost::nowide::convert.
+
+For example
+\code
+CopyFileW(  boost::nowide::convert(existing_file).c_str(),
+            boost::nowide::convert(new_file).c_str(),
+            TRUE);
+\endcode
+
+So the conversion is done at the last stage and you continue using
+UTF-8 strings anywhere and only at glue points you switch to 
+Wide API.
+
+\c boost::nowide::convert returns \c std::string. Sometimes
+it is convenient to prevent allocation and use on stack buffers
+if possible. Boot.Nowide provides \c boost::nowide::basic_stackstring class.
+
+Such that the example above can be rewritten as:
+
+\code
+boost::nowide::basic_stackstring<wchar_t,char,64> wexisting_file,wnew_file;
+if(!wexisting_file.convert(existing_file) || !wnew_file.convert(new_file)) {
+    // invalid UTF-8
+    return -1;
+}
+
+CopyFileW(wexisting_file.c_str(),wnew_file.c_str(),TRUE);
+\endcode
+
+\note There are convenience typedefs \c stackstring, \c wstackstring, \c short_stackstring and \c wshort_stackstring
+that use buffers of size 256 or 16 characters, and if the string is longer, they fall-back to memory
+allocation
+
+
+
+\endcode
 
 \section technical Technical Details
 \subsection technical_imple Windows vs POSIX
