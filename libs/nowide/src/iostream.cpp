@@ -254,7 +254,7 @@ namespace {
 
     
 } // nowide
-} // boost
+} // namespace boost
 
 #endif
 ///

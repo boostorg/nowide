@@ -396,7 +396,7 @@ namespace nowide {
     #endif // windows
     
 } // nowide
-} // boost
+} // namespace boost
 
 #ifdef BOOST_MSVC
 #  pragma warning(pop)

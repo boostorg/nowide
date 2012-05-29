@@ -33,6 +33,10 @@ Boost.Nowide is a library implemented by Artyom Beilis
 that make cross platform Unicode aware programming
 easier.
 
+The library provides an implementation of standard C and C++ library
+functions, such that their inputs are UTF-8 aware on Windows without
+requiring to use Wide API.
+
 
 
 \subsection main_rationale Rationale
@@ -132,7 +136,7 @@ int main(int argc,char **argv)
     }
     int total_lines = 0
     while(f) {
-        if(f.get() == '\n)
+        if(f.get() == '\n')
             total_lines++;
     }
     f.close();
@@ -165,7 +169,7 @@ int main(int argc,char **argv)
     }
     int total_lines = 0
     while(f) {
-        if(f.get() == '\n)
+        if(f.get() == '\n')
             total_lines++;
     }
     f.close();

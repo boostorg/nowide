@@ -38,8 +38,8 @@ inline int system(char const *cmd)
 }
 
 #endif
-} // boost
 } // nowide
+} // namespace boost
 
 #endif
 ///

@@ -240,7 +240,7 @@ namespace nowide {
 
 #endif
 } // nowide
-} // boost
+} // namespace boost
 
 
 

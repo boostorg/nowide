@@ -90,7 +90,7 @@ inline int remove(char const *name)
 }
 #endif
 } // nowide
-} // boost
+} // namespace boost
 
 #ifdef BOOST_MSVC
 #pragma warning(pop)

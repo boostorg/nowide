@@ -11,7 +11,7 @@
 #include <string.h>
 #include <algorithm>
 
-namespace boost{
+namespace boost {
 namespace nowide {
 
 ///
@@ -30,34 +30,34 @@ public:
     typedef CharIn input_char;
 
     basic_stackstring(basic_stackstring const &other) : 
-	mem_buffer_(0)
+    mem_buffer_(0)
     {
-	    clear();
-	    if(other.mem_buffer_) {
-		    size_t len = 0;
-		    while(other.mem_buffer_[len])
-			    len ++;
-		    mem_buffer_ = new output_char[len + 1];
-		    memcpy(mem_buffer_,other.mem_buffer_,sizeof(output_char) * (len+1));
-	    }
-	    else {
-		    memcpy(buffer_,other.buffer_,buffer_size * sizeof(output_char));
-	    }
+        clear();
+        if(other.mem_buffer_) {
+            size_t len = 0;
+            while(other.mem_buffer_[len])
+                len ++;
+            mem_buffer_ = new output_char[len + 1];
+            memcpy(mem_buffer_,other.mem_buffer_,sizeof(output_char) * (len+1));
+        }
+        else {
+            memcpy(buffer_,other.buffer_,buffer_size * sizeof(output_char));
+        }
     }
     
     void swap(basic_stackstring &other)
     {
-	    std::swap(mem_buffer_,other.mem_buffer_);
-	    for(size_t i=0;i<buffer_size;i++)
-		    std::swap(buffer_[i],other.buffer_[i]);
+        std::swap(mem_buffer_,other.mem_buffer_);
+        for(size_t i=0;i<buffer_size;i++)
+            std::swap(buffer_[i],other.buffer_[i]);
     }
     basic_stackstring &operator=(basic_stackstring const &other)
     {
-	    if(this != &other) {
-		    basic_stackstring tmp(other);
-		    swap(tmp);		    
-	    }
-	    return *this;
+        if(this != &other) {
+            basic_stackstring tmp(other);
+            swap(tmp);            
+        }
+        return *this;
     }
 
     basic_stackstring() : mem_buffer_(0)
@@ -147,7 +147,7 @@ typedef basic_stackstring<char,wchar_t,16> short_stackstring;
 
 
 } // nowide
-} // boost
+} // namespace boost
 
 #endif
 ///
