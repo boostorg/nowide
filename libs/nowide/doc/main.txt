@@ -119,8 +119,8 @@ As a developer you are expected to to \c boost::nowide functions instead of the 
 
 For example, Unicode unaware implementation of line counter:
 \code
-<fstream>
-<iostream>
+#include <fstream>
+#include <iostream>
 
 int main(int argc,char **argv)
 {
@@ -129,9 +129,9 @@ int main(int argc,char **argv)
         return 1;
     }
 
-    std::ifstream f(argv[2]);
+    std::ifstream f(argv[1]);
     if(!f) {
-        std::cerr << "Can't open a file " << argv[2] << std::endl;
+        std::cerr << "Can't open a file " << argv[1] << std::endl;
         return 1;
     }
     int total_lines = 0
@@ -140,7 +140,7 @@ int main(int argc,char **argv)
             total_lines++;
     }
     f.close();
-    std::cout << "File " << argv[2] << " has " << total_lines << " lines" << std::endl;
+    std::cout << "File " << argv[1] << " has " << total_lines << " lines" << std::endl;
     return 0;
 }
 \endcode
@@ -149,9 +149,9 @@ To make this program handle Unicode properly we do the following changes:
 
 
 \code
-<boost/nowide/args.hpp>
-<boost/nowide/fstream.hpp>
-<boost/nowide/iostream.hpp>
+#include <boost/nowide/args.hpp>
+#include <boost/nowide/fstream.hpp>
+#include <boost/nowide/iostream.hpp>
 
 int main(int argc,char **argv)
 {
@@ -161,10 +161,10 @@ int main(int argc,char **argv)
         return 1;
     }
 
-    boost::nowide::ifstream f(argv[2]); // argv[2] - is UTF-8
+    boost::nowide::ifstream f(argv[1]); // argv[1] - is UTF-8
     if(!f) {
         // the console can display UTF-8
-        boost::nowide::cerr << "Can't open a file " << argv[2] << std::endl;
+        boost::nowide::cerr << "Can't open a file " << argv[1] << std::endl;
         return 1;
     }
     int total_lines = 0
@@ -174,7 +174,7 @@ int main(int argc,char **argv)
     }
     f.close();
     // the console can display UTF-8
-    boost::nowide::cout << "File " << argv[2] << " has " << total_lines << " lines" << std::endl;
+    boost::nowide::cout << "File " << argv[1] << " has " << total_lines << " lines" << std::endl;
     return 0;
 }
 \endcode
@@ -185,12 +185,12 @@ This is very simple and straight forward approach helps writing Unicode aware pr
 
 Of course this simple set of functions does not cover all needs. However if you need
 to access Wide API from Windows application using UTF-8 encoding internally you can use
-functions like \c boost::nowide::convert.
+functions like \c boost::nowide::widen and \c boost::nowide::narrow.
 
 For example
 \code
-CopyFileW(  boost::nowide::convert(existing_file).c_str(),
-            boost::nowide::convert(new_file).c_str(),
+CopyFileW(  boost::nowide::widen(existing_file).c_str(),
+            boost::nowide::widen(new_file).c_str(),
             TRUE);
 \endcode
 
@@ -198,7 +198,7 @@ So the conversion is done at the last stage and you continue using
 UTF-8 strings anywhere and only at glue points you switch to 
 Wide API.
 
-\c boost::nowide::convert returns \c std::string. Sometimes
+\c boost::nowide::widen returns \c std::string. Sometimes
 it is convenient to prevent allocation and use on stack buffers
 if possible. Boot.Nowide provides \c boost::nowide::basic_stackstring class.
 
@@ -218,9 +218,13 @@ CopyFileW(wexisting_file.c_str(),wnew_file.c_str(),TRUE);
 that use buffers of size 256 or 16 characters, and if the string is longer, they fall-back to memory
 allocation
 
+\subsection using_windows_h \c windows.h header
 
+The library does not include the \c windows.h in order to prevent namespace pollution with numerous
+defines and types. The library rather defines the prototypes to the Win32 API functions.
 
-\endcode
+However if you may request to use original \c windows.h header by setting \c BOOST_NOWIDE_USE_WINDOWS_H 
+define before including any of the Boost.Nowide headers
 
 \section technical Technical Details
 \subsection technical_imple Windows vs POSIX

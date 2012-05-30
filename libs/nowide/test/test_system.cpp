@@ -49,7 +49,7 @@ int main(int argc,char **argv,char **env)
                     #ifdef BOOST_WINDOWS
                     std::wstring env = L"BOOST_NOWIDE_TEST=" + wexample;
                     _wputenv(env.c_str());
-                    std::wstring wcommand = boost::nowide::convert(argv[0]);
+                    std::wstring wcommand = boost::nowide::widen(argv[0]);
                     wcommand += L" ";
                     wcommand += wexample;
                     TEST(_wsystem(wcommand.c_str()) == 0);

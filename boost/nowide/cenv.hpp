@@ -16,7 +16,7 @@
 #include <vector>
 
 #ifdef BOOST_WINDOWS
-#include <windows.h>
+#include <boost/nowide/windows.hpp>
 #endif
 
 namespace boost {
@@ -45,7 +45,7 @@ namespace nowide {
         std::vector<wchar_t> tmp;
         wchar_t *ptr = buf;
         size_t n = GetEnvironmentVariableW(name.c_str(),buf,buf_size);
-        if(n == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND)
+        if(n == 0 && GetLastError() == 203) // ERROR_ENVVAR_NOT_FOUND
             return 0;
         if(n >= buf_size) {
             tmp.resize(n+1,L'\0');
@@ -72,7 +72,7 @@ namespace nowide {
             return -1;
         if(!override) {
             wchar_t unused[2];
-            if(!(GetEnvironmentVariableW(name.c_str(),unused,2)==0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND))
+            if(!(GetEnvironmentVariableW(name.c_str(),unused,2)==0 && GetLastError() == 203)) // ERROR_ENVVAR_NOT_FOUND
                 return 0;
         }
         wstackstring wval;
