@@ -9,7 +9,7 @@ popd
 
 pushd .
 
-./convert && mkdir nowide/build && cd nowide/build && cmake -DCMAKE_INSTALL_PREFIX=/tmp/nwlin .. && make && make test && make install
+./convert && mkdir nowide/build && cd nowide/build && cmake -DLIBDIR=lin64 -DCMAKE_INSTALL_PREFIX=/tmp/nwlin .. && make && make test && make install
 
 popd
 
