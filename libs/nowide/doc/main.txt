@@ -14,18 +14,18 @@
 Table of Contents:
 
 - \ref main 
-    - \ref main_rationale 
-        - \ref main_the_problem 
-        - \ref main_the_solution 
-        - \ref main_wide 
-        - \ref main_reading 
+- \ref main_rationale 
+    - \ref main_the_problem 
+    - \ref main_the_solution 
+    - \ref main_wide 
+    - \ref main_reading 
 - \ref using
     - \ref using_standard
     - \ref using_custom
 - \ref technical 
     - \ref technical_imple 
     - \ref technical_cio 
-
+- \ref qna
 
 \section main What is Boost.Nowide
 
@@ -39,8 +39,8 @@ requiring to use Wide API.
 
 
 
-\subsection main_rationale Rationale
-\subsubsection main_the_problem The Problem
+\section main_rationale Rationale
+\subsection main_the_problem The Problem
 
 Consider a simple application that splits a big file into chunks, such that 
 they can be sent by e-mail. It requires doing few very simple taks:
@@ -58,9 +58,9 @@ internally -- the vast majority of Unix-Line operating systems: Linux, Mac OS X,
 Solaris, BSD. But it would fail on files like <code>War and Peace - Война и мир - מלחמה ושלום.zip</code>
 under Microsoft Windows because the native Windows Unicode aware API is Wide-API - UTF-16.
 
-This,  even a trivial task is very hard to implement in cross platform manner.
+This, such a trivial task is very hard to implement in a cross platform manner.
 
-\subsubsection main_the_solution The Solution
+\subsection main_the_solution The Solution
 
 Boost.Nowide provides a set of standard library functions that are UTF-8 aware and 
 makes Unicode aware programming easier.
@@ -91,7 +91,7 @@ The library provides:
         - \c cin 
 
 
-\subsubsection main_wide Why Not Narrow and Wide? 
+\subsection main_wide Why Not Narrow and Wide? 
 
 Why not to provide both Wide and Narrow implementations so the
 developer can choose to use Wide characters on Unix-Like platforms
@@ -104,7 +104,7 @@ Several reasons:
   to stick to the standards rather than re-implement Wide API in "Microsoft Windows Style"
 
 
-\subsubsection main_reading Further Reading
+\subsection main_reading Further Reading
 
 - <a href="http://www.utf8everywhere.org/">www.utf8everywhere.org</a>
 - <a href="http://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approaches/">Windows console i/o approaches</a>
@@ -134,7 +134,7 @@ int main(int argc,char **argv)
         std::cerr << "Can't open a file " << argv[1] << std::endl;
         return 1;
     }
-    int total_lines = 0
+    int total_lines = 0;
     while(f) {
         if(f.get() == '\n')
             total_lines++;
@@ -167,7 +167,7 @@ int main(int argc,char **argv)
         boost::nowide::cerr << "Can't open a file " << argv[1] << std::endl;
         return 1;
     }
-    int total_lines = 0
+    int total_lines = 0;
     while(f) {
         if(f.get() == '\n')
             total_lines++;
@@ -218,7 +218,7 @@ CopyFileW(wexisting_file.c_str(),wnew_file.c_str(),TRUE);
 that use buffers of size 256 or 16 characters, and if the string is longer, they fall-back to memory
 allocation
 
-\subsection using_windows_h \c windows.h header
+\subsection using_windows_h windows.h header
 
 The library does not include the \c windows.h in order to prevent namespace pollution with numerous
 defines and types. The library rather defines the prototypes to the Win32 API functions.
@@ -256,6 +256,43 @@ the stream is not "atty" like a pipe than ReadFile/WriteFile is used.
 
 This approach eliminates a need of manual code page handling. If TrueType
 fonts are used the Unicode aware input and output would work.
+
+\section qna Q & A
+
+<b>Q: Why the library does not convert the string from Locale's encoding not UTF-8 and wise versa on POSIX systems</b>
+
+A: It is inherently incorrect
+to convert strings to/from locale encodings on POSIX platforms.
+
+You can create a file named "\xFF\xFF.txt" (invalid UTF-8), remove it, pass its name as a parameter to program 
+and it would work whether the current locale is UTF-8 locale or not.
+Also changing the locale from let's say \c en_US.UTF-8 to \c en_US.ISO-8859-1 would not magically change all
+files in OS or the strings a user may pass to the program (which is different on Windows)
+
+POSIX OSs treat strings as \c NUL terminated cookies.
+
+So altering their content according to the locale would
+actually lead to incorrect behavior.
+ 
+For example, this is a naive implementation of a standard program "rm"
+
+\code
+#include <cstdio>
+
+int main(int argc,char **argv)
+{
+   for(int i=1;i<argc;i++)
+     std::remove(argv[i]);
+   return 0;
+}
+\endcode
+
+It would work with ANY locale and changing the strings would
+lead to incorrect behavior.
+
+The meaning of a locale under POSIX and Windows paltforms
+is different and has very different effects.
+
 
 
 */
