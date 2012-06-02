@@ -16,7 +16,9 @@ project
             [ run test_fstream.cpp ]
             [ run test_stdio.cpp ]
             [ run test_env.cpp      :       : 
-                :   <toolset>msvc:<linkflags>shell32.lib ]
+                :   <toolset>msvc:<linkflags>shell32.lib : test_env_proto ]
+            [ run test_env.cpp      :       : 
+                :   <toolset>msvc:<linkflags>shell32.lib <define>BOOST_NOWIDE_TEST_INCLUDE_WINDOWS=1 : test_env_with_native ]
                 
             [ run test_system.cpp   : "-w"  :
                 :   <toolset>msvc:<linkflags>shell32.lib : test_system_w ]

@@ -10,6 +10,10 @@
 #include <iostream>
 #include "test.hpp"
 
+#if defined(BOOST_NOWIDE_TEST_INCLUDE_WINDOWS) && defined(BOOST_WINDOWS)
+#include <windows.h>
+#endif
+
 #ifdef BOOST_MSVC
 #  pragma warning(disable : 4996)
 #endif

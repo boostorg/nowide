@@ -19,14 +19,14 @@
 //
 extern "C" {
 
-wchar_t*        __stdcall GetEnvironmentStringsW(void);
-int             __stdcall FreeEnvironmentStringsW(wchar_t *);
-wchar_t*        __stdcall GetCommandLineW(void);
-wchar_t**       __stdcall CommandLineToArgvW(wchar_t const *,int *);
-unsigned long   __stdcall GetLastError();
-void*           __stdcall LocalFree(void *);
-int             __stdcall SetEnvironmentVariableW(wchar_t const *,wchar_t const *);
-unsigned long   __stdcall GetEnvironmentVariableW(wchar_t const *,wchar_t *,unsigned long);
+__declspec(dllimport) wchar_t*        __stdcall GetEnvironmentStringsW(void);
+__declspec(dllimport) int             __stdcall FreeEnvironmentStringsW(wchar_t *);
+__declspec(dllimport) wchar_t*        __stdcall GetCommandLineW(void);
+__declspec(dllimport) wchar_t**       __stdcall CommandLineToArgvW(wchar_t const *,int *);
+__declspec(dllimport) unsigned long   __stdcall GetLastError();
+__declspec(dllimport) void*           __stdcall LocalFree(void *);
+__declspec(dllimport) int             __stdcall SetEnvironmentVariableW(wchar_t const *,wchar_t const *);
+__declspec(dllimport) unsigned long   __stdcall GetEnvironmentVariableW(wchar_t const *,wchar_t *,unsigned long);
 
 }
 
