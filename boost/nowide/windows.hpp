@@ -19,14 +19,14 @@
 //
 extern "C" {
 
-__stdcall wchar_t *GetEnvironmentStringsW(void);
-__stdcall int FreeEnvironmentStringsW(wchar_t *);
-__stdcall wchar_t *GetCommandLineW(void);
-__stdcall wchar_t **CommandLineToArgvW(wchar_t const *,int *);
-__stdcall unsigned long GetLastError();
-__stdcall void *LocalFree(void *);
-__stdcall int SetEnvironmentVariableW(wchar_t const *,wchar_t const *);
-__stdcall unsigned long GetEnvironmentVariableW(wchar_t const *,wchar_t *,unsigned long);
+wchar_t*        __stdcall GetEnvironmentStringsW(void);
+int             __stdcall FreeEnvironmentStringsW(wchar_t *);
+wchar_t*        __stdcall GetCommandLineW(void);
+wchar_t**       __stdcall CommandLineToArgvW(wchar_t const *,int *);
+unsigned long   __stdcall GetLastError();
+void*           __stdcall LocalFree(void *);
+int             __stdcall SetEnvironmentVariableW(wchar_t const *,wchar_t const *);
+unsigned long   __stdcall GetEnvironmentVariableW(wchar_t const *,wchar_t *,unsigned long);
 
 }
 
