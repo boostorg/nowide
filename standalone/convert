@@ -25,4 +25,4 @@ sed 's/<boost\/locale\//<nowide\//g' -i $SOURCES
 sed 's/<boost\/nowide\//<nowide\//g' -i $SOURCES
 sed 's/<boost\//<nowide\//g' -i $SOURCES
 
-cp *.hpp CMakeLists.txt nowide/
+cp CMakeLists.txt nowide/
