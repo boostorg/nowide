@@ -26,6 +26,8 @@ Table of Contents:
     - \ref technical_imple 
     - \ref technical_cio 
 - \ref qna
+- \ref standalone_version
+- \ref sources
 
 \section main What is Boost.Nowide
 
@@ -293,7 +295,50 @@ lead to incorrect behavior.
 The meaning of a locale under POSIX and Windows paltforms
 is different and has very different effects.
 
+\subsection standalone_version Standalone Version
 
+It is possible to use Nowide library without dependency on the huge Boost project. There is a standalone version that all the functionality is placed in \c nowide namespace instead of \c boost::nowide. The example above would look like
+
+\code
+#include <nowide/args.hpp>
+#include <nowide/fstream.hpp>
+#include <nowide/iostream.hpp>
+
+int main(int argc,char **argv)
+{
+    nowide::args a(argc,argv); // Fix arguments - make them UTF-8
+    if(argc!=2) {
+        nowide::cerr << "Usage: file_name" << std::endl; // Unicode aware console
+        return 1;
+    }
+
+    nowide::ifstream f(argv[1]); // argv[1] - is UTF-8
+    if(!f) {
+        // the console can display UTF-8
+        nowide::cerr << "Can't open a file " << argv[1] << std::endl;
+        return 1;
+    }
+    int total_lines = 0;
+    while(f) {
+        if(f.get() == '\n')
+            total_lines++;
+    }
+    f.close();
+    // the console can display UTF-8
+    nowide::cout << "File " << argv[1] << " has " << total_lines << " lines" << std::endl;
+    return 0;
+}
+\endcode
+\endcode
+
+\subsection sources Sources and Downloads
+
+The upstream sources can be found at GitHub: <a href="https://github.com/artyom-beilis/nowide">https://github.com/artyom-beilis/nowide</a>
+
+You can download the latest sources there:
+
+- Standard Version: <a href="../nowide.zip">nowide.zip</a>
+- Standalone Boost independent version <a href="../nowide_standalone.zip">nowide.zip</a>
 
 */
 
