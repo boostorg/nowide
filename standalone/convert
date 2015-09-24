@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -fr nowide
+rm -fr nowide nowide_standalone nowide_standalone.zip boost_nowide boost_nowide.zip
 mkdir -p nowide/nowide
 mkdir -p nowide/src
 mkdir -p nowide/test
@@ -26,3 +26,9 @@ sed 's/<boost\/nowide\//<nowide\//g' -i $SOURCES
 sed 's/<boost\//<nowide\//g' -i $SOURCES
 
 cp CMakeLists.txt nowide/
+cp -a nowide nowide_standalone
+zip -r nowide_standalone.zip  nowide_standalone
+
+mkdir boost_nowide
+cp -a ../boost ../libs boost_nowide
+zip -r boost_nowide.zip boost_nowide
