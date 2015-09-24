@@ -337,7 +337,7 @@ The upstream sources can be found at GitHub: <a href="https://github.com/artyom-
 
 You can download the latest sources there:
 
-- Standard Version: <a href="../nowide.zip">nowide.zip</a>
+- Standard Version: <a href="../boost_nowide.zip">boost_nowide.zip</a>
 - Standalone Boost independent version <a href="../nowide_standalone.zip">nowide.zip</a>
 
 */
