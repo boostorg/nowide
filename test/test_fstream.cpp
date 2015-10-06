@@ -58,6 +58,28 @@ int main()
                 TEST(tmp=="test");
                 fi.close();
             }
+            #if defined(BOOST_WINDOWS) || defined(BOOST_NOWIDE_FSTREAM_TESTS) 
+            // C++11 interfaces aren't enabled at all platforms so need to skip
+            // for std::*fstream
+            {
+                std::string name = example;
+                nw::ifstream fi(name);
+                TEST(fi);
+                std::string tmp;
+                fi  >> tmp;
+                TEST(tmp=="test");
+                fi.close();
+            }
+            {
+                nw::ifstream fi;
+                fi.open(std::string(example));
+                TEST(fi);
+                std::string tmp;
+                fi  >> tmp;
+                TEST(tmp=="test");
+                fi.close();
+            }
+            #endif
             {
                 nw::ifstream fi(example,std::ios::binary);
                 TEST(fi);
