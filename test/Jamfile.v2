@@ -15,6 +15,7 @@ project
         :   [ run test_convert.cpp ]
             [ run test_fstream.cpp ]
             [ run test_stdio.cpp ]
+            [ run test_codecvt.cpp ]
             [ run test_env.cpp      :       : 
                 :   <toolset>msvc:<linkflags>shell32.lib : test_env_proto ]
             [ run test_env.cpp      :       : 
@@ -26,6 +27,10 @@ project
             [ run test_system.cpp   : "-n"  :
                 :   <toolset>msvc:<linkflags>shell32.lib : test_system_n ]
                 
+            [ run test_fs.cpp : : 
+                :   <library>/boost/filesystem//boost_filesystem
+                : test_fs ]
+
             [ run test_iostream.cpp : : 
                 :   <library>/boost/nowide//boost_nowide
                     <link>static 
