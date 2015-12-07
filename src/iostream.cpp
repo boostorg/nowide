@@ -64,8 +64,8 @@ namespace details {
             namespace uf = boost::locale::utf;
             char const *b = p;
             char const *e = p+n;
+            DWORD size=0;
             if(!isatty_) {
-                DWORD size=0;
                 if(!WriteFile(handle_,p,n,&size,0) || static_cast<int>(size) != n)
                     return -1;
                 return n;
@@ -81,7 +81,7 @@ namespace details {
             }
             if(c==uf::illegal)
                 return -1;
-            if(!WriteConsoleW(handle_,wbuffer_,out - wbuffer_,0,0))
+            if(!WriteConsoleW(handle_,wbuffer_,out - wbuffer_,&size,0))
                 return -1;
             return decoded;
         }
