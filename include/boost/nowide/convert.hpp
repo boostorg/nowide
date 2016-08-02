@@ -119,6 +119,15 @@ namespace nowide {
         return boost::locale::conv::utf_to_utf<char>(s);
     }
     ///
+    /// Convert between Wide - UTF-16/32 string and UTF-8 string.
+    ///
+    /// boost::locale::conv::conversion_error is thrown in a case of a error
+    ///
+    inline std::string narrow(wchar_t const *s, size_t input_count)
+    {
+        return nowide::conv::utf_to_utf<char>(s, s+input_count);
+    }
+    ///
     /// Convert between UTF-8 and UTF-16 string, implemented only on Windows platform
     ///
     /// boost::locale::conv::conversion_error is thrown in a case of a error
@@ -126,6 +135,15 @@ namespace nowide {
     inline std::wstring widen(char const *s)
     {
         return boost::locale::conv::utf_to_utf<wchar_t>(s);
+    }
+    ///
+    /// Convert between UTF-8 and UTF-16 string, implemented only on Windows platform
+    ///
+    /// nowide::conv::conversion_error is thrown in a case of a error
+    ///
+    inline std::wstring widen(char const *s, size_t input_count)
+    {
+        return nowide::conv::utf_to_utf<wchar_t>(s, s+input_count);
     }
     ///
     /// Convert between Wide - UTF-16/32 string and UTF-8 string
