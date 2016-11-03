@@ -272,7 +272,7 @@ and it would work whether the current locale is UTF-8 or not.
 Also, changing the locale from let's say \c en_US.UTF-8 to \c en_US.ISO-8859-1 would not magically change all
 files in the OS or the strings a user may pass to the program (which is different on Windows)
 
-POSIX OSs treat strings as \c NUL terminated cookies.
+POSIX OSs treat strings as \c NULL terminated cookies.
 
 So altering their content according to the locale would
 actually lead to incorrect behavior.
