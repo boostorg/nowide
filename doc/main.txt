@@ -22,6 +22,7 @@ Table of Contents:
 - \ref using
     - \ref using_standard
     - \ref using_custom
+    - \ref using_integration
 - \ref technical 
     - \ref technical_imple 
     - \ref technical_cio 
@@ -228,6 +229,12 @@ defines and types. Instead, the library defines the prototypes of the Win32 API 
 However, you may request to use the \c windows.h header by defining \c BOOST_NOWIDE_USE_WINDOWS_H 
 before including any of the Boost.Nowide headers
 
+\subsection using_integration Integration with Boost.Filesystem
+
+Boost.Filesystem supports selection of narrow encoding. Unfortunatelly the default narrow encoding on Windows isn't UTF-8, you can enable UTF-8 as default encoding on Boost.Filesystem
+by calling `boost::nowide::nowide_filesystem()` in the beginning of your program 
+
+
 \section technical Technical Details
 \subsection technical_imple Windows vs POSIX
 
@@ -338,7 +345,7 @@ The upstream sources can be found at GitHub: <a href="https://github.com/artyom-
 
 You can download the latest sources there:
 
-- Standard Version: <a href="../boost_nowide.zip">boost_nowide.zip</a>
+- Standard Version: <a href="https://github.com/artyom-beilis/nowide/archive/master.zip">nowide-master.zip</a>
 - Standalone Boost independent version <a href="../nowide_standalone.zip">nowide_standalone.zip</a>
 
 */
