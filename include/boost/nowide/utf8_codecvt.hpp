@@ -21,7 +21,7 @@ namespace nowide {
 //
 BOOST_STATIC_ASSERT(sizeof(std::mbstate_t)>=2);
 
-#ifdef _MSC_VER
+#if defined _MSC_VER && _MSC_VER < 1700
 // MSVC do_length is non-standard it counts wide characters instead of narrow and does not change mbstate
 #define BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
 #endif
