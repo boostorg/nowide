@@ -5,9 +5,9 @@ mkdir -p nowide/nowide
 mkdir -p nowide/src
 mkdir -p nowide/test
 
-cp ../boost/nowide/*.hpp nowide/nowide
-cp ../libs/nowide/src/*.cpp nowide/src
-cp ../libs/nowide/test/*.cpp ../libs/nowide/test/*.hpp nowide/test
+cp ../include/boost/nowide/*.hpp nowide/nowide
+cp ../src/*.cpp nowide/src
+cp ../test/*.cpp ../test/*.hpp nowide/test
 cp ./*.hpp nowide/nowide/
 
 SOURCES="nowide/test/* nowide/src/* nowide/nowide/*"
@@ -29,6 +29,6 @@ cp CMakeLists.txt nowide/
 cp -a nowide nowide_standalone
 zip -r nowide_standalone.zip  nowide_standalone
 
-mkdir boost_nowide
-cp -a ../boost ../libs boost_nowide
-zip -r boost_nowide.zip boost_nowide
+#mkdir boost_nowide
+#cp -a ../boost ../libs boost_nowide
+#zip -r boost_nowide.zip boost_nowide
