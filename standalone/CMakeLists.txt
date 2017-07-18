@@ -33,7 +33,7 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	endif()
 endif()
 
-if (BUILD_SHARED)
+if(BUILD_SHARED)
     add_library(nowide SHARED src/iostream.cpp)
     set_target_properties(nowide	PROPERTIES VERSION 0.0.0 SOVERSION 0)
     set_target_properties(nowide 	PROPERTIES
@@ -43,7 +43,7 @@ if (BUILD_SHARED)
     list(APPEND INSTALL_TARGETS nowide)
 endif()
 
-if (BUILD_STATIC)
+if(BUILD_STATIC)
     add_library(nowide-static STATIC src/iostream.cpp)
     set_target_properties(nowide-static PROPERTIES
     				CLEAN_DIRECT_OUTPUT 1
@@ -79,13 +79,13 @@ if(BUILD_TESTS)
         endif()
     endforeach()
     
-    if (BUILD_SHARED)
+    if(BUILD_SHARED)
         add_executable(test_iostream_shared test/test_iostream.cpp)
         set_target_properties(test_iostream_shared PROPERTIES COMPILE_DEFINITIONS DLL_EXPORT)
         target_link_libraries(test_iostream_shared nowide)
     endif()
     
-    if (BUILD_STATIC)
+    if(BUILD_STATIC)
         add_executable(test_iostream_static test/test_iostream.cpp)
         target_link_libraries(test_iostream_static nowide-static)
     endif()
