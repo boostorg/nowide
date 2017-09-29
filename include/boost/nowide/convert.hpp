@@ -13,6 +13,16 @@
 
 namespace boost {
 namespace nowide {
+    struct ErrorMethod{
+        enum EVal{
+            abort,
+            replace
+        };
+        EVal value;
+        ErrorMethod(EVal value):value(value){}
+        bool operator==(ErrorMethod other)const{return value==other.value;}
+        bool operator!=(ErrorMethod other)const{return value!=other.value;}
+    };
     ///
     /// \brief Template function that converts a buffer of UTF sequences in range [source_begin,source_end)
     /// to the output \a buffer of size \a buffer_size.
@@ -23,7 +33,7 @@ namespace nowide {
     /// 0 is returned, and the contents of the buffer are undefined.
     ///
     template<typename CharOut,typename CharIn>
-    CharOut *basic_convert(CharOut *buffer,size_t buffer_size,CharIn const *source_begin,CharIn const *source_end)
+    CharOut *basic_convert(CharOut *buffer,size_t buffer_size,CharIn const *source_begin,CharIn const *source_end, const ErrorMethod method = ErrorMethod::replace)
     {
         CharOut *rv = buffer;
         if(buffer_size == 0)
@@ -32,8 +42,15 @@ namespace nowide {
         while(source_begin!=source_end) {
             using namespace boost::locale::utf;
             code_point c = utf_traits<CharIn>::template decode<CharIn const *>(source_begin,source_end);
-            if(c==illegal || c==incomplete) {
-                rv = 0;
+            if(c == illegal) {
+                if(method == ErrorMethod::abort) {
+                    rv = 0;
+                    break;
+                }
+                c = 0xFFFD;
+            } else if(c == incomplete) {
+                if(method == ErrorMethod::abort)
+                    rv = 0;
                 break;
             }
             size_t width = utf_traits<CharOut>::width(c);
@@ -70,9 +87,9 @@ namespace nowide {
     /// In case of success output is returned, if the input sequence is illegal,
     /// or there is not enough room NULL is returned 
     ///
-    inline char *narrow(char *output,size_t output_size,wchar_t const *source)
+    inline char *narrow(char *output,size_t output_size,wchar_t const *source, const ErrorMethod method = ErrorMethod::replace)
     {
-        return basic_convert(output,output_size,source,details::basic_strend(source));
+        return basic_convert(output,output_size,source,details::basic_strend(source),method);
     }
     ///
     /// Convert UTF text in range [begin,end) to NULL terminated \a output string of size at
@@ -81,9 +98,9 @@ namespace nowide {
     /// In case of success output is returned, if the input sequence is illegal,
     /// or there is not enough room NULL is returned 
     ///
-    inline char *narrow(char *output,size_t output_size,wchar_t const *begin,wchar_t const *end)
+    inline char *narrow(char *output,size_t output_size,wchar_t const *begin,wchar_t const *end, const ErrorMethod method = ErrorMethod::replace)
     {
-        return basic_convert(output,output_size,begin,end);
+        return basic_convert(output,output_size,begin,end,method);
     }
     ///
     /// Convert NULL terminated UTF source string to NULL terminated \a output string of size at
@@ -92,9 +109,9 @@ namespace nowide {
     /// In case of success output is returned, if the input sequence is illegal,
     /// or there is not enough room NULL is returned 
     ///
-    inline wchar_t *widen(wchar_t *output,size_t output_size,char const *source)
+    inline wchar_t *widen(wchar_t *output,size_t output_size,char const *source, const ErrorMethod method = ErrorMethod::replace)
     {
-        return basic_convert(output,output_size,source,details::basic_strend(source));
+        return basic_convert(output,output_size,source,details::basic_strend(source),method);
     }
     ///
     /// Convert UTF text in range [begin,end) to NULL terminated \a output string of size at
@@ -103,9 +120,9 @@ namespace nowide {
     /// In case of success output is returned, if the input sequence is illegal,
     /// or there is not enough room NULL is returned 
     ///
-    inline wchar_t *widen(wchar_t *output,size_t output_size,char const *begin,char const *end)
+    inline wchar_t *widen(wchar_t *output,size_t output_size,char const *begin,char const *end, const ErrorMethod method = ErrorMethod::replace)
     {
-        return basic_convert(output,output_size,begin,end);
+        return basic_convert(output,output_size,begin,end,method);
     }
 
 

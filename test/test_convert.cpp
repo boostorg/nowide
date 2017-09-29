@@ -25,17 +25,17 @@ int main()
             TEST(buf == whello);
             TEST(buf[5] == 1);
             TEST(boost::nowide::widen(buf,4,b,e)==0);
-            TEST(boost::nowide::widen(buf,5,b,e-1)==0);
+            TEST(boost::nowide::widen(buf,5,b,e-1,boost::nowide::ErrorMethod::abort)==0);
             TEST(boost::nowide::widen(buf,5,b,e-2)==buf);
             TEST(boost::nowide::widen(buf,5,b,b)==buf && buf[0]==0);
             TEST(boost::nowide::widen(buf,5,b,b+2)==buf && buf[1]==0 && buf[0]==whello[0]);
             b="\xFF\xFF";
             e=b+2;
-            TEST(boost::nowide::widen(buf,5,b,e)==0);
+            TEST(boost::nowide::widen(buf,5,b,e,boost::nowide::ErrorMethod::abort)==0);
             b="\xd7\xa9\xFF";
             e=b+3;
-            TEST(boost::nowide::widen(buf,5,b,e)==0);
-            TEST(boost::nowide::widen(buf,5,b,b+1)==0);
+            TEST(boost::nowide::widen(buf,5,b,e,boost::nowide::ErrorMethod::abort)==0);
+            TEST(boost::nowide::widen(buf,5,b,b+1,boost::nowide::ErrorMethod::abort)==0);
         }
         std::cout << "- boost::nowide::narrow" << std::endl;
         {
@@ -85,6 +85,17 @@ int main()
                 TEST(sw.c_str() == hello);
                 TEST(sw.convert(whello.c_str(),whello.c_str()+whello.size()));
                 TEST(sw.c_str() == hello);
+            }
+            {
+                boost::nowide::wshort_stackstring sw, sw2;
+                std::string sInvalid = "1\xC0""2";
+                std::string sInvalid2 = "1\xF5""2";
+                std::wstring result = L"112";
+                result[1] = 0xFFFD;//\uFFFD is not recognized
+                TEST(sw.convert(sInvalid.c_str()));
+                TEST(sw.c_str() == result);
+                TEST(sw2.convert(sInvalid2.c_str()));
+                TEST(sw2.c_str() == result);
             }
         }
     }
