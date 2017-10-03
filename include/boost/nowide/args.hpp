@@ -9,10 +9,11 @@
 #define BOOST_NOWIDE_ARGS_HPP_INCLUDED
 
 #include <boost/config.hpp>
+#ifdef BOOST_WINDOWS
 #include <boost/nowide/stackstring.hpp>
 #include <vector>
-#ifdef BOOST_WINDOWS
 #include <boost/nowide/windows.hpp>
+#include <stdexcept>
 #endif
 
 namespace boost {
@@ -84,14 +85,10 @@ namespace nowide {
     private:
         void fix_args(int &argc,char **&argv)
         {
-                int wargc;
-                wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(),&wargc);
-            if(!wargv) {
-                argc = 0;
-                static char *dummy = 0;
-                argv = &dummy;
-                return;
-            }
+            int wargc;
+            wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(),&wargc);
+            if(!wargv)
+                throw std::runtime_error("Could not get command line!");
             try{
                 args_.resize(wargc+1,0);
                 arg_values_.resize(wargc);
@@ -112,7 +109,7 @@ namespace nowide {
             en = &dummy;
             wchar_t *wstrings = GetEnvironmentStringsW();
             if(!wstrings)
-                return;
+                throw std::runtime_error("Could not get environment strings!");
             try {
                 wchar_t *wstrings_end = 0;
                 int count = 0;
