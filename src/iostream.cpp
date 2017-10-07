@@ -50,7 +50,7 @@ namespace details {
         {
             if(!handle_)
                 return -1;
-            int n = pptr() - pbase();
+            int n = static_cast<int>(pptr() - pbase());
             int r = 0;
             
             if(n > 0 && (r=write(pbase(),n)) < 0)
@@ -83,9 +83,9 @@ namespace details {
                 out = uf::utf_traits<wchar_t>::encode(c,out);
                 decoded = p-b;
             }
-            if(!WriteConsoleW(handle_,wbuffer_,out - wbuffer_,&size,0))
+            if(!WriteConsoleW(handle_,wbuffer_,static_cast<DWORD>(out - wbuffer_),&size,0))
                 return -1;
-            return decoded;
+            return static_cast<int>(decoded);
         }
         
         static const int buffer_size = 1024;
@@ -158,7 +158,7 @@ namespace details {
             namespace uf = boost::locale::utf;
             DWORD read_wchars = 0;
             size_t n = wbuffer_size - wsize_;
-            if(!ReadConsoleW(handle_,wbuffer_,n,&read_wchars,0))
+            if(!ReadConsoleW(handle_,wbuffer_,static_cast<DWORD>(n),&read_wchars,0))
                 return 0;
             wsize_ += read_wchars;
             char *out = buffer_;
@@ -188,7 +188,7 @@ namespace details {
         char buffer_[buffer_size];
         wchar_t wbuffer_[buffer_size]; // for null
         HANDLE handle_;
-        int wsize_;
+        size_t wsize_;
         std::vector<char> pback_buffer_;
     };
 
