@@ -19,8 +19,8 @@ namespace nowide {
     ///
     /// In case of success a NULL terminated string is returned (buffer), otherwise 0 is returned.
     ///
-    /// If there is not enough room in the buffer or the source sequence contains invalid UTF,
-    /// 0 is returned, and the contents of the buffer are undefined.
+    /// If there is not enough room in the buffer 0 is returned, and the contents of the buffer are undefined.
+    /// Any illegal sequences are replaced with U+FFFD substutution charracter
     ///
     template<typename CharOut,typename CharIn>
     CharOut *basic_convert(CharOut *buffer,size_t buffer_size,CharIn const *source_begin,CharIn const *source_end)
@@ -33,8 +33,7 @@ namespace nowide {
             using namespace boost::locale::utf;
             code_point c = utf_traits<CharIn>::template decode<CharIn const *>(source_begin,source_end);
             if(c==illegal || c==incomplete) {
-                rv = 0;
-                break;
+                c = 0xFFFD;
             }
             size_t width = utf_traits<CharOut>::width(c);
             if(buffer_size < width) {
@@ -47,6 +46,43 @@ namespace nowide {
         *buffer++ = 0;
         return rv;
     }
+
+    ///
+    /// \brief Template function that converts a buffer of UTF sequences in range [source_begin,source_end) and returns a string containing converted value
+    ///
+    /// Any illegal sequences are replaced with U+FFFD substutution charracter
+    ///
+    template<typename CharOut,typename CharIn>
+    std::basic_string<CharOut>
+    basic_convert(CharIn const *begin,CharIn const *end)
+    {
+        std::basic_string<CharOut> result;
+        result.reserve(end-begin);
+        typedef std::back_insert_iterator<std::basic_string<CharOut> > inserter_type;
+        inserter_type inserter(result);
+        utf::code_point c;
+        while(begin!=end) {
+            c=utf::utf_traits<CharIn>::template decode<CharIn const *>(begin,end);
+            if(c==utf::illegal || c==utf::incomplete) {
+                c=0xFFFD;
+            }
+            utf::utf_traits<CharOut>::template encode<inserter_type>(c,inserter);
+        }
+        return result;
+    }
+    
+    ///
+    /// \brief Template function that converts a string \a s from one type of UTF to another UTF and returns a string containing converted value
+    ///
+    /// Any illegal sequences are replaced with U+FFFD substutution charracter
+    ///
+    template<typename CharOut,typename CharIn>
+    std::basic_string<CharOut>
+    basic_convert(std::basic_string<CharIn> const &s)
+    {
+        return basic_convert(s.c_str(),s.c_str()+s.size());
+    }
+
 
     /// \cond INTERNAL
     namespace details {
@@ -116,7 +152,7 @@ namespace nowide {
     ///
     inline std::string narrow(wchar_t const *s)
     {
-        return boost::locale::conv::utf_to_utf<char>(s);
+        return basic_convert<char>(s);
     }
     ///
     /// Convert between UTF-8 and UTF-16 string, implemented only on Windows platform
@@ -125,7 +161,7 @@ namespace nowide {
     ///
     inline std::wstring widen(char const *s)
     {
-        return boost::locale::conv::utf_to_utf<wchar_t>(s);
+        return basic_convert<wchar_t>(s);
     }
     ///
     /// Convert between Wide - UTF-16/32 string and UTF-8 string
@@ -134,7 +170,7 @@ namespace nowide {
     ///
     inline std::string narrow(std::wstring const &s) 
     {
-        return boost::locale::conv::utf_to_utf<char>(s);
+        return basic_convert<char>(s);
     }
     ///
     /// Convert between UTF-8 and UTF-16 string, implemented only on Windows platform
@@ -143,7 +179,7 @@ namespace nowide {
     ///
     inline std::wstring widen(std::string const &s) 
     {
-        return boost::locale::conv::utf_to_utf<wchar_t>(s);
+        return basic_convert<wchar_t>(s);
     }
 
 } // nowide

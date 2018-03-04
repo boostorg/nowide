@@ -30,7 +30,7 @@ public:
     typedef CharIn input_char;
 
     basic_stackstring(basic_stackstring const &other) : 
-    mem_buffer_(0)
+        mem_buffer_(0)
     {
         clear();
         if(other.mem_buffer_) {
@@ -63,9 +63,9 @@ public:
     basic_stackstring() : mem_buffer_(0)
     {
     }
-    bool convert(input_char const *input)
+    void convert(input_char const *input)
     {
-        return convert(input,details::basic_strend(input));
+        convert(input,details::basic_strend(input));
     }
     bool convert(input_char const *begin,input_char const *end)
     {
@@ -73,18 +73,11 @@ public:
 
         size_t space = get_space(sizeof(input_char),sizeof(output_char),end - begin) + 1;
         if(space <= buffer_size) {
-            if(basic_convert(buffer_,buffer_size,begin,end))
-                return true;
-            clear();
-            return false;
+            basic_convert(buffer_,buffer_size,begin,end);
         }
         else {
             mem_buffer_ = new output_char[space];
-            if(!basic_convert(mem_buffer_,space,begin,end)) {
-                clear();
-                return false;
-            }
-            return true;
+            basic_convert(mem_buffer_,space,begin,end);
         }
 
     }
