@@ -56,34 +56,23 @@ namespace nowide {
     std::basic_string<CharOut>
     basic_convert(CharIn const *begin,CharIn const *end)
     {
+        
         std::basic_string<CharOut> result;
         result.reserve(end-begin);
         typedef std::back_insert_iterator<std::basic_string<CharOut> > inserter_type;
         inserter_type inserter(result);
-        utf::code_point c;
+        using namespace boost::locale::utf;
+        code_point c;
         while(begin!=end) {
-            c=utf::utf_traits<CharIn>::template decode<CharIn const *>(begin,end);
-            if(c==utf::illegal || c==utf::incomplete) {
+            c=utf_traits<CharIn>::template decode<CharIn const *>(begin,end);
+            if(c==illegal || c==incomplete) {
                 c=0xFFFD;
             }
-            utf::utf_traits<CharOut>::template encode<inserter_type>(c,inserter);
+            utf_traits<CharOut>::template encode<inserter_type>(c,inserter);
         }
         return result;
     }
     
-    ///
-    /// \brief Template function that converts a string \a s from one type of UTF to another UTF and returns a string containing converted value
-    ///
-    /// Any illegal sequences are replaced with U+FFFD substutution charracter
-    ///
-    template<typename CharOut,typename CharIn>
-    std::basic_string<CharOut>
-    basic_convert(std::basic_string<CharIn> const &s)
-    {
-        return basic_convert(s.c_str(),s.c_str()+s.size());
-    }
-
-
     /// \cond INTERNAL
     namespace details {
         //
@@ -98,6 +87,31 @@ namespace nowide {
         }
     }
     /// \endcond
+    
+    ///
+    /// \brief Template function that converts a string \a s from one type of UTF to another UTF and returns a string containing converted value
+    ///
+    /// Any illegal sequences are replaced with U+FFFD substutution charracter
+    ///
+    template<typename CharOut,typename CharIn>
+    std::basic_string<CharOut>
+    basic_convert(std::basic_string<CharIn> const &s)
+    {
+        return basic_convert<CharOut>(s.c_str(),s.c_str()+s.size());
+    }
+    ///
+    /// \brief Template function that converts a string \a s from one type of UTF to another UTF and returns a string containing converted value
+    ///
+    /// Any illegal sequences are replaced with U+FFFD substutution charracter
+    ///
+    template<typename CharOut,typename CharIn>
+    std::basic_string<CharOut>
+    basic_convert(CharIn const *s)
+    {
+        return basic_convert<CharOut>(s,details::basic_strend(s));
+    }
+
+
 
     ///
     /// Convert NULL terminated UTF source string to NULL terminated \a output string of size at

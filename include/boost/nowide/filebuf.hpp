@@ -93,9 +93,7 @@ namespace nowide {
             wchar_t const *smode = get_mode(mode);
             if(!smode)
                 return 0;
-            wstackstring name;
-            if(!name.convert(s)) 
-                return 0;
+            wstackstring name(s);
             #ifdef BOOST_NOWIDE_FSTREAM_TESTS
             FILE *f = ::fopen(s,boost::nowide::convert(smode).c_str());
             #else

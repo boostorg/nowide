@@ -20,6 +20,8 @@ namespace nowide {
 ///
 /// It uses on stack buffer of the string is short enough
 /// and allocated a buffer on the heap if the size of the buffer is too small
+///
+/// If invalid UTF charracters are detected they are replaced with U+FFFD substutution charracter
 ///    
 template<typename CharOut=wchar_t,typename CharIn = char,size_t BufferSize = 256>
 class basic_stackstring {
@@ -63,11 +65,16 @@ public:
     basic_stackstring() : mem_buffer_(0)
     {
     }
-    void convert(input_char const *input)
+    basic_stackstring(input_char const *input) : mem_buffer_(0)
+    {
+        convert(input);
+    }
+    output_char *convert(input_char const *input)
     {
         convert(input,details::basic_strend(input));
+        return c_str();
     }
-    bool convert(input_char const *begin,input_char const *end)
+    output_char *convert(input_char const *begin,input_char const *end)
     {
         clear();
 
@@ -79,7 +86,7 @@ public:
             mem_buffer_ = new output_char[space];
             basic_convert(mem_buffer_,space,begin,end);
         }
-
+        return c_str();
     }
     output_char *c_str()
     {

@@ -36,8 +36,7 @@ namespace nowide {
     {
         static stackstring value;
         
-        wshort_stackstring name;
-        !name.convert(key);
+        wshort_stackstring name(key);
 
         static const size_t buf_size = 64;
         wchar_t buf[buf_size];
@@ -65,15 +64,13 @@ namespace nowide {
     ///
     inline int setenv(char const *key,char const *value,int override)
     {
-        wshort_stackstring name;
-        name.convert(key);
+        wshort_stackstring name(key);
         if(!override) {
             wchar_t unused[2];
             if(!(GetEnvironmentVariableW(name.c_str(),unused,2)==0 && GetLastError() == 203)) // ERROR_ENVVAR_NOT_FOUND
                 return 0;
         }
-        wstackstring wval;
-        wval.convert(value);
+        wstackstring wval(value);
         if(SetEnvironmentVariableW(name.c_str(),wval.c_str()))
             return 0;
         return -1;
@@ -83,8 +80,7 @@ namespace nowide {
     ///
     inline int unsetenv(char const *key)
     {
-        wshort_stackstring name;
-        name.convert(key);
+        wshort_stackstring name(key);
         if(SetEnvironmentVariableW(name.c_str(),0))
             return 0;
         return -1;

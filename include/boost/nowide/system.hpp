@@ -27,8 +27,7 @@ inline int system(char const *cmd)
 {
     if(!cmd)
         return _wsystem(0);
-    wstackstring wcmd;
-    wcmd.convert(cmd);
+    wstackstring wcmd(cmd);
     return _wsystem(wcmd.c_str());
 }
 
