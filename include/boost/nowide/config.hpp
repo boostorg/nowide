@@ -9,6 +9,7 @@
 #define BOOST_NOWIDE_CONFIG_HPP_INCLUDED
 
 #include <boost/config.hpp>
+#include <boost/nowide/replacement.hpp>
 
 #ifndef BOOST_SYMBOL_VISIBLE
 # define BOOST_SYMBOL_VISIBLE

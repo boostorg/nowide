@@ -21,7 +21,7 @@ int main()
 {   
     try {
 
-    boost::nowide::nowide_filesystem();        
+        boost::nowide::nowide_filesystem();        
         
         TEST(boost::nowide::widen(utf8_name) == wide_name);
         TEST(boost::nowide::narrow(wide_name) == utf8_name);

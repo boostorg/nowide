@@ -10,6 +10,7 @@
 
 #include <string>
 #include <boost/locale/encoding_utf.hpp>
+#include <boost/nowide/replacement.hpp>
 
 namespace boost {
 namespace nowide {
@@ -33,7 +34,7 @@ namespace nowide {
             using namespace boost::locale::utf;
             code_point c = utf_traits<CharIn>::template decode<CharIn const *>(source_begin,source_end);
             if(c==illegal || c==incomplete) {
-                c = 0xFFFD;
+                c = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
             }
             size_t width = utf_traits<CharOut>::width(c);
             if(buffer_size < width) {
@@ -66,7 +67,7 @@ namespace nowide {
         while(begin!=end) {
             c=utf_traits<CharIn>::template decode<CharIn const *>(begin,end);
             if(c==illegal || c==incomplete) {
-                c=0xFFFD;
+                c=BOOST_NOWIDE_REPLACEMENT_CHARACTER;
             }
             utf_traits<CharOut>::template encode<inserter_type>(c,inserter);
         }

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -fr nowide nowide_standalone nowide_standalone.zip boost_nowide boost_nowide.zip
+rm -fr nowide nowide_standalone/{CMakeLists.txt,nowide,src,test} nowide_standalone.zip boost_nowide boost_nowide.zip
 mkdir -p nowide/nowide
 mkdir -p nowide/src
 mkdir -p nowide/test

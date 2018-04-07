@@ -20,7 +20,6 @@
 #  pragma warning(disable : 4996 4244 4800)
 #endif
 
-
 namespace boost {
 namespace nowide {
 #if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_FSTREAM_TESTS) && !defined(BOOST_NOWIDE_DOXYGEN)
@@ -95,7 +94,7 @@ namespace nowide {
                 return 0;
             wstackstring name(s);
             #ifdef BOOST_NOWIDE_FSTREAM_TESTS
-            FILE *f = ::fopen(s,boost::nowide::convert(smode).c_str());
+            FILE *f = ::fopen(s,boost::nowide::narrow(smode).c_str());
             #else
             FILE *f = ::_wfopen(name.c_str(),smode);
             #endif
