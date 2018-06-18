@@ -8,7 +8,7 @@
 #define BOOST_NOWIDE_SOURCE
 #include <boost/nowide/iostream.hpp>
 #include <boost/nowide/convert.hpp>
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 
 #ifdef BOOST_WINDOWS

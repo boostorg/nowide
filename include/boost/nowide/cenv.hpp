@@ -10,7 +10,7 @@
 
 #include <string>
 #include <stdexcept>
-#include <stdlib.h>
+#include <cstdlib>
 #include <boost/config.hpp>
 #include <boost/nowide/stackstring.hpp>
 #include <vector>

@@ -8,7 +8,7 @@
 #ifndef BOOST_NOWIDE_WINDOWS_HPP_INCLUDED
 #define BOOST_NOWIDE_WINDOWS_HPP_INCLUDED
 
-#include <stddef.h>
+#include <cstddef>
 
 #ifdef BOOST_NOWIDE_USE_WINDOWS_H
 #include <windows.h>

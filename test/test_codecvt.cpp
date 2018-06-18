@@ -9,8 +9,8 @@
 #include <locale>
 #include <iostream>
 #include <iomanip>
-#include <string.h>
-#include <memory.h>
+#include <cstring>
+#include <cmemory>
 #include "test.hpp"
 
 static char const *utf8_name = "\xf0\x9d\x92\x9e-\xD0\xBF\xD1\x80\xD0\xB8\xD0\xB2\xD0\xB5\xD1\x82-\xE3\x82\x84\xE3\x81\x82.txt";

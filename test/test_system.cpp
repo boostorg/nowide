@@ -11,7 +11,7 @@
 #include <boost/nowide/cenv.hpp>
 #include <iostream>
 #include "test.hpp"
-#include <stdio.h>
+#include <cstdio>
 
 int main(int argc,char **argv,char **env)
 {

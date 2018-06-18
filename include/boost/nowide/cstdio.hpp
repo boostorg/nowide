@@ -9,11 +9,10 @@
 #define BOOST_NOWIDE_CSTDIO_H_INCLUDED
 
 #include <cstdio>
-#include <stdio.h>
 #include <boost/config.hpp>
 #include <boost/nowide/convert.hpp>
 #include <boost/nowide/stackstring.hpp>
-#include <errno.h>
+#include <cerrno>
 
 #ifdef BOOST_MSVC
 #  pragma warning(push)

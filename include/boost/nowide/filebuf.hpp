@@ -13,7 +13,7 @@
 #include <boost/nowide/stackstring.hpp>
 #include <fstream>
 #include <streambuf>
-#include <stdio.h>
+#include <cstdio>
 
 #ifdef BOOST_MSVC
 #  pragma warning(push)

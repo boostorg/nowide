@@ -19,7 +19,7 @@ namespace utf {
 }
 }
 #else
-#include <stdint.h>
+#include <cstdint>
 #endif
 
 namespace nowide {

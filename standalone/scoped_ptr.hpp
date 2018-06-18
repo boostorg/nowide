@@ -12,7 +12,7 @@
 //  http://www.boost.org/libs/smart_ptr/scoped_ptr.htm
 //
 
-#include <assert.h>
+#include <cassert>
 
 namespace nowide
 {

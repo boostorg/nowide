@@ -8,7 +8,7 @@
 
 #include <boost/nowide/cstdio.hpp>
 #include <iostream>
-#include <string.h>
+#include <cstring>
 #include "test.hpp"
 
 #ifdef BOOST_MSVC

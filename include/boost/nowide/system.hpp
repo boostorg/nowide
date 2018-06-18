@@ -8,8 +8,8 @@
 #ifndef BOOST_NOWIDE_CSTDLIB_HPP
 #define BOOST_NOWIDE_CSTDLIB_HPP
 
-#include <stdlib.h>
-#include <errno.h>
+#include <cstdlib>
+#include <cerrno>
 #include <boost/nowide/stackstring.hpp>
 namespace boost {
 namespace nowide {
