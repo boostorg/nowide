@@ -14,7 +14,6 @@
 #include <boost/nowide/cstdio.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <iostream>
-
 #include "test.hpp"
 
 
