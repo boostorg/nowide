@@ -8,12 +8,12 @@
 #ifndef BOOST_NOWIDE_WINDOWS_HPP_INCLUDED
 #define BOOST_NOWIDE_WINDOWS_HPP_INCLUDED
 
-#ifdef BOOST_NOWIDE_USE_WINDOWS_H
+#ifdef BOOST_USE_WINDOWS_H
 #include <windows.h>
 #else
 
 //
-// These are function prototypes... Allow to to include windows.h
+// These are function prototypes... Allow to avoid including windows.h
 //
 extern "C" {
 

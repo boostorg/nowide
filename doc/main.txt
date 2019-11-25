@@ -226,7 +226,7 @@ buffers. If the string is longer, they fall back to memory allocation.
 The library does not include the \c windows.h in order to prevent namespace pollution with numerous
 defines and types. Instead, the library defines the prototypes of the Win32 API functions.
 
-However, you may request to use the \c windows.h header by defining \c BOOST_NOWIDE_USE_WINDOWS_H
+However, you may request to use the \c windows.h header by defining \c BOOST_USE_WINDOWS_H
 before including any of the Boost.Nowide headers
 
 \subsection using_integration Integration with Boost.Filesystem
