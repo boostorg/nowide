@@ -170,7 +170,7 @@ namespace nowide {
         return basic_convert<char>(s);
     }
     ///
-    /// Convert between UTF-8 and UTF-16 string, implemented only on Windows platform
+    /// Convert between UTF-8 and UTF-16 string
     ///
     /// boost::locale::conv::conversion_error is thrown in a case of a error
     ///
@@ -188,7 +188,7 @@ namespace nowide {
         return basic_convert<char>(s);
     }
     ///
-    /// Convert between UTF-8 and UTF-16 string, implemented only on Windows platform
+    /// Convert between UTF-8 and UTF-16 string
     ///
     /// boost::locale::conv::conversion_error is thrown in a case of a error
     ///
