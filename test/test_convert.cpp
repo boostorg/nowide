@@ -90,7 +90,7 @@ int main()
         std::cout << "- boost::nowide::stackstring" << std::endl;
         {
             {
-                boost::nowide::short_stackstring s;
+                boost::nowide::short_stackstring const s;
                 TEST(s.c_str());
                 TEST(*s.c_str() == '\0');
             }
@@ -133,10 +133,8 @@ int main()
                 const std::wstring wtest = L"test";
                 const std::string stackVal = "test";
                 TEST(stackVal.size() < 5); // Will be put on stack
-                stackstring heap;
-                TEST(heap.convert(whello.c_str()));
-                stackstring stack;
-                TEST(stack.convert(wtest.c_str()));
+                stackstring const heap(whello.c_str());
+                stackstring const stack(wtest.c_str());
 
                 {
                     stackstring sw2(heap), sw3;
