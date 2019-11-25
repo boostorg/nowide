@@ -14,6 +14,8 @@
 #include <ostream>
 #include <istream>
 
+#include <boost/config/abi_prefix.hpp> // must be the last #include
+
 #ifdef BOOST_MSVC
 #  pragma warning(push)
 #  pragma warning(disable : 4251)
@@ -52,7 +54,6 @@ namespace nowide {
             winconsole_istream();
             ~winconsole_istream();
         private:
-            struct data;
             boost::scoped_ptr<console_input_buffer> d;
         };
     } // details 
@@ -93,6 +94,7 @@ namespace nowide {
 #  pragma warning(pop)
 #endif
 
+#include <boost/config/abi_suffix.hpp> // pops abi_prefix.hpp pragmas
 
 #endif
 ///

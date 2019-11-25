@@ -11,23 +11,15 @@
 #include <boost/config.hpp>
 #include <boost/nowide/replacement.hpp>
 
-#ifndef BOOST_SYMBOL_VISIBLE
-# define BOOST_SYMBOL_VISIBLE
-#endif
-
-#ifdef BOOST_HAS_DECLSPEC 
-#   if defined(BOOST_ALL_DYN_LINK) || defined(BOOST_NOWIDE_DYN_LINK)
-#       ifdef BOOST_NOWIDE_SOURCE
-#           define BOOST_NOWIDE_DECL BOOST_SYMBOL_EXPORT
-#       else
-#           define BOOST_NOWIDE_DECL BOOST_SYMBOL_IMPORT
-#       endif  // BOOST_NOWIDE_SOURCE
-#   endif  // DYN_LINK
-#endif  // BOOST_HAS_DECLSPEC
-
-#ifndef BOOST_NOWIDE_DECL
-#   define BOOST_NOWIDE_DECL
-#endif
+#if defined(BOOST_ALL_DYN_LINK) || defined(BOOST_NOWIDE_DYN_LINK)
+#  ifdef BOOST_NOWIDE_SOURCE
+#    define BOOST_NOWIDE_DECL BOOST_SYMBOL_EXPORT
+#  else
+#     define BOOST_NOWIDE_DECL BOOST_SYMBOL_IMPORT
+#  endif  // BOOST_NOWIDE_SOURCE
+#else
+#  define BOOST_NOWIDE_DECL
+#endif  // DYN_LINK
 
 //
 // Automatically link to the correct build variant where possible. 

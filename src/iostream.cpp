@@ -7,11 +7,20 @@
 //
 #define BOOST_NOWIDE_SOURCE
 #include <boost/nowide/iostream.hpp>
+
+#ifndef BOOST_WINDOWS
+
+namespace boost {
+namespace nowide {
+    BOOST_NOWIDE_DECL void dummy_exported_function(){}
+}
+}
+
+#else
+
 #include <boost/nowide/convert.hpp>
 #include <cstring>
 #include <vector>
-
-#ifdef BOOST_WINDOWS
 
 #ifndef NOMINMAX
 # define NOMINMAX
@@ -237,10 +246,10 @@ namespace details {
     
 } // details
     
-BOOST_NOWIDE_DECL details::winconsole_istream cin;
-BOOST_NOWIDE_DECL details::winconsole_ostream cout(1);
-BOOST_NOWIDE_DECL details::winconsole_ostream cerr(2);
-BOOST_NOWIDE_DECL details::winconsole_ostream clog(2);
+details::winconsole_istream cin;
+details::winconsole_ostream cout(1);
+details::winconsole_ostream cerr(2);
+details::winconsole_ostream clog(2);
     
 namespace {
     struct initialize {
