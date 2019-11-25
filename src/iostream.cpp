@@ -40,7 +40,7 @@ namespace nowide {
                 if(h)
                 {
                     DWORD dummy;
-                    return GetConsoleMode(h, &dummy) == TRUE;
+                    return GetConsoleMode(h, &dummy) != FALSE;
                 }
                 return false;
             }
