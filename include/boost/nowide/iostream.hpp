@@ -44,7 +44,7 @@ namespace nowide {
             void operator=(winconsole_ostream const &);
 
         public:
-            winconsole_ostream(int fd);
+            winconsole_ostream(int fd, winconsole_ostream *tieStream);
             ~winconsole_ostream();
 
         private:
@@ -57,7 +57,7 @@ namespace nowide {
             void operator=(winconsole_istream const &);
 
         public:
-            winconsole_istream();
+            explicit winconsole_istream(winconsole_ostream *tieStream);
             ~winconsole_istream();
 
         private:

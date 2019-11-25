@@ -103,7 +103,7 @@ namespace nowide {
 
             static const int buffer_size = 1024;
             char buffer_[buffer_size];
-            wchar_t wbuffer_[buffer_size]; // for null
+            wchar_t wbuffer_[buffer_size];
             HANDLE handle_;
         };
 
@@ -205,7 +205,7 @@ namespace nowide {
             std::vector<char> pback_buffer_;
         };
 
-        winconsole_ostream::winconsole_ostream(int fd) : std::ostream(0)
+        winconsole_ostream::winconsole_ostream(int fd, winconsole_ostream *tieStream) : std::ostream(0)
         {
             HANDLE h = 0;
             switch(fd)
@@ -221,6 +221,8 @@ namespace nowide {
             {
                 std::ostream::rdbuf(fd == 1 ? std::cout.rdbuf() : std::cerr.rdbuf());
             }
+            if(tieStream)
+                tie(tieStream);
         }
         winconsole_ostream::~winconsole_ostream()
         {
@@ -231,7 +233,7 @@ namespace nowide {
             {}
         }
 
-        winconsole_istream::winconsole_istream() : std::istream(0)
+        winconsole_istream::winconsole_istream(winconsole_ostream *tieStream) : std::istream(0)
         {
             HANDLE h = GetStdHandle(STD_INPUT_HANDLE);
             if(is_atty_handle(h))
@@ -242,6 +244,8 @@ namespace nowide {
             {
                 std::istream::rdbuf(std::cin.rdbuf());
             }
+            if(tieStream)
+                tie(tieStream);
         }
 
         winconsole_istream::~winconsole_istream()
@@ -249,23 +253,10 @@ namespace nowide {
 
     } // namespace details
 
-    details::winconsole_istream cin;
-    details::winconsole_ostream cout(1);
-    details::winconsole_ostream cerr(2);
-    details::winconsole_ostream clog(2);
-
-    namespace {
-        struct initialize
-        {
-            initialize()
-            {
-                boost::nowide::cin.tie(&boost::nowide::cout);
-                boost::nowide::cerr.tie(&boost::nowide::cout);
-                boost::nowide::clog.tie(&boost::nowide::cout);
-            }
-        } inst;
-    } // namespace
-
+    details::winconsole_ostream cout(1, NULL);
+    details::winconsole_istream cin(&cout);
+    details::winconsole_ostream cerr(2, &cout);
+    details::winconsole_ostream clog(2, &cout);
 } // namespace nowide
 } // namespace boost
 
