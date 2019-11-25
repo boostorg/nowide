@@ -95,6 +95,7 @@ int main()
                 TEST(*s.c_str() == '\0');
             }
             {
+                TEST(whello.size() >= 3);
                 boost::nowide::basic_stackstring<wchar_t, char, 3> sw;
                 TEST(sw.convert(hello.c_str()));
                 TEST(sw.c_str() == whello);
@@ -102,6 +103,7 @@ int main()
                 TEST(sw.c_str() == whello);
             }
             {
+                TEST(whello.size() < 5);
                 boost::nowide::basic_stackstring<wchar_t, char, 5> sw;
                 TEST(sw.convert(hello.c_str()));
                 TEST(sw.c_str() == whello);
@@ -109,6 +111,7 @@ int main()
                 TEST(sw.c_str() == whello);
             }
             {
+                TEST(hello.size() >= 5);
                 boost::nowide::basic_stackstring<char, wchar_t, 5> sw;
                 TEST(sw.convert(whello.c_str()));
                 TEST(sw.c_str() == hello);
@@ -116,11 +119,75 @@ int main()
                 TEST(sw.c_str() == hello);
             }
             {
+                TEST(hello.size() < 10);
                 boost::nowide::basic_stackstring<char, wchar_t, 10> sw;
                 TEST(sw.convert(whello.c_str()));
                 TEST(sw.c_str() == hello);
                 TEST(sw.convert(whello.c_str(), whello.c_str() + whello.size()));
                 TEST(sw.c_str() == hello);
+            }
+            {
+                typedef boost::nowide::basic_stackstring<char, wchar_t, 5> stackstring;
+                const std::string heapVal = hello;
+                TEST(heapVal.size() >= 5); // Will be put on heap
+                const std::wstring wtest = L"test";
+                const std::string stackVal = "test";
+                TEST(stackVal.size() < 5); // Will be put on stack
+                stackstring heap;
+                TEST(heap.convert(whello.c_str()));
+                stackstring stack;
+                TEST(stack.convert(wtest.c_str()));
+
+                {
+                    stackstring sw2(heap), sw3;
+                    sw3 = heap;
+                    TEST(sw2.c_str() == heapVal);
+                    TEST(sw3.c_str() == heapVal);
+                }
+                {
+                    stackstring sw2(stack), sw3;
+                    sw3 = stack;
+                    TEST(sw2.c_str() == stackVal);
+                    TEST(sw3.c_str() == stackVal);
+                }
+                {
+                    stackstring sw2(stack);
+                    sw2 = heap;
+                    TEST(sw2.c_str() == heapVal);
+                }
+                {
+                    stackstring sw2(heap);
+                    sw2 = stack;
+                    TEST(sw2.c_str() == stackVal);
+                }
+                {
+                    stackstring sw2(heap), sw3(stack);
+                    swap(sw2, sw3);
+                    TEST(sw2.c_str() == stackVal);
+                    TEST(sw3.c_str() == heapVal);
+                    swap(sw2, sw3);
+                    TEST(sw2.c_str() == heapVal);
+                    TEST(sw3.c_str() == stackVal);
+                }
+                {
+                    stackstring sw2(heap), sw3(heap);
+                    sw3.c_str()[0] = 'z';
+                    const std::string val2 = sw3.c_str();
+                    swap(sw2, sw3);
+                    TEST(sw2.c_str() == val2);
+                    TEST(sw3.c_str() == heapVal);
+                }
+                {
+                    stackstring sw2(stack), sw3(stack);
+                    sw3.c_str()[0] = 'z';
+                    const std::string val2 = sw3.c_str();
+                    swap(sw2, sw3);
+                    TEST(sw2.c_str() == val2);
+                    TEST(sw3.c_str() == stackVal);
+                }
+                // Sanity check
+                TEST(stack.c_str() == stackVal);
+                TEST(heap.c_str() == heapVal);
             }
             std::cout << "- Substitutions" << std::endl;
             run_all(boost::nowide::widen, boost::nowide::narrow);

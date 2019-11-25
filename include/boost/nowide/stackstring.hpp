@@ -47,18 +47,18 @@ namespace nowide {
             }
         }
 
-        void swap(basic_stackstring &other)
+        friend void swap(basic_stackstring &lhs, basic_stackstring &rhs)
         {
-            std::swap(mem_buffer_, other.mem_buffer_);
+            std::swap(lhs.mem_buffer_, rhs.mem_buffer_);
             for(size_t i = 0; i < buffer_size; i++)
-                std::swap(buffer_[i], other.buffer_[i]);
+                std::swap(lhs.buffer_[i], rhs.buffer_[i]);
         }
         basic_stackstring &operator=(basic_stackstring const &other)
         {
             if(this != &other)
             {
                 basic_stackstring tmp(other);
-                swap(tmp);
+                swap(*this, tmp);
             }
             return *this;
         }
