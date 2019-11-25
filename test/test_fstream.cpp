@@ -15,6 +15,12 @@
 #include <boost/nowide/fstream.hpp>
 #include <iostream>
 
+void makeEmptyFile(const char *filepath)
+{
+    boost::nowide::ofstream f(filepath, std::ios_base::out | std::ios::trunc);
+    TEST(f);
+}
+
 int main(int, char **argv)
 {
     const std::string prefix = argv[0];
@@ -102,6 +108,31 @@ int main(int, char **argv)
                 nw::remove(example);
                 fi.open(example);
                 TEST(!fi);
+            }
+            {
+                // Create with default flags
+                makeEmptyFile(example);
+                nw::fstream f(example);
+                TEST(f);
+                f << "test2";
+                std::string tmp;
+                f.seekg(0);
+                f >> tmp;
+                TEST(tmp == "test2");
+                f.close();
+            }
+            {
+                // Open with default flags
+                makeEmptyFile(example);
+                nw::fstream f;
+                f.open(example);
+                TEST(f);
+                f << "test2";
+                std::string tmp;
+                f.seekg(0);
+                f >> tmp;
+                TEST(tmp == "test2");
+                f.close();
             }
             {
                 nw::fstream f(example, nw::fstream::in | nw::fstream::out | nw::fstream::trunc | nw::fstream::binary);
