@@ -90,6 +90,11 @@ int main()
         std::cout << "- boost::nowide::stackstring" << std::endl;
         {
             {
+                boost::nowide::short_stackstring s;
+                TEST(s.c_str());
+                TEST(*s.c_str() == '\0');
+            }
+            {
                 boost::nowide::basic_stackstring<wchar_t, char, 3> sw;
                 TEST(sw.convert(hello.c_str()));
                 TEST(sw.c_str() == whello);

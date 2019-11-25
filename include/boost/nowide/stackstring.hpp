@@ -64,7 +64,9 @@ namespace nowide {
         }
 
         basic_stackstring() : mem_buffer_(0)
-        {}
+        {
+            buffer_[0] = 0;
+        }
         basic_stackstring(input_char const *input) : mem_buffer_(0)
         {
             convert(input);
