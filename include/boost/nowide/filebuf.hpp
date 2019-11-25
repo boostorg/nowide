@@ -81,12 +81,8 @@ namespace nowide {
         ///
         basic_filebuf *open(char const *s, std::ios_base::openmode mode)
         {
-            if(file_)
-            {
-                sync();
-                ::fclose(file_);
-                file_ = 0;
-            }
+            if(is_open())
+                return NULL;
             bool ate = bool(mode & std::ios_base::ate);
             if(ate)
                 mode = mode ^ std::ios_base::ate;

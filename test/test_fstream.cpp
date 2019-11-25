@@ -216,6 +216,31 @@ int main(int, char **argv)
             f.close();
             TEST(boost::nowide::remove(example) == 0);
         }
+        {
+            makeEmptyFile(example);
+            const std::string filename2 = "test.txt";
+            // Make sure file does not exist yet
+            boost::nowide::remove(filename2.c_str());
+            TEST(boost::nowide::fopen(filename2.c_str(), "r") == NULL);
+            boost::nowide::filebuf buf;
+            TEST(buf.open(example, std::ios_base::out) == &buf);
+            TEST(buf.is_open());
+            // Opening when already open fails
+            TEST(buf.open(filename2.c_str(), std::ios_base::out) == NULL);
+            // Still open
+            TEST(buf.is_open());
+            TEST(buf.close() == &buf);
+            // Failed opening did not create file
+            TEST(boost::nowide::fopen(filename2.c_str(), "r") == NULL);
+            // But it should work now:
+            TEST(buf.open(filename2.c_str(), std::ios_base::out) == &buf);
+            TEST(buf.close() == &buf);
+            FILE *f = boost::nowide::fopen(filename2.c_str(), "r");
+            TEST(f != NULL);
+            std::fclose(f);
+            TEST(boost::nowide::remove(example) == 0);
+            TEST(boost::nowide::remove(filename2.c_str()) == 0);
+        }
     } catch(std::exception const &e)
     {
         std::cerr << e.what() << std::endl;
