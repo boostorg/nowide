@@ -19,7 +19,7 @@
 
 namespace boost {
 ///
-/// \brief This namespace includes implementation of the standard library functios
+/// \brief This namespace includes implementation of the standard library functions
 /// such that they accept UTF-8 strings on Windows. On other platforms it is just an alias
 /// of std namespace (i.e. not on Windows)
 ///
@@ -223,7 +223,7 @@ namespace nowide {
 #endif
 
     ///
-    /// \brief Same as std::filebuf but accepts UTF-8 strings under Windows
+    /// Same as std::filebuf but accepts UTF-8 strings under Windows
     ///
     typedef basic_filebuf<char> filebuf;
     ///

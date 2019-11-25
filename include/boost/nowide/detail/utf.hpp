@@ -44,7 +44,7 @@ namespace nowide {
             {
                 if(v > 0x10FFFF)
                     return false;
-                if(0xD800 <= v && v <= 0xDFFF) // surragates
+                if(0xD800 <= v && v <= 0xDFFF) // surrogates
                     return false;
                 return true;
             }
@@ -200,7 +200,7 @@ namespace nowide {
                         return illegal;
 
                     //
-                    // Ok as only ASCII may be of size = 0
+                    // OK as only ASCII may be of size = 0
                     // also optimize for ASCII text
                     //
                     if(trail_size == 0)

@@ -124,7 +124,7 @@ namespace nowide {
             // mbstate_t is POD type and should be initialized to 0 (i.a. state = stateT())
             // according to standard. We use it to keep a flag 0/1 for surrogate pair writing
             //
-            // if 0 no code above >0xFFFF observed, of 1 a code above 0xFFFF observerd
+            // if 0 no code above >0xFFFF observed, of 1 a code above 0xFFFF observed
             // and first pair is written, but no input consumed
             boost::uint16_t &state = *reinterpret_cast<boost::uint16_t *>(&std_state);
             while(to < to_end && from < from_end)
@@ -142,7 +142,7 @@ namespace nowide {
                     r = std::codecvt_base::partial;
                     break;
                 }
-                // Normal codepoints go direcly to stream
+                // Normal codepoints go directly to stream
                 if(ch <= 0xFFFF)
                 {
                     *to++ = static_cast<CharType>(ch);
@@ -150,7 +150,7 @@ namespace nowide {
                 {
                     // for  other codepoints we do following
                     //
-                    // 1. We can't consume our input as we may find ourselfs
+                    // 1. We can't consume our input as we may find ourself
                     //    in state where all input consumed but not all output written,i.e. only
                     //    1st pair is written
                     // 2. We only write first pair and mark this in the state, we also revert back
@@ -192,9 +192,9 @@ namespace nowide {
             std::codecvt_base::result r = std::codecvt_base::ok;
             // mbstate_t is POD type and should be initialized to 0 (i.a. state = stateT())
             // according to standard. We assume that sizeof(mbstate_t) >=2 in order
-            // to be able to store first observerd surrogate pair
+            // to be able to store first observed surrogate pair
             //
-            // State: state!=0 - a first surrogate pair was observerd (state = first pair),
+            // State: state!=0 - a first surrogate pair was observed (state = first pair),
             // we expect the second one to come and then zero the state
             ///
             boost::uint16_t &state = *reinterpret_cast<boost::uint16_t *>(&std_state);
@@ -203,7 +203,7 @@ namespace nowide {
                 boost::uint32_t ch = 0;
                 if(state != 0)
                 {
-                    // if the state idecates that 1st surrogate pair was written
+                    // if the state indicates that 1st surrogate pair was written
                     // we should make sure that the second one that comes is actually
                     // second surrogate
                     boost::uint16_t w1 = state;
@@ -339,7 +339,7 @@ namespace nowide {
             // mbstate_t is POD type and should be initialized to 0 (i.a. state = stateT())
             // according to standard. We use it to keep a flag 0/1 for surrogate pair writing
             //
-            // if 0 no code above >0xFFFF observed, of 1 a code above 0xFFFF observerd
+            // if 0 no code above >0xFFFF observed, of 1 a code above 0xFFFF observed
             // and first pair is written, but no input consumed
             while(to < to_end && from < from_end)
             {
