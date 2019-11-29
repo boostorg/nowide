@@ -13,6 +13,7 @@
 #include <boost/nowide/stackstring.hpp>
 #include <cstdio>
 #include <iosfwd>
+#include <stdexcept>
 #include <streambuf>
 #else
 #include <fstream>
@@ -83,6 +84,7 @@ namespace nowide {
         {
             if(is_open())
                 return NULL;
+            validate_cvt(this->getloc());
             bool ate = bool(mode & std::ios_base::ate);
             if(ate)
                 mode = mode ^ std::ios_base::ate;
@@ -137,6 +139,11 @@ namespace nowide {
                 buffer_ = new char[buffer_size_];
                 own_ = true;
             }
+        }
+        void validate_cvt(const std::locale &loc)
+        {
+            if(!std::use_facet<std::codecvt<char, char, std::mbstate_t> >(loc).always_noconv())
+                throw std::runtime_error("Converting codecvts are not supported");
         }
 
     protected:
@@ -242,6 +249,10 @@ namespace nowide {
         std::streampos seekpos(std::streampos off, std::ios_base::openmode m)
         {
             return seekoff(std::streamoff(off), std::ios_base::beg, m);
+        }
+        virtual void imbue(const std::locale &loc)
+        {
+            validate_cvt(loc);
         }
 
     private:
