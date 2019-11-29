@@ -68,12 +68,9 @@ namespace nowide {
         void open(char const *file_name, std::ios_base::openmode mode = std::ios_base::in)
         {
             if(!buf_.open(file_name, mode | std::ios_base::in))
-            {
                 this->setstate(std::ios_base::failbit);
-            } else
-            {
+            else
                 this->clear();
-            }
         }
         bool is_open()
         {
@@ -87,17 +84,11 @@ namespace nowide {
         {
             if(!buf_.close())
                 this->setstate(std::ios_base::failbit);
-            else
-                this->clear();
         }
 
         internal_buffer_type *rdbuf() const
         {
             return const_cast<internal_buffer_type *>(&buf_);
-        }
-        ~basic_ifstream()
-        {
-            buf_.close();
         }
 
     private:
@@ -137,12 +128,9 @@ namespace nowide {
         void open(char const *file_name, std::ios_base::openmode mode = std::ios_base::out)
         {
             if(!buf_.open(file_name, mode | std::ios_base::out))
-            {
                 this->setstate(std::ios_base::failbit);
-            } else
-            {
+            else
                 this->clear();
-            }
         }
         bool is_open()
         {
@@ -156,17 +144,11 @@ namespace nowide {
         {
             if(!buf_.close())
                 this->setstate(std::ios_base::failbit);
-            else
-                this->clear();
         }
 
         internal_buffer_type *rdbuf() const
         {
             return const_cast<internal_buffer_type *>(&buf_);
-        }
-        ~basic_ofstream()
-        {
-            buf_.close();
         }
 
     private:
@@ -210,12 +192,9 @@ namespace nowide {
         void open(char const *file_name, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
         {
             if(!buf_.open(file_name, mode))
-            {
                 this->setstate(std::ios_base::failbit);
-            } else
-            {
+            else
                 this->clear();
-            }
         }
         bool is_open()
         {
@@ -229,17 +208,11 @@ namespace nowide {
         {
             if(!buf_.close())
                 this->setstate(std::ios_base::failbit);
-            else
-                this->clear();
         }
 
         internal_buffer_type *rdbuf() const
         {
             return const_cast<internal_buffer_type *>(&buf_);
-        }
-        ~basic_fstream()
-        {
-            buf_.close();
         }
 
     private:
