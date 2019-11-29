@@ -8,8 +8,7 @@
 
 #include "test.hpp"
 #include <boost/nowide/args.hpp>
-#include <boost/nowide/cenv.hpp>
-#include <boost/nowide/system.hpp>
+#include <boost/nowide/cstdlib.hpp>
 #include <cstring>
 #include <iostream>
 
