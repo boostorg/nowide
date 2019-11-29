@@ -48,6 +48,10 @@ namespace nowide {
     template<>
     class basic_filebuf<char> : public std::basic_streambuf<char>
     {
+        // Non-copyable
+        basic_filebuf(const basic_filebuf<char> &);
+        basic_filebuf &operator=(const basic_filebuf<char> &);
+
     public:
         ///
         /// Creates new filebuf
