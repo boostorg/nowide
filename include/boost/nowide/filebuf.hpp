@@ -1,5 +1,6 @@
 //
 //  Copyright (c) 2012 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2019 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -11,8 +12,11 @@
 #include <boost/config.hpp>
 #ifdef BOOST_WINDOWS
 #include <boost/nowide/stackstring.hpp>
+#include <cassert>
 #include <cstdio>
 #include <iosfwd>
+#include <limits>
+#include <locale>
 #include <stdexcept>
 #include <streambuf>
 #else
@@ -53,11 +57,13 @@ namespace nowide {
         basic_filebuf(const basic_filebuf<char> &);
         basic_filebuf &operator=(const basic_filebuf<char> &);
 
+        typedef std::char_traits<char> Traits;
+
     public:
         ///
         /// Creates new filebuf
         ///
-        basic_filebuf() : buffer_size_(4), buffer_(0), file_(0), own_(true)
+        basic_filebuf() : buffer_size_(4), buffer_(0), file_(0), owns_buffer_(false), last_char_(0), mode_(std::ios_base::openmode(0))
         {
             setg(0, 0, 0);
             setp(0, 0);
@@ -66,8 +72,6 @@ namespace nowide {
         virtual ~basic_filebuf()
         {
             close();
-            if(own_ && buffer_)
-                delete[] buffer_;
         }
 
         ///
@@ -85,26 +89,28 @@ namespace nowide {
             if(is_open())
                 return NULL;
             validate_cvt(this->getloc());
-            bool ate = bool(mode & std::ios_base::ate);
+            bool const ate = bool(mode & std::ios_base::ate);
             if(ate)
                 mode = mode ^ std::ios_base::ate;
             wchar_t const *smode = get_mode(mode);
             if(!smode)
                 return 0;
+#ifdef BOOST_WINDOWS
             wstackstring const name(s);
-#ifdef BOOST_NOWIDE_FSTREAM_TESTS
-            FILE *f = ::fopen(s, boost::nowide::narrow(smode).c_str());
+            file_ = ::_wfopen(name.c_str(), smode);
 #else
-            FILE *f = ::_wfopen(name.c_str(), smode);
+            short_stackstring smode2(smode);
+            file_ = std::fopen(s, smode2.c_str());
 #endif
-            if(!f)
+
+            if(!file_)
                 return 0;
-            if(ate && fseek(f, 0, SEEK_END) != 0)
+            if(ate && std::fseek(file_, 0, SEEK_END) != 0)
             {
-                fclose(f);
+                close();
                 return 0;
             }
-            file_ = f;
+            mode_ = mode;
             return this;
         }
         ///
@@ -112,21 +118,27 @@ namespace nowide {
         ///
         basic_filebuf *close()
         {
+            if(!is_open())
+                return NULL;
             bool res = sync() == 0;
-            if(file_)
+            if(std::fclose(file_) != 0)
+                res = false;
+            file_ = NULL;
+            mode_ = std::ios_base::openmode(0);
+            if(owns_buffer_)
             {
-                if(::fclose(file_) != 0)
-                    res = false;
-                file_ = 0;
+                delete[] buffer_;
+                buffer_ = NULL;
+                owns_buffer_ = false;
             }
-            return res ? this : 0;
+            return res ? this : NULL;
         }
         ///
         /// Same as std::filebuf::is_open()
         ///
         bool is_open() const
         {
-            return file_ != 0;
+            return file_ != NULL;
         }
 
     private:
@@ -137,7 +149,7 @@ namespace nowide {
             if(buffer_size_ > 0)
             {
                 buffer_ = new char[buffer_size_];
-                own_ = true;
+                owns_buffer_ = true;
             }
         }
         void validate_cvt(const std::locale &loc)
@@ -149,106 +161,145 @@ namespace nowide {
     protected:
         virtual std::streambuf *setbuf(char *s, std::streamsize n)
         {
-            if(!buffer_ && n >= 0)
-            {
-                buffer_ = s;
-                buffer_size_ = n;
-                own_ = false;
-            }
+            assert(n >= 0);
+            // Maximum compatibility: Discard all local buffers and use user-provided values
+            // Users should call sync() before or better use it before any IO is done or any file is opened
+            setg(NULL, NULL, NULL);
+            setp(NULL, NULL);
+            if(owns_buffer_)
+                delete[] buffer_;
+            buffer_ = s;
+            buffer_size_ = (n >= 0) ? n : 0;
             return this;
         }
 
-        int overflow(int c)
+        virtual int overflow(int c = EOF)
         {
-            if(!file_)
+            if(!(mode_ & std::ios_base::out))
                 return EOF;
 
-            if(fixg() < 0)
+            if(!stop_reading())
                 return EOF;
 
             size_t n = pptr() - pbase();
             if(n > 0)
             {
-                if(::fwrite(pbase(), 1, n, file_) < n)
+                if(std::fwrite(pbase(), 1, n, file_) != n)
                     return -1;
-                fflush(file_);
-            }
-
-            if(buffer_size_ > 0)
-            {
-                make_buffer();
                 setp(buffer_, buffer_ + buffer_size_);
                 if(c != EOF)
-                    sputc(c);
+                {
+                    *buffer_ = c;
+                    pbump(1);
+                }
             } else if(c != EOF)
             {
-                if(::fputc(c, file_) == EOF)
+                if(buffer_size_ > 0)
+                {
+                    make_buffer();
+                    setp(buffer_, buffer_ + buffer_size_);
+                    *buffer_ = c;
+                    pbump(1);
+                } else if(std::fputc(c, file_) == EOF)
                     return EOF;
-                fflush(file_);
             }
-            return 0;
+            return Traits::not_eof(c);
         }
 
-        int sync()
-        {
-            return overflow(EOF);
-        }
-
-        int underflow()
+        virtual int sync()
         {
             if(!file_)
+                return 0;
+            bool result = (pptr()) ? overflow() != EOF : stop_reading();
+            if(std::fflush(file_) != 0)
+                return -1;
+            return result ? 0 : -1;
+        }
+
+        virtual int underflow()
+        {
+            if(!(mode_ & std::ios_base::in))
                 return EOF;
-            if(fixp() < 0)
+            if(!stop_writing())
                 return EOF;
             if(buffer_size_ == 0)
             {
-                int c = ::fgetc(file_);
+                int const c = std::fgetc(file_);
                 if(c == EOF)
-                {
                     return EOF;
-                }
                 last_char_ = c;
                 setg(&last_char_, &last_char_, &last_char_ + 1);
-                return c;
+            } else
+            {
+                make_buffer();
+                size_t const n = std::fread(buffer_, 1, buffer_size_, file_);
+                setg(buffer_, buffer_, buffer_ + n);
+                if(n == 0)
+                    return EOF;
             }
-            make_buffer();
-            size_t n = ::fread(buffer_, 1, buffer_size_, file_);
-            setg(buffer_, buffer_, buffer_ + n);
-            if(n == 0)
-                return EOF;
-            return std::char_traits<char>::to_int_type(*gptr());
+            return Traits::to_int_type(*gptr());
         }
 
-        int pbackfail(int)
+        virtual int pbackfail(int c = EOF)
         {
-            return pubseekoff(-1, std::ios::cur);
+            if(!(mode_ & std::ios_base::in))
+                return EOF;
+            if(!stop_writing())
+                return EOF;
+            if(gptr() > eback())
+                gbump(-1);
+            else if(seekoff(-1, std::ios_base::cur) != std::streampos(std::streamoff(-1)))
+            {
+                if(underflow() == EOF)
+                    return EOF;
+            } else
+                return EOF;
+
+            // Case 1: Caller just wanted space for 1 char
+            if(c == EOF)
+                return Traits::not_eof(c);
+            // Case 2: Caller wants to put back different char
+            // gptr now points to the (potentially newly read) previous char
+            if(*gptr() != c)
+                *gptr() = Traits::to_char_type(c);
+            return Traits::not_eof(c);
         }
 
-        std::streampos seekoff(std::streamoff off, std::ios_base::seekdir seekdir, std::ios_base::openmode /*m*/)
+        virtual std::streampos
+        seekoff(std::streamoff off, std::ios_base::seekdir seekdir, std::ios_base::openmode = std::ios_base::in | std::ios_base::out)
         {
             if(!file_)
                 return EOF;
-            if(fixp() < 0 || fixg() < 0)
+            // Switching between input<->output requires a seek
+            // So do NOT optimize for seekoff(0, cur) as No-OP
+
+            // On some implementations a seek also flushes, so do a full sync
+            if(sync() != 0)
                 return EOF;
-            if(seekdir == std::ios_base::cur)
+            int whence;
+            switch(seekdir)
             {
-                if(::fseek(file_, off, SEEK_CUR) < 0)
-                    return EOF;
-            } else if(seekdir == std::ios_base::beg)
-            {
-                if(::fseek(file_, off, SEEK_SET) < 0)
-                    return EOF;
-            } else if(seekdir == std::ios_base::end)
-            {
-                if(::fseek(file_, off, SEEK_END) < 0)
-                    return EOF;
-            } else
-                return -1;
-            return ftell(file_);
+            case std::ios_base::beg: whence = SEEK_SET; break;
+            case std::ios_base::cur: whence = SEEK_CUR; break;
+            case std::ios_base::end: whence = SEEK_END; break;
+            default: assert(false); return EOF;
+            }
+            if(std::fseek(file_, off, whence) != 0)
+                return EOF;
+            return std::ftell(file_);
         }
-        std::streampos seekpos(std::streampos off, std::ios_base::openmode m)
+        virtual std::streampos seekpos(std::streampos pos, std::ios_base::openmode = std::ios_base::in | std::ios_base::out)
         {
-            return seekoff(std::streamoff(off), std::ios_base::beg, m);
+            if(!file_)
+                return EOF;
+            // On some implementations a seek also flushes, so do a full sync
+            if(sync() != 0)
+                return EOF;
+            std::streamoff off = static_cast<std::streamoff>(pos);
+            if(std::fsetpos(file_, &off) != 0)
+                return EOF;
+            assert(std::ftell(file_) == off);
+            return pos;
         }
         virtual void imbue(const std::locale &loc)
         {
@@ -256,28 +307,34 @@ namespace nowide {
         }
 
     private:
-        int fixg()
+        /// Stop reading adjusting the file pointer if neccessary
+        /// Postcondition: gptr() == NULL
+        bool stop_reading()
         {
-            if(gptr() != egptr())
+            if(gptr())
             {
-                std::streamsize off = gptr() - egptr();
+                std::streamsize const off = gptr() - egptr();
                 setg(0, 0, 0);
-                if(fseek(file_, off, SEEK_CUR) != 0)
-                    return -1;
+                assert(off <= std::numeric_limits<long>::max());
+                if(off && std::fseek(file_, off, SEEK_CUR) != 0)
+                    return false;
             }
-            setg(0, 0, 0);
-            return 0;
+            return true;
         }
 
-        int fixp()
+        /// Stop writing. If any bytes are to be written, writes them to file
+        /// Postcondition: pptr() == NULL
+        bool stop_writing()
         {
-            if(pptr() != 0)
+            if(pptr())
             {
-                int r = sync();
+                const char *const base = pbase();
+                size_t const n = pptr() - base;
                 setp(0, 0);
-                return r;
+                if(n && std::fwrite(base, 1, n, file_) != n)
+                    return false;
             }
-            return 0;
+            return true;
         }
 
         void reset(FILE *f = 0)
@@ -341,8 +398,9 @@ namespace nowide {
         size_t buffer_size_;
         char *buffer_;
         FILE *file_;
-        bool own_;
+        bool owns_buffer_;
         char last_char_;
+        std::ios::openmode mode_;
     };
 
     ///
