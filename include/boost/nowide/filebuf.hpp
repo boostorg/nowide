@@ -201,7 +201,13 @@ namespace nowide {
                     *buffer_ = c;
                     pbump(1);
                 } else if(std::fputc(c, file_) == EOF)
+                {
                     return EOF;
+                } else if(!pptr())
+                {
+                    // Set to dummy value so we know we have writting something
+                    setp(&last_char_, &last_char_);
+                }
             }
             return Traits::not_eof(c);
         }
@@ -210,9 +216,15 @@ namespace nowide {
         {
             if(!file_)
                 return 0;
-            bool result = (pptr()) ? overflow() != EOF : stop_reading();
-            if(std::fflush(file_) != 0)
-                return -1;
+            bool result;
+            if(pptr())
+            {
+                result = overflow() != EOF;
+                // Only flush if anything was written, otherwise behavior of fflush is undefined
+                if(std::fflush(file_) != 0)
+                    return result = false;
+            } else
+                result = stop_reading();
             return result ? 0 : -1;
         }
 
