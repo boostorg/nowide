@@ -22,7 +22,12 @@ boost_nowide_add_test(test_fstream)
 boost_nowide_add_test(test_iostream)
 boost_nowide_add_test(test_stdio)
 boost_nowide_add_test(test_system_n SRC test_system.cpp ARGS -n)
-boost_nowide_add_test(test_system_w SRC test_system.cpp ARGS -w)
+
+if(WIN32)
+  boost_nowide_add_test(test_system_w SRC test_system.cpp ARGS -w)
+else()
+  boost_nowide_add_test(test_internal_fstream SRC test_fstream.cpp DEFINITIONS BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS=1)
+endif()
 
 if(NOT BOOST_NOWIDE_STANDALONE)
   if(NOT BOOST_SUPERPROJECT_SOURCE_DIR)

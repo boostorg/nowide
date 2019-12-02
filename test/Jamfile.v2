@@ -21,10 +21,11 @@ run test_env.cpp ;
 run test_env.cpp : : : <define>BOOST_NOWIDE_TEST_INCLUDE_WINDOWS=1 : test_env_win ;
 run test_fs.cpp : : : <library>/boost/filesystem//boost_filesystem/<warnings-as-errors>off : ;
 run test_fstream.cpp ;
+run test_fstream.cpp : : : <define>BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS=1 <target-os>windows:<build>no : test_internal_fstream;
 run test_iostream.cpp : : : <library>/boost/nowide//boost_nowide <link>static : test_iostream_static ;
 run test_iostream.cpp : : : <library>/boost/nowide//boost_nowide <link>shared : test_iostream_shared ;
 run test_stdio.cpp ;
 run test_system.cpp : "-n" : : <target-os>windows:<library>shell32 : test_system_n ;
-run test_system.cpp : "-w" : : <target-os>windows:<library>shell32 : test_system_w ;
+run test_system.cpp : "-w" : : <target-os>windows:<library>shell32 <build>no <target-os>windows:<build>yes: test_system_w ;
 
 compile benchmark_fstream.cpp : <define>BOOST_NOWIDE_USE_WIN_FSTREAM=1 <library>/boost/chrono//boost_chrono/;
