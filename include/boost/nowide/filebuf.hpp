@@ -288,18 +288,10 @@ namespace nowide {
                 return EOF;
             return std::ftell(file_);
         }
-        virtual std::streampos seekpos(std::streampos pos, std::ios_base::openmode = std::ios_base::in | std::ios_base::out)
+        virtual std::streampos seekpos(std::streampos pos, std::ios_base::openmode m = std::ios_base::in | std::ios_base::out)
         {
-            if(!file_)
-                return EOF;
-            // On some implementations a seek also flushes, so do a full sync
-            if(sync() != 0)
-                return EOF;
-            std::streamoff off = static_cast<std::streamoff>(pos);
-            if(std::fsetpos(file_, &off) != 0)
-                return EOF;
-            assert(std::ftell(file_) == off);
-            return pos;
+            // Standard mandates "as-if fsetpos", but assume the effect is the same as fseek
+            return seekoff(pos, std::ios_base::beg, m);
         }
         virtual void imbue(const std::locale &loc)
         {
