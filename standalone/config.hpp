@@ -30,6 +30,15 @@
 #define NOWIDE_DECL
 #endif
 
+#if defined(NOWIDE_WINDOWS)
+#ifdef BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS
+#undef BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS
+#endif
+#define BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS 1
+#elif !defined(BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS)
+#define BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS 0
+#endif
+
 #endif
 ///
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

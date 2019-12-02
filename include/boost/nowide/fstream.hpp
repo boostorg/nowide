@@ -8,9 +8,9 @@
 #ifndef BOOST_NOWIDE_FSTREAM_INCLUDED_HPP
 #define BOOST_NOWIDE_FSTREAM_INCLUDED_HPP
 
-#include <boost/config.hpp>
+#include <boost/nowide/config.hpp>
 #include <boost/nowide/filebuf.hpp>
-#ifdef BOOST_WINDOWS
+#if BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS
 #include <boost/nowide/convert.hpp>
 #include <iosfwd>
 #include <memory>
@@ -24,7 +24,7 @@ namespace boost {
 /// of std namespace (i.e. not on Windows)
 ///
 namespace nowide {
-#if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_FSTREAM_TESTS) && !defined(BOOST_NOWIDE_DOXYGEN)
+#if !BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS && !defined(BOOST_NOWIDE_DOXYGEN)
 
     using std::basic_ifstream;
     using std::basic_ofstream;
