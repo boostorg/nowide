@@ -1,11 +1,12 @@
 #include <boost/nowide/fstream.hpp>
 #include <boost/nowide/cstdio.hpp>
+#include <boost/filesystem.hpp>
 #include <iostream>
 
 #include <iostream>
 #include "test.hpp"
 
-#ifdef BOOST_MSVC
+#ifdef _MSC_VER
 #  pragma warning(disable : 4996)
 #endif
 
@@ -21,6 +22,13 @@ int main()
     try {
         namespace nw=boost::nowide;
         
+        namespace fs = boost::filesystem;
+
+        fs::path temp = fs::temp_directory_path() / fs::unique_path( "nowide-test_fstream-%%%%-%%%%" );
+
+        fs::create_directory( temp );
+        fs::current_path( temp );
+
         std::cout << "Testing fstream" << std::endl;
         {
             nw::ofstream fo;
@@ -172,7 +180,11 @@ int main()
             TEST(boost::nowide::remove(example)==0);
             
         }
-            
+
+        fs::current_path( fs::initial_path() );
+
+        boost::system::error_code ec;
+        fs::remove( temp, ec );
     }
     catch(std::exception const &e) {
         std::cerr << e.what() << std::endl;
