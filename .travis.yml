@@ -294,8 +294,9 @@ matrix:
             - libc++-dev
 
     - os: linux
+      dist: trusty
       compiler: clang++-libc++
-      env: UBSAN=1 TOOLSET=clang COMPILER=clang++-libc++ CXXSTD=03,11,14 UBSAN_OPTIONS=print_stacktrace=1 VISIBILITY=global
+      env: UBSAN=1 TOOLSET=clang COMPILER=clang++-libc++ CXXSTD=03,11,14 UBSAN_OPTIONS=print_stacktrace=1
       addons:
         apt:
           packages:
