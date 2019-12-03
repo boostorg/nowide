@@ -18,6 +18,7 @@
 
 #define TEST BOOST_TEST
 
+
 int main()
 {
     std::string prefix = boost::filesystem::unique_path( "nowide-%%%%-%%%%-" ).string();
@@ -129,10 +130,7 @@ int main()
             }
             nw::remove(example);
         }
-
-// libc++'s std::fstream fails these tests
-#if defined(BOOST_WINDOWS) || !defined(_LIBCPP_VERSION)
-
+        
         for(int i=-1;i<16;i++) {
             std::cout << "Complex io with buffer = " << i << std::endl;
             char buf[16];
@@ -141,7 +139,7 @@ int main()
                 f.rdbuf()->pubsetbuf(0,0);
             else if (i > 0) 
                 f.rdbuf()->pubsetbuf(buf,i);
-
+            
             f.open(example,nw::fstream::in | nw::fstream::out | nw::fstream::trunc | nw::fstream::binary);
             f.put('a');
             f.put('b');
@@ -185,10 +183,8 @@ int main()
             TEST(!f.putback('x'));
             f.close();
             TEST(boost::nowide::remove(example)==0);
+            
         }
-
-#endif
-
     }
     catch(std::exception const &e) {
         std::cerr << e.what() << std::endl;
