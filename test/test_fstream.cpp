@@ -181,8 +181,11 @@ int main()
             f.seekg(1);
             TEST(f.get()=='B');
             TEST(f.putback('B'));
+#if !defined(_LIBCPP_VERSION)
+            // libc++ fails this putback
             TEST(f.putback('a'));
             TEST(!f.putback('x'));
+#endif
             f.close();
             TEST(boost::nowide::remove(example)==0);
             
