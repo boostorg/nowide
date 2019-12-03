@@ -12,7 +12,7 @@
 
 #include <boost/nowide/fstream.hpp>
 #include <boost/nowide/cstdio.hpp>
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/core/lightweight_test.hpp>
 #include <iostream>
 
@@ -21,22 +21,19 @@
 
 int main()
 {
+    std::string prefix = boost::filesystem::unique_path( "nowide-%%%%-%%%%-" ).string();
+
+    std::string example_str = prefix + "\xd7\xa9-\xd0\xbc-\xce\xbd" ".txt";
+    std::wstring wexample_str = boost::nowide::widen( prefix ) + L"\u05e9-\u043c-\u03bd.txt";
     
-    char const *example = "\xd7\xa9-\xd0\xbc-\xce\xbd" ".txt";
-#ifdef BOOST_WINDOWS
-    wchar_t const *wexample = L"\u05e9-\u043c-\u03bd.txt";
-#endif    
+    char const * example = example_str.c_str();
+    #ifdef BOOST_WINDOWS
+    wchar_t const * wexample = wexample_str.c_str();
+    #endif
 
     try {
         namespace nw=boost::nowide;
         
-        namespace fs = boost::filesystem;
-
-        fs::path temp = fs::temp_directory_path() / fs::unique_path( "nowide-test_fstream-%%%%-%%%%" );
-
-        fs::create_directory( temp );
-        fs::current_path( temp );
-
         std::cout << "Testing fstream" << std::endl;
         {
             nw::ofstream fo;
@@ -188,11 +185,6 @@ int main()
             TEST(boost::nowide::remove(example)==0);
             
         }
-
-        fs::current_path( fs::initial_path() );
-
-        boost::system::error_code ec;
-        fs::remove( temp, ec );
     }
     catch(std::exception const &e) {
         std::cerr << e.what() << std::endl;
