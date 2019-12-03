@@ -6,7 +6,7 @@ language: cpp
 
 sudo: false
 
-dist: trusty
+dist: xenial
 
 branches:
   only:
@@ -128,12 +128,12 @@ matrix:
             - ubuntu-toolchain-r-test
 
     - os: linux
-      compiler: g++-8
-      env: UBSAN=1 TOOLSET=gcc COMPILER=g++-8 CXXSTD=03,11,14,17 UBSAN_OPTIONS=print_stacktrace=1 LINKFLAGS=-fuse-ld=gold
+      compiler: g++-9
+      env: UBSAN=1 TOOLSET=gcc COMPILER=g++-9 CXXSTD=03,11,14,17,2a UBSAN_OPTIONS=print_stacktrace=1 LINKFLAGS=-fuse-ld=gold
       addons:
         apt:
           packages:
-            - g++-8
+            - g++-9
           sources:
             - ubuntu-toolchain-r-test
 
@@ -142,6 +142,7 @@ matrix:
       env: TOOLSET=clang COMPILER=clang++ CXXSTD=03,11
 
     - os: linux
+      dist: trusty
       compiler: /usr/bin/clang++
       env: TOOLSET=clang COMPILER=/usr/bin/clang++ CXXSTD=03,11
       addons:
@@ -150,6 +151,7 @@ matrix:
             - clang-3.3
 
     - os: linux
+      dist: trusty
       compiler: /usr/bin/clang++
       env: TOOLSET=clang COMPILER=/usr/bin/clang++ CXXSTD=03,11
       addons:
@@ -164,10 +166,8 @@ matrix:
         apt:
           packages:
             - clang-3.5
-            - libstdc++-4.9-dev
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.5
 
     - os: linux
       compiler: clang++-3.6
@@ -178,19 +178,6 @@ matrix:
             - clang-3.6
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.6
-
-    - os: linux
-      compiler: clang++-3.6
-      env: TOOLSET=clang COMPILER=clang++-3.6 CXXSTD=03,11,14,1z
-      addons:
-        apt:
-          packages:
-            - clang-3.6
-            - libstdc++-4.9-dev
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.6
 
     - os: linux
       compiler: clang++-3.7
@@ -201,19 +188,6 @@ matrix:
             - clang-3.7
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.7
-
-    - os: linux
-      compiler: clang++-3.7
-      env: TOOLSET=clang COMPILER=clang++-3.7 CXXSTD=03,11,14,1z
-      addons:
-        apt:
-          packages:
-            - clang-3.7
-            - libstdc++-4.9-dev
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.7
 
     - os: linux
       compiler: clang++-3.8
@@ -224,19 +198,6 @@ matrix:
             - clang-3.8
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.8
-
-    - os: linux
-      compiler: clang++-3.8
-      env: TOOLSET=clang COMPILER=clang++-3.8 CXXSTD=03,11,14,1z
-      addons:
-        apt:
-          packages:
-            - clang-3.8
-            - libstdc++-4.9-dev
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.8
 
     - os: linux
       compiler: clang++-3.9
@@ -247,19 +208,6 @@ matrix:
             - clang-3.9
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.9
-
-    - os: linux
-      compiler: clang++-3.9
-      env: TOOLSET=clang COMPILER=clang++-3.9 CXXSTD=03,11,14,1z
-      addons:
-        apt:
-          packages:
-            - clang-3.9
-            - libstdc++-4.9-dev
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.9
 
     - os: linux
       compiler: clang++-4.0
@@ -270,19 +218,6 @@ matrix:
             - clang-4.0
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-4.0
-
-    - os: linux
-      compiler: clang++-4.0
-      env: TOOLSET=clang COMPILER=clang++-4.0 CXXSTD=03,11,14,1z
-      addons:
-        apt:
-          packages:
-            - clang-4.0
-            - libstdc++-4.9-dev
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-4.0
 
     - os: linux
       compiler: clang++-5.0
@@ -293,19 +228,6 @@ matrix:
             - clang-5.0
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-5.0
-
-    - os: linux
-      compiler: clang++-5.0
-      env: TOOLSET=clang COMPILER=clang++-5.0 CXXSTD=03,11,14,1z
-      addons:
-        apt:
-          packages:
-            - clang-5.0
-            - libstdc++-4.9-dev
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-5.0
 
     - os: linux
       compiler: clang++-6.0
@@ -316,7 +238,6 @@ matrix:
             - clang-6.0
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-6.0
 
     - os: linux
       compiler: clang++-7
@@ -327,7 +248,7 @@ matrix:
             - clang-7
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-7
+            - llvm-toolchain-xenial-7
 
     - os: linux
       compiler: clang++-8
@@ -338,19 +259,31 @@ matrix:
             - clang-8
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-8
+            - llvm-toolchain-xenial-8
 
     - os: linux
-      compiler: clang++-6.0
-      env: UBSAN=1 TOOLSET=clang COMPILER=clang++-6.0 CXXSTD=03,11,14,1z UBSAN_OPTIONS=print_stacktrace=1
+      dist: xenial
+      compiler: clang++-9
+      env: TOOLSET=clang COMPILER=clang++-9 CXXSTD=03,11,14,17,2a
       addons:
         apt:
           packages:
-            - clang-6.0
-            - libstdc++-5-dev
+            - clang-9
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-6.0
+            - sourceline: 'deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+
+    - os: linux
+      compiler: clang++-8
+      env: UBSAN=1 TOOLSET=clang COMPILER=clang++-8 CXXSTD=03,11,14,17,2a UBSAN_OPTIONS=print_stacktrace=1
+      addons:
+        apt:
+          packages:
+            - clang-8
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-8
 
     - os: linux
       compiler: clang++-libc++
