@@ -9,12 +9,14 @@
 #include <boost/nowide/utf8_codecvt.hpp>
 #include <boost/nowide/convert.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/core/lightweight_test.hpp>
 #include <locale>
 #include <iostream>
 #include <iomanip>
 #include <string.h>
 #include <memory.h>
-#include "test.hpp"
+
+#define TEST BOOST_TEST
 
 namespace detail
 {
@@ -263,8 +265,8 @@ int main()
         std::cerr << "Failed : " << e.what() << std::endl;
         return 1;
     }
-    std::cout << "Ok" << std::endl;
-    return 0;
+
+    return boost::report_errors();
 }
 ///
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

@@ -7,8 +7,9 @@
 //
 
 #include <boost/nowide/iostream.hpp>
+#include <boost/core/lightweight_test.hpp>
 
-#include "test.hpp"
+#define TEST BOOST_TEST
 
 
 int main(int argc,char **argv)
@@ -54,7 +55,6 @@ int main(int argc,char **argv)
         std::cerr << "Fail: " << e.what() << std::endl;
         return 1;
     }
-    std::cout <<"Ok" << std::endl;
-    return 0;
 
+    return boost::report_errors();
 }

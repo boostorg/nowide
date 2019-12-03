@@ -12,9 +12,11 @@
 
 #include <boost/nowide/cstdio.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/core/lightweight_test.hpp>
 #include <iostream>
 #include <string.h>
-#include "test.hpp"
+
+#define TEST BOOST_TEST
 
 int main()
 {
@@ -33,7 +35,7 @@ int main()
         std::fprintf(f,"test\n");
         std::fclose(f);
         f=0;
-        
+
         TEST((f=boost::nowide::fopen(example.c_str(),"r"))!=0);
         char buf[16];
         TEST(std::fgets(buf,16,f)!=0);
@@ -41,7 +43,7 @@ int main()
         TEST((f=boost::nowide::freopen(example.c_str(),"r+",f))!=0);
         std::fclose(f);
         f=0;
-        
+
         TEST(boost::nowide::rename(example.c_str(),(example+".1").c_str())==0);
         TEST(boost::nowide::remove(example.c_str())<0);
         TEST((f=boost::nowide::fopen((example+".1").c_str(),"r"))!=0);
@@ -54,8 +56,8 @@ int main()
         std::cerr << "Failed " << e.what() << std::endl;
         return 1;
     }
-    std::cout << "Ok" << std::endl;
-    return 0;
+
+    return boost::report_errors();
 }
 
 ///

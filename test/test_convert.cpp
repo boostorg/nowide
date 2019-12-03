@@ -8,8 +8,10 @@
 
 #include <boost/nowide/convert.hpp>
 #include <boost/nowide/stackstring.hpp>
-#include "test.hpp"
+#include <boost/core/lightweight_test.hpp>
 #include <iostream>
+
+#define TEST BOOST_TEST
 
 int main()
 {
@@ -92,8 +94,8 @@ int main()
         std::cerr << "Failed :" << e.what() << std::endl;
         return 1;
     }
-    std::cout << "Passed" << std::endl;
-    return 0;
+
+    return boost::report_errors();
 }
 
 

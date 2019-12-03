@@ -13,10 +13,10 @@
 #include <boost/nowide/fstream.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/core/lightweight_test.hpp>
 #include <iostream>
 
-#include <iostream>
-#include "test.hpp"
+#define TEST BOOST_TEST
 
 
 int main()
@@ -198,7 +198,6 @@ int main()
         std::cerr << e.what() << std::endl;
         return 1;
     }
-    std::cout << "Ok" << std::endl;
-    return 0;
 
+    return boost::report_errors();
 }

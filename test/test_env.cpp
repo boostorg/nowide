@@ -11,13 +11,14 @@
 #endif
 
 #include <boost/nowide/cenv.hpp>
+#include <boost/core/lightweight_test.hpp>
 #include <iostream>
-#include "test.hpp"
 
 #if defined(BOOST_NOWIDE_TEST_INCLUDE_WINDOWS) && defined(BOOST_WINDOWS)
 #include <windows.h>
 #endif
 
+#define TEST BOOST_TEST
 
 int main()
 {
@@ -25,7 +26,7 @@ int main()
         std::string example = "\xd7\xa9-\xd0\xbc-\xce\xbd";
         char penv[256] = {0};
         strncpy(penv,("BOOST_TEST2=" + example + "x").c_str(),sizeof(penv)-1);
-        
+
         TEST(boost::nowide::setenv("BOOST_TEST1",example.c_str(),1)==0);
         TEST(boost::nowide::getenv("BOOST_TEST1"));
         TEST(boost::nowide::getenv("BOOST_TEST1")==example);
@@ -35,14 +36,13 @@ int main()
         TEST(boost::nowide::getenv("BOOST_TEST2"));
         TEST(boost::nowide::getenv("BOOST_TEST_INVALID")==0);
         TEST(boost::nowide::getenv("BOOST_TEST2")==example + "x");
-        
-        std::cout << "Ok" << std::endl;
-        return 0;
     }
     catch(std::exception const &e) {
         std::cerr << "Failed " << e.what() << std::endl;
         return 1;
     }
+
+    return boost::report_errors();
 }
 
 ///

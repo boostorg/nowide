@@ -15,9 +15,10 @@
 #include <boost/nowide/cstdio.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/core/lightweight_test.hpp>
 #include <iostream>
 
-#include "test.hpp"
+#define TEST BOOST_TEST
 
 namespace detail
 {
@@ -61,8 +62,8 @@ int main()
         std::cerr << "Failed : " << e.what() << std::endl;
         return 1;
     }
-    std::cout << "Ok" << std::endl;
-    return 0;
+
+    return boost::report_errors();
 }
 
 ///
