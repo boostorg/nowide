@@ -295,7 +295,7 @@ matrix:
 
     - os: linux
       compiler: clang++-libc++
-      env: UBSAN=1 TOOLSET=clang COMPILER=clang++-libc++ CXXSTD=03,11,14 UBSAN_OPTIONS=print_stacktrace=1
+      env: UBSAN=1 TOOLSET=clang COMPILER=clang++-libc++ CXXSTD=03,11,14 UBSAN_OPTIONS=print_stacktrace=1 VISIBILITY=global
       addons:
         apt:
           packages:
