@@ -161,7 +161,7 @@ matrix:
 
     - os: linux
       compiler: clang++-3.5
-      env: TOOLSET=clang COMPILER=clang++-3.5 CXXSTD=03,11,14,1z
+      env: TOOLSET=clang COMPILER=clang++-3.5 CXXSTD=03,11
       addons:
         apt:
           packages:
