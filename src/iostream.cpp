@@ -24,16 +24,16 @@ namespace boost {
 namespace nowide {
 namespace details {
 
-	namespace {
-		bool is_atty_handle(HANDLE h) 
-		{
+    namespace {
+        bool is_atty_handle(HANDLE h)
+        {
             if(h) {
                 DWORD dummy;
                 return GetConsoleMode(h,&dummy) == TRUE;
             }
-			return false;
-		}
-	}
+            return false;
+        }
+    }
 
     class console_output_buffer : public std::streambuf {
     public:
@@ -203,32 +203,32 @@ namespace details {
             h = GetStdHandle(STD_ERROR_HANDLE);
             break;
         }
-		if(is_atty_handle(h)) {
-			d.reset(new console_output_buffer(h));
-			std::ostream::rdbuf(d.get());
-		}
-		else {
-			std::ostream::rdbuf( fd == 1 ? std::cout.rdbuf() : std::cerr.rdbuf() );
-		}
+        if(is_atty_handle(h)) {
+            d.reset(new console_output_buffer(h));
+            std::ostream::rdbuf(d.get());
+        }
+        else {
+            std::ostream::rdbuf( fd == 1 ? std::cout.rdbuf() : std::cerr.rdbuf() );
+        }
     }
     winconsole_ostream::~winconsole_ostream()
     {
-		try {
-			flush();
-		}
-		catch(...){}
+        try {
+            flush();
+        }
+        catch(...){}
     }
 
     winconsole_istream::winconsole_istream() : std::istream(0)
     {
         HANDLE h = GetStdHandle(STD_INPUT_HANDLE);
-		if(is_atty_handle(h)) {
-			d.reset(new console_input_buffer(h));
-			std::istream::rdbuf(d.get());
-		}
-		else {
-			std::istream::rdbuf(std::cin.rdbuf());
-		}
+        if(is_atty_handle(h)) {
+            d.reset(new console_input_buffer(h));
+            std::istream::rdbuf(d.get());
+        }
+        else {
+            std::istream::rdbuf(std::cin.rdbuf());
+        }
     }
     
     winconsole_istream::~winconsole_istream()
