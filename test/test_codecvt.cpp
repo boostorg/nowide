@@ -46,17 +46,17 @@ void test_codecvt_in_n_m(cvt_type const &cvt,int n,int m)
             if(end > real_end)
                 end = real_end;
         }
-        
+
         wchar_t buf[128];
         wchar_t *to = buf;
         wchar_t *to_end = to + m;
         wchar_t *to_next = to;
-        
-        
+
+
         std::mbstate_t mb2 = mb;
         std::codecvt_base::result r = cvt.in(mb,from,end,from_next,to,to_end,to_next);
         //std::cout << "In from_size=" << (end-from) << " from move=" <<  (from_next - from) << " to move= " << to_next - to << " state = " << res(r) << std::endl;
-       
+
         int count = cvt.length(mb2,from,end,to_end - to);
         #ifndef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
         TEST(memcmp(&mb,&mb2,sizeof(mb))==0);
@@ -68,7 +68,7 @@ void test_codecvt_in_n_m(cvt_type const &cvt,int n,int m)
         TEST(count == to_next - to);
         #endif
 
-        
+
         if(r == cvt_type::partial) {
             end+=n;
             if(end > real_end)
@@ -86,7 +86,7 @@ void test_codecvt_in_n_m(cvt_type const &cvt,int n,int m)
     }
     TEST(wptr == wide_name + wlen);
     TEST(from == real_end);
-    
+
 }
 
 void test_codecvt_out_n_m(cvt_type const &cvt,int n,int m)
@@ -94,18 +94,18 @@ void test_codecvt_out_n_m(cvt_type const &cvt,int n,int m)
     char const *nptr = utf8_name;
     int wlen = wcslen(wide_name);
     int u8len = strlen(utf8_name);
-    
+
     std::mbstate_t mb=std::mbstate_t();
-    
+
     wchar_t const *from_next = wide_name;
     wchar_t const *real_from_end = wide_name + wlen;
-    
+
     char buf[256];
     char *to = buf;
     char *to_next = to;
     char *to_end = to + n;
     char *real_to_end = buf + sizeof(buf);
-    
+
     while(from_next < real_from_end) {
         wchar_t const *from = from_next;
         wchar_t const *from_end = from + m;
@@ -114,7 +114,7 @@ void test_codecvt_out_n_m(cvt_type const &cvt,int n,int m)
         if(to_end == to) {
             to_end = to+n;
         }
-        
+
         std::codecvt_base::result r = cvt.out(mb,from,from_end,from_next,to,to_end,to_next);
         //std::cout << "In from_size=" << (end-from) << " from move=" <<  (from_next - from) << " to move= " << to_next - to << " state = " << res(r) << std::endl;
         if(r == cvt_type::partial) {
@@ -126,7 +126,7 @@ void test_codecvt_out_n_m(cvt_type const &cvt,int n,int m)
         else {
             TEST(r == cvt_type::ok);
         }
-        
+
         while(to!=to_next) {
             TEST(*nptr == *to);
             nptr++;
@@ -146,9 +146,9 @@ void test_codecvt_conv()
 {
     std::cout << "Conversions " << std::endl;
     std::locale l(std::locale::classic(),new boost::nowide::utf8_codecvt<wchar_t>());
- 
+
     cvt_type const &cvt = std::use_facet<cvt_type>(l);
-    
+
     for(int i=1;i<=(int)strlen(utf8_name)+1;i++) {
         for(int j=1;j<=(int)wcslen(wide_name)+1;j++) {
             try {
@@ -160,19 +160,19 @@ void test_codecvt_conv()
                 throw;
             }
         }
-    }    
+    }
 }
 
 void test_codecvt_err()
 {
     std::cout << "Errors " << std::endl;
     std::locale l(std::locale::classic(),new boost::nowide::utf8_codecvt<wchar_t>());
- 
+
     cvt_type const &cvt = std::use_facet<cvt_type>(l);
 
     std::cout << "- UTF-8" << std::endl;
     {
-        
+
         wchar_t buf[2];
         wchar_t *to=buf;
         wchar_t *to_end = buf+2;
@@ -199,11 +199,11 @@ void test_codecvt_err()
             TEST(from_next == from);
             TEST(to_next == to);
         }
-    }    
-    
+    }
+
     std::cout << "- UTF-16/32" << std::endl;
     {
-        
+
         char buf[32];
         char *to=buf;
         char *to_end = buf+32;
@@ -231,17 +231,17 @@ void test_codecvt_err()
             TEST(from_next == from);
             TEST(to_next == to);
         }
-    }    
-    
+    }
+
 }
 
 
 int main()
-{   
+{
     try {
         test_codecvt_conv();
         test_codecvt_err();
-        
+
     }
     catch(std::exception const &e) {
         std::cerr << "Failed : " << e.what() << std::endl;
