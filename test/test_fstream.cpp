@@ -156,11 +156,13 @@ int main()
             TEST(f.get()=='c');
             TEST(f.seekg(1));
             f.put('B');
+            TEST(f.flush()); // Flush or seek needed when changing out->in
             TEST(f.get()=='c');
             TEST(f.seekg(1));
             TEST(f.get() == 'B');
             f.seekg(2);
             f.put('C');
+            TEST(f.seekg(3)); // Flush or seek needed when changing out->in
             TEST(f.get()=='d');
             f.seekg(0);
             TEST(f.get()=='a');
