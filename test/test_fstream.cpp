@@ -1,3 +1,7 @@
+#ifdef _MSC_VER
+# define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <boost/nowide/fstream.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/filesystem.hpp>
@@ -5,10 +9,6 @@
 
 #include <iostream>
 #include "test.hpp"
-
-#ifdef _MSC_VER
-#  pragma warning(disable : 4996)
-#endif
 
 
 int main()

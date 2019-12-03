@@ -6,16 +6,16 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#ifdef _MSC_VER
+# define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <boost/nowide/cenv.hpp>
 #include <iostream>
 #include "test.hpp"
 
 #if defined(BOOST_NOWIDE_TEST_INCLUDE_WINDOWS) && defined(BOOST_WINDOWS)
 #include <windows.h>
-#endif
-
-#ifdef BOOST_MSVC
-#  pragma warning(disable : 4996)
 #endif
 
 
