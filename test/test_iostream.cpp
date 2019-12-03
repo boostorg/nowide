@@ -8,6 +8,7 @@
 
 #include <boost/nowide/iostream.hpp>
 #include <boost/core/lightweight_test.hpp>
+#include <string>
 
 #define TEST BOOST_TEST
 
@@ -33,14 +34,14 @@ int main(int argc,char **argv)
         boost::nowide::cout << "Normal I/O:" << std::endl;
         boost::nowide::cout << example << std::endl;
         boost::nowide::cerr << example << std::endl;
-        
+
         boost::nowide::cout << "Flushing each character:" << std::endl;
-        
+
         for(char const *s=example;*s;s++) {
             boost::nowide::cout << *s << std::flush;
             TEST(boost::nowide::cout);
         }
-        
+
         TEST(boost::nowide::cout);
         TEST(boost::nowide::cerr);
         if(argc==2 && argv[1]==std::string("-i")) {
