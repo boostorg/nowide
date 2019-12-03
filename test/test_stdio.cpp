@@ -6,21 +6,23 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#ifdef _MSC_VER
+# define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <boost/nowide/cstdio.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <iostream>
 #include <string.h>
 #include "test.hpp"
 
-#ifdef BOOST_MSVC
-#  pragma warning(disable : 4996)
-#endif
-
-
 int main()
 {
     try {
-        std::string example = "\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
-        std::wstring wexample = L"\u05e9-\u043c-\u03bd.txt";
+        std::string prefix = boost::filesystem::unique_path( "nowide-%%%%-%%%%-" ).string();
+
+        std::string example = prefix + "\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
+        std::wstring wexample = boost::nowide::widen( prefix ) + L"\u05e9-\u043c-\u03bd.txt";
 
         #ifdef BOOST_WINDOWS
         FILE *f=_wfopen(wexample.c_str(),L"w");

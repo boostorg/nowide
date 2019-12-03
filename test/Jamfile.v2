@@ -9,8 +9,8 @@
 
 run test_convert.cpp ;
 run test_fstream.cpp : : : <library>/boost/filesystem//boost_filesystem ;
-run test_stdio.cpp ;
-run test_codecvt.cpp ;
+run test_stdio.cpp : : : <library>/boost/filesystem//boost_filesystem ;
+run test_codecvt.cpp : : : <library>/boost/filesystem//boost_filesystem ;
 
 lib shell32 ;
 
