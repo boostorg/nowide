@@ -7,6 +7,8 @@
 
 # See library home page at http://www.boost.org/libs/nowide
 
+import testing ;
+
 run test_convert.cpp ;
 run test_fstream.cpp : : : <library>/boost/filesystem//boost_filesystem ;
 run test_stdio.cpp : : : <library>/boost/filesystem//boost_filesystem ;
