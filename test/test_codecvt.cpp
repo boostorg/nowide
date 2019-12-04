@@ -10,12 +10,13 @@
 #include <boost/nowide/convert.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <locale>
+#include <vector>
 #include <iostream>
 #include <iomanip>
 #include <string.h>
 #include <memory.h>
-
 #include "test.hpp"
+#include "test_sets.hpp"
 
 namespace detail
 {
@@ -190,37 +191,30 @@ void test_codecvt_err()
     std::cout << "- UTF-8" << std::endl;
     {
 
-        wchar_t buf[2];
+        wchar_t buf[4];
         wchar_t *to=buf;
-        wchar_t *to_end = buf+2;
+        wchar_t *to_end = buf+4;
         wchar_t *to_next = to;
-        char const *err_utf="1\xFF\xFF";
+        char const *err_utf="1\xFF\xFF\xd7\xa9";
         {
             std::mbstate_t mb=std::mbstate_t();
             char const *from=err_utf;
             char const *from_end = from + strlen(from);
             char const *from_next = from;
             to_next = to;
-            TEST(cvt.in(mb,from,from_end,from_next,to,to_end,to_next)==cvt_type::error);
-            TEST(from_next == from+1);
-            TEST(to_next == to + 1);
-            TEST(*to == '1');
+            TEST(cvt.in(mb,from,from_end,from_next,to,to_end,to_next)==cvt_type::ok);
+            TEST(from_next == from+5);
+            TEST(to_next == to + 4);
+            TEST(to[0] == L'1');
+            TEST(to[1] == L'\uFFFD');
+            TEST(to[2] == L'\uFFFD');
+            TEST(to[3] == L'\u05e9');
         }
-        err_utf++;
-        {
-            std::mbstate_t mb=std::mbstate_t();
-            char const *from=err_utf;
-            char const *from_end = from + strlen(from);
-            char const *from_next = from;
-            TEST(cvt.in(mb,from,from_end,from_next,to,to_end,to_next)==cvt_type::error);
-            TEST(from_next == from);
-            TEST(to_next == to);
-        }
-    }
-
+    }    
+    
     std::cout << "- UTF-16/32" << std::endl;
     {
-
+        
         char buf[32];
         char *to=buf;
         char *to_end = buf+32;
@@ -232,33 +226,78 @@ void test_codecvt_err()
             wchar_t const *from=err_utf;
             wchar_t const *from_end = from + wcslen(from);
             wchar_t const *from_next = from;
-            TEST(cvt.out(mb,from,from_end,from_next,to,to_end,to_next)==cvt_type::error);
-            TEST(from_next == from+1);
-            TEST(to_next == to + 1);
-            TEST(*to == '1');
+            TEST(cvt.out(mb,from,from_end,from_next,to,to_end,to_next)==cvt_type::ok);
+            TEST(from_next == from+2);
+            TEST(to_next == to + 4);
+            TEST(memcmp(to,"1\xEF\xBF\xBD",4)==0);
         }
-        err_utf++;
-        {
-            std::mbstate_t mb=std::mbstate_t();
-            wchar_t const *from=err_utf;
-            wchar_t const *from_end = from + wcslen(from);
-            wchar_t const *from_next = from;
-            to_next = to;
-            TEST(cvt.out(mb,from,from_end,from_next,to,to_end,to_next)==cvt_type::error);
-            TEST(from_next == from);
-            TEST(to_next == to);
-        }
-    }
+    }    
+    
+}
+
+std::wstring codecvt_to_wide(std::string const &s)
+{
+    std::locale l(std::locale::classic(),new boost::nowide::utf8_codecvt<wchar_t>());
+ 
+    cvt_type const &cvt = std::use_facet<cvt_type>(l);
+    std::vector<wchar_t> output(s.size()+1);
+    
+    std::mbstate_t mb=std::mbstate_t();
+    char const *from=s.c_str();
+    char const *from_end = from + s.size();
+    char const *from_next = from;
+
+    std::vector<wchar_t> buf(s.size()+1);
+    wchar_t *to=&buf[0];
+    wchar_t *to_end = to + buf.size();
+    wchar_t *to_next = to;
+    
+    TEST(cvt.in(mb,from,from_end,from_next,to,to_end,to_next)==cvt_type::ok);
+
+    std::wstring res(to,to_next);
+    return res;
 
 }
 
 
-int main()
+std::string codecvt_to_narrow(std::wstring const &s)
 {
+    std::locale l(std::locale::classic(),new boost::nowide::utf8_codecvt<wchar_t>());
+ 
+    cvt_type const &cvt = std::use_facet<cvt_type>(l);
+    std::vector<wchar_t> output(s.size()+1);
+    
+    std::mbstate_t mb=std::mbstate_t();
+    wchar_t const *from=s.c_str();
+    wchar_t const *from_end = from + s.size();
+    wchar_t const *from_next = from;
+
+    std::vector<char> buf(s.size() * 4 + 1);
+    char *to=&buf[0];
+    char *to_end = to + buf.size();
+    char *to_next = to;
+    
+    TEST(cvt.out(mb,from,from_end,from_next,to,to_end,to_next)==cvt_type::ok);
+
+    std::string res(to,to_next);
+    return res;
+
+}
+
+
+void test_codecvt_subst()
+{
+    std::cout << "Substitutions " << std::endl;
+    run_all(codecvt_to_wide,codecvt_to_narrow);
+}
+
+int main()
+{   
     try {
         test_codecvt_conv();
         test_codecvt_err();
-
+        test_codecvt_subst();
+        
     }
     catch(std::exception const &e) {
         std::cerr << "Failed : " << e.what() << std::endl;

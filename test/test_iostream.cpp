@@ -17,7 +17,10 @@ int main(int argc,char **argv)
     
     char const *example = "Basic letters: \xd7\xa9-\xd0\xbc-\xce\xbd\n"
                           "East Asian Letters: \xe5\x92\x8c\xe5\xb9\xb3\n"
-                          "Non-BMP letters: \xf0\x9d\x84\x9e\n";
+                          "Non-BMP letters: \xf0\x9d\x84\x9e\n"
+			  "Invalid UTF-8: `\xFF' `\xd7\xFF' `\xe5\xFF\x8c' `\xf0\x9d\x84\xFF' \n"
+			  "\n"
+			  ;
 
     try {
         int maxval = 15000;

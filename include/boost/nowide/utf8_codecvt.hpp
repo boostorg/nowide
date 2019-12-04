@@ -10,6 +10,7 @@
 
 #include <boost/locale/utf.hpp>
 #include <boost/cstdint.hpp>
+#include <boost/nowide/replacement.hpp>
 #include <boost/static_assert.hpp>
 #include <locale>
 
@@ -84,7 +85,10 @@ protected:
         while(max > 0 && from < from_end){
             char const *prev_from = from;
             boost::uint32_t ch=boost::locale::utf::utf_traits<char>::decode(from,from_end);
-            if(ch==boost::locale::utf::incomplete || ch==boost::locale::utf::illegal) {
+            if(ch==boost::locale::utf::illegal) {
+                ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
+            }
+            else if(ch==boost::locale::utf::incomplete) {
                 from = prev_from;
                 break;
             }
@@ -136,11 +140,9 @@ protected:
             uint32_t ch=boost::locale::utf::utf_traits<char>::decode(from,from_end);
 
             if(ch==boost::locale::utf::illegal) {
-                from = from_saved;
-                r=std::codecvt_base::error;
-                break;
+                ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
             }
-            if(ch==boost::locale::utf::incomplete) {
+            else if(ch==boost::locale::utf::incomplete) {
                 from = from_saved;
                 r=std::codecvt_base::partial;
                 break;
@@ -241,9 +243,7 @@ protected:
                     ch=((uint32_t(vh) << 10)  | vl) + 0x10000;
                 }
                 else {
-                    // Invalid surrogate
-                    r=std::codecvt_base::error;
-                    break;
+                    ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
                 }
             }
             else {
@@ -258,11 +258,10 @@ protected:
                     continue;
                 }
                 else if(0xDC00 <= ch && ch<=0xDFFF) {
-                    // if we observe second surrogate pair and
+                    // if we observe second surrogate pair and 
                     // first only may be expected we should break from the loop with error
                     // as it is illegal input
-                    r=std::codecvt_base::error;
-                    break;
+                    ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
                 }
             }
             if(!boost::locale::utf::is_valid_codepoint(ch)) {
@@ -354,9 +353,12 @@ protected:
         while(max > 0 && from < from_end){
             char const *save_from = from;
             boost::uint32_t ch=boost::locale::utf::utf_traits<char>::decode(from,from_end);
-            if(ch==boost::locale::utf::incomplete || ch==boost::locale::utf::illegal) {
+            if(ch==boost::locale::utf::incomplete) {
                 from = save_from;
                 break;
+            }
+            else if(ch == boost::locale::utf::illegal) {
+                ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
             }
             max--;
         }
@@ -392,15 +394,13 @@ protected:
             std::cout << "Left in " << std::dec << from_end - from << " out " << to_end -to << std::endl;
 #endif
             char const *from_saved = from;
-
+            
             uint32_t ch=boost::locale::utf::utf_traits<char>::decode(from,from_end);
-
+            
             if(ch==boost::locale::utf::illegal) {
-                r=std::codecvt_base::error;
-                from = from_saved;
-                break;
+                ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
             }
-            if(ch==boost::locale::utf::incomplete) {
+            else if(ch==boost::locale::utf::incomplete) {
                 r=std::codecvt_base::partial;
                 from=from_saved;
                 break;
@@ -434,7 +434,7 @@ protected:
     }
 
     virtual std::codecvt_base::result
-    do_out( std::mbstate_t &std_state,
+    do_out( std::mbstate_t &/*std_state*/,
             uchar const *from,
             uchar const *from_end,
             uchar const *&from_next,
@@ -453,8 +453,7 @@ protected:
             boost::uint32_t ch=0;
             ch = *from;
             if(!boost::locale::utf::is_valid_codepoint(ch)) {
-                r=std::codecvt_base::error;
-                break;
+                ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
             }
             int len = boost::locale::utf::utf_traits<char>::width(ch);
             if(to_end - to < len) {
