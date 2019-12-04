@@ -9,14 +9,13 @@
 #include <boost/nowide/utf8_codecvt.hpp>
 #include <boost/nowide/convert.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/core/lightweight_test.hpp>
 #include <locale>
 #include <iostream>
 #include <iomanip>
 #include <string.h>
 #include <memory.h>
 
-#define TEST BOOST_TEST
+#include "test.hpp"
 
 namespace detail
 {

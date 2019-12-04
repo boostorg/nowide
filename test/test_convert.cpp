@@ -8,10 +8,9 @@
 
 #include <boost/nowide/convert.hpp>
 #include <boost/nowide/stackstring.hpp>
-#include <boost/core/lightweight_test.hpp>
 #include <iostream>
 
-#define TEST BOOST_TEST
+#include "test.hpp"
 
 int main()
 {

@@ -12,11 +12,10 @@
 
 #include <boost/nowide/cstdio.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/core/lightweight_test.hpp>
 #include <iostream>
 #include <string.h>
 
-#define TEST BOOST_TEST
+#include "test.hpp"
 
 int main()
 {

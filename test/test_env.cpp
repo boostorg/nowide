@@ -11,14 +11,13 @@
 #endif
 
 #include <boost/nowide/cenv.hpp>
-#include <boost/core/lightweight_test.hpp>
 #include <iostream>
 
 #if defined(BOOST_NOWIDE_TEST_INCLUDE_WINDOWS) && defined(BOOST_WINDOWS)
 #include <windows.h>
 #endif
 
-#define TEST BOOST_TEST
+#include "test.hpp"
 
 int main()
 {

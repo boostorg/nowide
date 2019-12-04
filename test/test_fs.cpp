@@ -15,10 +15,9 @@
 #include <boost/nowide/cstdio.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/core/lightweight_test.hpp>
 #include <iostream>
 
-#define TEST BOOST_TEST
+#include "test.hpp"
 
 namespace detail
 {

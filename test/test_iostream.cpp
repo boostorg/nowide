@@ -7,10 +7,9 @@
 //
 
 #include <boost/nowide/iostream.hpp>
-#include <boost/core/lightweight_test.hpp>
 #include <string>
 
-#define TEST BOOST_TEST
+#include "test.hpp"
 
 
 int main(int argc,char **argv)
