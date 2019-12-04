@@ -341,11 +341,11 @@ int main(int argc,char **argv)
 
 \subsection sources Sources and Downloads
 
-The upstream sources can be found at GitHub: <a href="https://github.com/artyom-beilis/nowide">https://github.com/artyom-beilis/nowide</a>
+The upstream sources can be found at GitHub: <a href="https://github.com/boostorg/nowide">https://github.com/boostorg/nowide</a>
 
 You can download the latest sources there:
 
-- Standard Version: <a href="https://github.com/artyom-beilis/nowide/archive/master.zip">nowide-master.zip</a>
+- Standard Version: <a href="https://github.com/boostorg/nowide/archive/master.zip">nowide-master.zip</a>
 - Standalone Boost independent version <a href="../nowide_standalone.zip">nowide_standalone.zip</a>
 
 */
