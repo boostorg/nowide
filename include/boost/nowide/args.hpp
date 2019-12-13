@@ -33,10 +33,13 @@ namespace nowide {
     /// Microsoft Windows.
     ///
     /// The class uses \c GetCommandLineW(), \c CommandLineToArgvW() and \c GetEnvironmentStringsW()
-    /// in order to obtain the information. It does not relates to actual values of argc,argv and env
+    /// in order to obtain the information. It does not relate to actual values of argc,argv and env
     /// under Windows.
     ///
     /// It restores the original values in its destructor
+    ///
+    /// If any of the system calls fails, an exception of type std::runtime_error will be thrown
+    /// and argc, argv, env remain unchanged.
     ///
     /// \note the class owns the memory of the newly allocated strings
     ///
@@ -44,7 +47,7 @@ namespace nowide {
     public:
 
         ///
-        /// Fix command line agruments
+        /// Fix command line arguments 
         ///
         args(int &argc,char **&argv) :
             old_argc_(argc),
@@ -57,18 +60,18 @@ namespace nowide {
             fix_args(argc,argv);
         }
         ///
-        /// Fix command line agruments and environment
+        /// Fix command line arguments and environment
         ///
-        args(int &argc,char **&argv,char **&en) :
+        args(int &argc,char **&argv,char **&env) :
             old_argc_(argc),
             old_argv_(argv),
-            old_env_(en),
+            old_env_(env),
             old_argc_ptr_(&argc),
             old_argv_ptr_(&argv),
-            old_env_ptr_(&en)
+            old_env_ptr_(&env)
         {
             fix_args(argc,argv);
-            fix_env(en);
+            fix_env(env);
         }
         ///
         /// Restore original argc,argv,env values, if changed
@@ -89,49 +92,34 @@ namespace nowide {
             wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(),&wargc);
             if(!wargv)
                 throw std::runtime_error("Could not get command line!");
-            try{
-                args_.resize(wargc+1,0);
-                arg_values_.resize(wargc);
-                for(int i=0;i<wargc;i++)
-                    args_[i] = arg_values_[i].convert(wargv[i]);
-                argc = wargc;
-                argv = &args_[0];
-            }
-            catch(...) {
-                LocalFree(wargv);
-                throw;
-            }
+            args_.resize(wargc+1,0);
+            arg_values_.resize(wargc);
+            for(int i=0;i<wargc;i++) 
+                args_[i] = arg_values_[i].convert(wargv[i]);
+            argc = wargc;
+            argv = &args_[0];
             LocalFree(wargv);
         }
-        void fix_env(char **&en)
+        void fix_env(char **&env)
         {
-            static char *dummy = 0;
-            en = &dummy;
             wchar_t *wstrings = GetEnvironmentStringsW();
             if(!wstrings)
                 throw std::runtime_error("Could not get environment strings!");
-            try {
-                wchar_t *wstrings_end = 0;
-                int count = 0;
-                for(wstrings_end = wstrings;*wstrings_end;wstrings_end+=wcslen(wstrings_end)+1)
-                        count++;
-                env_.convert(wstrings,wstrings_end);
-                envp_.resize(count+1,0);
-                char *p=env_.c_str();
-                int pos = 0;
-                for(int i=0;i<count;i++) {
-                    if(*p!='=')
-                        envp_[pos++] = p;
-                    p+=strlen(p)+1;
-                }
-                en = &envp_[0];
+            wchar_t *wstrings_end = 0;
+            int count = 0;
+            for(wstrings_end = wstrings;*wstrings_end;wstrings_end+=wcslen(wstrings_end)+1)
+                    count++;
+            env_.convert(wstrings,wstrings_end);
+            envp_.resize(count+1,0);
+            char *p=env_.c_str();
+            int pos = 0;
+            for(int i=0;i<count;i++) {
+                if(*p!='=')
+                    envp_[pos++] = p;
+                p+=strlen(p)+1;
             }
-            catch(...) {
-                FreeEnvironmentStringsW(wstrings);
-                throw;
-            }
+            env = &envp_[0];
             FreeEnvironmentStringsW(wstrings);
-
         }
 
         std::vector<char *> args_;
