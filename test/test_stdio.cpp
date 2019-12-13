@@ -13,7 +13,7 @@
 #include <boost/nowide/cstdio.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <iostream>
-#include <string.h>
+#include <cstring>
 
 #include "test.hpp"
 
@@ -38,7 +38,7 @@ int main()
         TEST((f=boost::nowide::fopen(example.c_str(),"r"))!=0);
         char buf[16];
         TEST(std::fgets(buf,16,f)!=0);
-        TEST(strcmp(buf,"test\n")==0);
+        TEST(std::strcmp(buf,"test\n")==0);
         TEST((f=boost::nowide::freopen(example.c_str(),"r+",f))!=0);
         std::fclose(f);
         f=0;

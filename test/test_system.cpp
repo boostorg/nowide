@@ -10,7 +10,6 @@
 #include <boost/nowide/args.hpp>
 #include <boost/nowide/cenv.hpp>
 #include <iostream>
-#include <stdio.h>
 
 #include "test.hpp"
 

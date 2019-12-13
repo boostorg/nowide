@@ -8,7 +8,7 @@
 #define BOOST_NOWIDE_SOURCE
 #include <boost/nowide/iostream.hpp>
 #include <boost/nowide/convert.hpp>
-#include <stdio.h>
+#include <cstring>
 #include <vector>
 
 #ifdef BOOST_WINDOWS
@@ -44,7 +44,7 @@ namespace details {
     protected:
         int sync()
         {
-            return overflow(EOF);
+            return overflow(traits_type::eof());
         }
         int overflow(int c)
         {
@@ -56,11 +56,11 @@ namespace details {
             if(n > 0 && (r=write(pbase(),n)) < 0)
                     return -1;
             if(r < n) {
-                memmove(pbase(),pbase() + r,n-r);
+                std::memmove(pbase(),pbase() + r,n-r);
             }
             setp(buffer_, buffer_ + buffer_size);
             pbump(n-r);
-            if(c!=EOF)
+            if(c!=traits_type::eof())
                 sputc(c);
             return 0;
         }
@@ -105,8 +105,8 @@ namespace details {
     protected:
         int pbackfail(int c)
         {
-            if(c==EOF)
-                return EOF;
+            if(c==traits_type::eof())
+                return traits_type::eof();
             
             if(gptr()!=eback()) {
                 gbump(-1);
@@ -147,7 +147,7 @@ namespace details {
             size_t n = read();
             setg(buffer_,buffer_,buffer_+n);
             if(n == 0)
-                return EOF;
+                return traits_type::eof();
             return std::char_traits<char>::to_int_type(*gptr());
         }
         
@@ -177,7 +177,7 @@ namespace details {
             
             
             if(c==uf::incomplete) {
-                memmove(b,e-wsize_,sizeof(wchar_t)*wsize_);
+                std::memmove(b,e-wsize_,sizeof(wchar_t)*wsize_);
             }
             
             return out - buffer_;

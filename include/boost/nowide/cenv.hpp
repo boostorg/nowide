@@ -10,7 +10,7 @@
 
 #include <string>
 #include <stdexcept>
-#include <stdlib.h>
+#include <cstdlib>
 #include <boost/config.hpp>
 #include <boost/nowide/stackstring.hpp>
 #include <vector>
@@ -22,7 +22,7 @@
 namespace boost {
 namespace nowide {
     #if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_DOXYGEN)
-    using ::getenv;
+    using std::getenv;
     using ::setenv;
     using ::unsetenv;
     using ::putenv;
