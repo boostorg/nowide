@@ -13,19 +13,19 @@
 
 Table of Contents:
 
-- \ref main 
-- \ref main_rationale 
-    - \ref main_the_problem 
-    - \ref main_the_solution 
-    - \ref main_wide 
-    - \ref main_reading 
+- \ref main
+- \ref main_rationale
+    - \ref main_the_problem
+    - \ref main_the_solution
+    - \ref main_wide
+    - \ref main_reading
 - \ref using
     - \ref using_standard
     - \ref using_custom
     - \ref using_integration
-- \ref technical 
-    - \ref technical_imple 
-    - \ref technical_cio 
+- \ref technical
+    - \ref technical_imple
+    - \ref technical_cio
 - \ref qna
 - \ref standalone_version
 - \ref sources
@@ -45,7 +45,7 @@ requiring to use Wide API.
 \section main_rationale Rationale
 \subsection main_the_problem The Problem
 
-Consider a simple application that splits a big file into chunks, such that 
+Consider a simple application that splits a big file into chunks, such that
 they can be sent by e-mail. It requires doing a few very simple tasks:
 
 - Access command line arguments: <code>int main(int argc,char **argv)</code>
@@ -57,7 +57,7 @@ Unfortunately it is impossible to implement this simple task in plain C++
 if the file names contain non-ASCII characters.
 
 The simple program that uses the API would work on the systems that use UTF-8
-internally -- the vast majority of Unix-Line operating systems: Linux, Mac OS X, 
+internally -- the vast majority of Unix-Line operating systems: Linux, Mac OS X,
 Solaris, BSD. But it would fail on files like <code>War and Peace - Война и мир - מלחמה ושלום.zip</code>
 under Microsoft Windows because the native Windows Unicode aware API is Wide-API -- UTF-16.
 
@@ -65,7 +65,7 @@ This incredibly trivial task is very hard to implement in a cross platform manne
 
 \subsection main_the_solution The Solution
 
-Boost.Nowide provides a set of standard library functions that are UTF-8 aware and 
+Boost.Nowide provides a set of standard library functions that are UTF-8 aware and
 makes Unicode aware programming easier.
 
 The library provides:
@@ -91,10 +91,10 @@ The library provides:
         - \c cout
         - \c cerr
         - \c clog
-        - \c cin 
+        - \c cin
 
 
-\subsection main_wide Why Not Narrow and Wide? 
+\subsection main_wide Why Not Narrow and Wide?
 
 Why not provide both Wide and Narrow implementations so the
 developer can choose to use Wide characters on Unix-like platforms?
@@ -183,7 +183,7 @@ int main(int argc,char **argv)
 \endcode
 
 This very simple and straightforward approach helps writing Unicode aware programs.
-    
+
 \subsection using_custom Custom API
 
 Of course, this simple set of functions does not cover all needs. If you need
@@ -197,7 +197,7 @@ CopyFileW(  boost::nowide::widen(existing_file).c_str(),
             TRUE);
 \endcode
 
-The conversion is done at the last stage, and you continue using UTF-8 
+The conversion is done at the last stage, and you continue using UTF-8
 strings everywhere else. You only switch to the Wide API at glue points.
 
 \c boost::nowide::widen returns \c std::string. Sometimes
@@ -226,20 +226,20 @@ buffers. If the string is longer, they fall back to memory allocation.
 The library does not include the \c windows.h in order to prevent namespace pollution with numerous
 defines and types. Instead, the library defines the prototypes of the Win32 API functions.
 
-However, you may request to use the \c windows.h header by defining \c BOOST_NOWIDE_USE_WINDOWS_H 
+However, you may request to use the \c windows.h header by defining \c BOOST_NOWIDE_USE_WINDOWS_H
 before including any of the Boost.Nowide headers
 
 \subsection using_integration Integration with Boost.Filesystem
 
 Boost.Filesystem supports selection of narrow encoding. Unfortunatelly the default narrow encoding on Windows isn't UTF-8, you can enable UTF-8 as default encoding on Boost.Filesystem
-by calling `boost::nowide::nowide_filesystem()` in the beginning of your program 
+by calling `boost::nowide::nowide_filesystem()` in the beginning of your program
 
 
 \section technical Technical Details
 \subsection technical_imple Windows vs POSIX
 
 For Microsoft Windows, the library provides UTF-8 aware variants of some \c std:: functions in the \c boost::nowide namespace.
-For example, \c std::fopen becomes \c boost::nowide::fopen. 
+For example, \c std::fopen becomes \c boost::nowide::fopen.
 
 Under POSIX platforms, the functions in boost::nowide are aliases of their standard library counterparts:
 
@@ -274,7 +274,7 @@ fonts are used the Unicode aware input and output works as intended.
 A: It is inherently incorrect
 to convert strings to/from locale encodings on POSIX platforms.
 
-You can create a file named "\xFF\xFF.txt" (invalid UTF-8), remove it, pass its name as a parameter to a program 
+You can create a file named "\xFF\xFF.txt" (invalid UTF-8), remove it, pass its name as a parameter to a program
 and it would work whether the current locale is UTF-8 or not.
 Also, changing the locale from let's say \c en_US.UTF-8 to \c en_US.ISO-8859-1 would not magically change all
 files in the OS or the strings a user may pass to the program (which is different on Windows)
@@ -283,7 +283,7 @@ POSIX OSs treat strings as \c NULL terminated cookies.
 
 So altering their content according to the locale would
 actually lead to incorrect behavior.
- 
+
 For example, this is a naive implementation of a standard program "rm"
 
 \code

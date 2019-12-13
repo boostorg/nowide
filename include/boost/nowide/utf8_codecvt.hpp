@@ -226,7 +226,7 @@ protected:
                     continue;
                 }
                 else if(0xDC00 <= ch && ch<=0xDFFF) {
-                    // if we observe second surrogate pair and 
+                    // if we observe second surrogate pair and
                     // first only may be expected we should break from the loop with error
                     // as it is illegal input
                     ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
@@ -338,9 +338,9 @@ protected:
         while(to < to_end && from < from_end)
         {
             char const *from_saved = from;
-            
+
             uint32_t ch=boost::locale::utf::utf_traits<char>::decode(from,from_end);
-            
+
             if(ch==boost::locale::utf::illegal) {
                 ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
             }

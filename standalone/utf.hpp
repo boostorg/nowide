@@ -24,7 +24,7 @@ namespace utf {
 
 namespace nowide {
 ///
-/// \brief Namespace that holds basic operations on UTF encoded sequences 
+/// \brief Namespace that holds basic operations on UTF encoded sequences
 ///
 /// All functions defined in this namespace do not require linking with Boost.Locale library
 ///
@@ -89,7 +89,7 @@ namespace utf {
         /// Postconditions
         ///
         /// - p points to the last consumed character
-        /// 
+        ///
         template<typename Iterator>
         static code_point decode(Iterator &p,Iterator e);
 
@@ -113,7 +113,7 @@ namespace utf {
         /// Get the size of the trail part of variable length encoded sequence.
         ///
         /// Returns -1 if C is not valid lead character
-        /// 
+        ///
         static int trail_length(char_type c);
         ///
         /// Returns true if c is trail code unit, always false for UTF-32
@@ -127,11 +127,11 @@ namespace utf {
         ///
         /// Convert valid Unicode code point \a value to the UTF sequence.
         ///
-        /// Requirements: 
+        /// Requirements:
         ///
         /// - \a value is valid code point
         /// - \a out is an output iterator should be able to accept at least width(value) units
-        /// 
+        ///
         /// Returns the iterator past the last written code unit.
         ///
         template<typename Iterator>
@@ -144,7 +144,7 @@ namespace utf {
         template<typename Iterator>
         static code_point decode_valid(Iterator &p);
     };
-    
+
     #else
 
     template<typename CharType,int size=sizeof(CharType)>
@@ -154,8 +154,8 @@ namespace utf {
     struct utf_traits<CharType,1> {
 
         typedef CharType char_type;
-        
-        static int trail_length(char_type ci) 
+
+        static int trail_length(char_type ci)
         {
             unsigned char c = ci;
             if(c < 128)
@@ -170,7 +170,7 @@ namespace utf {
                 return 3;
             return -1;
         }
-        
+
         static const int max_width = 4;
 
         static int width(code_point value)
@@ -199,7 +199,7 @@ namespace utf {
         {
             return !is_trail(ci);
         }
-        
+
         template<typename Iterator>
         static code_point decode(Iterator &p,Iterator e)
         {
@@ -220,7 +220,7 @@ namespace utf {
             //
             if(trail_size == 0)
                 return lead;
-            
+
             code_point c = lead & ((1<<(6-trail_size))-1);
 
             // Read the rest
@@ -261,7 +261,7 @@ namespace utf {
             return c;
 
         }
-        
+
         template<typename Iterator>
         static code_point decode_valid(Iterator &p)
         {
@@ -277,7 +277,7 @@ namespace utf {
                 trail_size = 2;
             else
                 trail_size = 3;
-            
+
             code_point c = lead & ((1<<(6-trail_size))-1);
 
             switch(trail_size) {
@@ -408,7 +408,7 @@ namespace utf {
         }
     }; // utf16;
 
-        
+
     template<typename CharType>
     struct utf_traits<CharType,4> {
         typedef CharType char_type;

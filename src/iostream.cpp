@@ -61,7 +61,7 @@ namespace details {
                 return -1;
             int n = static_cast<int>(pptr() - pbase());
             int r = 0;
-            
+
             if(n > 0 && (r=write(pbase(),n)) < 0)
                     return -1;
             if(r < n) {
@@ -74,7 +74,7 @@ namespace details {
             return 0;
         }
     private:
-        
+
         int write(char const *p,int n)
         {
             namespace uf = boost::locale::utf;
@@ -96,33 +96,33 @@ namespace details {
                 return -1;
             return static_cast<int>(decoded);
         }
-        
+
         static const int buffer_size = 1024;
         char buffer_[buffer_size];
         wchar_t wbuffer_[buffer_size]; // for null
         HANDLE handle_;
     };
-    
+
     class console_input_buffer: public std::streambuf {
     public:
         console_input_buffer(HANDLE h) :
             handle_(h),
             wsize_(0)
         {
-        } 
-        
+        }
+
     protected:
         int pbackfail(int c)
         {
             if(c==traits_type::eof())
                 return traits_type::eof();
-            
+
             if(gptr()!=eback()) {
                 gbump(-1);
                 *gptr() = c;
                 return 0;
             }
-            
+
             if(pback_buffer_.empty()) {
                 pback_buffer_.resize(4);
                 char *b = &pback_buffer_[0];
@@ -142,7 +142,7 @@ namespace details {
                 *p = c;
                 setg(b,p,e);
             }
-          
+
             return 0;
         }
 
@@ -152,16 +152,16 @@ namespace details {
                 return -1;
             if(!pback_buffer_.empty())
                 pback_buffer_.clear();
-            
+
             size_t n = read();
             setg(buffer_,buffer_,buffer_+n);
             if(n == 0)
                 return traits_type::eof();
             return std::char_traits<char>::to_int_type(*gptr());
         }
-        
+
     private:
-        
+
         size_t read()
         {
             namespace uf = boost::locale::utf;
@@ -180,18 +180,18 @@ namespace details {
                 out = uf::utf_traits<char>::encode(c,out);
                 wsize_ = e-p;
             }
-            
+
             if(c==uf::illegal)
                 return 0;
-            
-            
+
+
             if(c==uf::incomplete) {
                 std::memmove(b,e-wsize_,sizeof(wchar_t)*wsize_);
             }
-            
+
             return out - buffer_;
         }
-        
+
         static const size_t buffer_size = 1024 * 3;
         static const size_t wbuffer_size = 1024;
         char buffer_[buffer_size];
@@ -239,18 +239,18 @@ namespace details {
             std::istream::rdbuf(std::cin.rdbuf());
         }
     }
-    
+
     winconsole_istream::~winconsole_istream()
     {
     }
-    
+
 } // details
-    
+
 details::winconsole_istream cin;
 details::winconsole_ostream cout(1);
 details::winconsole_ostream cerr(2);
 details::winconsole_ostream clog(2);
-    
+
 namespace {
     struct initialize {
         initialize()
@@ -263,7 +263,7 @@ namespace {
 }
 
 
-    
+
 } // nowide
 } // namespace boost
 

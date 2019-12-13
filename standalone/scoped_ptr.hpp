@@ -2,7 +2,7 @@
 #define NOWIDE_SCOPED_PTR_HPP
 
 //  (C) Copyright Greg Colvin and Beman Dawes 1998, 1999.
-//  Copyright (c) 2001, 2002 Peter Dimov, 
+//  Copyright (c) 2001, 2002 Peter Dimov,
 //  Copyright (C) 2012 Artyom Beilis
 //
 //  Distributed under the Boost Software License, Version 1.0. (See

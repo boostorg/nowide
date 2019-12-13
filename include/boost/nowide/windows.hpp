@@ -28,7 +28,7 @@ __declspec(dllimport) unsigned long   __stdcall GetEnvironmentVariableW(wchar_t 
 
 }
 
-#endif 
+#endif
 
 
 
