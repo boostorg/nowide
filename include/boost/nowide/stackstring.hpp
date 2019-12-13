@@ -8,8 +8,7 @@
 #ifndef BOOST_NOWIDE_DETAILS_WIDESTR_H_INCLUDED
 #define BOOST_NOWIDE_DETAILS_WIDESTR_H_INCLUDED
 #include <boost/nowide/convert.hpp>
-#include <string.h>
-#include <algorithm>
+#include <cstring>
 
 namespace boost {
 namespace nowide {
@@ -40,10 +39,10 @@ public:
             while(other.mem_buffer_[len])
                 len ++;
             mem_buffer_ = new output_char[len + 1];
-            memcpy(mem_buffer_,other.mem_buffer_,sizeof(output_char) * (len+1));
+            std::memcpy(mem_buffer_,other.mem_buffer_,sizeof(output_char) * (len+1));
         }
         else {
-            memcpy(buffer_,other.buffer_,buffer_size * sizeof(output_char));
+            std::memcpy(buffer_,other.buffer_,buffer_size * sizeof(output_char));
         }
     }
     

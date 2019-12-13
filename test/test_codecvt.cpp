@@ -13,8 +13,7 @@
 #include <vector>
 #include <iostream>
 #include <iomanip>
-#include <string.h>
-#include <memory.h>
+#include <cstring>
 #include "test.hpp"
 #include "test_sets.hpp"
 
@@ -51,8 +50,8 @@ typedef std::codecvt<wchar_t,char,std::mbstate_t> cvt_type;
 void test_codecvt_in_n_m(cvt_type const &cvt,int n,int m)
 {
     wchar_t const *wptr = wide_name;
-    int wlen = wcslen(wide_name);
-    int u8len = strlen(utf8_name);
+    int wlen = std::wcslen(wide_name);
+    int u8len = std::strlen(utf8_name);
     char const *from = utf8_name;
     char const *end = from;
     char const *real_end = utf8_name + u8len;
@@ -77,7 +76,7 @@ void test_codecvt_in_n_m(cvt_type const &cvt,int n,int m)
 
         int count = cvt.length(mb2,from,end,to_end - to);
         #ifndef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
-        TEST(memcmp(&mb,&mb2,sizeof(mb))==0);
+        TEST(std::memcmp(&mb,&mb2,sizeof(mb))==0);
         if(count != from_next - from) {
             std::cout << count << " " << from_next - from << std::endl;
         }
@@ -110,8 +109,8 @@ void test_codecvt_in_n_m(cvt_type const &cvt,int n,int m)
 void test_codecvt_out_n_m(cvt_type const &cvt,int n,int m)
 {
     char const *nptr = utf8_name;
-    int wlen = wcslen(wide_name);
-    int u8len = strlen(utf8_name);
+    int wlen = std::wcslen(wide_name);
+    int u8len = std::strlen(utf8_name);
 
     std::mbstate_t mb=std::mbstate_t();
 
@@ -167,8 +166,8 @@ void test_codecvt_conv()
 
     cvt_type const &cvt = std::use_facet<cvt_type>(l);
 
-    for(int i=1;i<=(int)strlen(utf8_name)+1;i++) {
-        for(int j=1;j<=(int)wcslen(wide_name)+1;j++) {
+    for(int i=1;i<=(int)std::strlen(utf8_name)+1;i++) {
+        for(int j=1;j<=(int)std::wcslen(wide_name)+1;j++) {
             try {
                 test_codecvt_in_n_m(cvt,i,j);
                 test_codecvt_out_n_m(cvt,i,j);
@@ -199,7 +198,7 @@ void test_codecvt_err()
         {
             std::mbstate_t mb=std::mbstate_t();
             char const *from=err_utf;
-            char const *from_end = from + strlen(from);
+            char const *from_end = from + std::strlen(from);
             char const *from_next = from;
             to_next = to;
             TEST(cvt.in(mb,from,from_end,from_next,to,to_end,to_next)==cvt_type::ok);
@@ -224,12 +223,12 @@ void test_codecvt_err()
         {
             std::mbstate_t mb=std::mbstate_t();
             wchar_t const *from=err_utf;
-            wchar_t const *from_end = from + wcslen(from);
+            wchar_t const *from_end = from + std::wcslen(from);
             wchar_t const *from_next = from;
             TEST(cvt.out(mb,from,from_end,from_next,to,to_end,to_next)==cvt_type::ok);
             TEST(from_next == from+2);
             TEST(to_next == to + 4);
-            TEST(memcmp(to,"1\xEF\xBF\xBD",4)==0);
+            TEST(std::memcmp(to,"1\xEF\xBF\xBD",4)==0);
         }
     }    
     

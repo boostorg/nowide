@@ -8,15 +8,14 @@
 #ifndef BOOST_NOWIDE_CSTDLIB_HPP
 #define BOOST_NOWIDE_CSTDLIB_HPP
 
-#include <stdlib.h>
-#include <errno.h>
+#include <cstdlib>
 #include <boost/nowide/stackstring.hpp>
 namespace boost {
 namespace nowide {
 
 #if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_DOXYGEN)
 
-using ::system;
+using std::system;
 
 #else // Windows
 
