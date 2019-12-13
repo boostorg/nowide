@@ -56,7 +56,7 @@ int main(int argc,char **argv)
     }
     catch(std::exception const &e) {
         std::cerr << "Fail: " << e.what() << std::endl;
-        return 1;
+        BOOST_NOWIDE_TEST_RETURN_FAILURE;
     }
 
     return boost::report_errors();

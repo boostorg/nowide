@@ -192,7 +192,7 @@ int main()
     }
     catch(std::exception const &e) {
         std::cerr << e.what() << std::endl;
-        return 1;
+        BOOST_NOWIDE_TEST_RETURN_FAILURE;
     }
 
     return boost::report_errors();
