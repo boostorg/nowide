@@ -1,0 +1,21 @@
+# Add common options for the library with the given name
+function(boost_add_options name)
+  if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR OR BOOST_SUPERPROJECT_SOURCE_DIR)
+    set(def_INSTALL ON)
+    set(def_SYSTEM_INCLUDE OFF)
+    set(def_WERROR ON)
+    set(def_LAYOUT system)
+  else()
+    set(def_INSTALL OFF)
+    set(def_SYSTEM_INCLUDE ON)
+    set(def_WERROR OFF)
+    set(def_LAYOUT system)
+  endif()
+  
+  string(TOUPPER ${name} NAME)
+
+  option(BOOST_${NAME}_INSTALL "Install library" "${def_INSTALL}")
+  option(BOOST_${NAME}_SYSTEM_INCLUDE "Treat includes as system includes" "${def_SYSTEM_INCLUDE}")
+  option(BOOST_${NAME}_WERROR "Treat warnings as errors" "${def_WERROR}")
+  set(BOOST_${NAME}_LAYOUT "${def_LAYOUT}" CACHE STRING "Layout of installed library [system, versioned]")
+endfunction()
