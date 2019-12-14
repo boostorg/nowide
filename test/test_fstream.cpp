@@ -21,12 +21,8 @@ int main(int, char** argv)
     const std::string prefix = argv[0];
 
     std::string example_str = prefix + "\xd7\xa9-\xd0\xbc-\xce\xbd" ".txt";
-    std::wstring wexample_str = boost::nowide::widen( prefix ) + L"\u05e9-\u043c-\u03bd.txt";
 
     char const * example = example_str.c_str();
-    #ifdef BOOST_WINDOWS
-    wchar_t const * wexample = wexample_str.c_str();
-    #endif
 
     try {
         namespace nw=boost::nowide;
@@ -40,7 +36,7 @@ int main(int, char** argv)
             fo.close();
             #ifdef BOOST_WINDOWS
             {
-                FILE *tmp=_wfopen(wexample,L"r");
+                FILE *tmp=_wfopen(boost::nowide::widen(example).c_str(),L"r");
                 TEST(tmp);
                 TEST(fgetc(tmp)=='t');
                 TEST(fgetc(tmp)=='e');

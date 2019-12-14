@@ -7,7 +7,14 @@
 //
 
 #include <boost/nowide/iostream.hpp>
+# if (__GNUC__ >= 7)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+# endif
 #include <boost/locale/utf.hpp>
+# if (__GNUC__ >= 7)
+#  pragma GCC diagnostic pop
+# endif
 #include <iostream>
 #include <string>
 

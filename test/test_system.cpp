@@ -17,7 +17,6 @@ int main(int argc,char **argv,char **env)
 {
     try {
         std::string example = "\xd7\xa9-\xd0\xbc-\xce\xbd";
-        std::wstring wexample = L"\u05e9-\u043c-\u03bd";
         boost::nowide::args a(argc,argv,env);
         if(argc==2 && argv[1][0]!='-') {
             TEST(argv[1]==example);
@@ -47,11 +46,11 @@ int main(int argc,char **argv,char **env)
             case 'w':
                 {
                     #ifdef BOOST_WINDOWS
-                    std::wstring env = L"BOOST_NOWIDE_TEST=" + wexample;
-                    _wputenv(env.c_str());
+                    std::wstring env_var = L"BOOST_NOWIDE_TEST=" + boost::nowide::widen(example);
+                    TEST(_wputenv(env_var.c_str()) == 0);
                     std::wstring wcommand = boost::nowide::widen(argv[0]);
                     wcommand += L" ";
-                    wcommand += wexample;
+                    wcommand += boost::nowide::widen(example);
                     TEST(_wsystem(wcommand.c_str()) == 0);
                     std::cout << "Wide Parent ok" << std::endl;
                     #else

@@ -23,7 +23,7 @@ int main(int, char** argv)
 
     try {
         #ifdef BOOST_WINDOWS
-        FILE *f=_wfopen(wexample.c_str(),L"w");
+        FILE *f=_wfopen(boost::nowide::widen(example).c_str(),L"w");
         #else
         FILE *f=std::fopen(example.c_str(),"w");
         #endif

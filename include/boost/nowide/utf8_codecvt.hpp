@@ -8,7 +8,14 @@
 #ifndef BOOST_NOWIDE_UTF8_CODECVT_HPP
 #define BOOST_NOWIDE_UTF8_CODECVT_HPP
 
+# if (__GNUC__ >= 7)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+# endif
 #include <boost/locale/utf.hpp>
+# if (__GNUC__ >= 7)
+#  pragma GCC diagnostic pop
+# endif
 #include <boost/cstdint.hpp>
 #include <boost/nowide/replacement.hpp>
 #include <boost/static_assert.hpp>
@@ -34,6 +41,8 @@ template<typename CharType>
 class utf8_codecvt<CharType,2> : public std::codecvt<CharType,char,std::mbstate_t>
 {
 public:
+    BOOST_STATIC_ASSERT_MSG(sizeof(CharType) >= 2, "CharType must be able to store UTF16 code point");
+
     utf8_codecvt(size_t refs = 0) : std::codecvt<CharType,char,std::mbstate_t>(refs)
     {
     }
@@ -101,9 +110,9 @@ protected:
             }
         }
         #ifndef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
-        return from - save_from;
+        return static_cast<int>(from - save_from);
         #else
-        return save_max - max;
+        return static_cast<int>(save_max - max);
         #endif
     }
 
@@ -141,7 +150,7 @@ protected:
             }
             // Normal codepoints go direcly to stream
             if(ch <= 0xFFFF) {
-                *to++=ch;
+                *to++=static_cast<CharType>(ch);
             }
             else {
                 // for  other codepoints we do following
@@ -154,17 +163,17 @@ protected:
                 //    once again and then we would consume our input together with writing
                 //    second surrogate pair
                 ch-=0x10000;
-                boost::uint16_t vh = ch >> 10;
+                boost::uint16_t vh = static_cast<boost::uint16_t>(ch >> 10);
                 boost::uint16_t vl = ch & 0x3FF;
                 boost::uint16_t w1 = vh + 0xD800;
                 boost::uint16_t w2 = vl + 0xDC00;
                 if(state == 0) {
                     from = from_saved;
-                    *to++ = w1;
+                    *to++ = static_cast<CharType>(w1);
                     state = 1;
                 }
                 else {
-                    *to++ = w2;
+                    *to++ = static_cast<CharType>(w2);
                     state = 0;
                 }
             }
@@ -221,7 +230,7 @@ protected:
                     // it into the state and consume it, note we don't
                     // go forward as it should be illegal so we increase
                     // the from pointer manually
-                    state = ch;
+                    state = static_cast<boost::uint16_t>(ch);
                     from++;
                     continue;
                 }

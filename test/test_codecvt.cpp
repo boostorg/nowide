@@ -178,9 +178,9 @@ void test_codecvt_err()
     {
 
         wchar_t buf[4];
-        wchar_t *to=buf;
-        wchar_t *to_end = buf+4;
-        wchar_t *to_next = to;
+        wchar_t * const to=buf;
+        wchar_t * const to_end = buf+4;
+        wchar_t * to_next = to;
         char const *err_utf="1\xFF\xFF\xd7\xa9";
         {
             std::mbstate_t mb=std::mbstate_t();
@@ -191,10 +191,7 @@ void test_codecvt_err()
             TEST(cvt.in(mb,from,from_end,from_next,to,to_end,to_next)==cvt_type::ok);
             TEST(from_next == from+5);
             TEST(to_next == to + 4);
-            TEST(to[0] == L'1');
-            TEST(to[1] == L'\uFFFD');
-            TEST(to[2] == L'\uFFFD');
-            TEST(to[3] == L'\u05e9');
+            TEST(std::wstring(to, to_end) == boost::nowide::widen(err_utf));
         }
     }
 

@@ -8,9 +8,14 @@
 
 #include <boost/nowide/convert.hpp>
 #include <boost/nowide/stackstring.hpp>
+#include <boost/config/workaround.hpp>
 #include "test.hpp"
 #include "test_sets.hpp"
 #include <iostream>
+
+#if BOOST_WORKAROUND(BOOST_MSVC, < 1700)
+#  pragma warning(disable: 4428) // universal-character-name encountered in source
+#endif
 
 int main()
 {
@@ -19,6 +24,10 @@ int main()
         std::wstring whello = L"\u05e9\u05dc\u05d5\u05dd";
         std::wstring whello_3e = L"\u05e9\u05dc\u05d5\ufffd";
         std::wstring whello_3 = L"\u05e9\u05dc\u05d5";
+        // Example filenames used in tests
+        std::string example = "\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
+        std::wstring wexample = L"\u05e9-\u043c-\u03bd.txt";
+
         std::cout << "- boost::nowide::widen" << std::endl;
         {
             char const *b=hello.c_str();
@@ -48,6 +57,7 @@ int main()
             e=b+3;
             TEST(boost::nowide::widen(buf,5,b,e)==buf);
             TEST(buf == std::wstring(L"\ufffd\u05e9"));
+            TEST(boost::nowide::widen(example) == wexample);
         }
         std::cout << "- boost::nowide::narrow" << std::endl;
         {
@@ -69,6 +79,7 @@ int main()
             b = tmp2;
             TEST(boost::nowide::narrow(buf,10,b,b+2)==buf);
             TEST(buf == std::string("\xd7\xa9\xEF\xBF\xBD"));
+            TEST(boost::nowide::narrow(wexample) == example);
         }
         {
             char buf[3];
