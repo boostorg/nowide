@@ -9,10 +9,11 @@
 #define BOOST_NOWIDE_ARGS_HPP_INCLUDED
 
 #include <boost/config.hpp>
+#ifdef BOOST_WINDOWS
 #include <boost/nowide/stackstring.hpp>
 #include <vector>
-#ifdef BOOST_WINDOWS
 #include <boost/nowide/windows.hpp>
+#include <stdexcept>
 #endif
 
 namespace boost {
@@ -32,10 +33,13 @@ namespace nowide {
     /// Microsoft Windows.
     ///
     /// The class uses \c GetCommandLineW(), \c CommandLineToArgvW() and \c GetEnvironmentStringsW()
-    /// in order to obtain the information. It does not relates to actual values of argc,argv and env
+    /// in order to obtain the information. It does not relate to actual values of argc,argv and env
     /// under Windows.
     ///
     /// It restores the original values in its destructor
+    ///
+    /// If any of the system calls fails, an exception of type std::runtime_error will be thrown
+    /// and argc, argv, env remain unchanged.
     ///
     /// \note the class owns the memory of the newly allocated strings
     ///
@@ -43,7 +47,7 @@ namespace nowide {
     public:
 
         ///
-        /// Fix command line agruments
+        /// Fix command line arguments 
         ///
         args(int &argc,char **&argv) :
             old_argc_(argc),
@@ -56,18 +60,18 @@ namespace nowide {
             fix_args(argc,argv);
         }
         ///
-        /// Fix command line agruments and environment
+        /// Fix command line arguments and environment
         ///
-        args(int &argc,char **&argv,char **&en) :
+        args(int &argc,char **&argv,char **&env) :
             old_argc_(argc),
             old_argv_(argv),
-            old_env_(en),
+            old_env_(env),
             old_argc_ptr_(&argc),
             old_argv_ptr_(&argv),
-            old_env_ptr_(&en)
+            old_env_ptr_(&env)
         {
             fix_args(argc,argv);
-            fix_env(en);
+            fix_env(env);
         }
         ///
         /// Restore original argc,argv,env values, if changed
@@ -82,59 +86,59 @@ namespace nowide {
                 *old_env_ptr_ = old_env_;
         }
     private:
+        class wargv_ptr
+        {
+            wchar_t **p;
+            int argc;
+            wargv_ptr(const wargv_ptr &); // Non-copyable
+        public:
+            explicit wargv_ptr(const wchar_t *cmd_line) : p(CommandLineToArgvW(GetCommandLineW(), &argc)) {}
+            ~wargv_ptr() { if(p) LocalFree(p); }
+            int size() const { return argc; }
+            operator bool() const { return p != NULL; }
+            const wchar_t* operator[](size_t i) const { return p[i]; }
+        };
+        class wenv_ptr
+        {
+            wchar_t *p;
+            wenv_ptr(const wenv_ptr &); // Non-copyable
+        public:
+            wenv_ptr() : p(GetEnvironmentStringsW()) {}
+            ~wenv_ptr() { if(p) FreeEnvironmentStringsW(p); }
+            operator const wchar_t*() const { return p; }
+        };
+
         void fix_args(int &argc,char **&argv)
         {
-                int wargc;
-                wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(),&wargc);
-            if(!wargv) {
-                argc = 0;
-                static char *dummy = 0;
-                argv = &dummy;
-                return;
-            }
-            try{
-                args_.resize(wargc+1,0);
-                arg_values_.resize(wargc);
-                for(int i=0;i<wargc;i++)
-                    args_[i] = arg_values_[i].convert(wargv[i]);
-                argc = wargc;
-                argv = &args_[0];
-            }
-            catch(...) {
-                LocalFree(wargv);
-                throw;
-            }
-            LocalFree(wargv);
+            const wargv_ptr wargv(GetCommandLineW());
+            if(!wargv)
+                throw std::runtime_error("Could not get command line!");
+            args_.resize(wargv.size()+1,0);
+            arg_values_.resize(wargv.size());
+            for(int i=0;i<wargv.size();i++) 
+                args_[i] = arg_values_[i].convert(wargv[i]);
+            argc = wargv.size();
+            argv = &args_[0];
         }
-        void fix_env(char **&en)
+        void fix_env(char **&env)
         {
-            static char *dummy = 0;
-            en = &dummy;
-            wchar_t *wstrings = GetEnvironmentStringsW();
+            const wenv_ptr wstrings;
             if(!wstrings)
-                return;
-            try {
-                wchar_t *wstrings_end = 0;
-                int count = 0;
-                for(wstrings_end = wstrings;*wstrings_end;wstrings_end+=wcslen(wstrings_end)+1)
-                        count++;
-                env_.convert(wstrings,wstrings_end);
-                envp_.resize(count+1,0);
-                char *p=env_.c_str();
-                int pos = 0;
-                for(int i=0;i<count;i++) {
-                    if(*p!='=')
-                        envp_[pos++] = p;
-                    p+=strlen(p)+1;
-                }
-                en = &envp_[0];
+                throw std::runtime_error("Could not get environment strings!");
+            const wchar_t *wstrings_end = 0;
+            int count = 0;
+            for(wstrings_end = wstrings;*wstrings_end;wstrings_end+=wcslen(wstrings_end)+1)
+                    count++;
+            env_.convert(wstrings,wstrings_end);
+            envp_.resize(count+1,0);
+            char *p=env_.c_str();
+            int pos = 0;
+            for(int i=0;i<count;i++) {
+                if(*p!='=')
+                    envp_[pos++] = p;
+                p+=strlen(p)+1;
             }
-            catch(...) {
-                FreeEnvironmentStringsW(wstrings);
-                throw;
-            }
-            FreeEnvironmentStringsW(wstrings);
-
+            env = &envp_[0];
         }
 
         std::vector<char *> args_;
