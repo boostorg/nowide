@@ -1,0 +1,60 @@
+name: CI Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  UnitTests:
+    strategy:
+      matrix:
+        os: [ubuntu-16.04, windows-latest]
+        buildType: [Debug, Release]
+        shared_lib: [ON, OFF]
+        generator: ['Visual Studio 16 2019', 'MinGW Makefiles', 'Unix Makefiles']
+        exclude:
+          - os: ubuntu-16.04
+            generator: MinGW Makefiles
+          - os: ubuntu-16.04
+            generator: Visual Studio 16 2019
+          - os: ubuntu-16.04
+            buildType: Debug
+          - os: windows-latest
+            generator: Unix Makefiles
+    runs-on: ${{matrix.os}}
+    steps:
+    - uses: actions/checkout@v1
+    # Install newer CMake to be able to find Boost
+    - name: Install CMake
+      if: runner.os == 'Linux' && ! matrix.standalone
+      run: wget -O- https://cmake.org/files/v3.14/cmake-3.14.0-Linux-x86_64.tar.gz | sudo tar --strip-components=1 -xzC /usr/local
+    - name: Build Boost
+      if: matrix.generator == 'MinGW Makefiles'
+      shell: bash
+      run: |
+        cd "${BOOST_ROOT}"
+        ./bootstrap.sh --with-libraries=system,filesystem threading=multi
+        ./b2 link=static variant=release -j$(nproc)
+    - name: Configure
+      working-directory: build
+      run: cmake .. -DBoost_ARCHITECTURE=-x64 -DCMAKE_BUILD_TYPE=${{matrix.buildType}} -DBUILD_SHARED_LIBS=${{matrix.shared_lib}} -DCMAKE_INSTALL_PREFIX=${{runner.workspace}}/../install -G "${{matrix.generator}}" -DCMAKE_SH="CMAKE_SH-NOTFOUND"
+    - name: Build & Install
+      run: cmake --build build --config ${{matrix.buildType}} --target install
+    # Run test with both bash and powershell and watch for "Using std::cin" on bash but not on powershell
+    - name: Test
+      working-directory: build
+      shell: bash
+      run: ctest --output-on-failure -C ${{matrix.buildType}} --verbose
+    - name: Test on PowerShell
+      working-directory: build
+      shell: powershell
+      if: runner.os == 'Windows'
+      run: ctest --output-on-failure -C ${{matrix.buildType}} --verbose
+    - name: Test consumption
+      working-directory: build
+      shell: bash
+      run: |
+        rm -r *
+        cmake ../test/exampleProject -DBoost_ARCHITECTURE=-x64 -DCMAKE_PREFIX_PATH="${{runner.workspace}}/../install" -G "${{matrix.generator}}" -DCMAKE_SH="CMAKE_SH-NOTFOUND"
+        cmake --build . --config ${{matrix.buildType}}
+        ctest --output-on-failure -C ${{matrix.buildType}}
