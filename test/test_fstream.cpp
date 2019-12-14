@@ -12,14 +12,13 @@
 
 #include <boost/nowide/fstream.hpp>
 #include <boost/nowide/cstdio.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <iostream>
 #include "test.hpp"
 
 
-int main()
+int main(int, char** argv)
 {
-    std::string prefix = boost::filesystem::unique_path( "nowide-%%%%-%%%%-" ).string();
+    const std::string prefix = argv[0];
 
     std::string example_str = prefix + "\xd7\xa9-\xd0\xbc-\xce\xbd" ".txt";
     std::wstring wexample_str = boost::nowide::widen( prefix ) + L"\u05e9-\u043c-\u03bd.txt";
