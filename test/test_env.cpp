@@ -35,6 +35,18 @@ int main()
         TEST(boost::nowide::getenv("BOOST_TEST2"));
         TEST(boost::nowide::getenv("BOOST_TEST_INVALID")==0);
         TEST(boost::nowide::getenv("BOOST_TEST2")==example + "x");
+#ifdef BOOST_WINDOWS
+        // Passing a variable without an equals sign (before \0) is an error
+        // But GLIBC has an extension that unsets the env var instead
+        char penv2[256] = {0};
+        const char* sPenv2 = "BOOST_TEST1SOMEGARBAGE=";
+        strncpy(penv2, sPenv2, sizeof(penv2) - 1);
+        // End the string before the equals sign -> Expect fail
+        penv2[strlen("BOOST_TEST1")] = '\0';
+        TEST(boost::nowide::putenv(penv2)==-1);
+        TEST(boost::nowide::getenv("BOOST_TEST1"));
+        TEST(boost::nowide::getenv("BOOST_TEST1")==example);
+#endif
     }
     catch(std::exception const &e) {
         std::cerr << "Failed " << e.what() << std::endl;
