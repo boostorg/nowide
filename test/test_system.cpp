@@ -75,17 +75,17 @@ int main(int argc,char **argv,char **env)
                 break;
             default:
                 std::cout << "Invalid parameters expected '-n/-w'" << std::endl;
-                return 1;
+                BOOST_NOWIDE_TEST_RETURN_FAILURE;
             }
         }
         else {
             std::cerr << "Invalid parameters" << std::endl;
-            return 1;
+            BOOST_NOWIDE_TEST_RETURN_FAILURE;
         }
     }
     catch(std::exception const &e) {
         std::cerr << "Failed " << e.what() << std::endl;
-        return 1;
+        BOOST_NOWIDE_TEST_RETURN_FAILURE;
     }
 
     return boost::report_errors();

@@ -31,6 +31,7 @@ int report_errors()
     std::cout << "Ok" << std::endl;
     return 0;
 }
+#define BOOST_NOWIDE_TEST_RETURN_FAILURE return 1
 
 } // namespace boost
 
@@ -38,6 +39,7 @@ int report_errors()
 
 #include <boost/core/lightweight_test.hpp>
 #define TEST BOOST_TEST
+#define BOOST_NOWIDE_TEST_RETURN_FAILURE BOOST_TEST(false); return boost::report_errors()
 
 #endif
 

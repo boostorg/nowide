@@ -7,10 +7,21 @@
 //
 
 #include <boost/nowide/iostream.hpp>
+#include <boost/locale/utf.hpp>
+#include <iostream>
 #include <string>
 
 #include "test.hpp"
 
+bool isValidUTF8(const std::string& s){
+    using namespace boost::locale::utf;
+    for(std::string::const_iterator it = s.begin(); it != s.end();){
+        code_point c = utf_traits<char>::decode(it, s.end());
+        if(!is_valid_codepoint(c))
+            return false;
+    }
+    return true;
+}
 
 int main(int argc,char **argv)
 {
@@ -23,16 +34,27 @@ int main(int argc,char **argv)
 			  ;
 
     try {
-        int maxval = 15000;
-        for(int i=0;i<maxval;i++) {
-            char c = i % 96 + ' ';
-            TEST(boost::nowide::cin.putback(c));
+        // If we are using the standard rdbuf we can only put back 1 char
+        if(boost::nowide::cin.rdbuf() == std::cin.rdbuf()) {
+            std::cout << "Using std::cin" << std::endl;
+            int maxval = 15000;
+            for(int i = 0; i < maxval; i++) {
+                char c = i % 96 + ' ';
+                TEST(boost::nowide::cin.putback(c));
+                int ci = i % 96 + ' ';
+                TEST(boost::nowide::cin.get() == ci);
+            }
+        } else {
+            int maxval = 15000;
+            for(int i = 0; i < maxval; i++) {
+                char c = i % 96 + ' ';
+                TEST(boost::nowide::cin.putback(c));
+            }
+            for(int i = maxval - 1; i >= 0; i--) {
+                int c = i % 96 + ' ';
+                TEST(boost::nowide::cin.get() == c);
+            }
         }
-        for(int i=maxval-1;i>=0;i--) {
-            int c = i % 96 + ' ';
-            TEST(boost::nowide::cin.get() == c);
-        }
-        std::string v1,v2;
         boost::nowide::cout << "Normal I/O:" << std::endl;
         boost::nowide::cout << example << std::endl;
         boost::nowide::cerr << example << std::endl;
@@ -47,8 +69,11 @@ int main(int argc,char **argv)
         TEST(boost::nowide::cout);
         TEST(boost::nowide::cerr);
         if(argc==2 && argv[1]==std::string("-i")) {
-            boost::nowide::cin  >> v1 >> v2;
+            std::string v1, v2;
+            boost::nowide::cin >> v1 >> v2;
             TEST(boost::nowide::cin);
+            TEST(isValidUTF8(v1));
+            TEST(isValidUTF8(v2));
             boost::nowide::cout << "First:  "<< v1 << std::endl;
             boost::nowide::cout << "Second: "<< v2 << std::endl;
             TEST(boost::nowide::cout);
@@ -56,7 +81,7 @@ int main(int argc,char **argv)
     }
     catch(std::exception const &e) {
         std::cerr << "Fail: " << e.what() << std::endl;
-        return 1;
+        BOOST_NOWIDE_TEST_RETURN_FAILURE;
     }
 
     return boost::report_errors();
