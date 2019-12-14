@@ -21,16 +21,16 @@ namespace nowide {
 /// and allocated a buffer on the heap if the size of the buffer is too small
 ///
 /// If invalid UTF charracters are detected they are replaced with U+FFFD substutution charracter
-///    
+///
 template<typename CharOut=wchar_t,typename CharIn = char,size_t BufferSize = 256>
 class basic_stackstring {
 public:
-   
-    static const size_t buffer_size = BufferSize; 
+
+    static const size_t buffer_size = BufferSize;
     typedef CharOut output_char;
     typedef CharIn input_char;
 
-    basic_stackstring(basic_stackstring const &other) : 
+    basic_stackstring(basic_stackstring const &other) :
         mem_buffer_(0)
     {
         clear();
@@ -45,7 +45,7 @@ public:
             std::memcpy(buffer_,other.buffer_,buffer_size * sizeof(output_char));
         }
     }
-    
+
     void swap(basic_stackstring &other)
     {
         std::swap(mem_buffer_,other.mem_buffer_);
@@ -56,7 +56,7 @@ public:
     {
         if(this != &other) {
             basic_stackstring tmp(other);
-            swap(tmp);            
+            swap(tmp);
         }
         return *this;
     }
@@ -116,11 +116,11 @@ private:
     {
         if(insize <= outsize)
             return in;
-        else if(insize == 2 && outsize == 1) 
+        else if(insize == 2 && outsize == 1)
             return 3 * in;
-        else if(insize == 4 && outsize == 1) 
+        else if(insize == 4 && outsize == 1)
             return 4 * in;
-        else  // if(insize == 4 && outsize == 2) 
+        else  // if(insize == 4 && outsize == 2)
             return 2 * in;
     }
     output_char buffer_[buffer_size];

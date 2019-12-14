@@ -25,7 +25,7 @@
 #           define NOWIDE_DECL __declspec(dllimport)
 #       endif  //NOWIDE_SOURCE
 #   endif  // DYN_LINK
-#endif  
+#endif
 
 #ifndef NOWIDE_DECL
 #   define NOWIDE_DECL

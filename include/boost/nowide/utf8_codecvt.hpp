@@ -44,9 +44,6 @@ protected:
     virtual std::codecvt_base::result do_unshift(std::mbstate_t &s,char *from,char * /*to*/,char *&next) const
     {
         boost::uint16_t &state = *reinterpret_cast<boost::uint16_t *>(&s);
-#ifdef DEBUG_CODECVT
-        std::cout << "Entering unshift " << std::hex << state << std::dec << std::endl;
-#endif
         if(state != 0)
             return std::codecvt_base::error;
         next=from;
@@ -130,11 +127,6 @@ protected:
         boost::uint16_t &state = *reinterpret_cast<boost::uint16_t *>(&std_state);
         while(to < to_end && from < from_end)
         {
-#ifdef DEBUG_CODECVT
-            std::cout << "Entering IN--------------" << std::endl;
-            std::cout << "State " << std::hex << state <<std::endl;
-            std::cout << "Left in " << std::dec << from_end - from << " out " << to_end -to << std::endl;
-#endif
             char const *from_saved = from;
 
             uint32_t ch=boost::locale::utf::utf_traits<char>::decode(from,from_end);
@@ -181,25 +173,6 @@ protected:
         to_next=to;
         if(r == std::codecvt_base::ok && (from!=from_end || state!=0))
             r = std::codecvt_base::partial;
-#ifdef DEBUG_CODECVT
-        std::cout << "Returning ";
-        switch(r) {
-        case std::codecvt_base::ok:
-            std::cout << "ok" << std::endl;
-            break;
-        case std::codecvt_base::partial:
-            std::cout << "partial" << std::endl;
-            break;
-        case std::codecvt_base::error:
-            std::cout << "error" << std::endl;
-            break;
-        default:
-            std::cout << "other" << std::endl;
-            break;
-        }
-        std::cout << "State " << std::hex << state <<std::endl;
-        std::cout << "Left in " << std::dec << from_end - from << " out " << to_end -to << std::endl;
-#endif
         return r;
     }
 
@@ -223,11 +196,6 @@ protected:
         boost::uint16_t &state = *reinterpret_cast<boost::uint16_t *>(&std_state);
         while(to < to_end && from < from_end)
         {
-#ifdef DEBUG_CODECVT
-        std::cout << "Entering OUT --------------" << std::endl;
-        std::cout << "State " << std::hex << state <<std::endl;
-        std::cout << "Left in " << std::dec << from_end - from << " out " << to_end -to << std::endl;
-#endif
             boost::uint32_t ch=0;
             if(state != 0) {
                 // if the state idecates that 1st surrogate pair was written
@@ -258,7 +226,7 @@ protected:
                     continue;
                 }
                 else if(0xDC00 <= ch && ch<=0xDFFF) {
-                    // if we observe second surrogate pair and 
+                    // if we observe second surrogate pair and
                     // first only may be expected we should break from the loop with error
                     // as it is illegal input
                     ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
@@ -281,25 +249,6 @@ protected:
         to_next=to;
         if(r==std::codecvt_base::ok && from!=from_end)
             r = std::codecvt_base::partial;
-#ifdef DEBUG_CODECVT
-        std::cout << "Returning ";
-        switch(r) {
-        case std::codecvt_base::ok:
-            std::cout << "ok" << std::endl;
-            break;
-        case std::codecvt_base::partial:
-            std::cout << "partial" << std::endl;
-            break;
-        case std::codecvt_base::error:
-            std::cout << "error" << std::endl;
-            break;
-        default:
-            std::cout << "other" << std::endl;
-            break;
-        }
-        std::cout << "State " << std::hex << state <<std::endl;
-        std::cout << "Left in " << std::dec << from_end - from << " out " << to_end -to << std::endl;
-#endif
         return r;
     }
 
@@ -388,15 +337,10 @@ protected:
         // and first pair is written, but no input consumed
         while(to < to_end && from < from_end)
         {
-#ifdef DEBUG_CODECVT
-            std::cout << "Entering IN--------------" << std::endl;
-            std::cout << "State " << std::hex << state <<std::endl;
-            std::cout << "Left in " << std::dec << from_end - from << " out " << to_end -to << std::endl;
-#endif
             char const *from_saved = from;
-            
+
             uint32_t ch=boost::locale::utf::utf_traits<char>::decode(from,from_end);
-            
+
             if(ch==boost::locale::utf::illegal) {
                 ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
             }
@@ -411,25 +355,6 @@ protected:
         to_next=to;
         if(r == std::codecvt_base::ok && from!=from_end)
             r = std::codecvt_base::partial;
-#ifdef DEBUG_CODECVT
-        std::cout << "Returning ";
-        switch(r) {
-        case std::codecvt_base::ok:
-            std::cout << "ok" << std::endl;
-            break;
-        case std::codecvt_base::partial:
-            std::cout << "partial" << std::endl;
-            break;
-        case std::codecvt_base::error:
-            std::cout << "error" << std::endl;
-            break;
-        default:
-            std::cout << "other" << std::endl;
-            break;
-        }
-        std::cout << "State " << std::hex << state <<std::endl;
-        std::cout << "Left in " << std::dec << from_end - from << " out " << to_end -to << std::endl;
-#endif
         return r;
     }
 
@@ -445,11 +370,6 @@ protected:
         std::codecvt_base::result r=std::codecvt_base::ok;
         while(to < to_end && from < from_end)
         {
-#ifdef DEBUG_CODECVT
-        std::cout << "Entering OUT --------------" << std::endl;
-        std::cout << "State " << std::hex << state <<std::endl;
-        std::cout << "Left in " << std::dec << from_end - from << " out " << to_end -to << std::endl;
-#endif
             boost::uint32_t ch=0;
             ch = *from;
             if(!boost::locale::utf::is_valid_codepoint(ch)) {
@@ -467,25 +387,6 @@ protected:
         to_next=to;
         if(r==std::codecvt_base::ok && from!=from_end)
             r = std::codecvt_base::partial;
-#ifdef DEBUG_CODECVT
-        std::cout << "Returning ";
-        switch(r) {
-        case std::codecvt_base::ok:
-            std::cout << "ok" << std::endl;
-            break;
-        case std::codecvt_base::partial:
-            std::cout << "partial" << std::endl;
-            break;
-        case std::codecvt_base::error:
-            std::cout << "error" << std::endl;
-            break;
-        default:
-            std::cout << "other" << std::endl;
-            break;
-        }
-        std::cout << "State " << std::hex << state <<std::endl;
-        std::cout << "Left in " << std::dec << from_end - from << " out " << to_end -to << std::endl;
-#endif
         return r;
     }
 };

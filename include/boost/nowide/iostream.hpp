@@ -14,6 +14,8 @@
 #include <ostream>
 #include <istream>
 
+#include <boost/config/abi_prefix.hpp> // must be the last #include
+
 #ifdef BOOST_MSVC
 #  pragma warning(push)
 #  pragma warning(disable : 4251)
@@ -28,12 +30,12 @@ namespace nowide {
     using std::cin;
     using std::clog;
     #else
-    
-    /// \cond INTERNAL 
+
+    /// \cond INTERNAL
     namespace details {
         class console_output_buffer;
         class console_input_buffer;
-        
+
         class BOOST_NOWIDE_DECL winconsole_ostream : public std::ostream {
             winconsole_ostream(winconsole_ostream const &);
             void operator=(winconsole_ostream const &);
@@ -48,40 +50,39 @@ namespace nowide {
             winconsole_istream(winconsole_istream const &);
             void operator=(winconsole_istream const &);
         public:
-            
+
             winconsole_istream();
             ~winconsole_istream();
         private:
-            struct data;
             boost::scoped_ptr<console_input_buffer> d;
         };
-    } // details 
-    
+    } // details
+
     /// \endcond
 
     ///
     /// \brief Same as std::cin, but uses UTF-8
     ///
     /// Note, the stream is not synchronized with stdio and not affected by std::ios::sync_with_stdio
-    /// 
+    ///
     extern BOOST_NOWIDE_DECL details::winconsole_istream cin;
     ///
     /// \brief Same as std::cout, but uses UTF-8
     ///
     /// Note, the stream is not synchronized with stdio and not affected by std::ios::sync_with_stdio
-    /// 
+    ///
     extern BOOST_NOWIDE_DECL details::winconsole_ostream cout;
     ///
     /// \brief Same as std::cerr, but uses UTF-8
     ///
     /// Note, the stream is not synchronized with stdio and not affected by std::ios::sync_with_stdio
-    /// 
+    ///
     extern BOOST_NOWIDE_DECL details::winconsole_ostream cerr;
     ///
     /// \brief Same as std::clog, but uses UTF-8
     ///
     /// Note, the stream is not synchronized with stdio and not affected by std::ios::sync_with_stdio
-    /// 
+    ///
     extern BOOST_NOWIDE_DECL details::winconsole_ostream clog;
 
     #endif
@@ -93,6 +94,7 @@ namespace nowide {
 #  pragma warning(pop)
 #endif
 
+#include <boost/config/abi_suffix.hpp> // pops abi_prefix.hpp pragmas
 
 #endif
 ///

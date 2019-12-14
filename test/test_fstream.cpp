@@ -14,7 +14,6 @@
 #include <boost/nowide/cstdio.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <iostream>
-
 #include "test.hpp"
 
 
@@ -24,7 +23,7 @@ int main()
 
     std::string example_str = prefix + "\xd7\xa9-\xd0\xbc-\xce\xbd" ".txt";
     std::wstring wexample_str = boost::nowide::widen( prefix ) + L"\u05e9-\u043c-\u03bd.txt";
-    
+
     char const * example = example_str.c_str();
     #ifdef BOOST_WINDOWS
     wchar_t const * wexample = wexample_str.c_str();
@@ -32,7 +31,7 @@ int main()
 
     try {
         namespace nw=boost::nowide;
-        
+
         std::cout << "Testing fstream" << std::endl;
         {
             nw::ofstream fo;
@@ -70,7 +69,7 @@ int main()
                 TEST(tmp=="test");
                 fi.close();
             }
-            #if defined(BOOST_WINDOWS) || defined(BOOST_NOWIDE_FSTREAM_TESTS) 
+            #if defined(BOOST_WINDOWS) || defined(BOOST_NOWIDE_FSTREAM_TESTS)
             // C++11 interfaces aren't enabled at all platforms so need to skip
             // for std::*fstream
             {
@@ -129,16 +128,16 @@ int main()
             }
             nw::remove(example);
         }
-        
+
         for(int i=-1;i<16;i++) {
             std::cout << "Complex io with buffer = " << i << std::endl;
             char buf[16];
             nw::fstream f;
             if(i==0)
                 f.rdbuf()->pubsetbuf(0,0);
-            else if (i > 0) 
+            else if (i > 0)
                 f.rdbuf()->pubsetbuf(buf,i);
-            
+
             f.open(example,nw::fstream::in | nw::fstream::out | nw::fstream::trunc | nw::fstream::binary);
             f.put('a');
             f.put('b');
@@ -187,7 +186,7 @@ int main()
 #endif
             f.close();
             TEST(boost::nowide::remove(example)==0);
-            
+
         }
     }
     catch(std::exception const &e) {

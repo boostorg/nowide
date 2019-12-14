@@ -26,7 +26,7 @@ namespace nowide {
     using std::basic_filebuf;
     using std::filebuf;
 #else // Windows
-    
+
     ///
     /// \brief This forward declaration defined the basic_filebuf type.
     ///
@@ -35,7 +35,7 @@ namespace nowide {
     ///
     template<typename CharType,typename Traits = std::char_traits<CharType> >
     class basic_filebuf;
-    
+
     ///
     /// \brief This is implementation of std::filebuf
     ///
@@ -48,7 +48,7 @@ namespace nowide {
         ///
         /// Creates new filebuf
         ///
-        basic_filebuf() : 
+        basic_filebuf() :
             buffer_size_(4),
             buffer_(0),
             file_(0),
@@ -58,7 +58,7 @@ namespace nowide {
             setg(0,0,0);
             setp(0,0);
         }
-        
+
         virtual ~basic_filebuf()
         {
             if(file_) {
@@ -68,7 +68,7 @@ namespace nowide {
             if(own_ && buffer_)
                 delete [] buffer_;
         }
-        
+
         ///
         /// Same as std::filebuf::open but s is UTF-8 string
         ///
@@ -139,7 +139,7 @@ namespace nowide {
             }
         }
     protected:
-        
+
         virtual std::streambuf *setbuf(char *s,std::streamsize n)
         {
             if(!buffer_ && n>=0) {
@@ -149,68 +149,12 @@ namespace nowide {
             }
             return this;
         }
-        
-#ifdef BOOST_NOWIDE_DEBUG_FILEBUF
 
-        void print_buf(char *b,char *p,char *e)
-        {
-            std::cerr << "-- Is Null: " << (b==0) << std::endl;; 
-            if(b==0)
-                return;
-            if(e != 0)
-                std::cerr << "-- Total: " << e - b <<" offset from start " << p - b << std::endl;
-            else
-                std::cerr << "-- Total: " << p - b << std::endl;
-                
-            std::cerr << "-- [";
-            for(char *ptr = b;ptr<p;ptr++)
-                std::cerr << *ptr;
-            if(e!=0) {
-                std::cerr << "|";
-                for(char *ptr = p;ptr<e;ptr++)
-                    std::cerr << *ptr;
-            }
-            std::cerr << "]" << std::endl;
-           
-        }
-        
-        void print_state()
-        {
-            std::cerr << "- Output:" << std::endl;
-            print_buf(pbase(),pptr(),0);
-            std::cerr << "- Input:" << std::endl;
-            print_buf(eback(),gptr(),egptr());
-            std::cerr << "- fpos: " << (file_ ? ftell(file_) : -1L) << std::endl;
-        }
-        
-        struct print_guard
-        {
-            print_guard(basic_filebuf *p,char const *func)
-            {
-                self = p;
-                f=func;
-                std::cerr << "In: " << f << std::endl;
-                self->print_state();
-            }
-            ~print_guard()
-            {
-                std::cerr << "Out: " << f << std::endl;
-                self->print_state();
-            }
-            basic_filebuf *self;
-            char const *f;
-        };
-#else
-#endif        
-        
         int overflow(int c)
         {
-#ifdef BOOST_NOWIDE_DEBUG_FILEBUF
-            print_guard g(this,__FUNCTION__);
-#endif            
             if(!file_)
                 return EOF;
-            
+
             if(fixg() < 0)
                 return EOF;
 
@@ -234,8 +178,8 @@ namespace nowide {
             }
             return 0;
         }
-        
-        
+
+
         int sync()
         {
             return overflow(EOF);
@@ -243,9 +187,6 @@ namespace nowide {
 
         int underflow()
         {
-#ifdef BOOST_NOWIDE_DEBUG_FILEBUF
-            print_guard g(this,__FUNCTION__);
-#endif            
             if(!file_)
                 return EOF;
             if(fixp() < 0)
@@ -276,9 +217,6 @@ namespace nowide {
                             std::ios_base::seekdir seekdir,
                             std::ios_base::openmode /*m*/)
         {
-#ifdef BOOST_NOWIDE_DEBUG_FILEBUF
-            print_guard g(this,__FUNCTION__);
-#endif            
             if(!file_)
                 return EOF;
             if(fixp() < 0 || fixg() < 0)
@@ -315,7 +253,7 @@ namespace nowide {
             setg(0,0,0);
             return 0;
         }
-        
+
         int fixp()
         {
             if(pptr()!=0) {
@@ -335,8 +273,8 @@ namespace nowide {
             }
             file_ = f;
         }
-        
-        
+
+
         static wchar_t const *get_mode(std::ios_base::openmode mode)
         {
             //
@@ -381,9 +319,9 @@ namespace nowide {
                 return L"a+b";
             if(mode == (std::ios_base::binary | std::ios_base::in | std::ios_base::app))
                 return L"a+b";
-            return 0;    
+            return 0;
         }
-        
+
         size_t buffer_size_;
         char *buffer_;
         FILE *file_;
@@ -391,14 +329,14 @@ namespace nowide {
         char last_char_;
         std::ios::openmode mode_;
     };
-    
+
     ///
     /// \brief Convinience typedef
     ///
     typedef basic_filebuf<char> filebuf;
-    
+
     #endif // windows
-    
+
 } // nowide
 } // namespace boost
 

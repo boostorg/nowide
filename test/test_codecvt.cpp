@@ -209,11 +209,11 @@ void test_codecvt_err()
             TEST(to[2] == L'\uFFFD');
             TEST(to[3] == L'\u05e9');
         }
-    }    
-    
+    }
+
     std::cout << "- UTF-16/32" << std::endl;
     {
-        
+
         char buf[32];
         char *to=buf;
         char *to_end = buf+32;
@@ -230,17 +230,17 @@ void test_codecvt_err()
             TEST(to_next == to + 4);
             TEST(std::memcmp(to,"1\xEF\xBF\xBD",4)==0);
         }
-    }    
-    
+    }
+
 }
 
 std::wstring codecvt_to_wide(std::string const &s)
 {
     std::locale l(std::locale::classic(),new boost::nowide::utf8_codecvt<wchar_t>());
- 
+
     cvt_type const &cvt = std::use_facet<cvt_type>(l);
     std::vector<wchar_t> output(s.size()+1);
-    
+
     std::mbstate_t mb=std::mbstate_t();
     char const *from=s.c_str();
     char const *from_end = from + s.size();
@@ -250,7 +250,7 @@ std::wstring codecvt_to_wide(std::string const &s)
     wchar_t *to=&buf[0];
     wchar_t *to_end = to + buf.size();
     wchar_t *to_next = to;
-    
+
     TEST(cvt.in(mb,from,from_end,from_next,to,to_end,to_next)==cvt_type::ok);
 
     std::wstring res(to,to_next);
@@ -262,10 +262,10 @@ std::wstring codecvt_to_wide(std::string const &s)
 std::string codecvt_to_narrow(std::wstring const &s)
 {
     std::locale l(std::locale::classic(),new boost::nowide::utf8_codecvt<wchar_t>());
- 
+
     cvt_type const &cvt = std::use_facet<cvt_type>(l);
     std::vector<wchar_t> output(s.size()+1);
-    
+
     std::mbstate_t mb=std::mbstate_t();
     wchar_t const *from=s.c_str();
     wchar_t const *from_end = from + s.size();
@@ -275,7 +275,7 @@ std::string codecvt_to_narrow(std::wstring const &s)
     char *to=&buf[0];
     char *to_end = to + buf.size();
     char *to_next = to;
-    
+
     TEST(cvt.out(mb,from,from_end,from_next,to,to_end,to_next)==cvt_type::ok);
 
     std::string res(to,to_next);
@@ -291,12 +291,12 @@ void test_codecvt_subst()
 }
 
 int main()
-{   
+{
     try {
         test_codecvt_conv();
         test_codecvt_err();
         test_codecvt_subst();
-        
+
     }
     catch(std::exception const &e) {
         std::cerr << "Failed : " << e.what() << std::endl;

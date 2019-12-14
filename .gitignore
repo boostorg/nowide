@@ -1,0 +1,6 @@
+/build/*
+/nowide_standalone
+/.vscode
+/.vs
+# Don't ignore Jamfiles, also in subfolders
+!Jamfile.*

@@ -215,7 +215,7 @@ Custom API</h2>
 <h2><a class="anchor" id="using_windows_h"></a>
 The windows.h header</h2>
 <p>The library does not include the <code>windows.h</code> in order to prevent namespace pollution with numerous defines and types. Instead, the library defines the prototypes of the Win32 API functions.</p>
-<p>However, you may request to use the <code>windows.h</code> header by defining <code>BOOST_NOWIDE_USE_WINDOWS_H</code> before including any of the Boost.Nowide headers</p>
+<p>However, you may request to use the <code>windows.h</code> header by defining <code>BOOST_USE_WINDOWS_H</code> before including any of the Boost.Nowide headers</p>
 <h2><a class="anchor" id="using_integration"></a>
 Integration with Boost.Filesystem</h2>
 <p>Boost.Filesystem supports selection of narrow encoding. Unfortunatelly the default narrow encoding on Windows isn't UTF-8, you can enable UTF-8 as default encoding on Boost.Filesystem by calling <code><a class="el" href="namespaceboost_1_1nowide.html#a7f94a60d0a9e5534a6dcc41bbc826ee8">boost::nowide::nowide_filesystem()</a></code> in the beginning of your program</p>

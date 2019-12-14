@@ -44,7 +44,7 @@ int main(int argc,char **argv,char **env)
         }
         else if(argc==2 && argv[1][0]=='-') {
             switch(argv[1][1]) {
-            case 'w': 
+            case 'w':
                 {
                     #ifdef BOOST_WINDOWS
                     std::wstring env = L"BOOST_NOWIDE_TEST=" + wexample;
