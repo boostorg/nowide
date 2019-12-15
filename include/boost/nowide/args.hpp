@@ -92,7 +92,7 @@ namespace nowide {
             int argc;
             wargv_ptr(const wargv_ptr &); // Non-copyable
         public:
-            explicit wargv_ptr(const wchar_t *cmd_line) : p(CommandLineToArgvW(GetCommandLineW(), &argc)) {}
+            wargv_ptr() : p(CommandLineToArgvW(GetCommandLineW(), &argc)) {}
             ~wargv_ptr() { if(p) LocalFree(p); }
             int size() const { return argc; }
             operator bool() const { return p != NULL; }
@@ -110,7 +110,7 @@ namespace nowide {
 
         void fix_args(int &argc,char **&argv)
         {
-            const wargv_ptr wargv(GetCommandLineW());
+            const wargv_ptr wargv;
             if(!wargv)
                 throw std::runtime_error("Could not get command line!");
             args_.resize(wargv.size()+1,0);
