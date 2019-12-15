@@ -21,15 +21,53 @@ jobs:
     - env: BOGUS_JOB=true
 
   include:
-    - compiler: g++
-      env: CXXSTD=03,11
-
-    - compiler: g++-4.4
+    - stage: essential
+      compiler: g++-4.4
       env: CXXSTD=98,0x
       addons:
         apt:
           packages: [g++-4.4]
           sources: [ubuntu-toolchain-r-test]
+
+    - compiler: g++-9
+      env: UBSAN=1 CXXSTD=03,11,14,17,2a UBSAN_OPTIONS=print_stacktrace=1 LINKFLAGS=-fuse-ld=gold
+      addons:
+        apt:
+          packages: [g++-9]
+          sources: [ubuntu-toolchain-r-test]
+
+    - dist: trusty
+      compiler: /usr/bin/clang++
+      env: CXXSTD=03,11
+      addons:
+        apt:
+          packages: [clang-3.3]
+
+    - compiler: clang++-9
+      env: UBSAN=1 CXXSTD=03,11,14,17,2a UBSAN_OPTIONS=print_stacktrace=1 VISIBILITY=global
+      addons:
+        apt:
+          packages: [clang-9]
+          sources:
+            - ubuntu-toolchain-r-test
+            - sourceline: 'deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+
+    - dist: trusty
+      compiler: clang++-libc++
+      env: UBSAN=1 CXXSTD=03,11,14 UBSAN_OPTIONS=print_stacktrace=1
+      addons:
+        apt:
+          packages: [libc++-dev]
+
+    - os: osx
+      compiler: clang++
+      env: UBSAN=1 CXXSTD=03,11,14,1z UBSAN_OPTIONS=print_stacktrace=1
+
+    # Additional compiler versions tested for completenes
+    - stage: additional
+      compiler: g++
+      env: CXXSTD=03,11
 
     - compiler: g++-4.6
       env: CXXSTD=03,0x
@@ -94,22 +132,8 @@ jobs:
           packages: [g++-9]
           sources: [ubuntu-toolchain-r-test]
 
-    - compiler: g++-9
-      env: UBSAN=1 CXXSTD=03,11,14,17,2a UBSAN_OPTIONS=print_stacktrace=1 LINKFLAGS=-fuse-ld=gold
-      addons:
-        apt:
-          packages: [g++-9]
-          sources: [ubuntu-toolchain-r-test]
-
     - compiler: clang++
       env: CXXSTD=03,11
-
-    - dist: trusty
-      compiler: /usr/bin/clang++
-      env: CXXSTD=03,11
-      addons:
-        apt:
-          packages: [clang-3.3]
 
     - dist: trusty
       compiler: /usr/bin/clang++
@@ -202,24 +226,8 @@ jobs:
             - sourceline: 'deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main'
               key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
 
-    - compiler: clang++-8
-      env: UBSAN=1 CXXSTD=03,11,14,17,2a UBSAN_OPTIONS=print_stacktrace=1 VISIBILITY=global
-      addons:
-        apt:
-          packages: [clang-8]
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-xenial-8
-
     - compiler: clang++-libc++
       env: CXXSTD=03,11,14
-      addons:
-        apt:
-          packages: [libc++-dev]
-
-    - dist: trusty
-      compiler: clang++-libc++
-      env: UBSAN=1 CXXSTD=03,11,14 UBSAN_OPTIONS=print_stacktrace=1
       addons:
         apt:
           packages: [libc++-dev]
@@ -228,9 +236,10 @@ jobs:
       compiler: clang++
       env: CXXSTD=03,11,14,1z
 
-    - os: osx
-      compiler: clang++
-      env: UBSAN=1 CXXSTD=03,11,14,1z UBSAN_OPTIONS=print_stacktrace=1
+stages:
+  - essential
+  - name: additional
+    if: type != "pull_request"
 
 install:
   - BOOST_BRANCH=develop && [ "$TRAVIS_BRANCH" == "master" ] && BOOST_BRANCH=master || true
