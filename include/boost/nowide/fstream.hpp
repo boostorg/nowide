@@ -10,6 +10,7 @@
 
 #include <iosfwd>
 #include <boost/config.hpp>
+#include <boost/config/workaround.hpp>
 #include <boost/nowide/convert.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <fstream>
@@ -182,10 +183,13 @@ namespace nowide {
         boost::scoped_ptr<internal_buffer_type> buf_;
     };
 
+#if BOOST_WORKAROUND(BOOST_MSVC, == 1700)
+#  pragma warning(push)
+#  pragma warning(disable : 4250) // <class> : inherits <method> via dominance
+#endif
     ///
     /// \brief Same as std::basic_fstream<char> but accepts UTF-8 strings under Windows
     ///
-
     template<typename CharType,typename Traits = std::char_traits<CharType> >
     class basic_fstream : public std::basic_iostream<CharType,Traits>
     {
@@ -254,7 +258,9 @@ namespace nowide {
     private:
         boost::scoped_ptr<internal_buffer_type> buf_;
     };
-
+#if BOOST_WORKAROUND(BOOST_MSVC, == 1700)
+#  pragma warning(pop)
+#endif
 
     ///
     /// \brief Same as std::filebuf but accepts UTF-8 strings under Windows

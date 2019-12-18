@@ -8,7 +8,6 @@
 
 #include <boost/nowide/utf8_codecvt.hpp>
 #include <boost/nowide/convert.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <locale>
 #include <vector>
 #include <iostream>
@@ -17,21 +16,9 @@
 #include "test.hpp"
 #include "test_sets.hpp"
 
-namespace detail
-{
-
 static char const * utf8_name = "\xf0\x9d\x92\x9e-\xD0\xBF\xD1\x80\xD0\xB8\xD0\xB2\xD0\xB5\xD1\x82-\xE3\x82\x84\xE3\x81\x82.txt";
-static wchar_t const * wide_name = L"\U0001D49E-\u043F\u0440\u0438\u0432\u0435\u0442-\u3084\u3042.txt";
-
-static std::string prefix = boost::filesystem::unique_path( "nowide-%%%%-%%%%-" ).string();
-
-static std::string utf8_name_str = prefix + utf8_name;
-static std::wstring wide_name_str = boost::nowide::widen( prefix ) + wide_name;
-
-} // detail
-
-static char const * utf8_name = detail::utf8_name_str.c_str();
-static wchar_t const * wide_name = detail::wide_name_str.c_str();
+static const std::wstring wide_name_str = boost::nowide::widen(utf8_name);
+static wchar_t const * wide_name = wide_name_str.c_str();
 
 char const *res(std::codecvt_base::result r)
 {
@@ -50,8 +37,8 @@ typedef std::codecvt<wchar_t,char,std::mbstate_t> cvt_type;
 void test_codecvt_in_n_m(cvt_type const &cvt,int n,int m)
 {
     wchar_t const *wptr = wide_name;
-    int wlen = std::wcslen(wide_name);
-    int u8len = std::strlen(utf8_name);
+    size_t wlen = std::wcslen(wide_name);
+    size_t u8len = std::strlen(utf8_name);
     char const *from = utf8_name;
     char const *end = from;
     char const *real_end = utf8_name + u8len;
@@ -109,8 +96,8 @@ void test_codecvt_in_n_m(cvt_type const &cvt,int n,int m)
 void test_codecvt_out_n_m(cvt_type const &cvt,int n,int m)
 {
     char const *nptr = utf8_name;
-    int wlen = std::wcslen(wide_name);
-    int u8len = std::strlen(utf8_name);
+    size_t wlen = std::wcslen(wide_name);
+    size_t u8len = std::strlen(utf8_name);
 
     std::mbstate_t mb=std::mbstate_t();
 
@@ -191,9 +178,9 @@ void test_codecvt_err()
     {
 
         wchar_t buf[4];
-        wchar_t *to=buf;
-        wchar_t *to_end = buf+4;
-        wchar_t *to_next = to;
+        wchar_t * const to=buf;
+        wchar_t * const to_end = buf+4;
+        wchar_t * to_next = to;
         char const *err_utf="1\xFF\xFF\xd7\xa9";
         {
             std::mbstate_t mb=std::mbstate_t();
@@ -204,10 +191,7 @@ void test_codecvt_err()
             TEST(cvt.in(mb,from,from_end,from_next,to,to_end,to_next)==cvt_type::ok);
             TEST(from_next == from+5);
             TEST(to_next == to + 4);
-            TEST(to[0] == L'1');
-            TEST(to[1] == L'\uFFFD');
-            TEST(to[2] == L'\uFFFD');
-            TEST(to[3] == L'\u05e9');
+            TEST(std::wstring(to, to_end) == boost::nowide::widen(err_utf));
         }
     }
 
@@ -218,7 +202,7 @@ void test_codecvt_err()
         char *to=buf;
         char *to_end = buf+32;
         char *to_next = to;
-        wchar_t err_buf[3] = { '1' , 0xDC9E }; // second surrogate not works both for UTF-16 and 32
+        wchar_t err_buf[3] = { '1' , 0xDC9E, 0 }; // second surrogate not works both for UTF-16 and 32
         wchar_t const *err_utf = err_buf;
         {
             std::mbstate_t mb=std::mbstate_t();

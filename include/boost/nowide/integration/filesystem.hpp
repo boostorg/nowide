@@ -8,6 +8,9 @@
 #ifndef BOOST_NOWIDE_INTEGRATION_FILESYSTEM_HPP_INCLUDED
 #define BOOST_NOWIDE_INTEGRATION_FILESYSTEM_HPP_INCLUDED
 
+# if (defined(__GNUC__) && __GNUC__ < 5)
+#  pragma GCC diagnostic ignored "-Wunused-parameter"
+# endif
 #include <boost/filesystem/path.hpp>
 #include <boost/nowide/utf8_codecvt.hpp>
 namespace boost {

@@ -11,22 +11,19 @@
 #endif
 
 #include <boost/nowide/cstdio.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <iostream>
 #include <cstring>
 
 #include "test.hpp"
 
-int main()
+int main(int, char** argv)
 {
+    const std::string prefix = argv[0];
+    const std::string example = prefix + "\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
+
     try {
-        std::string prefix = boost::filesystem::unique_path( "nowide-%%%%-%%%%-" ).string();
-
-        std::string example = prefix + "\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
-        std::wstring wexample = boost::nowide::widen( prefix ) + L"\u05e9-\u043c-\u03bd.txt";
-
         #ifdef BOOST_WINDOWS
-        FILE *f=_wfopen(wexample.c_str(),L"w");
+        FILE *f=_wfopen(boost::nowide::widen(example).c_str(),L"w");
         #else
         FILE *f=std::fopen(example.c_str(),"w");
         #endif

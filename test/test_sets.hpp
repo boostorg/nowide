@@ -7,8 +7,9 @@
 //
 #ifndef BOOST_NOWIDE_TEST_SETS_HPP_INCLUDED
 #define BOOST_NOWIDE_TEST_SETS_HPP_INCLUDED
-#include <iostream>
 
+#include <boost/config/workaround.hpp>
+#include <iostream>
 
 struct utf8_to_wide {
     char const *utf8;
@@ -20,7 +21,10 @@ struct wide_to_utf8 {
     char const *utf8;
 };
 
-
+#if BOOST_WORKAROUND(BOOST_MSVC, < 1700)
+#  pragma warning(push)
+#  pragma warning(disable: 4428) // universal-character-name encountered in source
+#endif
 
 utf8_to_wide n2w_tests[] = {
     {
@@ -116,7 +120,14 @@ wide_to_utf8 w2n_tests_utf32[] = {
     }
 };
 
+#if BOOST_WORKAROUND(BOOST_MSVC, < 1700)
+#  pragma warning(pop)
+#endif
 
+#ifdef BOOST_MSVC
+#  pragma warning(push)
+#  pragma warning(disable : 4127) // Constant expression detected
+#endif
 
 void run_all(std::wstring (*to_wide)(std::string const &),std::string (*to_narrow)(std::wstring const &))
 {
@@ -142,6 +153,10 @@ void run_all(std::wstring (*to_wide)(std::string const &),std::string (*to_narro
 }
 
 
+#endif
+
+#ifdef BOOST_MSVC
+#  pragma warning(pop)
 #endif
 
 ///

@@ -19,43 +19,26 @@
 
 #include "test.hpp"
 
-namespace detail
-{
-
-static char const * utf8_name = "\xf0\x9d\x92\x9e-\xD0\xBF\xD1\x80\xD0\xB8\xD0\xB2\xD0\xB5\xD1\x82-\xE3\x82\x84\xE3\x81\x82.txt";
-static wchar_t const * wide_name = L"\U0001D49E-\u043F\u0440\u0438\u0432\u0435\u0442-\u3084\u3042.txt";
-
-static std::string prefix = boost::filesystem::unique_path( "nowide-%%%%-%%%%-" ).string();
-
-static std::string utf8_name_str = prefix + utf8_name;
-static std::wstring wide_name_str = boost::nowide::widen( prefix ) + wide_name;
-
-} // detail
-
-static char const * utf8_name = detail::utf8_name_str.c_str();
-static wchar_t const * wide_name = detail::wide_name_str.c_str();
-
 int main()
 {
     try {
-
         boost::nowide::nowide_filesystem();
+        const std::string prefix = boost::filesystem::unique_path( "nowide-%%%%-%%%%-" ).string();
+        const std::string utf8_name = prefix + 
+            "\xf0\x9d\x92\x9e-\xD0\xBF\xD1\x80\xD0\xB8\xD0\xB2\xD0\xB5\xD1\x82-\xE3\x82\x84\xE3\x81\x82.txt";
 
-        TEST(boost::nowide::widen(utf8_name) == wide_name);
-        TEST(boost::nowide::narrow(wide_name) == utf8_name);
-
-        boost::nowide::ofstream f(utf8_name);
+        boost::nowide::ofstream f(utf8_name.c_str());
         TEST(f);
         f << "Test" << std::endl;
         f.close();
 
-        TEST(boost::filesystem::is_regular_file(wide_name)==true);
-        TEST(boost::filesystem::is_regular_file(utf8_name)==true);
+        TEST(boost::filesystem::is_regular_file(boost::nowide::widen(utf8_name)));
+        TEST(boost::filesystem::is_regular_file(utf8_name));
 
-        boost::nowide::remove(utf8_name);
+        boost::nowide::remove(utf8_name.c_str());
 
-        TEST(boost::filesystem::is_regular_file(utf8_name)==false);
-        TEST(boost::filesystem::is_regular_file(wide_name)==false);
+        TEST(!boost::filesystem::is_regular_file(boost::nowide::widen(utf8_name)));
+        TEST(!boost::filesystem::is_regular_file(utf8_name));
     }
     catch(std::exception const &e) {
         std::cerr << "Failed : " << e.what() << std::endl;

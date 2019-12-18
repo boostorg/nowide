@@ -9,7 +9,14 @@
 #define BOOST_NOWIDE_CONVERT_H_INCLUDED
 
 #include <string>
+# if (__GNUC__ >= 7)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+# endif
 #include <boost/locale/encoding_utf.hpp>
+# if (__GNUC__ >= 7)
+#  pragma GCC diagnostic pop
+# endif
 #include <boost/nowide/replacement.hpp>
 
 namespace boost {

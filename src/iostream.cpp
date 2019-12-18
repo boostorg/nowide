@@ -70,7 +70,7 @@ namespace details {
             setp(buffer_, buffer_ + buffer_size);
             pbump(n-r);
             if(c!=traits_type::eof())
-                sputc(c);
+                sputc(traits_type::to_char_type(c));
             return 0;
         }
     private:
@@ -119,7 +119,7 @@ namespace details {
 
             if(gptr()!=eback()) {
                 gbump(-1);
-                *gptr() = c;
+                *gptr() = traits_type::to_char_type(c);
                 return 0;
             }
 
@@ -128,7 +128,7 @@ namespace details {
                 char *b = &pback_buffer_[0];
                 char *e = b + pback_buffer_.size();
                 setg(b,e-1,e);
-                *gptr() = c;
+                *gptr() = traits_type::to_char_type(c);
             }
             else {
                 size_t n = pback_buffer_.size();
@@ -139,7 +139,7 @@ namespace details {
                 char *b = &pback_buffer_[0];
                 char *e = b + n * 2;
                 char *p = b+n-1;
-                *p = c;
+                *p = traits_type::to_char_type(c);
                 setg(b,p,e);
             }
 
@@ -174,7 +174,7 @@ namespace details {
             wchar_t *b = wbuffer_;
             wchar_t *e = b + wsize_;
             wchar_t *p = b;
-            uf::code_point c;
+            uf::code_point c = 0;
             wsize_ = e-p;
             while(p < e && (c = uf::utf_traits<wchar_t>::decode(p,e))!=uf::illegal && c!=uf::incomplete) {
                 out = uf::utf_traits<char>::encode(c,out);
