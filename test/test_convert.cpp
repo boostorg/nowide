@@ -8,7 +8,7 @@
 
 #include <boost/nowide/convert.hpp>
 #include <boost/nowide/stackstring.hpp>
-#include <boost/config/workaround.hpp>
+#include <boost/detail/workaround.hpp>
 #include "test.hpp"
 #include "test_sets.hpp"
 #include <iostream>
