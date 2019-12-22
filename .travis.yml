@@ -58,7 +58,7 @@ jobs:
       env: UBSAN=1 CXXSTD=03,11,14 UBSAN_OPTIONS=print_stacktrace=1
       addons:
         apt:
-          packages: [libc++-dev]
+          packages: [libc++-dev, libc++-helpers]
 
     - os: osx
       compiler: clang++
@@ -230,7 +230,7 @@ jobs:
       env: CXXSTD=03,11,14
       addons:
         apt:
-          packages: [libc++-dev]
+          packages: [libc++-dev, libc++-helpers]
 
     - os: osx
       compiler: clang++
