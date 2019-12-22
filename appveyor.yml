@@ -34,6 +34,7 @@ environment:
       TOOLSET: msvc-14.2
       CXXSTD: 14,17
       ADDRMD: 32,64
+      BOOST_CMAKE: 1
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       ADDPATH: C:\cygwin\bin;
       TOOLSET: gcc
@@ -81,6 +82,26 @@ test_script:
   - if not "%CXXSTD%" == "" set CXXSTD=cxxstd=%CXXSTD%
   - if not "%ADDRMD%" == "" set ADDRMD=address-model=%ADDRMD%
   - b2 -j3 libs/nowide/test toolset=%TOOLSET% %CXXSTD% %ADDRMD% variant=debug,release
+  - ps: |
+        If ("$env:BOOST_CMAKE" -eq "1") {
+          ./b2 --clean
+
+          mkdir __build_static | cd
+          cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide ..
+          cmake --build . --config Debug
+          ctest --output-on-failure --build-config Debug
+          cmake --build . --config Release
+          ctest --output-on-failure --build-config Release
+
+          cd ..
+
+          mkdir __build_shared | cd
+          cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBUILD_SHARED_LIBS=ON -DBOOST_INCLUDE_LIBRARIES=nowide ..
+          cmake --build . --config Debug
+          ctest --output-on-failure --build-config Debug
+          cmake --build . --config Release
+          ctest --output-on-failure --build-config Release
+        }
 
 for:
   - matrix:
