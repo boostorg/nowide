@@ -7,21 +7,14 @@
 //
 
 #include <boost/nowide/iostream.hpp>
-# if (__GNUC__ >= 7)
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-# endif
-#include <boost/locale/utf.hpp>
-# if (__GNUC__ >= 7)
-#  pragma GCC diagnostic pop
-# endif
+#include <boost/nowide/detail/utf.hpp>
 #include <iostream>
 #include <string>
 
 #include "test.hpp"
 
 bool isValidUTF8(const std::string& s){
-    using namespace boost::locale::utf;
+    using namespace boost::nowide::detail::utf;
     for(std::string::const_iterator it = s.begin(); it != s.end();){
         code_point c = utf_traits<char>::decode(it, s.end());
         if(!is_valid_codepoint(c))

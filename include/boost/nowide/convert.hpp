@@ -10,14 +10,7 @@
 
 #include <iterator>
 #include <string>
-# if (__GNUC__ >= 7)
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-# endif
-#include <boost/locale/utf.hpp>
-# if (__GNUC__ >= 7)
-#  pragma GCC diagnostic pop
-# endif
+#include <boost/nowide/detail/utf.hpp>
 #include <boost/nowide/replacement.hpp>
 
 namespace boost {
@@ -39,7 +32,7 @@ namespace nowide {
             return 0;
         buffer_size --;
         while(source_begin!=source_end) {
-            using namespace boost::locale::utf;
+            using namespace detail::utf;
             code_point c = utf_traits<CharIn>::template decode<CharIn const *>(source_begin,source_end);
             if(c==illegal || c==incomplete) {
                 c = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
@@ -70,7 +63,7 @@ namespace nowide {
         result.reserve(end-begin);
         typedef std::back_insert_iterator<std::basic_string<CharOut> > inserter_type;
         inserter_type inserter(result);
-        using namespace boost::locale::utf;
+        using namespace detail::utf;
         code_point c;
         while(begin!=end) {
             c=utf_traits<CharIn>::template decode<CharIn const *>(begin,end);
@@ -171,16 +164,12 @@ namespace nowide {
     ///
     /// Convert between Wide - UTF-16/32 string and UTF-8 string.
     ///
-    /// boost::locale::conv::conversion_error is thrown in a case of a error
-    ///
     inline std::string narrow(wchar_t const *s)
     {
         return basic_convert<char>(s);
     }
     ///
     /// Convert between UTF-8 and UTF-16 string
-    ///
-    /// boost::locale::conv::conversion_error is thrown in a case of a error
     ///
     inline std::wstring widen(char const *s)
     {
@@ -189,16 +178,12 @@ namespace nowide {
     ///
     /// Convert between Wide - UTF-16/32 string and UTF-8 string
     ///
-    /// boost::locale::conv::conversion_error is thrown in a case of a error
-    ///
     inline std::string narrow(std::wstring const &s)
     {
         return basic_convert<char>(s);
     }
     ///
     /// Convert between UTF-8 and UTF-16 string
-    ///
-    /// boost::locale::conv::conversion_error is thrown in a case of a error
     ///
     inline std::wstring widen(std::string const &s)
     {
