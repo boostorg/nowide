@@ -49,12 +49,14 @@ function(boost_add_library name)
   endif()
 
   set_target_properties(${targetName} PROPERTIES
-    DEFINE_SYMBOL ${targetNameUpper}_DYN_LINK
     POSITION_INDEPENDENT_CODE ON
     EXPORT_NAME ${name}
     OUTPUT_NAME ${libname}
     VERSION ${PROJECT_VERSION}
   )
+  if(BUILD_SHARED_LIBS)
+    target_compile_definitions(${targetName} ${scope} ${targetNameUpper}_DYN_LINK)
+  endif()
   add_library(Boost::${name} ALIAS ${targetName})
   target_compile_definitions(${targetName} ${scope} ${targetNameUpper}_NO_LIB)
   target_include_directories(${targetName} ${system} ${scope}
