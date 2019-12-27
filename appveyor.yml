@@ -12,6 +12,9 @@ branches:
     - develop
     - /feature\/.*/
 
+matrix:
+  fast_finish: true
+
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
@@ -31,6 +34,7 @@ environment:
       TOOLSET: msvc-14.2
       CXXSTD: 14,17
       ADDRMD: 32,64
+      BOOST_CMAKE: 1
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       ADDPATH: C:\cygwin\bin;
       TOOLSET: gcc
@@ -47,6 +51,17 @@ environment:
       ADDPATH: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\bin;
       TOOLSET: gcc
       CXXSTD: 03-gnu,11-gnu,14-gnu,1z-gnu
+    # CMake builds
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      GENERATOR: Visual Studio 14 2015 Win64
+      configuration: Debug
+      BOOST_ROOT: C:\Libraries\boost_1_60_0
+      CMAKE: true
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      GENERATOR: Visual Studio 16 2019
+      configuration: Debug
+      BOOST_ROOT: C:\Libraries\boost_1_71_0
+      CMAKE: true
 
 install:
   - set BOOST_BRANCH=develop
@@ -67,3 +82,49 @@ test_script:
   - if not "%CXXSTD%" == "" set CXXSTD=cxxstd=%CXXSTD%
   - if not "%ADDRMD%" == "" set ADDRMD=address-model=%ADDRMD%
   - b2 -j3 libs/nowide/test toolset=%TOOLSET% %CXXSTD% %ADDRMD% variant=debug,release
+  - ps: |
+        If ("$env:BOOST_CMAKE" -eq "1") {
+          ./b2 --clean
+
+          mkdir __build_static | cd
+          cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide -DBOOST_NOWIDE_INSTALL=OFF ..
+          cmake --build . --config Debug
+          ctest --output-on-failure --build-config Debug
+          cmake --build . --config Release
+          ctest --output-on-failure --build-config Release
+
+          cd ..
+
+          mkdir __build_shared | cd
+          cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBUILD_SHARED_LIBS=ON -DBOOST_INCLUDE_LIBRARIES=nowide -DBOOST_NOWIDE_INSTALL=OFF ..
+          cmake --build . --config Debug
+          ctest --output-on-failure --build-config Debug
+          cmake --build . --config Release
+          ctest --output-on-failure --build-config Release
+        }
+
+for:
+  - matrix:
+      only:
+        - CMAKE: true
+    install: true
+    before_build:
+      - if exist build\ (rmdir /S /Q build)
+      - set "INSTALL_DIR=%APPVEYOR_BUILD_FOLDER%\installed"
+      - if exist %INSTALL_DIR%\ (rmdir /S /Q %INSTALL_DIR%)
+      - mkdir build
+      - cd build
+      - cmake -G "%GENERATOR%" -DBOOST_NOWIDE_LAYOUT=versioned -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR% ..
+
+    build:
+      project: build/boost_nowide.sln
+      parallel: true
+
+    test_script:
+      - ctest --output-on-failure -C %configuration% --parallel 4
+      # Build consumer example test
+      - cmake --build . --config %configuration% --target install
+      - del /F /S /Q *
+      - cmake ../test/exampleProject -G "%GENERATOR%" -DCMAKE_PREFIX_PATH=%APPVEYOR_BUILD_FOLDER%\installed
+      - cmake --build . --config %configuration%
+      - ctest --output-on-failure -C %configuration% --parallel 4

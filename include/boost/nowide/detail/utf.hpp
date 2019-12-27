@@ -5,42 +5,25 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef NOWIDE_UTF_HPP_INCLUDED
-#define NOWIDE_UTF_HPP_INCLUDED
+#ifndef BOOST_NOWIDE_UTF_HPP_INCLUDED
+#define BOOST_NOWIDE_UTF_HPP_INCLUDED
 
-#include <nowide/config.hpp>
+#include <boost/cstdint.hpp>
+#include <boost/config.hpp>
 
-#ifndef NOWIDE_MSVC
-namespace nowide  {
-namespace utf {
-    typedef unsigned uint32_t;
-    typedef unsigned short uint16_t;
-    typedef unsigned char uint8_t;
-}
-}
-#else
-#include <cstdint>
-#endif
-
+namespace boost {
 namespace nowide {
+namespace detail {
 ///
 /// \brief Namespace that holds basic operations on UTF encoded sequences
 ///
-/// All functions defined in this namespace do not require linking with Boost.Locale library
+/// All functions defined in this namespace do not require linking with Boost.Nowide library
+/// Extracted from Boost.Locale
 ///
 namespace utf {
-    /// \cond INTERNAL
-    #ifdef __GNUC__
-    #   define NOWIDE_LIKELY(x)   __builtin_expect((x),1)
-    #   define NOWIDE_UNLIKELY(x) __builtin_expect((x),0)
-    #else
-    #   define NOWIDE_LIKELY(x)   (x)
-    #   define NOWIDE_UNLIKELY(x) (x)
-    #endif
-    /// \endcond
 
     ///
-    /// \brief The integral type type that can hold a Unicode code point
+    /// \brief The integral type that can hold a Unicode code point
     ///
     typedef uint32_t code_point;
 
@@ -66,7 +49,7 @@ namespace utf {
         return true;
     }
 
-    #ifdef NOWIDE_DOXYGEN
+    #ifdef BOOST_NOWIDE_DOXYGEN
     ///
     /// \brief UTF Traits class - functions to convert UTF sequences to and from Unicode code points
     ///
@@ -160,13 +143,13 @@ namespace utf {
             unsigned char c = ci;
             if(c < 128)
                 return 0;
-            if(NOWIDE_UNLIKELY(c < 194))
+            if(BOOST_UNLIKELY(c < 194))
                 return -1;
             if(c < 224)
                 return 1;
             if(c < 240)
                 return 2;
-            if(NOWIDE_LIKELY(c <=244))
+            if(BOOST_LIKELY(c <=244))
                 return 3;
             return -1;
         }
@@ -181,7 +164,7 @@ namespace utf {
             else if(value <=0x7FF) {
                 return 2;
             }
-            else if(NOWIDE_LIKELY(value <=0xFFFF)) {
+            else if(BOOST_LIKELY(value <=0xFFFF)) {
                 return 3;
             }
             else {
@@ -203,7 +186,7 @@ namespace utf {
         template<typename Iterator>
         static code_point decode(Iterator &p,Iterator e)
         {
-            if(NOWIDE_UNLIKELY(p==e))
+            if(BOOST_UNLIKELY(p==e))
                 return incomplete;
 
             unsigned char lead = *p++;
@@ -211,7 +194,7 @@ namespace utf {
             // First byte is fully validated here
             int trail_size = trail_length(lead);
 
-            if(NOWIDE_UNLIKELY(trail_size < 0))
+            if(BOOST_UNLIKELY(trail_size < 0))
                 return illegal;
 
             //
@@ -227,21 +210,23 @@ namespace utf {
             unsigned char tmp;
             switch(trail_size) {
             case 3:
-                if(NOWIDE_UNLIKELY(p==e))
+                if(BOOST_UNLIKELY(p==e))
                     return incomplete;
                 tmp = *p++;
                 if (!is_trail(tmp))
                     return illegal;
                 c = (c << 6) | ( tmp & 0x3F);
+                BOOST_FALLTHROUGH;
             case 2:
-                if(NOWIDE_UNLIKELY(p==e))
+                if(BOOST_UNLIKELY(p==e))
                     return incomplete;
                 tmp = *p++;
                 if (!is_trail(tmp))
                     return illegal;
                 c = (c << 6) | ( tmp & 0x3F);
+                BOOST_FALLTHROUGH;
             case 1:
-                if(NOWIDE_UNLIKELY(p==e))
+                if(BOOST_UNLIKELY(p==e))
                     return incomplete;
                 tmp = *p++;
                 if (!is_trail(tmp))
@@ -251,11 +236,11 @@ namespace utf {
 
             // Check code point validity: no surrogates and
             // valid range
-            if(NOWIDE_UNLIKELY(!is_valid_codepoint(c)))
+            if(BOOST_UNLIKELY(!is_valid_codepoint(c)))
                 return illegal;
 
             // make sure it is the most compact representation
-            if(NOWIDE_UNLIKELY(width(c)!=trail_size + 1))
+            if(BOOST_UNLIKELY(width(c)!=trail_size + 1))
                 return illegal;
 
             return c;
@@ -273,7 +258,7 @@ namespace utf {
 
             if(lead < 224)
                 trail_size = 1;
-            else if(NOWIDE_LIKELY(lead < 240)) // non-BMP rare
+            else if(BOOST_LIKELY(lead < 240)) // non-BMP rare
                 trail_size = 2;
             else
                 trail_size = 3;
@@ -283,8 +268,10 @@ namespace utf {
             switch(trail_size) {
             case 3:
                 c = (c << 6) | ( static_cast<unsigned char>(*p++) & 0x3F);
+                BOOST_FALLTHROUGH;
             case 2:
                 c = (c << 6) | ( static_cast<unsigned char>(*p++) & 0x3F);
+                BOOST_FALLTHROUGH;
             case 1:
                 c = (c << 6) | ( static_cast<unsigned char>(*p++) & 0x3F);
             }
@@ -304,7 +291,7 @@ namespace utf {
                 *out++ = static_cast<char_type>((value >> 6) | 0xC0);
                 *out++ = static_cast<char_type>((value & 0x3F) | 0x80);
             }
-            else if(NOWIDE_LIKELY(value <= 0xFFFF)) {
+            else if(BOOST_LIKELY(value <= 0xFFFF)) {
                 *out++ = static_cast<char_type>((value >> 12) | 0xE0);
                 *out++ = static_cast<char_type>(((value >> 6) & 0x3F) | 0x80);
                 *out++ = static_cast<char_type>((value & 0x3F) | 0x80);
@@ -362,10 +349,10 @@ namespace utf {
         template<typename It>
         static code_point decode(It &current,It last)
         {
-            if(NOWIDE_UNLIKELY(current == last))
+            if(BOOST_UNLIKELY(current == last))
                 return incomplete;
             uint16_t w1=*current++;
-            if(NOWIDE_LIKELY(w1 < 0xD800 || 0xDFFF < w1)) {
+            if(BOOST_LIKELY(w1 < 0xD800 || 0xDFFF < w1)) {
                 return w1;
             }
             if(w1 > 0xDBFF)
@@ -381,7 +368,7 @@ namespace utf {
         static code_point decode_valid(It &current)
         {
             uint16_t w1=*current++;
-            if(NOWIDE_LIKELY(w1 < 0xD800 || 0xDFFF < w1)) {
+            if(BOOST_LIKELY(w1 < 0xD800 || 0xDFFF < w1)) {
                 return w1;
             }
             uint16_t w2=*current++;
@@ -396,7 +383,7 @@ namespace utf {
         template<typename It>
         static It encode(code_point u,It out)
         {
-            if(NOWIDE_LIKELY(u<=0xFFFF)) {
+            if(BOOST_LIKELY(u<=0xFFFF)) {
                 *out++ = static_cast<char_type>(u);
             }
             else {
@@ -436,11 +423,11 @@ namespace utf {
         template<typename It>
         static code_point decode(It &current,It last)
         {
-            if(NOWIDE_UNLIKELY(current == last))
-                return nowide::utf::incomplete;
+            if(BOOST_UNLIKELY(current == last))
+                return incomplete;
             code_point c=*current++;
-            if(NOWIDE_UNLIKELY(!is_valid_codepoint(c)))
-                return nowide::utf::illegal;
+            if(BOOST_UNLIKELY(!is_valid_codepoint(c)))
+                return illegal;
             return c;
         }
         static const int max_width = 1;
@@ -459,11 +446,11 @@ namespace utf {
 
     #endif
 
+
 } // utf
+} // detail
 } // nowide
+} // boost
 
 
 #endif
-
-// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
-

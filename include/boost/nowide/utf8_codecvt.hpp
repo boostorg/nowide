@@ -8,15 +8,8 @@
 #ifndef BOOST_NOWIDE_UTF8_CODECVT_HPP
 #define BOOST_NOWIDE_UTF8_CODECVT_HPP
 
-# if (__GNUC__ >= 7)
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-# endif
-#include <boost/locale/utf.hpp>
-# if (__GNUC__ >= 7)
-#  pragma GCC diagnostic pop
-# endif
 #include <boost/cstdint.hpp>
+#include <boost/nowide/detail/utf.hpp>
 #include <boost/nowide/replacement.hpp>
 #include <boost/static_assert.hpp>
 #include <locale>
@@ -90,11 +83,11 @@ protected:
         #endif
         while(max > 0 && from < from_end){
             char const *prev_from = from;
-            boost::uint32_t ch=boost::locale::utf::utf_traits<char>::decode(from,from_end);
-            if(ch==boost::locale::utf::illegal) {
+            boost::uint32_t ch=detail::utf::utf_traits<char>::decode(from,from_end);
+            if(ch==detail::utf::illegal) {
                 ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
             }
-            else if(ch==boost::locale::utf::incomplete) {
+            else if(ch==detail::utf::incomplete) {
                 from = prev_from;
                 break;
             }
@@ -138,12 +131,12 @@ protected:
         {
             char const *from_saved = from;
 
-            uint32_t ch=boost::locale::utf::utf_traits<char>::decode(from,from_end);
+            uint32_t ch=detail::utf::utf_traits<char>::decode(from,from_end);
 
-            if(ch==boost::locale::utf::illegal) {
+            if(ch==detail::utf::illegal) {
                 ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
             }
-            else if(ch==boost::locale::utf::incomplete) {
+            else if(ch==detail::utf::incomplete) {
                 from = from_saved;
                 r=std::codecvt_base::partial;
                 break;
@@ -241,16 +234,16 @@ protected:
                     ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
                 }
             }
-            if(!boost::locale::utf::is_valid_codepoint(ch)) {
+            if(!detail::utf::is_valid_codepoint(ch)) {
                 r=std::codecvt_base::error;
                 break;
             }
-            int len = boost::locale::utf::utf_traits<char>::width(ch);
+            int len = detail::utf::utf_traits<char>::width(ch);
             if(to_end - to < len) {
                 r=std::codecvt_base::partial;
                 break;
             }
-            to = boost::locale::utf::utf_traits<char>::encode(ch,to);
+            to = detail::utf::utf_traits<char>::encode(ch,to);
             state = 0;
             from++;
         }
@@ -310,12 +303,12 @@ protected:
 
         while(max > 0 && from < from_end){
             char const *save_from = from;
-            boost::uint32_t ch=boost::locale::utf::utf_traits<char>::decode(from,from_end);
-            if(ch==boost::locale::utf::incomplete) {
+            boost::uint32_t ch=detail::utf::utf_traits<char>::decode(from,from_end);
+            if(ch==detail::utf::incomplete) {
                 from = save_from;
                 break;
             }
-            else if(ch == boost::locale::utf::illegal) {
+            else if(ch == detail::utf::illegal) {
                 ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
             }
             max--;
@@ -348,12 +341,12 @@ protected:
         {
             char const *from_saved = from;
 
-            uint32_t ch=boost::locale::utf::utf_traits<char>::decode(from,from_end);
+            uint32_t ch=detail::utf::utf_traits<char>::decode(from,from_end);
 
-            if(ch==boost::locale::utf::illegal) {
+            if(ch==detail::utf::illegal) {
                 ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
             }
-            else if(ch==boost::locale::utf::incomplete) {
+            else if(ch==detail::utf::incomplete) {
                 r=std::codecvt_base::partial;
                 from=from_saved;
                 break;
@@ -381,15 +374,15 @@ protected:
         {
             boost::uint32_t ch=0;
             ch = *from;
-            if(!boost::locale::utf::is_valid_codepoint(ch)) {
+            if(!detail::utf::is_valid_codepoint(ch)) {
                 ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
             }
-            int len = boost::locale::utf::utf_traits<char>::width(ch);
+            int len = detail::utf::utf_traits<char>::width(ch);
             if(to_end - to < len) {
                 r=std::codecvt_base::partial;
                 break;
             }
-            to = boost::locale::utf::utf_traits<char>::encode(ch,to);
+            to = detail::utf::utf_traits<char>::encode(ch,to);
             from++;
         }
         from_next=from;

@@ -77,7 +77,7 @@ namespace details {
 
         int write(char const *p,int n)
         {
-            namespace uf = boost::locale::utf;
+            namespace uf = detail::utf;
             char const *b = p;
             char const *e = p+n;
             DWORD size=0;
@@ -164,7 +164,7 @@ namespace details {
 
         size_t read()
         {
-            namespace uf = boost::locale::utf;
+            namespace uf = detail::utf;
             DWORD read_wchars = 0;
             size_t n = wbuffer_size - wsize_;
             if(!ReadConsoleW(handle_,wbuffer_,static_cast<DWORD>(n),&read_wchars,0))

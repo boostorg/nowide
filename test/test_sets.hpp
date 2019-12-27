@@ -8,7 +8,7 @@
 #ifndef BOOST_NOWIDE_TEST_SETS_HPP_INCLUDED
 #define BOOST_NOWIDE_TEST_SETS_HPP_INCLUDED
 
-#include <boost/config/workaround.hpp>
+#include <boost/detail/workaround.hpp>
 #include <iostream>
 
 struct utf8_to_wide {

@@ -10,7 +10,6 @@
 
 #include <iosfwd>
 #include <boost/config.hpp>
-#include <boost/config/workaround.hpp>
 #include <boost/nowide/convert.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <fstream>
@@ -183,7 +182,7 @@ namespace nowide {
         boost::scoped_ptr<internal_buffer_type> buf_;
     };
 
-#if BOOST_WORKAROUND(BOOST_MSVC, == 1700)
+#ifdef BOOST_MSVC
 #  pragma warning(push)
 #  pragma warning(disable : 4250) // <class> : inherits <method> via dominance
 #endif
@@ -258,7 +257,7 @@ namespace nowide {
     private:
         boost::scoped_ptr<internal_buffer_type> buf_;
     };
-#if BOOST_WORKAROUND(BOOST_MSVC, == 1700)
+#ifdef BOOST_MSVC
 #  pragma warning(pop)
 #endif
 
