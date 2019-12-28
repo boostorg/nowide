@@ -7,5 +7,8 @@
 #  http://www.boost.org/LICENSE_1_0.txt)
 #
 
+set -euo pipefail
 
-rm -f html/* && doxygen
+cd "$(dirname "$0")"
+rm -f html/*
+doxygen
