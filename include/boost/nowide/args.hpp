@@ -11,22 +11,26 @@
 #include <boost/config.hpp>
 #ifdef BOOST_WINDOWS
 #include <boost/nowide/stackstring.hpp>
-#include <vector>
 #include <boost/nowide/windows.hpp>
 #include <stdexcept>
+#include <vector>
 #endif
 
 namespace boost {
 namespace nowide {
-    #if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_DOXYGEN)
-    class args {
+#if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_DOXYGEN)
+    class args
+    {
     public:
-        args(int &,char **&) {}
-        args(int &,char **&,char **&){}
-        ~args() {}
+        args(int &, char **&)
+        {}
+        args(int &, char **&, char **&)
+        {}
+        ~args()
+        {}
     };
 
-    #else
+#else
 
     ///
     /// \brief args is a class that fixes standard main() function arguments and changes them to UTF-8 under
@@ -43,34 +47,24 @@ namespace nowide {
     ///
     /// \note the class owns the memory of the newly allocated strings
     ///
-    class args {
+    class args
+    {
     public:
-
         ///
-        /// Fix command line arguments 
+        /// Fix command line arguments
         ///
-        args(int &argc,char **&argv) :
-            old_argc_(argc),
-            old_argv_(argv),
-            old_env_(0),
-            old_argc_ptr_(&argc),
-            old_argv_ptr_(&argv),
-            old_env_ptr_(0)
+        args(int &argc, char **&argv) :
+            old_argc_(argc), old_argv_(argv), old_env_(0), old_argc_ptr_(&argc), old_argv_ptr_(&argv), old_env_ptr_(0)
         {
-            fix_args(argc,argv);
+            fix_args(argc, argv);
         }
         ///
         /// Fix command line arguments and environment
         ///
-        args(int &argc,char **&argv,char **&env) :
-            old_argc_(argc),
-            old_argv_(argv),
-            old_env_(env),
-            old_argc_ptr_(&argc),
-            old_argv_ptr_(&argv),
-            old_env_ptr_(&env)
+        args(int &argc, char **&argv, char **&env) :
+            old_argc_(argc), old_argv_(argv), old_env_(env), old_argc_ptr_(&argc), old_argv_ptr_(&argv), old_env_ptr_(&env)
         {
-            fix_args(argc,argv);
+            fix_args(argc, argv);
             fix_env(env);
         }
         ///
@@ -85,6 +79,7 @@ namespace nowide {
             if(old_env_ptr_)
                 *old_env_ptr_ = old_env_;
         }
+
     private:
         class wargv_ptr
         {
@@ -92,30 +87,52 @@ namespace nowide {
             int argc;
             wargv_ptr(const wargv_ptr &); // Non-copyable
         public:
-            wargv_ptr() : p(CommandLineToArgvW(GetCommandLineW(), &argc)) {}
-            ~wargv_ptr() { if(p) LocalFree(p); }
-            int size() const { return argc; }
-            operator bool() const { return p != NULL; }
-            const wchar_t* operator[](size_t i) const { return p[i]; }
+            wargv_ptr() : p(CommandLineToArgvW(GetCommandLineW(), &argc))
+            {}
+            ~wargv_ptr()
+            {
+                if(p)
+                    LocalFree(p);
+            }
+            int size() const
+            {
+                return argc;
+            }
+            operator bool() const
+            {
+                return p != NULL;
+            }
+            const wchar_t *operator[](size_t i) const
+            {
+                return p[i];
+            }
         };
         class wenv_ptr
         {
             wchar_t *p;
             wenv_ptr(const wenv_ptr &); // Non-copyable
         public:
-            wenv_ptr() : p(GetEnvironmentStringsW()) {}
-            ~wenv_ptr() { if(p) FreeEnvironmentStringsW(p); }
-            operator const wchar_t*() const { return p; }
+            wenv_ptr() : p(GetEnvironmentStringsW())
+            {}
+            ~wenv_ptr()
+            {
+                if(p)
+                    FreeEnvironmentStringsW(p);
+            }
+            operator const wchar_t *() const
+            {
+                return p;
+            }
         };
 
-        void fix_args(int &argc,char **&argv)
+        void fix_args(int &argc, char **&argv)
         {
             const wargv_ptr wargv;
             if(!wargv)
                 throw std::runtime_error("Could not get command line!");
-            args_.resize(wargv.size()+1,0);
+            args_.resize(wargv.size() + 1, 0);
             arg_values_.resize(wargv.size());
-            for(int i=0;i<wargv.size();i++) 
+            for(int i = 0; i < wargv.size(); i++)
                 args_[i] = arg_values_[i].convert(wargv[i]);
             argc = wargv.size();
             argv = &args_[0];
@@ -127,16 +144,17 @@ namespace nowide {
                 throw std::runtime_error("Could not get environment strings!");
             const wchar_t *wstrings_end = 0;
             int count = 0;
-            for(wstrings_end = wstrings;*wstrings_end;wstrings_end+=wcslen(wstrings_end)+1)
-                    count++;
-            env_.convert(wstrings,wstrings_end);
-            envp_.resize(count+1,0);
-            char *p=env_.c_str();
+            for(wstrings_end = wstrings; *wstrings_end; wstrings_end += wcslen(wstrings_end) + 1)
+                count++;
+            env_.convert(wstrings, wstrings_end);
+            envp_.resize(count + 1, 0);
+            char *p = env_.c_str();
             int pos = 0;
-            for(int i=0;i<count;i++) {
-                if(*p!='=')
+            for(int i = 0; i < count; i++)
+            {
+                if(*p != '=')
                     envp_[pos++] = p;
-                p+=strlen(p)+1;
+                p += strlen(p) + 1;
             }
             env = &envp_[0];
         }
@@ -150,14 +168,14 @@ namespace nowide {
         char **old_argv_;
         char **old_env_;
 
-        int  *old_argc_ptr_;
+        int *old_argc_ptr_;
         char ***old_argv_ptr_;
         char ***old_env_ptr_;
     };
 
-    #endif
+#endif
 
-} // nowide
+} // namespace nowide
 } // namespace boost
 #endif
 

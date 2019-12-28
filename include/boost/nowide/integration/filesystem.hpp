@@ -8,23 +8,23 @@
 #ifndef BOOST_NOWIDE_INTEGRATION_FILESYSTEM_HPP_INCLUDED
 #define BOOST_NOWIDE_INTEGRATION_FILESYSTEM_HPP_INCLUDED
 
-# if (defined(__GNUC__) && __GNUC__ < 5)
-#  pragma GCC diagnostic ignored "-Wunused-parameter"
-# endif
-#include <boost/filesystem/path.hpp>
+#if(defined(__GNUC__) && __GNUC__ < 5)
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 #include <boost/nowide/utf8_codecvt.hpp>
+#include <boost/filesystem/path.hpp>
 namespace boost {
-    namespace nowide {
-        ///
-        /// Instal utf8_codecvt facet into  boost::filesystem::path such all char strings are interpreted as utf-8 strings
-        ///
-        inline void nowide_filesystem()
-        {
-            std::locale tmp = std::locale(std::locale(),new boost::nowide::utf8_codecvt<wchar_t>());
-            boost::filesystem::path::imbue(tmp);
-        }
-    } // nowide
-} // boost
+namespace nowide {
+    ///
+    /// Instal utf8_codecvt facet into  boost::filesystem::path such all char strings are interpreted as utf-8 strings
+    ///
+    inline void nowide_filesystem()
+    {
+        std::locale tmp = std::locale(std::locale(), new boost::nowide::utf8_codecvt<wchar_t>());
+        boost::filesystem::path::imbue(tmp);
+    }
+} // namespace nowide
+} // namespace boost
 
 #endif
 ///
