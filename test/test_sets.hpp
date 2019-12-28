@@ -10,6 +10,7 @@
 
 #include <boost/detail/workaround.hpp>
 #include <iostream>
+#include <string>
 
 struct utf8_to_wide
 {
