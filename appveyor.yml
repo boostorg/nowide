@@ -87,7 +87,7 @@ test_script:
           ./b2 --clean
 
           mkdir __build_static | cd
-          cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide -DBOOST_NOWIDE_INSTALL=OFF ..
+          cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide ..
           cmake --build . --config Debug
           ctest --output-on-failure --build-config Debug
           cmake --build . --config Release
@@ -96,7 +96,7 @@ test_script:
           cd ..
 
           mkdir __build_shared | cd
-          cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBUILD_SHARED_LIBS=ON -DBOOST_INCLUDE_LIBRARIES=nowide -DBOOST_NOWIDE_INSTALL=OFF ..
+          cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBUILD_SHARED_LIBS=ON -DBOOST_INCLUDE_LIBRARIES=nowide ..
           cmake --build . --config Debug
           ctest --output-on-failure --build-config Debug
           cmake --build . --config Release

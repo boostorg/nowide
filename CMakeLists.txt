@@ -56,6 +56,7 @@ if(BOOST_NOWIDE_STANDALONE)
 else()
   if(BOOST_SUPERPROJECT_SOURCE_DIR)
     target_link_libraries(boost_nowide PUBLIC Boost::config Boost::smart_ptr Boost::static_assert)
+    set(BOOST_NOWIDE_INSTALL OFF) # smart_ptr does not support installation
   else()
     # Default boost libs are static on windows and dynamic on linux
     if(WIN32 AND NOT DEFINED Boost_USE_STATIC_LIBS)
