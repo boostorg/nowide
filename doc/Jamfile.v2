@@ -1,0 +1,32 @@
+# Copyright (C) 2019-2019 Alexander Grund
+# Distributed under the Boost Software License, Version 1.0
+# (see accompanying file LICENSE_1_0.txt or a copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+
+using doxygen ;
+
+path-constant here : . ;
+
+doxygen index.html
+    : [ glob ../include/boost/nowide/*.hpp ]
+      [ glob ../include/boost/nowide/integration/*.hpp ]
+      main.md
+    : <location>.
+      <doxygen:param>PROJECT_NAME=Boost.Nowide
+      <doxygen:param>PREDEFINED="BOOST_NOWIDE_DOXYGEN BOOST_NOWIDE_DECL="
+      <doxygen:param>WARNINGS=YES
+      <doxygen:param>WARN_IF_UNDOCUMENTED=NO
+      <doxygen:param>EXTRACT_ALL=NO
+      <doxygen:param>EXTRACT_STATIC=YES
+      <doxygen:param>EXTRACT_LOCAL_CLASSES=YES
+      <doxygen:param>CASE_SENSE_NAMES=YES
+      <doxygen:param>GENERATE_LATEX=NO
+      <doxygen:param>ENABLE_PREPROCESSING=YES
+      <doxygen:param>MACRO_EXPANSION=YES
+      <doxygen:param>EXPAND_ONLY_PREDEF=YES
+    ;
+
+alias boostdoc : index.html ;
+explicit boostdoc ;
+alias boostrelease ;
+explicit boostrelease ;
