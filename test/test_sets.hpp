@@ -8,7 +8,6 @@
 #ifndef BOOST_NOWIDE_TEST_SETS_HPP_INCLUDED
 #define BOOST_NOWIDE_TEST_SETS_HPP_INCLUDED
 
-#include <boost/detail/workaround.hpp>
 #include <iostream>
 #include <string>
 
@@ -24,8 +23,7 @@ struct wide_to_utf8
     char const *utf8;
 };
 
-#if BOOST_WORKAROUND(BOOST_MSVC, < 1700)
-#pragma warning(push)
+#if defined(BOOST_MSVC) && BOOST_MSVC < 1700
 #pragma warning(disable : 4428) // universal-character-name encountered in source
 #endif
 
@@ -70,10 +68,6 @@ wide_to_utf8 w2n_tests_utf32[] = {
    "\xE3\x82\x84\xE3\x81\x82\xEF\xBF\xBD \xD0\xBF\xD1\x80\xD0\xB8\xD0\xB2\xD0\xB5\xD1\x82-\xE3\x82\x84\xE3\x81\x82"},
   {L"\u3084\u3042\xDC00\x20\u043F\u0440\u0438\u0432\u0435\u0442-\u3084\u3042",
    "\xE3\x82\x84\xE3\x81\x82\xEF\xBF\xBD \xD0\xBF\xD1\x80\xD0\xB8\xD0\xB2\xD0\xB5\xD1\x82-\xE3\x82\x84\xE3\x81\x82"}};
-
-#if BOOST_WORKAROUND(BOOST_MSVC, < 1700)
-#pragma warning(pop)
-#endif
 
 #ifdef BOOST_MSVC
 #pragma warning(push)

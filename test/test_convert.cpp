@@ -10,10 +10,9 @@
 #include "test_sets.hpp"
 #include <boost/nowide/convert.hpp>
 #include <boost/nowide/stackstring.hpp>
-#include <boost/detail/workaround.hpp>
 #include <iostream>
 
-#if BOOST_WORKAROUND(BOOST_MSVC, < 1700)
+#if defined(BOOST_MSVC) && BOOST_MSVC < 1700
 #pragma warning(disable : 4428) // universal-character-name encountered in source
 #endif
 
