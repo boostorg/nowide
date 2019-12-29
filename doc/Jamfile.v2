@@ -4,29 +4,37 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 using doxygen ;
+import doxygen ;
+import path ;
+import os ;
 
 path-constant here : . ;
 
-doxygen index.html
-    : [ glob ../include/boost/nowide/*.hpp ]
-      [ glob ../include/boost/nowide/integration/*.hpp ]
-      main.md
-    : <location>.
-      <doxygen:param>PROJECT_NAME=Boost.Nowide
-      <doxygen:param>PREDEFINED="BOOST_NOWIDE_DOXYGEN BOOST_NOWIDE_DECL="
-      <doxygen:param>WARNINGS=YES
-      <doxygen:param>WARN_IF_UNDOCUMENTED=NO
-      <doxygen:param>EXTRACT_ALL=NO
-      <doxygen:param>EXTRACT_STATIC=YES
-      <doxygen:param>EXTRACT_LOCAL_CLASSES=YES
-      <doxygen:param>CASE_SENSE_NAMES=YES
-      <doxygen:param>GENERATE_LATEX=NO
-      <doxygen:param>ENABLE_PREPROCESSING=YES
-      <doxygen:param>MACRO_EXPANSION=YES
-      <doxygen:param>EXPAND_ONLY_PREDEF=YES
-    ;
+.doxygen = [ doxygen.name ] ;
+.doxygen ?= doxygen ;
 
-alias boostdoc : index.html ;
+local sources = [ path.glob-tree ../include/boost/nowide : *.hpp : detail ] main.md ;
+
+make html : ./Doxyfile : @make-html : <dependency>$(sources) ;
+
+if [ os.name ] = NT
+{
+    RMDIR = rmdir /s /q ;
+}
+else
+{
+    RMDIR = rm -rf ;
+}
+
+actions make-html {
+  cd $(here)
+  $(RMDIR) html
+  "$(.doxygen)"
+}
+
+alias reference : html ;
+
+alias boostdoc ;
 explicit boostdoc ;
-alias boostrelease ;
+alias boostrelease : html ;
 explicit boostrelease ;
