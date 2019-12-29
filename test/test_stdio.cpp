@@ -7,48 +7,49 @@
 //
 
 #ifdef _MSC_VER
-# define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #endif
 
 #include <boost/nowide/cstdio.hpp>
-#include <iostream>
 #include <cstring>
+#include <iostream>
 
 #include "test.hpp"
 
-int main(int, char** argv)
+int main(int, char **argv)
 {
     const std::string prefix = argv[0];
     const std::string example = prefix + "\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
 
-    try {
-        #ifdef BOOST_WINDOWS
-        FILE *f=_wfopen(boost::nowide::widen(example).c_str(),L"w");
-        #else
-        FILE *f=std::fopen(example.c_str(),"w");
-        #endif
+    try
+    {
+#ifdef BOOST_WINDOWS
+        FILE *f = _wfopen(boost::nowide::widen(example).c_str(), L"w");
+#else
+        FILE *f = std::fopen(example.c_str(), "w");
+#endif
         TEST(f);
-        std::fprintf(f,"test\n");
+        std::fprintf(f, "test\n");
         std::fclose(f);
-        f=0;
+        f = 0;
 
-        TEST((f=boost::nowide::fopen(example.c_str(),"r"))!=0);
+        TEST((f = boost::nowide::fopen(example.c_str(), "r")) != 0);
         char buf[16];
-        TEST(std::fgets(buf,16,f)!=0);
-        TEST(std::strcmp(buf,"test\n")==0);
-        TEST((f=boost::nowide::freopen(example.c_str(),"r+",f))!=0);
+        TEST(std::fgets(buf, 16, f) != 0);
+        TEST(std::strcmp(buf, "test\n") == 0);
+        TEST((f = boost::nowide::freopen(example.c_str(), "r+", f)) != 0);
         std::fclose(f);
-        f=0;
+        f = 0;
 
-        TEST(boost::nowide::rename(example.c_str(),(example+".1").c_str())==0);
-        TEST(boost::nowide::remove(example.c_str())<0);
-        TEST((f=boost::nowide::fopen((example+".1").c_str(),"r"))!=0);
+        TEST(boost::nowide::rename(example.c_str(), (example + ".1").c_str()) == 0);
+        TEST(boost::nowide::remove(example.c_str()) < 0);
+        TEST((f = boost::nowide::fopen((example + ".1").c_str(), "r")) != 0);
         std::fclose(f);
-        f=0;
-        TEST(boost::nowide::remove(example.c_str())<0);
-        TEST(boost::nowide::remove((example+".1").c_str())==0);
-    }
-    catch(std::exception const &e) {
+        f = 0;
+        TEST(boost::nowide::remove(example.c_str()) < 0);
+        TEST(boost::nowide::remove((example + ".1").c_str()) == 0);
+    } catch(std::exception const &e)
+    {
         std::cerr << "Failed " << e.what() << std::endl;
         BOOST_NOWIDE_TEST_RETURN_FAILURE;
     }

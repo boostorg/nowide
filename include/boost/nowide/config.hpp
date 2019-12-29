@@ -8,18 +8,18 @@
 #ifndef BOOST_NOWIDE_CONFIG_HPP_INCLUDED
 #define BOOST_NOWIDE_CONFIG_HPP_INCLUDED
 
-#include <boost/config.hpp>
 #include <boost/nowide/replacement.hpp>
+#include <boost/config.hpp>
 
 #if defined(BOOST_ALL_DYN_LINK) || defined(BOOST_NOWIDE_DYN_LINK)
-#  ifdef BOOST_NOWIDE_SOURCE
-#    define BOOST_NOWIDE_DECL BOOST_SYMBOL_EXPORT
-#  else
-#     define BOOST_NOWIDE_DECL BOOST_SYMBOL_IMPORT
-#  endif  // BOOST_NOWIDE_SOURCE
+#ifdef BOOST_NOWIDE_SOURCE
+#define BOOST_NOWIDE_DECL BOOST_SYMBOL_EXPORT
 #else
-#  define BOOST_NOWIDE_DECL
-#endif  // DYN_LINK
+#define BOOST_NOWIDE_DECL BOOST_SYMBOL_IMPORT
+#endif // BOOST_NOWIDE_SOURCE
+#else
+#define BOOST_NOWIDE_DECL
+#endif // DYN_LINK
 
 //
 // Automatically link to the correct build variant where possible.
@@ -34,14 +34,13 @@
 // If we're importing code from a dll, then tell auto_link.hpp about it:
 //
 #if defined(BOOST_ALL_DYN_LINK) || defined(BOOST_NOWIDE_DYN_LINK)
-#  define BOOST_DYN_LINK
+#define BOOST_DYN_LINK
 #endif
 //
 // And include the header that does the work:
 //
 #include <boost/config/auto_link.hpp>
-#endif  // auto-linking disabled
-
+#endif // auto-linking disabled
 
 #endif // boost/nowide/config.hpp
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

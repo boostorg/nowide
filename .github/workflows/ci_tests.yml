@@ -94,3 +94,33 @@ jobs:
     - name: Build & Test shared
       working-directory: __build_shared
       run: cmake --build . --config Debug && ctest --output-on-failure --build-config Debug
+
+  CreateDocuTest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Create documentation
+        run: |
+            sudo apt-get install -y doxygen
+            bash doc/gendoc.sh
+
+  CheckFormatting:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: DoozyX/clang-format-lint-action@v0.5
+      with:
+        exclude: './doc'
+        clangFormatVersion: 9
+    - name: Check line endings
+      run: |
+        if grep -r -l $'\r' --exclude-dir="\.git" --exclude-dir="html"; then
+            echo "Found files windows style line endings (CRLF). Please fix!"
+            exit 1
+        fi
+    - name: Check for tabs
+      run: |
+        if grep -r -l $'\t' --exclude-dir="\.git" --exclude-dir="html"; then
+            echo "Found files with TABs. Please fix!"
+            exit 1
+        fi
