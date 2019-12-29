@@ -337,7 +337,6 @@ int main(int argc,char **argv)
     return 0;
 }
 \endcode
-\endcode
 
 \subsection sources Sources and Downloads
 
@@ -346,9 +345,3 @@ The upstream sources can be found at GitHub: <a href="https://github.com/boostor
 You can download the latest sources there:
 
 - Standard Version: <a href="https://github.com/boostorg/nowide/archive/master.zip">nowide-master.zip</a>
-- Standalone Boost independent version <a href="../nowide_standalone.zip">nowide_standalone.zip</a>
-
-*/
-
-// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
-

@@ -104,6 +104,33 @@ jobs:
             sudo apt-get install -y doxygen
             bash doc/gendoc.sh
 
+  CreateBoostDocuTest:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get Boost branch
+      id: get_branch
+      run: |
+        ref=${GITHUB_BASE_REF:-$GITHUB_REF}
+        if [[ "${ref##*/}" == "master" ]]; then echo "::set-output name=branch::master"
+        else echo "::set-output name=branch::develop"
+        fi
+    - uses: actions/checkout@v2
+      with:
+        repository: boostorg/boost
+        ref: ${{ steps.get_branch.outputs.branch }}
+    - name: Checkout BoostDep
+      run: git submodule update --init tools/boostdep
+    - uses: actions/checkout@v2
+      with:
+        path: libs/nowide
+    - name: Install deps
+      run: python tools/boostdep/depinst/depinst.py nowide
+    - name: Create documentation
+      run: |
+          sudo apt-get install -y doxygen
+          ./bootstrap.sh
+          ./b2 libs/nowide/doc
+
   CheckFormatting:
     runs-on: ubuntu-latest
     steps:
