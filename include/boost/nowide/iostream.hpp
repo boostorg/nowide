@@ -9,12 +9,15 @@
 #define BOOST_NOWIDE_IOSTREAM_HPP_INCLUDED
 
 #include <boost/nowide/config.hpp>
+#ifdef BOOST_WINDOWS
 #include <boost/scoped_ptr.hpp>
-#include <iostream>
 #include <istream>
 #include <ostream>
 
 #include <boost/config/abi_prefix.hpp> // must be the last #include
+#else
+#include <iostream>
+#endif
 
 #ifdef BOOST_MSVC
 #pragma warning(push)
@@ -98,7 +101,9 @@ namespace nowide {
 #pragma warning(pop)
 #endif
 
+#ifdef BOOST_WINDOWS
 #include <boost/config/abi_suffix.hpp> // pops abi_prefix.hpp pragmas
+#endif
 
 #endif
 ///

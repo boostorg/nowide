@@ -8,13 +8,15 @@
 #ifndef BOOST_NOWIDE_FSTREAM_INCLUDED_HPP
 #define BOOST_NOWIDE_FSTREAM_INCLUDED_HPP
 
-#include <boost/nowide/convert.hpp>
-#include <boost/nowide/filebuf.hpp>
 #include <boost/config.hpp>
+#include <boost/nowide/filebuf.hpp>
+#ifdef BOOST_WINDOWS
+#include <boost/nowide/convert.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <fstream>
 #include <iosfwd>
 #include <memory>
+#endif
+#include <fstream>
 
 namespace boost {
 ///

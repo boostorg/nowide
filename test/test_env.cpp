@@ -11,6 +11,7 @@
 #endif
 
 #include <boost/nowide/cenv.hpp>
+#include <cstring>
 #include <iostream>
 
 #if defined(BOOST_NOWIDE_TEST_INCLUDE_WINDOWS) && defined(BOOST_WINDOWS)

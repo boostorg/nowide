@@ -8,12 +8,15 @@
 #ifndef BOOST_NOWIDE_FILEBUF_HPP
 #define BOOST_NOWIDE_FILEBUF_HPP
 
-#include <boost/nowide/stackstring.hpp>
 #include <boost/config.hpp>
+#ifdef BOOST_WINDOWS
+#include <boost/nowide/stackstring.hpp>
 #include <cstdio>
-#include <fstream>
 #include <iosfwd>
 #include <streambuf>
+#else
+#include <fstream>
+#endif
 
 #ifdef BOOST_MSVC
 #pragma warning(push)

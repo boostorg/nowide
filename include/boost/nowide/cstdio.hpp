@@ -8,9 +8,11 @@
 #ifndef BOOST_NOWIDE_CSTDIO_H_INCLUDED
 #define BOOST_NOWIDE_CSTDIO_H_INCLUDED
 
-#include <boost/nowide/convert.hpp>
-#include <boost/nowide/stackstring.hpp>
 #include <boost/config.hpp>
+
+#ifdef BOOST_WINDOWS
+#include <boost/nowide/stackstring.hpp>
+#endif
 #include <cstdio>
 
 #ifdef BOOST_MSVC
