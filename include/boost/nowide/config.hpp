@@ -8,8 +8,8 @@
 #ifndef BOOST_NOWIDE_CONFIG_HPP_INCLUDED
 #define BOOST_NOWIDE_CONFIG_HPP_INCLUDED
 
-#include <boost/nowide/replacement.hpp>
 #include <boost/config.hpp>
+#include <boost/nowide/replacement.hpp>
 
 #if defined(BOOST_ALL_DYN_LINK) || defined(BOOST_NOWIDE_DYN_LINK)
 #ifdef BOOST_NOWIDE_SOURCE
