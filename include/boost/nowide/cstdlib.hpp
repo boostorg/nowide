@@ -41,20 +41,20 @@ namespace nowide {
         wchar_t buf[buf_size];
         std::vector<wchar_t> tmp;
         wchar_t *ptr = buf;
-        size_t n = GetEnvironmentVariableW(name.c_str(), buf, buf_size);
+        size_t n = GetEnvironmentVariableW(name.get(), buf, buf_size);
         if(n == 0 && GetLastError() == 203) // ERROR_ENVVAR_NOT_FOUND
             return 0;
         if(n >= buf_size)
         {
             tmp.resize(n + 1, L'\0');
-            n = GetEnvironmentVariableW(name.c_str(), &tmp[0], static_cast<unsigned>(tmp.size() - 1));
+            n = GetEnvironmentVariableW(name.get(), &tmp[0], static_cast<unsigned>(tmp.size() - 1));
             // The size may have changed
             if(n >= tmp.size() - 1)
                 return 0;
             ptr = &tmp[0];
         }
         value.convert(ptr);
-        return value.c_str();
+        return value.get();
     }
     ///
     /// \brief  UTF-8 aware setenv, \a key - the variable name, \a value is a new UTF-8 value,
@@ -68,11 +68,11 @@ namespace nowide {
         if(!override)
         {
             wchar_t unused[2];
-            if(!(GetEnvironmentVariableW(name.c_str(), unused, 2) == 0 && GetLastError() == 203)) // ERROR_ENVVAR_NOT_FOUND
+            if(!(GetEnvironmentVariableW(name.get(), unused, 2) == 0 && GetLastError() == 203)) // ERROR_ENVVAR_NOT_FOUND
                 return 0;
         }
         wstackstring const wval(value);
-        if(SetEnvironmentVariableW(name.c_str(), wval.c_str()))
+        if(SetEnvironmentVariableW(name.get(), wval.get()))
             return 0;
         return -1;
     }
@@ -82,7 +82,7 @@ namespace nowide {
     inline int unsetenv(char const *key)
     {
         wshort_stackstring const name(key);
-        if(SetEnvironmentVariableW(name.c_str(), 0))
+        if(SetEnvironmentVariableW(name.get(), 0))
             return 0;
         return -1;
     }
@@ -100,7 +100,7 @@ namespace nowide {
         wshort_stackstring const wkey(key, key_end);
         wstackstring const wvalue(key_end + 1);
 
-        if(SetEnvironmentVariableW(wkey.c_str(), wvalue.c_str()))
+        if(SetEnvironmentVariableW(wkey.get(), wvalue.get()))
             return 0;
         return -1;
     }
@@ -113,7 +113,7 @@ namespace nowide {
         if(!cmd)
             return _wsystem(0);
         wstackstring const wcmd(cmd);
-        return _wsystem(wcmd.c_str());
+        return _wsystem(wcmd.get());
     }
 #endif
 } // namespace nowide

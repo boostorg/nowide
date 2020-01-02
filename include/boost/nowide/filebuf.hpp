@@ -97,10 +97,10 @@ namespace nowide {
                 return 0;
 #ifdef BOOST_WINDOWS
             wstackstring const name(s);
-            file_ = ::_wfopen(name.c_str(), smode);
+            file_ = ::_wfopen(name.get(), smode);
 #else
             short_stackstring smode2(smode);
-            file_ = std::fopen(s, smode2.c_str());
+            file_ = std::fopen(s, smode2.get());
 #endif
 
             if(!file_)

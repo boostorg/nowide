@@ -148,7 +148,7 @@ namespace nowide {
                 count++;
             env_.convert(wstrings, wstrings_end);
             envp_.resize(count + 1, 0);
-            char *p = env_.c_str();
+            char *p = env_.get();
             int pos = 0;
             for(int i = 0; i < count; i++)
             {
