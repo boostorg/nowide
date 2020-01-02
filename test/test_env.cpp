@@ -6,10 +6,6 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-
 #include <boost/nowide/cstdlib.hpp>
 #include <cstring>
 #include <iostream>
@@ -19,6 +15,10 @@
 #endif
 
 #include "test.hpp"
+
+#ifdef BOOST_MSVC
+#pragma warning(disable : 4996) // function unsafe/deprecated
+#endif
 
 int main()
 {

@@ -7,15 +7,15 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-
 #include <boost/nowide/cstdio.hpp>
 #include <cstring>
 #include <iostream>
 
 #include "test.hpp"
+
+#ifdef BOOST_MSVC
+#pragma warning(disable : 4996) // function unsafe/deprecated
+#endif
 
 bool file_exists(const std::string &filename)
 {
