@@ -11,7 +11,12 @@ import testing ;
 
 project : requirements
   <warnings>pedantic
-  <warnings-as-errors>on ;
+  <warnings-as-errors>on
+  <toolset>gcc:<cxxflags>-Wno-long-long
+  <toolset>darwin:<cxxflags>-Wno-long-long
+  <toolset>pathscale:<cxxflags>-Wno-long-long
+  <toolset>clang:<cxxflags>-Wno-long-long
+  ;
 
 lib shell32 ;
 
