@@ -20,6 +20,7 @@ boost_nowide_add_test(test_env)
 boost_nowide_add_test(test_env_win SRC test_env.cpp DEFINITIONS BOOST_NOWIDE_TEST_INCLUDE_WINDOWS)
 boost_nowide_add_test(test_fstream)
 boost_nowide_add_test(test_iostream)
+boost_nowide_add_test(test_stackstring)
 boost_nowide_add_test(test_stdio)
 boost_nowide_add_test(test_system_n SRC test_system.cpp ARGS -n)
 
