@@ -85,7 +85,10 @@ namespace nowide {
         {
             wchar_t **p;
             int argc;
-            wargv_ptr(const wargv_ptr &); // Non-copyable
+            // Non-copyable
+            wargv_ptr(const wargv_ptr &);
+            wargv_ptr &operator=(const wargv_ptr &);
+
         public:
             wargv_ptr() : p(CommandLineToArgvW(GetCommandLineW(), &argc))
             {}
@@ -110,7 +113,10 @@ namespace nowide {
         class wenv_ptr
         {
             wchar_t *p;
-            wenv_ptr(const wenv_ptr &); // Non-copyable
+            // Non-copyable
+            wenv_ptr(const wenv_ptr &);
+            wenv_ptr &operator=(const wenv_ptr &);
+
         public:
             wenv_ptr() : p(GetEnvironmentStringsW())
             {}
