@@ -21,6 +21,7 @@ namespace nowide {
 
 #include <boost/nowide/convert.hpp>
 #include <cstring>
+#include <iostream>
 #include <vector>
 
 #ifndef NOMINMAX

@@ -9,7 +9,6 @@
 #include "test.hpp"
 #include "test_sets.hpp"
 #include <boost/nowide/convert.hpp>
-#include <boost/nowide/stackstring.hpp>
 #include <iostream>
 
 #if defined(BOOST_MSVC) && BOOST_MSVC < 1700
@@ -87,46 +86,15 @@ int main()
             TEST(boost::nowide::narrow(buf, 3, L"xy") == std::string("xy"));
             TEST(boost::nowide::widen(wbuf, 3, "xy") == std::wstring(L"xy"));
         }
-        std::cout << "- boost::nowide::stackstring" << std::endl;
-        {
-            {
-                boost::nowide::basic_stackstring<wchar_t, char, 3> sw;
-                TEST(sw.convert(hello.c_str()));
-                TEST(sw.c_str() == whello);
-                TEST(sw.convert(hello.c_str(), hello.c_str() + hello.size()));
-                TEST(sw.c_str() == whello);
-            }
-            {
-                boost::nowide::basic_stackstring<wchar_t, char, 5> sw;
-                TEST(sw.convert(hello.c_str()));
-                TEST(sw.c_str() == whello);
-                TEST(sw.convert(hello.c_str(), hello.c_str() + hello.size()));
-                TEST(sw.c_str() == whello);
-            }
-            {
-                boost::nowide::basic_stackstring<char, wchar_t, 5> sw;
-                TEST(sw.convert(whello.c_str()));
-                TEST(sw.c_str() == hello);
-                TEST(sw.convert(whello.c_str(), whello.c_str() + whello.size()));
-                TEST(sw.c_str() == hello);
-            }
-            {
-                boost::nowide::basic_stackstring<char, wchar_t, 10> sw;
-                TEST(sw.convert(whello.c_str()));
-                TEST(sw.c_str() == hello);
-                TEST(sw.convert(whello.c_str(), whello.c_str() + whello.size()));
-                TEST(sw.c_str() == hello);
-            }
-            std::cout << "- Substitutions" << std::endl;
-            run_all(boost::nowide::widen, boost::nowide::narrow);
-        }
+        std::cout << "- Substitutions" << std::endl;
+        run_all(boost::nowide::widen, boost::nowide::narrow);
     } catch(std::exception const &e)
     {
         std::cerr << "Failed :" << e.what() << std::endl;
-        BOOST_NOWIDE_TEST_RETURN_FAILURE;
+        return 1;
     }
 
-    return boost::report_errors();
+    return 0;
 }
 
 ///

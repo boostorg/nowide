@@ -8,6 +8,7 @@
 #ifndef BOOST_NOWIDE_TEST_SETS_HPP_INCLUDED
 #define BOOST_NOWIDE_TEST_SETS_HPP_INCLUDED
 
+#include <boost/config.hpp>
 #include <iostream>
 #include <string>
 

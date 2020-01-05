@@ -6,12 +6,11 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <boost/nowide/args.hpp>
-#include <boost/nowide/cenv.hpp>
-#include <boost/nowide/system.hpp>
-#include <iostream>
-
 #include "test.hpp"
+#include <boost/nowide/args.hpp>
+#include <boost/nowide/cstdlib.hpp>
+#include <cstring>
+#include <iostream>
 
 int main(int argc, char **argv, char **env)
 {
@@ -73,20 +72,20 @@ int main(int argc, char **argv, char **env)
                 std::cout << "Parent ok" << std::endl;
             }
             break;
-            default: std::cout << "Invalid parameters expected '-n/-w'" << std::endl; BOOST_NOWIDE_TEST_RETURN_FAILURE;
+            default: std::cout << "Invalid parameters expected '-n/-w'" << std::endl; return 1;
             }
         } else
         {
             std::cerr << "Invalid parameters" << std::endl;
-            BOOST_NOWIDE_TEST_RETURN_FAILURE;
+            return 1;
         }
     } catch(std::exception const &e)
     {
         std::cerr << "Failed " << e.what() << std::endl;
-        BOOST_NOWIDE_TEST_RETURN_FAILURE;
+        return 1;
     }
 
-    return boost::report_errors();
+    return 0;
 }
 
 ///

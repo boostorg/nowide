@@ -6,10 +6,7 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-
+#include <boost/nowide/convert.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/nowide/fstream.hpp>
 #include <boost/nowide/integration/filesystem.hpp>
@@ -43,10 +40,10 @@ int main()
     } catch(std::exception const &e)
     {
         std::cerr << "Failed : " << e.what() << std::endl;
-        BOOST_NOWIDE_TEST_RETURN_FAILURE;
+        return 1;
     }
 
-    return boost::report_errors();
+    return 0;
 }
 
 ///

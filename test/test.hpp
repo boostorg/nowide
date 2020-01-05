@@ -1,5 +1,6 @@
 //
 //  Copyright (c) 2012 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2019 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -8,11 +9,14 @@
 #ifndef BOOST_NOWIDE_LIB_TEST_H_INCLUDED
 #define BOOST_NOWIDE_LIB_TEST_H_INCLUDED
 
-#if 0
-
-#include <iostream>
 #include <sstream>
 #include <stdexcept>
+
+/// Function called when a test failed to be able set a breakpoint for debugging
+inline void test_failed(const std::string &msg)
+{
+    throw std::runtime_error(msg);
+}
 
 #define TEST(x)                                                                         \
     do                                                                                  \
@@ -21,30 +25,8 @@
             break;                                                                      \
         std::ostringstream ss;                                                          \
         ss << "Error " #x " in " << __FILE__ << ':' << __LINE__ << " " << __FUNCTION__; \
-        throw std::runtime_error(ss.str());                                             \
+        test_failed(ss.str());                                                          \
     } while(0)
-
-namespace boost
-{
-
-int report_errors()
-{
-    std::cout << "Ok" << std::endl;
-    return 0;
-}
-#define BOOST_NOWIDE_TEST_RETURN_FAILURE return 1
-
-} // namespace boost
-
-#else
-
-#include <boost/core/lightweight_test.hpp>
-#define TEST BOOST_TEST
-#define BOOST_NOWIDE_TEST_RETURN_FAILURE \
-    BOOST_TEST(false);                   \
-    return boost::report_errors()
-
-#endif
 
 #endif // #ifndef BOOST_NOWIDE_LIB_TEST_H_INCLUDED
 ///

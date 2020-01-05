@@ -33,7 +33,7 @@ jobs:
       shell: bash
       run: |
         cd "${BOOST_ROOT}"
-        ./bootstrap.sh --with-libraries=system,filesystem threading=multi
+        ./bootstrap.sh --with-libraries=system,filesystem,chrono threading=multi
         ./b2 link=static variant=release -j$(nproc)
     - name: Configure
       working-directory: build

@@ -286,10 +286,10 @@ int main()
     } catch(std::exception const &e)
     {
         std::cerr << "Failed : " << e.what() << std::endl;
-        BOOST_NOWIDE_TEST_RETURN_FAILURE;
+        return 1;
     }
 
-    return boost::report_errors();
+    return 0;
 }
 ///
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

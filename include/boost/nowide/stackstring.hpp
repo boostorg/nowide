@@ -7,6 +7,7 @@
 //
 #ifndef BOOST_NOWIDE_DETAILS_WIDESTR_H_INCLUDED
 #define BOOST_NOWIDE_DETAILS_WIDESTR_H_INCLUDED
+
 #include <boost/nowide/convert.hpp>
 #include <cstring>
 
@@ -17,10 +18,13 @@ namespace nowide {
     /// \brief A class that allows to create a temporary wide or narrow UTF strings from
     /// wide or narrow UTF source.
     ///
-    /// It uses on stack buffer of the string is short enough
-    /// and allocated a buffer on the heap if the size of the buffer is too small
+    /// It uses on stack buffer if the string is short enough
+    /// and allocates a buffer on the heap if the size of the buffer is too small
     ///
-    /// If invalid UTF charracters are detected they are replaced with U+FFFD substutution charracter
+    /// Invalid UTF characters are replaced by the substitution character
+    ///
+    /// If a NULL pointer is passed to the constructor or convert method, NULL will be returned by c_str.
+    /// Similarily a default constructed stackstring will return NULL on calling c_str.
     ///
     template<typename CharOut = wchar_t, typename CharIn = char, size_t BufferSize = 256>
     class basic_stackstring
@@ -30,84 +34,103 @@ namespace nowide {
         typedef CharOut output_char;
         typedef CharIn input_char;
 
-        basic_stackstring(basic_stackstring const &other) : mem_buffer_(0)
+        basic_stackstring(basic_stackstring const &other) : data_(NULL)
         {
-            clear();
-            if(other.mem_buffer_)
-            {
-                size_t len = 0;
-                while(other.mem_buffer_[len])
-                    len++;
-                mem_buffer_ = new output_char[len + 1];
-                std::memcpy(mem_buffer_, other.mem_buffer_, sizeof(output_char) * (len + 1));
-            } else
-            {
-                std::memcpy(buffer_, other.buffer_, buffer_size * sizeof(output_char));
-            }
+            *this = other;
         }
 
-        void swap(basic_stackstring &other)
+        friend void swap(basic_stackstring &lhs, basic_stackstring &rhs)
         {
-            std::swap(mem_buffer_, other.mem_buffer_);
-            for(size_t i = 0; i < buffer_size; i++)
-                std::swap(buffer_[i], other.buffer_[i]);
+            if(lhs.uses_stack_memory())
+            {
+                if(rhs.uses_stack_memory())
+                {
+                    for(size_t i = 0; i < buffer_size; i++)
+                        std::swap(lhs.buffer_[i], rhs.buffer_[i]);
+                } else
+                {
+                    lhs.data_ = rhs.data_;
+                    rhs.data_ = rhs.buffer_;
+                    for(size_t i = 0; i < buffer_size; i++)
+                        rhs.buffer_[i] = lhs.buffer_[i];
+                }
+            } else if(rhs.uses_stack_memory())
+            {
+                rhs.data_ = lhs.data_;
+                lhs.data_ = lhs.buffer_;
+                for(size_t i = 0; i < buffer_size; i++)
+                    lhs.buffer_[i] = rhs.buffer_[i];
+            } else
+                std::swap(lhs.data_, rhs.data_);
         }
         basic_stackstring &operator=(basic_stackstring const &other)
         {
             if(this != &other)
             {
-                basic_stackstring tmp(other);
-                swap(tmp);
+                clear();
+                const size_t len = other.length();
+                if(other.uses_stack_memory())
+                    data_ = buffer_;
+                else
+                    data_ = new output_char[len + 1];
+                std::memcpy(data_, other.data_, sizeof(output_char) * (len + 1));
             }
             return *this;
         }
 
-        basic_stackstring() : mem_buffer_(0)
-        {}
-        basic_stackstring(input_char const *input) : mem_buffer_(0)
+        basic_stackstring() : data_(NULL)
+        {
+            buffer_[0] = 0;
+        }
+        explicit basic_stackstring(input_char const *input) : data_(NULL)
         {
             convert(input);
         }
+        basic_stackstring(input_char const *begin, input_char const *end) : data_(NULL)
+        {
+            convert(begin, end);
+        }
         output_char *convert(input_char const *input)
         {
-            convert(input, details::basic_strend(input));
-            return c_str();
+            if(input)
+                return convert(input, details::basic_strend(input));
+            clear();
+            return get();
         }
         output_char *convert(input_char const *begin, input_char const *end)
         {
             clear();
 
-            size_t space = get_space(sizeof(input_char), sizeof(output_char), end - begin) + 1;
-            if(space <= buffer_size)
+            if(begin)
             {
-                basic_convert(buffer_, buffer_size, begin, end);
-            } else
-            {
-                mem_buffer_ = new output_char[space];
-                basic_convert(mem_buffer_, space, begin, end);
+                size_t space = get_space(sizeof(input_char), sizeof(output_char), end - begin) + 1;
+                if(space <= buffer_size)
+                {
+                    data_ = buffer_;
+                    basic_convert(buffer_, buffer_size, begin, end);
+                } else
+                {
+                    data_ = new output_char[space];
+                    basic_convert(data_, space, begin, end);
+                }
             }
-            return c_str();
+            return get();
         }
-        output_char *c_str()
+        /// Return the converted, NULL-terminated string or NULL if no string was converted
+        output_char *get()
         {
-            if(mem_buffer_)
-                return mem_buffer_;
-            return buffer_;
+            return data_;
         }
-        output_char const *c_str() const
+        /// Return the converted, NULL-terminated string or NULL if no string was converted
+        output_char const *get() const
         {
-            if(mem_buffer_)
-                return mem_buffer_;
-            return buffer_;
+            return data_;
         }
         void clear()
         {
-            if(mem_buffer_)
-            {
-                delete[] mem_buffer_;
-                mem_buffer_ = 0;
-            }
-            buffer_[0] = 0;
+            if(!uses_stack_memory())
+                delete[] data_;
+            data_ = NULL;
         }
         ~basic_stackstring()
         {
@@ -115,6 +138,20 @@ namespace nowide {
         }
 
     private:
+        /// True if the stack memory is used
+        bool uses_stack_memory() const
+        {
+            return data_ == buffer_;
+        }
+        size_t length() const
+        {
+            if(!data_)
+                return 0;
+            size_t len = 0;
+            while(data_[len])
+                len++;
+            return len;
+        }
         static size_t get_space(size_t insize, size_t outsize, size_t in)
         {
             if(insize <= outsize)
@@ -127,7 +164,7 @@ namespace nowide {
                 return 2 * in;
         }
         output_char buffer_[buffer_size];
-        output_char *mem_buffer_;
+        output_char *data_;
     }; // basic_stackstring
 
     ///

@@ -6,11 +6,8 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-
-#include <boost/nowide/cenv.hpp>
+#include <boost/nowide/cstdlib.hpp>
+#include <cstring>
 #include <iostream>
 
 #if defined(BOOST_NOWIDE_TEST_INCLUDE_WINDOWS) && defined(BOOST_WINDOWS)
@@ -18,6 +15,10 @@
 #endif
 
 #include "test.hpp"
+
+#ifdef BOOST_MSVC
+#pragma warning(disable : 4996) // function unsafe/deprecated
+#endif
 
 int main()
 {
@@ -51,10 +52,10 @@ int main()
     } catch(std::exception const &e)
     {
         std::cerr << "Failed " << e.what() << std::endl;
-        BOOST_NOWIDE_TEST_RETURN_FAILURE;
+        return 1;
     }
 
-    return boost::report_errors();
+    return 0;
 }
 
 ///

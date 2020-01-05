@@ -66,6 +66,8 @@ ForEachMacros:
   - BOOST_FOREACH
 IncludeBlocks:   Preserve
 IncludeCategories:
+  - Regex:           '<boost/(nowide/)?config.hpp>'
+    Priority:        48
   - Regex:           '<boost/nowide'
     Priority:        49
   - Regex:           '<boost/'
