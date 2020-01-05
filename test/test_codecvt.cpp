@@ -187,14 +187,13 @@ void test_codecvt_err()
         wchar_t buf[4];
         wchar_t *const to = buf;
         wchar_t *const to_end = buf + 4;
-        wchar_t *to_next = to;
         char const *err_utf = "1\xFF\xFF\xd7\xa9";
         {
             std::mbstate_t mb = std::mbstate_t();
             char const *from = err_utf;
             char const *from_end = from + std::strlen(from);
             char const *from_next = from;
-            to_next = to;
+            wchar_t *to_next = to;
             TEST(cvt.in(mb, from, from_end, from_next, to, to_end, to_next) == cvt_type::ok);
             TEST(from_next == from + 5);
             TEST(to_next == to + 4);
@@ -228,7 +227,6 @@ std::wstring codecvt_to_wide(std::string const &s)
     std::locale l(std::locale::classic(), new boost::nowide::utf8_codecvt<wchar_t>());
 
     cvt_type const &cvt = std::use_facet<cvt_type>(l);
-    std::vector<wchar_t> output(s.size() + 1);
 
     std::mbstate_t mb = std::mbstate_t();
     char const *from = s.c_str();
@@ -251,7 +249,6 @@ std::string codecvt_to_narrow(std::wstring const &s)
     std::locale l(std::locale::classic(), new boost::nowide::utf8_codecvt<wchar_t>());
 
     cvt_type const &cvt = std::use_facet<cvt_type>(l);
-    std::vector<wchar_t> output(s.size() + 1);
 
     std::mbstate_t mb = std::mbstate_t();
     wchar_t const *from = s.c_str();
