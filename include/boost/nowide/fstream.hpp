@@ -74,7 +74,7 @@ namespace nowide {
         }
         bool is_open()
         {
-            return buf_->is_open();
+            return buf_.is_open();
         }
         bool is_open() const
         {
@@ -134,7 +134,7 @@ namespace nowide {
         }
         bool is_open()
         {
-            return buf_->is_open();
+            return buf_.is_open();
         }
         bool is_open() const
         {
@@ -198,7 +198,7 @@ namespace nowide {
         }
         bool is_open()
         {
-            return buf_->is_open();
+            return buf_.is_open();
         }
         bool is_open() const
         {
