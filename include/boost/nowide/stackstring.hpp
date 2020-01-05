@@ -18,10 +18,10 @@ namespace nowide {
     /// \brief A class that allows to create a temporary wide or narrow UTF strings from
     /// wide or narrow UTF source.
     ///
-    /// It uses on stack buffer if the string is short enough
-    /// and allocates a buffer on the heap if the size of the buffer is too small
+    /// It uses a stack buffer if the string is short enough
+    /// otherwise allocates a buffer on the heap.
     ///
-    /// Invalid UTF characters are replaced by the substitution character
+    /// Invalid UTF characters are replaced by the substitution character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
     /// If a NULL pointer is passed to the constructor or convert method, NULL will be returned by c_str.
     /// Similarily a default constructed stackstring will return NULL on calling c_str.

@@ -59,13 +59,13 @@ namespace nowide {
     ///
     /// \brief  UTF-8 aware setenv, \a key - the variable name, \a value is a new UTF-8 value,
     ///
-    /// if override is not 0, that the old value is always overridded, otherwise,
+    /// if overwrite is not 0, that the old value is always overwritten, otherwise,
     /// if the variable exists it remains unchanged
     ///
-    inline int setenv(char const *key, char const *value, int override)
+    inline int setenv(char const *key, char const *value, int overwrite)
     {
         wshort_stackstring const name(key);
-        if(!override)
+        if(!overwrite)
         {
             wchar_t unused[2];
             if(!(GetEnvironmentVariableW(name.get(), unused, 2) == 0 && GetLastError() == 203)) // ERROR_ENVVAR_NOT_FOUND
@@ -77,7 +77,7 @@ namespace nowide {
         return -1;
     }
     ///
-    /// \brief Remove enviroment variable \a key
+    /// \brief Remove environment variable \a key
     ///
     inline int unsetenv(char const *key)
     {
