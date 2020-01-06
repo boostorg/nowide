@@ -13,6 +13,7 @@
 
 #include <boost/config.hpp>
 #include <boost/nowide/replacement.hpp>
+#include <boost/version.hpp>
 
 #if defined(BOOST_ALL_DYN_LINK) || defined(BOOST_NOWIDE_DYN_LINK)
 #ifdef BOOST_NOWIDE_SOURCE
@@ -61,6 +62,12 @@
 #define BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS 1
 #elif !defined(BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS)
 #define BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS 0
+#endif
+
+#if BOOST_VERSION < 106500 && defined(BOOST_GCC) && BOOST_GCC_VERSION >= 70000
+#define BOOST_NOWIDE_FALLTHROUGH __attribute__((fallthrough))
+#else
+#define BOOST_NOWIDE_FALLTHROUGH BOOST_FALLTHROUGH
 #endif
 
 #endif // boost/nowide/config.hpp

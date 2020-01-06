@@ -8,7 +8,7 @@
 #ifndef BOOST_NOWIDE_UTF_HPP_INCLUDED
 #define BOOST_NOWIDE_UTF_HPP_INCLUDED
 
-#include <boost/config.hpp>
+#include <boost/nowide/config.hpp>
 #include <boost/cstdint.hpp>
 
 namespace boost {
@@ -219,7 +219,7 @@ namespace nowide {
                         if(!is_trail(tmp))
                             return illegal;
                         c = (c << 6) | (tmp & 0x3F);
-                        BOOST_FALLTHROUGH;
+                        BOOST_NOWIDE_FALLTHROUGH;
                     case 2:
                         if(BOOST_UNLIKELY(p == e))
                             return incomplete;
@@ -227,7 +227,7 @@ namespace nowide {
                         if(!is_trail(tmp))
                             return illegal;
                         c = (c << 6) | (tmp & 0x3F);
-                        BOOST_FALLTHROUGH;
+                        BOOST_NOWIDE_FALLTHROUGH;
                     case 1:
                         if(BOOST_UNLIKELY(p == e))
                             return incomplete;
@@ -269,8 +269,8 @@ namespace nowide {
 
                     switch(trail_size)
                     {
-                    case 3: c = (c << 6) | (static_cast<unsigned char>(*p++) & 0x3F); BOOST_FALLTHROUGH;
-                    case 2: c = (c << 6) | (static_cast<unsigned char>(*p++) & 0x3F); BOOST_FALLTHROUGH;
+                    case 3: c = (c << 6) | (static_cast<unsigned char>(*p++) & 0x3F); BOOST_NOWIDE_FALLTHROUGH;
+                    case 2: c = (c << 6) | (static_cast<unsigned char>(*p++) & 0x3F); BOOST_NOWIDE_FALLTHROUGH;
                     case 1: c = (c << 6) | (static_cast<unsigned char>(*p++) & 0x3F);
                     }
 

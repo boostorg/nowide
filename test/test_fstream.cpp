@@ -435,6 +435,37 @@ void test_fstream(const char *filename)
     TEST(nw::remove(filename) == 0);
 }
 
+template<typename T>
+bool is_open(T &stream)
+{
+    // There are const and non const versions of is_open
+    // Test both
+    TEST(stream.is_open() == const_cast<const T &>(stream).is_open());
+    return stream.is_open();
+}
+
+template<typename T>
+void do_test_is_open(const char *filename)
+{
+    T f;
+    TEST(!is_open(f));
+    f.open(filename);
+    TEST(f);
+    TEST(is_open(f));
+    f.close();
+    TEST(f);
+    TEST(!is_open(f));
+}
+
+void test_is_open(const char *filename)
+{
+    // Note the order: Output before input so file exists
+    do_test_is_open<nw::ofstream>(filename);
+    do_test_is_open<nw::ifstream>(filename);
+    do_test_is_open<nw::fstream>(filename);
+    TEST(nw::remove(filename) == 0);
+}
+
 int main(int, char **argv)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
@@ -445,6 +476,7 @@ int main(int, char **argv)
         test_ofstream_write(exampleFilename.c_str());
         test_ifstream_open_read(exampleFilename.c_str());
         test_fstream(exampleFilename.c_str());
+        test_is_open(exampleFilename.c_str());
 
         std::cout << "Complex IO - Sanity Check" << std::endl;
         // Don't use chars the std stream can't properly handle
