@@ -77,26 +77,26 @@ namespace nowide {
         ///
         /// Same as std::filebuf::open but s is UTF-8 string
         ///
-        basic_filebuf *open(std::string const &s, std::ios_base::openmode mode)
+        basic_filebuf *open(const std::string &s, std::ios_base::openmode mode)
         {
             return open(s.c_str(), mode);
         }
         ///
         /// Same as std::filebuf::open but s is UTF-8 string
         ///
-        basic_filebuf *open(char const *s, std::ios_base::openmode mode)
+        basic_filebuf *open(const char *s, std::ios_base::openmode mode)
         {
             if(is_open())
                 return NULL;
             validate_cvt(this->getloc());
-            bool const ate = bool(mode & std::ios_base::ate);
+            const bool ate = bool(mode & std::ios_base::ate);
             if(ate)
                 mode = mode ^ std::ios_base::ate;
-            wchar_t const *smode = get_mode(mode);
+            const wchar_t *smode = get_mode(mode);
             if(!smode)
                 return 0;
 #ifdef BOOST_WINDOWS
-            wstackstring const name(s);
+            const wstackstring name(s);
             file_ = ::_wfopen(name.get(), smode);
 #else
             short_stackstring smode2(smode);
@@ -236,7 +236,7 @@ namespace nowide {
                 return EOF;
             if(buffer_size_ == 0)
             {
-                int const c = std::fgetc(file_);
+                const int c = std::fgetc(file_);
                 if(c == EOF)
                     return EOF;
                 last_char_ = c;
@@ -244,7 +244,7 @@ namespace nowide {
             } else
             {
                 make_buffer();
-                size_t const n = std::fread(buffer_, 1, buffer_size_, file_);
+                const size_t n = std::fread(buffer_, 1, buffer_size_, file_);
                 setg(buffer_, buffer_, buffer_ + n);
                 if(n == 0)
                     return EOF;
@@ -317,7 +317,7 @@ namespace nowide {
         {
             if(gptr())
             {
-                std::streamsize const off = gptr() - egptr();
+                const std::streamsize off = gptr() - egptr();
                 setg(0, 0, 0);
                 assert(off <= std::numeric_limits<long>::max());
                 if(off && std::fseek(file_, off, SEEK_CUR) != 0)
@@ -333,7 +333,7 @@ namespace nowide {
             if(pptr())
             {
                 const char *const base = pbase();
-                size_t const n = pptr() - base;
+                const size_t n = pptr() - base;
                 setp(0, 0);
                 if(n && std::fwrite(base, 1, n, file_) != n)
                     return false;
@@ -352,7 +352,7 @@ namespace nowide {
             file_ = f;
         }
 
-        static wchar_t const *get_mode(std::ios_base::openmode mode)
+        static const wchar_t *get_mode(std::ios_base::openmode mode)
         {
             //
             // done according to n2914 table 106 27.9.1.4

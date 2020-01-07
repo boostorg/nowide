@@ -62,7 +62,7 @@ int main(int argc, char **argv, char **env)
             std::cout << "Wide Parent ok" << std::endl;
 #endif
         }
-    } catch(std::exception const &e)
+    } catch(const std::exception &e)
     {
         std::cerr << "Failed " << e.what() << std::endl;
         return 1;

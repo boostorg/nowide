@@ -78,11 +78,11 @@ namespace nowide {
             }
 
         private:
-            int write(char const *p, int n)
+            int write(const char *p, int n)
             {
                 namespace uf = detail::utf;
-                char const *b = p;
-                char const *e = p + n;
+                const char *b = p;
+                const char *e = p + n;
                 DWORD size = 0;
                 if(n > buffer_size)
                     return -1;

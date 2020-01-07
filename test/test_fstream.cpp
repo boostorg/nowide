@@ -438,7 +438,7 @@ void test_fstream(const char *filename)
 template<typename T>
 bool is_open(T &stream)
 {
-    // There are const and non const versions of is_open
+    // There const are and const non versions of is_open
     // Test both
     TEST(stream.is_open() == const_cast<const T &>(stream).is_open());
     return stream.is_open();
@@ -494,7 +494,7 @@ int main(int, char **argv)
         test_flush<std::ifstream, std::ofstream>(exampleFilename.c_str());
         std::cout << "Flush - Test" << std::endl;
         test_flush<nw::ifstream, nw::ofstream>(exampleFilename.c_str());
-    } catch(std::exception const &e)
+    } catch(const std::exception &e)
     {
         std::cerr << e.what() << std::endl;
         return 1;

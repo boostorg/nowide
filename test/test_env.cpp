@@ -49,7 +49,7 @@ int main()
         TEST(boost::nowide::getenv("BOOST_TEST1"));
         TEST(boost::nowide::getenv("BOOST_TEST1") == example);
 #endif
-    } catch(std::exception const &e)
+    } catch(const std::exception &e)
     {
         std::cerr << "Failed " << e.what() << std::endl;
         return 1;

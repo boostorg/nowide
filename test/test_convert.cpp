@@ -29,8 +29,8 @@ int main()
 
         std::cout << "- boost::nowide::widen" << std::endl;
         {
-            char const *b = hello.c_str();
-            char const *e = b + 8;
+            const char *b = hello.c_str();
+            const char *e = b + 8;
             wchar_t buf[6] = {0, 0, 0, 0, 0, 1};
             TEST(boost::nowide::widen(buf, 5, b, e) == buf);
             TEST(buf == whello);
@@ -60,8 +60,8 @@ int main()
         }
         std::cout << "- boost::nowide::narrow" << std::endl;
         {
-            wchar_t const *b = whello.c_str();
-            wchar_t const *e = b + 4;
+            const wchar_t *b = whello.c_str();
+            const wchar_t *e = b + 4;
             char buf[10] = {0};
             buf[9] = 1;
             TEST(boost::nowide::narrow(buf, 9, b, e) == buf);
@@ -88,7 +88,7 @@ int main()
         }
         std::cout << "- Substitutions" << std::endl;
         run_all(boost::nowide::widen, boost::nowide::narrow);
-    } catch(std::exception const &e)
+    } catch(const std::exception &e)
     {
         std::cerr << "Failed :" << e.what() << std::endl;
         return 1;

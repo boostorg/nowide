@@ -34,7 +34,7 @@ namespace nowide {
         typedef CharOut output_char;
         typedef CharIn input_char;
 
-        basic_stackstring(basic_stackstring const &other) : data_(NULL)
+        basic_stackstring(const basic_stackstring &other) : data_(NULL)
         {
             *this = other;
         }
@@ -63,7 +63,7 @@ namespace nowide {
             } else
                 std::swap(lhs.data_, rhs.data_);
         }
-        basic_stackstring &operator=(basic_stackstring const &other)
+        basic_stackstring &operator=(const basic_stackstring &other)
         {
             if(this != &other)
             {
@@ -82,22 +82,22 @@ namespace nowide {
         {
             buffer_[0] = 0;
         }
-        explicit basic_stackstring(input_char const *input) : data_(NULL)
+        explicit basic_stackstring(const input_char *input) : data_(NULL)
         {
             convert(input);
         }
-        basic_stackstring(input_char const *begin, input_char const *end) : data_(NULL)
+        basic_stackstring(const input_char *begin, const input_char *end) : data_(NULL)
         {
             convert(begin, end);
         }
-        output_char *convert(input_char const *input)
+        output_char *convert(const input_char *input)
         {
             if(input)
                 return convert(input, detail::basic_strend(input));
             clear();
             return get();
         }
-        output_char *convert(input_char const *begin, input_char const *end)
+        output_char *convert(const input_char *begin, const input_char *end)
         {
             clear();
 
@@ -122,7 +122,7 @@ namespace nowide {
             return data_;
         }
         /// Return the converted, NULL-terminated string or NULL if no string was converted
-        output_char const *get() const
+        const output_char *get() const
         {
             return data_;
         }

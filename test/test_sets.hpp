@@ -14,14 +14,14 @@
 
 struct utf8_to_wide
 {
-    char const *utf8;
-    wchar_t const *wide;
+    const char *utf8;
+    const wchar_t *wide;
 };
 
 struct wide_to_utf8
 {
-    wchar_t const *wide;
-    char const *utf8;
+    const wchar_t *wide;
+    const char *utf8;
 };
 
 #if defined(BOOST_MSVC) && BOOST_MSVC < 1700
@@ -75,7 +75,7 @@ wide_to_utf8 w2n_tests_utf32[] = {
 #pragma warning(disable : 4127) // Constant expression detected
 #endif
 
-void run_all(std::wstring (*to_wide)(std::string const &), std::string (*to_narrow)(std::wstring const &))
+void run_all(std::wstring (*to_wide)(const std::string &), std::string (*to_narrow)(const std::wstring &))
 {
     for(size_t i = 0; i < sizeof(n2w_tests) / sizeof(n2w_tests[0]); i++)
     {
@@ -83,7 +83,7 @@ void run_all(std::wstring (*to_wide)(std::string const &), std::string (*to_narr
         TEST(to_wide(n2w_tests[i].utf8) == n2w_tests[i].wide);
     }
     int total = 0;
-    wide_to_utf8 const *ptr = 0;
+    const wide_to_utf8 *ptr = 0;
     if(sizeof(wchar_t) == 2)
     {
         ptr = w2n_tests_utf16;

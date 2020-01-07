@@ -134,7 +134,7 @@ int main(int, char **argv)
             TEST(boost::nowide::remove(filename.c_str()) < 0);
             TEST(boost::nowide::remove(filename2.c_str()) == 0);
         }
-    } catch(std::exception const &e)
+    } catch(const std::exception &e)
     {
         std::cerr << "Failed " << e.what() << std::endl;
         return 1;

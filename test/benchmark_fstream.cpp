@@ -27,7 +27,7 @@ template<typename FStream>
 class io_fstream
 {
 public:
-    void open(char const *file)
+    void open(const char *file)
     {
         f_.open(file, std::fstream::out | std::fstream::in | std::fstream::trunc);
         TEST(f_);
@@ -61,7 +61,7 @@ private:
 class io_stdio
 {
 public:
-    void open(char const *file)
+    void open(const char *file)
     {
         f_ = fopen(file, "w+");
         TEST(f_);
@@ -94,7 +94,7 @@ private:
 };
 
 template<typename FStream>
-void test_io(const char *file, char const *type)
+void test_io(const char *file, const char *type)
 {
     std::cout << "Testing I/O performance " << type << std::endl;
     FStream tmp;

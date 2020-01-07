@@ -68,20 +68,20 @@ namespace nowide {
                               const
 #endif
                                 &std_state,
-                              char const *from,
-                              char const *from_end,
+                              const char *from,
+                              const char *from_end,
                               size_t max) const
         {
 #ifndef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
-            char const *save_from = from;
+            const char *save_from = from;
             boost::uint16_t &state = *reinterpret_cast<boost::uint16_t *>(&std_state);
 #else
             size_t save_max = max;
-            boost::uint16_t state = *reinterpret_cast<boost::uint16_t const *>(&std_state);
+            boost::uint16_t state = *reinterpret_cast<const boost::uint16_t *>(&std_state);
 #endif
             while(max > 0 && from < from_end)
             {
-                char const *prev_from = from;
+                const char *prev_from = from;
                 boost::uint32_t ch = detail::utf::utf_traits<char>::decode(from, from_end);
                 if(ch == detail::utf::illegal)
                 {
@@ -112,9 +112,9 @@ namespace nowide {
         }
 
         virtual std::codecvt_base::result do_in(std::mbstate_t &std_state,
-                                                char const *from,
-                                                char const *from_end,
-                                                char const *&from_next,
+                                                const char *from,
+                                                const char *from_end,
+                                                const char *&from_next,
                                                 uchar *to,
                                                 uchar *to_end,
                                                 uchar *&to_next) const
@@ -129,7 +129,7 @@ namespace nowide {
             boost::uint16_t &state = *reinterpret_cast<boost::uint16_t *>(&std_state);
             while(to < to_end && from < from_end)
             {
-                char const *from_saved = from;
+                const char *from_saved = from;
 
                 uint32_t ch = detail::utf::utf_traits<char>::decode(from, from_end);
 
@@ -182,9 +182,9 @@ namespace nowide {
         }
 
         virtual std::codecvt_base::result do_out(std::mbstate_t &std_state,
-                                                 uchar const *from,
-                                                 uchar const *from_end,
-                                                 uchar const *&from_next,
+                                                 const uchar *from,
+                                                 const uchar *from_end,
+                                                 const uchar *&from_next,
                                                  char *to,
                                                  char *to_end,
                                                  char *&to_next) const
@@ -295,19 +295,19 @@ namespace nowide {
                               const
 #endif
                                 & /*state*/,
-                              char const *from,
-                              char const *from_end,
+                              const char *from,
+                              const char *from_end,
                               size_t max) const
         {
 #ifndef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
-            char const *start_from = from;
+            const char *start_from = from;
 #else
             size_t save_max = max;
 #endif
 
             while(max > 0 && from < from_end)
             {
-                char const *save_from = from;
+                const char *save_from = from;
                 boost::uint32_t ch = detail::utf::utf_traits<char>::decode(from, from_end);
                 if(ch == detail::utf::incomplete)
                 {
@@ -327,9 +327,9 @@ namespace nowide {
         }
 
         virtual std::codecvt_base::result do_in(std::mbstate_t & /*state*/,
-                                                char const *from,
-                                                char const *from_end,
-                                                char const *&from_next,
+                                                const char *from,
+                                                const char *from_end,
+                                                const char *&from_next,
                                                 uchar *to,
                                                 uchar *to_end,
                                                 uchar *&to_next) const
@@ -343,7 +343,7 @@ namespace nowide {
             // and first pair is written, but no input consumed
             while(to < to_end && from < from_end)
             {
-                char const *from_saved = from;
+                const char *from_saved = from;
 
                 uint32_t ch = detail::utf::utf_traits<char>::decode(from, from_end);
 
@@ -366,9 +366,9 @@ namespace nowide {
         }
 
         virtual std::codecvt_base::result do_out(std::mbstate_t & /*std_state*/,
-                                                 uchar const *from,
-                                                 uchar const *from_end,
-                                                 uchar const *&from_next,
+                                                 const uchar *from,
+                                                 const uchar *from_end,
+                                                 const uchar *&from_next,
                                                  char *to,
                                                  char *to_end,
                                                  char *&to_next) const
