@@ -42,42 +42,25 @@ int main(int argc, char **argv, char **env)
             }
             TEST(found);
             std::cout << "Subprocess ok" << std::endl;
-        } else if(argc == 2 && argv[1][0] == '-')
+        } else if(argc == 1)
         {
-            switch(argv[1][1])
-            {
-            case 'w': {
-#ifdef BOOST_WINDOWS
-                std::wstring env_var = L"BOOST_NOWIDE_TEST=" + boost::nowide::widen(example);
-                TEST(_wputenv(env_var.c_str()) == 0);
-                std::wstring wcommand = boost::nowide::widen(argv[0]);
-                wcommand += L" ";
-                wcommand += boost::nowide::widen(example);
-                TEST(_wsystem(wcommand.c_str()) == 0);
-                std::cout << "Wide Parent ok" << std::endl;
+#if BOOST_NOWIDE_TEST_USE_NARROW
+            TEST(boost::nowide::setenv("BOOST_NOWIDE_TEST", example.c_str(), 1) == 0);
+            TEST(boost::nowide::setenv("BOOST_NOWIDE_TEST_NONE", example.c_str(), 1) == 0);
+            TEST(boost::nowide::unsetenv("BOOST_NOWIDE_TEST_NONE") == 0);
+            std::string command = "\"";
+            command += argv[0];
+            command += "\" ";
+            command += example;
+            TEST(boost::nowide::system(command.c_str()) == 0);
+            std::cout << "Parent ok" << std::endl;
 #else
-                std::cout << "Wide API is irrelevant" << std::endl;
+            std::wstring envVar = L"BOOST_NOWIDE_TEST=" + boost::nowide::widen(example);
+            TEST(_wputenv(envVar.c_str()) == 0);
+            std::wstring wcommand = boost::nowide::widen(argv[0]) + L" " + boost::nowide::widen(example);
+            TEST(_wsystem(wcommand.c_str()) == 0);
+            std::cout << "Wide Parent ok" << std::endl;
 #endif
-            }
-            break;
-            case 'n': {
-                TEST(boost::nowide::setenv("BOOST_NOWIDE_TEST", example.c_str(), 1) == 0);
-                TEST(boost::nowide::setenv("BOOST_NOWIDE_TEST_NONE", example.c_str(), 1) == 0);
-                TEST(boost::nowide::unsetenv("BOOST_NOWIDE_TEST_NONE") == 0);
-                std::string command = "\"";
-                command += argv[0];
-                command += "\" ";
-                command += example;
-                TEST(boost::nowide::system(command.c_str()) == 0);
-                std::cout << "Parent ok" << std::endl;
-            }
-            break;
-            default: std::cout << "Invalid parameters expected '-n/-w'" << std::endl; return 1;
-            }
-        } else
-        {
-            std::cerr << "Invalid parameters" << std::endl;
-            return 1;
         }
     } catch(std::exception const &e)
     {
