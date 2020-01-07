@@ -29,5 +29,3 @@ inline void test_failed(const std::string &msg)
     } while(0)
 
 #endif // #ifndef BOOST_NOWIDE_LIB_TEST_H_INCLUDED
-///
-// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

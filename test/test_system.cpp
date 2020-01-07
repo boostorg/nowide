@@ -70,6 +70,3 @@ int main(int argc, char **argv, char **env)
 
     return 0;
 }
-
-///
-// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

@@ -105,6 +105,3 @@ void run_all(std::wstring (*to_wide)(std::string const &), std::string (*to_narr
 #ifdef BOOST_MSVC
 #pragma warning(pop)
 #endif
-
-///
-// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
