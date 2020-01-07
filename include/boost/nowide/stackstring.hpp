@@ -93,7 +93,7 @@ namespace nowide {
         output_char *convert(input_char const *input)
         {
             if(input)
-                return convert(input, details::basic_strend(input));
+                return convert(input, detail::basic_strend(input));
             clear();
             return get();
         }

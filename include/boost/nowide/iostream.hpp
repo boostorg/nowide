@@ -34,7 +34,7 @@ namespace nowide {
 #else
 
     /// \cond INTERNAL
-    namespace details {
+    namespace detail {
         class console_output_buffer;
         class console_input_buffer;
 
@@ -63,7 +63,7 @@ namespace nowide {
         private:
             boost::scoped_ptr<console_input_buffer> d;
         };
-    } // namespace details
+    } // namespace detail
 
     /// \endcond
 
@@ -72,25 +72,25 @@ namespace nowide {
     ///
     /// Note, the stream is not synchronized with stdio and not affected by std::ios::sync_with_stdio
     ///
-    extern BOOST_NOWIDE_DECL details::winconsole_istream cin;
+    extern BOOST_NOWIDE_DECL detail::winconsole_istream cin;
     ///
     /// \brief Same as std::cout, but uses UTF-8
     ///
     /// Note, the stream is not synchronized with stdio and not affected by std::ios::sync_with_stdio
     ///
-    extern BOOST_NOWIDE_DECL details::winconsole_ostream cout;
+    extern BOOST_NOWIDE_DECL detail::winconsole_ostream cout;
     ///
     /// \brief Same as std::cerr, but uses UTF-8
     ///
     /// Note, the stream is not synchronized with stdio and not affected by std::ios::sync_with_stdio
     ///
-    extern BOOST_NOWIDE_DECL details::winconsole_ostream cerr;
+    extern BOOST_NOWIDE_DECL detail::winconsole_ostream cerr;
     ///
     /// \brief Same as std::clog, but uses UTF-8
     ///
     /// Note, the stream is not synchronized with stdio and not affected by std::ios::sync_with_stdio
     ///
-    extern BOOST_NOWIDE_DECL details::winconsole_ostream clog;
+    extern BOOST_NOWIDE_DECL detail::winconsole_ostream clog;
 
 #endif
 

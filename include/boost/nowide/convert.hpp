@@ -80,7 +80,7 @@ namespace nowide {
     }
 
     /// \cond INTERNAL
-    namespace details {
+    namespace detail {
         //
         // wcslen defined only in C99... So we will not use it
         //
@@ -91,7 +91,7 @@ namespace nowide {
                 s++;
             return s;
         }
-    } // namespace details
+    } // namespace detail
     /// \endcond
 
     ///
@@ -114,7 +114,7 @@ namespace nowide {
     template<typename CharOut, typename CharIn>
     std::basic_string<CharOut> basic_convert(CharIn const *s)
     {
-        return basic_convert<CharOut>(s, details::basic_strend(s));
+        return basic_convert<CharOut>(s, detail::basic_strend(s));
     }
 
     ///
@@ -126,7 +126,7 @@ namespace nowide {
     ///
     inline char *narrow(char *output, size_t output_size, wchar_t const *source)
     {
-        return basic_convert(output, output_size, source, details::basic_strend(source));
+        return basic_convert(output, output_size, source, detail::basic_strend(source));
     }
     ///
     /// Convert UTF text in range [begin,end) to NULL terminated \a output string of size at
@@ -148,7 +148,7 @@ namespace nowide {
     ///
     inline wchar_t *widen(wchar_t *output, size_t output_size, char const *source)
     {
-        return basic_convert(output, output_size, source, details::basic_strend(source));
+        return basic_convert(output, output_size, source, detail::basic_strend(source));
     }
     ///
     /// Convert UTF text in range [begin,end) to NULL terminated \a output string of size at

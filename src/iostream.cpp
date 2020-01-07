@@ -32,7 +32,7 @@ namespace nowide {
 
 namespace boost {
 namespace nowide {
-    namespace details {
+    namespace detail {
 
         namespace {
             bool is_atty_handle(HANDLE h)
@@ -251,12 +251,12 @@ namespace nowide {
         winconsole_istream::~winconsole_istream()
         {}
 
-    } // namespace details
+    } // namespace detail
 
-    details::winconsole_ostream cout(1, NULL);
-    details::winconsole_istream cin(&cout);
-    details::winconsole_ostream cerr(2, &cout);
-    details::winconsole_ostream clog(2, &cout);
+    detail::winconsole_ostream cout(1, NULL);
+    detail::winconsole_istream cin(&cout);
+    detail::winconsole_ostream cerr(2, &cout);
+    detail::winconsole_ostream clog(2, &cout);
 } // namespace nowide
 } // namespace boost
 
