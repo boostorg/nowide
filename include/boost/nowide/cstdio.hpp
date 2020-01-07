@@ -5,8 +5,8 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_CSTDIO_H_INCLUDED
-#define BOOST_NOWIDE_CSTDIO_H_INCLUDED
+#ifndef BOOST_NOWIDE_CSTDIO_HPP_INCLUDED
+#define BOOST_NOWIDE_CSTDIO_HPP_INCLUDED
 
 #include <boost/config.hpp>
 

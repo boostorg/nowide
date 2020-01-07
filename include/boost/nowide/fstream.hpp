@@ -5,8 +5,8 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_FSTREAM_INCLUDED_HPP
-#define BOOST_NOWIDE_FSTREAM_INCLUDED_HPP
+#ifndef BOOST_NOWIDE_FSTREAM_HPP_INCLUDED
+#define BOOST_NOWIDE_FSTREAM_HPP_INCLUDED
 
 #include <boost/nowide/config.hpp>
 #include <boost/nowide/filebuf.hpp>
