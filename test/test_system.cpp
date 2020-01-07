@@ -12,7 +12,7 @@
 #include <cstring>
 #include <iostream>
 
-int main(int argc, char **argv, char **env)
+int main(int argc, char** argv, char** env)
 {
     try
     {
@@ -27,11 +27,11 @@ int main(int argc, char **argv, char **env)
             TEST(boost::nowide::getenv("BOOST_NOWIDE_TEST") == example);
             std::string sample = "BOOST_NOWIDE_TEST=" + example;
             bool found = false;
-            for(char **e = env; *e != 0; e++)
+            for(char** e = env; *e != 0; e++)
             {
-                char *eptr = *e;
+                char* eptr = *e;
                 // printf("%s\n",eptr);
-                char *key_end = strchr(eptr, '=');
+                char* key_end = strchr(eptr, '=');
                 TEST(key_end);
                 std::string key = std::string(eptr, key_end);
                 std::string value = key_end + 1;
@@ -62,7 +62,7 @@ int main(int argc, char **argv, char **env)
             std::cout << "Wide Parent ok" << std::endl;
 #endif
         }
-    } catch(const std::exception &e)
+    } catch(const std::exception& e)
     {
         std::cerr << "Failed " << e.what() << std::endl;
         return 1;

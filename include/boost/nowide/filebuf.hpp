@@ -54,8 +54,8 @@ namespace nowide {
     class basic_filebuf<char> : public std::basic_streambuf<char>
     {
         // Non-copyable
-        basic_filebuf(const basic_filebuf<char> &);
-        basic_filebuf &operator=(const basic_filebuf<char> &);
+        basic_filebuf(const basic_filebuf<char>&);
+        basic_filebuf& operator=(const basic_filebuf<char>&);
 
         typedef std::char_traits<char> Traits;
 
@@ -77,14 +77,14 @@ namespace nowide {
         ///
         /// Same as std::filebuf::open but s is UTF-8 string
         ///
-        basic_filebuf *open(const std::string &s, std::ios_base::openmode mode)
+        basic_filebuf* open(const std::string& s, std::ios_base::openmode mode)
         {
             return open(s.c_str(), mode);
         }
         ///
         /// Same as std::filebuf::open but s is UTF-8 string
         ///
-        basic_filebuf *open(const char *s, std::ios_base::openmode mode)
+        basic_filebuf* open(const char* s, std::ios_base::openmode mode)
         {
             if(is_open())
                 return NULL;
@@ -92,7 +92,7 @@ namespace nowide {
             const bool ate = bool(mode & std::ios_base::ate);
             if(ate)
                 mode = mode ^ std::ios_base::ate;
-            const wchar_t *smode = get_mode(mode);
+            const wchar_t* smode = get_mode(mode);
             if(!smode)
                 return 0;
 #ifdef BOOST_WINDOWS
@@ -116,7 +116,7 @@ namespace nowide {
         ///
         /// Same as std::filebuf::close()
         ///
-        basic_filebuf *close()
+        basic_filebuf* close()
         {
             if(!is_open())
                 return NULL;
@@ -152,14 +152,14 @@ namespace nowide {
                 owns_buffer_ = true;
             }
         }
-        void validate_cvt(const std::locale &loc)
+        void validate_cvt(const std::locale& loc)
         {
             if(!std::use_facet<std::codecvt<char, char, std::mbstate_t> >(loc).always_noconv())
                 throw std::runtime_error("Converting codecvts are not supported");
         }
 
     protected:
-        virtual std::streambuf *setbuf(char *s, std::streamsize n)
+        virtual std::streambuf* setbuf(char* s, std::streamsize n)
         {
             assert(n >= 0);
             // Maximum compatibility: Discard all local buffers and use user-provided values
@@ -305,7 +305,7 @@ namespace nowide {
             // Standard mandates "as-if fsetpos", but assume the effect is the same as fseek
             return seekoff(pos, std::ios_base::beg, m);
         }
-        virtual void imbue(const std::locale &loc)
+        virtual void imbue(const std::locale& loc)
         {
             validate_cvt(loc);
         }
@@ -332,7 +332,7 @@ namespace nowide {
         {
             if(pptr())
             {
-                const char *const base = pbase();
+                const char* const base = pbase();
                 const size_t n = pptr() - base;
                 setp(0, 0);
                 if(n && std::fwrite(base, 1, n, file_) != n)
@@ -341,7 +341,7 @@ namespace nowide {
             return true;
         }
 
-        void reset(FILE *f = 0)
+        void reset(FILE* f = 0)
         {
             sync();
             if(file_)
@@ -352,7 +352,7 @@ namespace nowide {
             file_ = f;
         }
 
-        static const wchar_t *get_mode(std::ios_base::openmode mode)
+        static const wchar_t* get_mode(std::ios_base::openmode mode)
         {
             //
             // done according to n2914 table 106 27.9.1.4
@@ -400,8 +400,8 @@ namespace nowide {
         }
 
         size_t buffer_size_;
-        char *buffer_;
-        FILE *file_;
+        char* buffer_;
+        FILE* file_;
         bool owns_buffer_;
         char last_char_;
         std::ios::openmode mode_;

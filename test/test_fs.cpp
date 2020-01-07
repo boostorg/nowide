@@ -37,7 +37,7 @@ int main()
 
         TEST(!boost::filesystem::is_regular_file(boost::nowide::widen(utf8_name)));
         TEST(!boost::filesystem::is_regular_file(utf8_name));
-    } catch(const std::exception &e)
+    } catch(const std::exception& e)
     {
         std::cerr << "Failed : " << e.what() << std::endl;
         return 1;

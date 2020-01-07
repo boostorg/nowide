@@ -40,11 +40,11 @@ namespace nowide {
 
         class BOOST_NOWIDE_DECL winconsole_ostream : public std::ostream
         {
-            winconsole_ostream(const winconsole_ostream &);
-            void operator=(const winconsole_ostream &);
+            winconsole_ostream(const winconsole_ostream&);
+            void operator=(const winconsole_ostream&);
 
         public:
-            winconsole_ostream(int fd, winconsole_ostream *tieStream);
+            winconsole_ostream(int fd, winconsole_ostream* tieStream);
             ~winconsole_ostream();
 
         private:
@@ -53,11 +53,11 @@ namespace nowide {
 
         class BOOST_NOWIDE_DECL winconsole_istream : public std::istream
         {
-            winconsole_istream(const winconsole_istream &);
-            void operator=(const winconsole_istream &);
+            winconsole_istream(const winconsole_istream&);
+            void operator=(const winconsole_istream&);
 
         public:
-            explicit winconsole_istream(winconsole_ostream *tieStream);
+            explicit winconsole_istream(winconsole_ostream* tieStream);
             ~winconsole_istream();
 
         private:

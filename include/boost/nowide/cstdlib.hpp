@@ -31,7 +31,7 @@ namespace nowide {
     ///
     /// This function is not thread safe or reenterable as defined by the standard library
     ///
-    inline char *getenv(const char *key)
+    inline char* getenv(const char* key)
     {
         static stackstring value;
 
@@ -40,7 +40,7 @@ namespace nowide {
         static const size_t buf_size = 64;
         wchar_t buf[buf_size];
         std::vector<wchar_t> tmp;
-        wchar_t *ptr = buf;
+        wchar_t* ptr = buf;
         size_t n = GetEnvironmentVariableW(name.get(), buf, buf_size);
         if(n == 0 && GetLastError() == 203) // ERROR_ENVVAR_NOT_FOUND
             return 0;
@@ -62,7 +62,7 @@ namespace nowide {
     /// if overwrite is not 0, that the old value is always overwritten, otherwise,
     /// if the variable exists it remains unchanged
     ///
-    inline int setenv(const char *key, const char *value, int overwrite)
+    inline int setenv(const char* key, const char* value, int overwrite)
     {
         const wshort_stackstring name(key);
         if(!overwrite)
@@ -79,7 +79,7 @@ namespace nowide {
     ///
     /// \brief Remove environment variable \a key
     ///
-    inline int unsetenv(const char *key)
+    inline int unsetenv(const char* key)
     {
         const wshort_stackstring name(key);
         if(SetEnvironmentVariableW(name.get(), 0))
@@ -89,10 +89,10 @@ namespace nowide {
     ///
     /// \brief UTF-8 aware putenv implementation, expects string in format KEY=VALUE
     ///
-    inline int putenv(char *string)
+    inline int putenv(char* string)
     {
-        const char *key = string;
-        const char *key_end = string;
+        const char* key = string;
+        const char* key_end = string;
         while(*key_end != '=' && *key_end != '\0')
             key_end++;
         if(*key_end == '\0')
@@ -108,7 +108,7 @@ namespace nowide {
     ///
     /// Same as std::system but cmd is UTF-8.
     ///
-    inline int system(const char *cmd)
+    inline int system(const char* cmd)
     {
         if(!cmd)
             return _wsystem(0);

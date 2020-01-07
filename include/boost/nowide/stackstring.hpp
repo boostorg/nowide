@@ -34,12 +34,12 @@ namespace nowide {
         typedef CharOut output_char;
         typedef CharIn input_char;
 
-        basic_stackstring(const basic_stackstring &other) : data_(NULL)
+        basic_stackstring(const basic_stackstring& other) : data_(NULL)
         {
             *this = other;
         }
 
-        friend void swap(basic_stackstring &lhs, basic_stackstring &rhs)
+        friend void swap(basic_stackstring& lhs, basic_stackstring& rhs)
         {
             if(lhs.uses_stack_memory())
             {
@@ -63,7 +63,7 @@ namespace nowide {
             } else
                 std::swap(lhs.data_, rhs.data_);
         }
-        basic_stackstring &operator=(const basic_stackstring &other)
+        basic_stackstring& operator=(const basic_stackstring& other)
         {
             if(this != &other)
             {
@@ -82,22 +82,22 @@ namespace nowide {
         {
             buffer_[0] = 0;
         }
-        explicit basic_stackstring(const input_char *input) : data_(NULL)
+        explicit basic_stackstring(const input_char* input) : data_(NULL)
         {
             convert(input);
         }
-        basic_stackstring(const input_char *begin, const input_char *end) : data_(NULL)
+        basic_stackstring(const input_char* begin, const input_char* end) : data_(NULL)
         {
             convert(begin, end);
         }
-        output_char *convert(const input_char *input)
+        output_char* convert(const input_char* input)
         {
             if(input)
                 return convert(input, detail::basic_strend(input));
             clear();
             return get();
         }
-        output_char *convert(const input_char *begin, const input_char *end)
+        output_char* convert(const input_char* begin, const input_char* end)
         {
             clear();
 
@@ -117,12 +117,12 @@ namespace nowide {
             return get();
         }
         /// Return the converted, NULL-terminated string or NULL if no string was converted
-        output_char *get()
+        output_char* get()
         {
             return data_;
         }
         /// Return the converted, NULL-terminated string or NULL if no string was converted
-        const output_char *get() const
+        const output_char* get() const
         {
             return data_;
         }
@@ -164,7 +164,7 @@ namespace nowide {
                 return 2 * in;
         }
         output_char buffer_[buffer_size];
-        output_char *data_;
+        output_char* data_;
     }; // basic_stackstring
 
     ///

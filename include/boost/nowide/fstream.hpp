@@ -49,23 +49,23 @@ namespace nowide {
             this->init(&buf_);
         }
 
-        explicit basic_ifstream(const char *file_name, std::ios_base::openmode mode = std::ios_base::in) : internal_stream_type(NULL)
+        explicit basic_ifstream(const char* file_name, std::ios_base::openmode mode = std::ios_base::in) : internal_stream_type(NULL)
         {
             this->init(&buf_);
             open(file_name, mode);
         }
 
-        explicit basic_ifstream(const std::string &file_name, std::ios_base::openmode mode = std::ios_base::in) : internal_stream_type(NULL)
+        explicit basic_ifstream(const std::string& file_name, std::ios_base::openmode mode = std::ios_base::in) : internal_stream_type(NULL)
         {
             this->init(&buf_);
             open(file_name, mode);
         }
 
-        void open(const std::string &file_name, std::ios_base::openmode mode = std::ios_base::in)
+        void open(const std::string& file_name, std::ios_base::openmode mode = std::ios_base::in)
         {
             open(file_name.c_str(), mode);
         }
-        void open(const char *file_name, std::ios_base::openmode mode = std::ios_base::in)
+        void open(const char* file_name, std::ios_base::openmode mode = std::ios_base::in)
         {
             if(!buf_.open(file_name, mode | std::ios_base::in))
                 this->setstate(std::ios_base::failbit);
@@ -86,9 +86,9 @@ namespace nowide {
                 this->setstate(std::ios_base::failbit);
         }
 
-        internal_buffer_type *rdbuf() const
+        internal_buffer_type* rdbuf() const
         {
-            return const_cast<internal_buffer_type *>(&buf_);
+            return const_cast<internal_buffer_type*>(&buf_);
         }
 
     private:
@@ -110,22 +110,22 @@ namespace nowide {
         {
             this->init(&buf_);
         }
-        explicit basic_ofstream(const char *file_name, std::ios_base::openmode mode = std::ios_base::out) : internal_stream_type(NULL)
+        explicit basic_ofstream(const char* file_name, std::ios_base::openmode mode = std::ios_base::out) : internal_stream_type(NULL)
         {
             this->init(&buf_);
             open(file_name, mode);
         }
-        explicit basic_ofstream(const std::string &file_name, std::ios_base::openmode mode = std::ios_base::out) :
+        explicit basic_ofstream(const std::string& file_name, std::ios_base::openmode mode = std::ios_base::out) :
             internal_stream_type(NULL)
         {
             this->init(&buf_);
             open(file_name, mode);
         }
-        void open(const std::string &file_name, std::ios_base::openmode mode = std::ios_base::out)
+        void open(const std::string& file_name, std::ios_base::openmode mode = std::ios_base::out)
         {
             open(file_name.c_str(), mode);
         }
-        void open(const char *file_name, std::ios_base::openmode mode = std::ios_base::out)
+        void open(const char* file_name, std::ios_base::openmode mode = std::ios_base::out)
         {
             if(!buf_.open(file_name, mode | std::ios_base::out))
                 this->setstate(std::ios_base::failbit);
@@ -146,9 +146,9 @@ namespace nowide {
                 this->setstate(std::ios_base::failbit);
         }
 
-        internal_buffer_type *rdbuf() const
+        internal_buffer_type* rdbuf() const
         {
-            return const_cast<internal_buffer_type *>(&buf_);
+            return const_cast<internal_buffer_type*>(&buf_);
         }
 
     private:
@@ -173,23 +173,23 @@ namespace nowide {
         {
             this->init(&buf_);
         }
-        explicit basic_fstream(const char *file_name, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) :
+        explicit basic_fstream(const char* file_name, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) :
             internal_stream_type(NULL)
         {
             this->init(&buf_);
             open(file_name, mode);
         }
-        explicit basic_fstream(const std::string &file_name, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) :
+        explicit basic_fstream(const std::string& file_name, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) :
             internal_stream_type(NULL)
         {
             this->init(&buf_);
             open(file_name, mode);
         }
-        void open(const std::string &file_name, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
+        void open(const std::string& file_name, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
         {
             open(file_name.c_str(), mode);
         }
-        void open(const char *file_name, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
+        void open(const char* file_name, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
         {
             if(!buf_.open(file_name, mode))
                 this->setstate(std::ios_base::failbit);
@@ -210,9 +210,9 @@ namespace nowide {
                 this->setstate(std::ios_base::failbit);
         }
 
-        internal_buffer_type *rdbuf() const
+        internal_buffer_type* rdbuf() const
         {
-            return const_cast<internal_buffer_type *>(&buf_);
+            return const_cast<internal_buffer_type*>(&buf_);
         }
 
     private:

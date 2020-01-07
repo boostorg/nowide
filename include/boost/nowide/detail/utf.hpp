@@ -75,7 +75,7 @@ namespace nowide {
                 /// - p points to the last consumed character
                 ///
                 template<typename Iterator>
-                static code_point decode(Iterator &p, Iterator e);
+                static code_point decode(Iterator& p, Iterator e);
 
                 ///
                 /// Maximal width of valid sequence in the code units:
@@ -126,7 +126,7 @@ namespace nowide {
                 /// If the sequence is invalid or points to end the behavior is undefined
                 ///
                 template<typename Iterator>
-                static code_point decode_valid(Iterator &p);
+                static code_point decode_valid(Iterator& p);
             };
 
 #else
@@ -186,7 +186,7 @@ namespace nowide {
                 }
 
                 template<typename Iterator>
-                static code_point decode(Iterator &p, Iterator e)
+                static code_point decode(Iterator& p, Iterator e)
                 {
                     if(BOOST_UNLIKELY(p == e))
                         return incomplete;
@@ -250,7 +250,7 @@ namespace nowide {
                 }
 
                 template<typename Iterator>
-                static code_point decode_valid(Iterator &p)
+                static code_point decode_valid(Iterator& p)
                 {
                     unsigned char lead = *p++;
                     if(lead < 192)
@@ -345,7 +345,7 @@ namespace nowide {
                 }
 
                 template<typename It>
-                static code_point decode(It &current, It last)
+                static code_point decode(It& current, It last)
                 {
                     if(BOOST_UNLIKELY(current == last))
                         return incomplete;
@@ -364,7 +364,7 @@ namespace nowide {
                     return combine_surrogate(w1, w2);
                 }
                 template<typename It>
-                static code_point decode_valid(It &current)
+                static code_point decode_valid(It& current)
                 {
                     uint16_t w1 = *current++;
                     if(BOOST_LIKELY(w1 < 0xD800 || 0xDFFF < w1))
@@ -416,13 +416,13 @@ namespace nowide {
                 }
 
                 template<typename It>
-                static code_point decode_valid(It &current)
+                static code_point decode_valid(It& current)
                 {
                     return *current++;
                 }
 
                 template<typename It>
-                static code_point decode(It &current, It last)
+                static code_point decode(It& current, It last)
                 {
                     if(BOOST_UNLIKELY(current == last))
                         return incomplete;

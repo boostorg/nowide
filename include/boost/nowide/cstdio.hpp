@@ -32,7 +32,7 @@ namespace nowide {
     ///
     /// \brief Same as freopen but file_name and mode are UTF-8 strings
     ///
-    inline FILE *freopen(const char *file_name, const char *mode, FILE *stream)
+    inline FILE* freopen(const char* file_name, const char* mode, FILE* stream)
     {
         const wstackstring wname(file_name);
         const wshort_stackstring wmode(mode);
@@ -41,7 +41,7 @@ namespace nowide {
     ///
     /// \brief Same as fopen but file_name and mode are UTF-8 strings
     ///
-    inline FILE *fopen(const char *file_name, const char *mode)
+    inline FILE* fopen(const char* file_name, const char* mode)
     {
         const wstackstring wname(file_name);
         const wshort_stackstring wmode(mode);
@@ -50,7 +50,7 @@ namespace nowide {
     ///
     /// \brief Same as rename but old_name and new_name are UTF-8 strings
     ///
-    inline int rename(const char *old_name, const char *new_name)
+    inline int rename(const char* old_name, const char* new_name)
     {
         const wstackstring wold(old_name), wnew(new_name);
         return _wrename(wold.get(), wnew.get());
@@ -58,7 +58,7 @@ namespace nowide {
     ///
     /// \brief Same as rename but name is UTF-8 string
     ///
-    inline int remove(const char *name)
+    inline int remove(const char* name)
     {
         const wstackstring wname(name);
         return _wremove(wname.get());

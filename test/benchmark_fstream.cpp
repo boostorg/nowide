@@ -27,16 +27,16 @@ template<typename FStream>
 class io_fstream
 {
 public:
-    void open(const char *file)
+    void open(const char* file)
     {
         f_.open(file, std::fstream::out | std::fstream::in | std::fstream::trunc);
         TEST(f_);
     }
-    void write(char *buf, int size)
+    void write(char* buf, int size)
     {
         f_.write(buf, size);
     }
-    void read(char *buf, int size)
+    void read(char* buf, int size)
     {
         f_.read(buf, size);
     }
@@ -61,16 +61,16 @@ private:
 class io_stdio
 {
 public:
-    void open(const char *file)
+    void open(const char* file)
     {
         f_ = fopen(file, "w+");
         TEST(f_);
     }
-    void write(char *buf, int size)
+    void write(char* buf, int size)
     {
         fwrite(buf, 1, size, f_);
     }
-    void read(char *buf, int size)
+    void read(char* buf, int size)
     {
         size_t res = fread(buf, 1, size, f_);
         (void)res;
@@ -90,11 +90,11 @@ public:
     }
 
 private:
-    FILE *f_;
+    FILE* f_;
 };
 
 template<typename FStream>
-void test_io(const char *file, const char *type)
+void test_io(const char* file, const char* type)
 {
     std::cout << "Testing I/O performance " << type << std::endl;
     FStream tmp;
@@ -139,14 +139,14 @@ void test_io(const char *file, const char *type)
     std::remove(file);
 }
 
-void test_perf(const char *file)
+void test_perf(const char* file)
 {
     test_io<io_stdio>(file, "stdio");
     test_io<io_fstream<std::fstream> >(file, "std::fstream");
     test_io<io_fstream<nw::fstream> >(file, "nowide::fstream");
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     std::string filename = "perf_test_file.dat";
     if(argc == 2)

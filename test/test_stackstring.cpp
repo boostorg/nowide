@@ -15,13 +15,13 @@
 #pragma warning(disable : 4428) // universal-character-name encountered in source
 #endif
 
-std::wstring stackstring_to_wide(const std::string &s)
+std::wstring stackstring_to_wide(const std::string& s)
 {
     const boost::nowide::wstackstring ss(s.c_str());
     return ss.get();
 }
 
-std::string stackstring_to_narrow(const std::wstring &s)
+std::string stackstring_to_narrow(const std::wstring& s)
 {
     const boost::nowide::stackstring ss(s.c_str());
     return ss.get();
@@ -33,7 +33,7 @@ int main()
     {
         std::string hello = "\xd7\xa9\xd7\x9c\xd7\x95\xd7\x9d";
         std::wstring whello = L"\u05e9\u05dc\u05d5\u05dd";
-        const wchar_t *wempty = L"";
+        const wchar_t* wempty = L"";
 
         {
             // Default constructed string is NULL
@@ -170,7 +170,7 @@ int main()
         }
         std::cout << "- Substitutions" << std::endl;
         run_all(stackstring_to_wide, stackstring_to_narrow);
-    } catch(const std::exception &e)
+    } catch(const std::exception& e)
     {
         std::cerr << "Failed :" << e.what() << std::endl;
         return 1;

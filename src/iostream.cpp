@@ -78,15 +78,15 @@ namespace nowide {
             }
 
         private:
-            int write(const char *p, int n)
+            int write(const char* p, int n)
             {
                 namespace uf = detail::utf;
-                const char *b = p;
-                const char *e = p + n;
+                const char* b = p;
+                const char* e = p + n;
                 DWORD size = 0;
                 if(n > buffer_size)
                     return -1;
-                wchar_t *out = wbuffer_;
+                wchar_t* out = wbuffer_;
                 uf::code_point c;
                 size_t decoded = 0;
                 while(p < e && (c = uf::utf_traits<char>::decode(p, e)) != uf::incomplete)
@@ -129,8 +129,8 @@ namespace nowide {
                 if(pback_buffer_.empty())
                 {
                     pback_buffer_.resize(4);
-                    char *b = &pback_buffer_[0];
-                    char *e = b + pback_buffer_.size();
+                    char* b = &pback_buffer_[0];
+                    char* e = b + pback_buffer_.size();
                     setg(b, e - 1, e);
                     *gptr() = traits_type::to_char_type(c);
                 } else
@@ -140,9 +140,9 @@ namespace nowide {
                     tmp.resize(n * 2);
                     memcpy(&tmp[n], &pback_buffer_[0], n);
                     tmp.swap(pback_buffer_);
-                    char *b = &pback_buffer_[0];
-                    char *e = b + n * 2;
-                    char *p = b + n - 1;
+                    char* b = &pback_buffer_[0];
+                    char* e = b + n * 2;
+                    char* p = b + n - 1;
                     *p = traits_type::to_char_type(c);
                     setg(b, p, e);
                 }
@@ -173,10 +173,10 @@ namespace nowide {
                 if(!ReadConsoleW(handle_, wbuffer_, static_cast<DWORD>(n), &read_wchars, 0))
                     return 0;
                 wsize_ += read_wchars;
-                char *out = buffer_;
-                wchar_t *b = wbuffer_;
-                wchar_t *e = b + wsize_;
-                wchar_t *p = b;
+                char* out = buffer_;
+                wchar_t* b = wbuffer_;
+                wchar_t* e = b + wsize_;
+                wchar_t* p = b;
                 uf::code_point c = 0;
                 wsize_ = e - p;
                 while(p < e && (c = uf::utf_traits<wchar_t>::decode(p, e)) != uf::illegal && c != uf::incomplete)
@@ -205,7 +205,7 @@ namespace nowide {
             std::vector<char> pback_buffer_;
         };
 
-        winconsole_ostream::winconsole_ostream(int fd, winconsole_ostream *tieStream) : std::ostream(0)
+        winconsole_ostream::winconsole_ostream(int fd, winconsole_ostream* tieStream) : std::ostream(0)
         {
             HANDLE h = 0;
             switch(fd)
@@ -233,7 +233,7 @@ namespace nowide {
             {}
         }
 
-        winconsole_istream::winconsole_istream(winconsole_ostream *tieStream) : std::istream(0)
+        winconsole_istream::winconsole_istream(winconsole_ostream* tieStream) : std::istream(0)
         {
             HANDLE h = GetStdHandle(STD_INPUT_HANDLE);
             if(is_atty_handle(h))

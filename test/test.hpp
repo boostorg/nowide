@@ -13,7 +13,7 @@
 #include <stdexcept>
 
 /// Function called when a test failed to be able set a breakpoint for debugging
-inline void test_failed(const std::string &msg)
+inline void test_failed(const std::string& msg)
 {
     throw std::runtime_error(msg);
 }

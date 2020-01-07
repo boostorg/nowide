@@ -25,16 +25,16 @@ namespace nowide {
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
     template<typename CharOut, typename CharIn>
-    CharOut *basic_convert(CharOut *buffer, size_t buffer_size, const CharIn *source_begin, const CharIn *source_end)
+    CharOut* basic_convert(CharOut* buffer, size_t buffer_size, const CharIn* source_begin, const CharIn* source_end)
     {
-        CharOut *rv = buffer;
+        CharOut* rv = buffer;
         if(buffer_size == 0)
             return 0;
         buffer_size--;
         while(source_begin != source_end)
         {
             using namespace detail::utf;
-            code_point c = utf_traits<CharIn>::template decode<const CharIn *>(source_begin, source_end);
+            code_point c = utf_traits<CharIn>::template decode<const CharIn*>(source_begin, source_end);
             if(c == illegal || c == incomplete)
             {
                 c = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
@@ -45,7 +45,7 @@ namespace nowide {
                 rv = NULL;
                 break;
             }
-            buffer = utf_traits<CharOut>::template encode<CharOut *>(c, buffer);
+            buffer = utf_traits<CharOut>::template encode<CharOut*>(c, buffer);
             buffer_size -= width;
         }
         *buffer++ = 0;
@@ -59,7 +59,7 @@ namespace nowide {
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
     template<typename CharOut, typename CharIn>
-    std::basic_string<CharOut> basic_convert(const CharIn *begin, const CharIn *end)
+    std::basic_string<CharOut> basic_convert(const CharIn* begin, const CharIn* end)
     {
         std::basic_string<CharOut> result;
         result.reserve(end - begin);
@@ -69,7 +69,7 @@ namespace nowide {
         code_point c;
         while(begin != end)
         {
-            c = utf_traits<CharIn>::template decode<const CharIn *>(begin, end);
+            c = utf_traits<CharIn>::template decode<const CharIn*>(begin, end);
             if(c == illegal || c == incomplete)
             {
                 c = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
@@ -85,7 +85,7 @@ namespace nowide {
         // wcslen defined only in C99... So we will not use it
         //
         template<typename Char>
-        const Char *basic_strend(const Char *s)
+        const Char* basic_strend(const Char* s)
         {
             while(*s)
                 s++;
@@ -101,7 +101,7 @@ namespace nowide {
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
     template<typename CharOut, typename CharIn>
-    std::basic_string<CharOut> basic_convert(std::basic_string<CharIn> const &s)
+    std::basic_string<CharOut> basic_convert(std::basic_string<CharIn> const& s)
     {
         return basic_convert<CharOut>(s.c_str(), s.c_str() + s.size());
     }
@@ -112,7 +112,7 @@ namespace nowide {
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
     template<typename CharOut, typename CharIn>
-    std::basic_string<CharOut> basic_convert(const CharIn *s)
+    std::basic_string<CharOut> basic_convert(const CharIn* s)
     {
         return basic_convert<CharOut>(s, detail::basic_strend(s));
     }
@@ -124,7 +124,7 @@ namespace nowide {
     /// In case of success output is returned, if there is not enough room NULL is returned.
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
-    inline char *narrow(char *output, size_t output_size, const wchar_t *source)
+    inline char* narrow(char* output, size_t output_size, const wchar_t* source)
     {
         return basic_convert(output, output_size, source, detail::basic_strend(source));
     }
@@ -135,7 +135,7 @@ namespace nowide {
     /// In case of success output is returned, if there is not enough room NULL is returned.
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
-    inline char *narrow(char *output, size_t output_size, const wchar_t *begin, const wchar_t *end)
+    inline char* narrow(char* output, size_t output_size, const wchar_t* begin, const wchar_t* end)
     {
         return basic_convert(output, output_size, begin, end);
     }
@@ -146,7 +146,7 @@ namespace nowide {
     /// In case of success output is returned, if there is not enough room NULL is returned.
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
-    inline wchar_t *widen(wchar_t *output, size_t output_size, const char *source)
+    inline wchar_t* widen(wchar_t* output, size_t output_size, const char* source)
     {
         return basic_convert(output, output_size, source, detail::basic_strend(source));
     }
@@ -157,7 +157,7 @@ namespace nowide {
     /// In case of success output is returned, if there is not enough room NULL is returned.
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
-    inline wchar_t *widen(wchar_t *output, size_t output_size, const char *begin, const char *end)
+    inline wchar_t* widen(wchar_t* output, size_t output_size, const char* begin, const char* end)
     {
         return basic_convert(output, output_size, begin, end);
     }
@@ -167,7 +167,7 @@ namespace nowide {
     ///
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
-    inline std::string narrow(const wchar_t *s)
+    inline std::string narrow(const wchar_t* s)
     {
         return basic_convert<char>(s);
     }
@@ -176,7 +176,7 @@ namespace nowide {
     ///
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
-    inline std::wstring widen(const char *s)
+    inline std::wstring widen(const char* s)
     {
         return basic_convert<wchar_t>(s);
     }
@@ -185,7 +185,7 @@ namespace nowide {
     ///
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
-    inline std::string narrow(const std::wstring &s)
+    inline std::string narrow(const std::wstring& s)
     {
         return basic_convert<char>(s);
     }
@@ -194,7 +194,7 @@ namespace nowide {
     ///
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
-    inline std::wstring widen(const std::string &s)
+    inline std::wstring widen(const std::string& s)
     {
         return basic_convert<wchar_t>(s);
     }
