@@ -54,8 +54,8 @@ Consider a simple application that splits a big file into chunks, such that
 they can be sent by e-mail. It requires doing a few very simple tasks:
 
 - Access command line arguments: <code>int main(int argc,char **argv)</code>
-- Open an input file, open several output files: <code>std::fstream::open(char const *,std::ios::openmode m)</code>
-- Remove the files in case of fault: <code>std::remove(char const *file)</code>
+- Open an input file, open several output files: <code>std::fstream::open(const char*,std::ios::openmode m)</code>
+- Remove the files in case of fault: <code>std::remove(const char* file)</code>
 - Print a progress report onto the console: <code>std::cout << file_name </code>
 
 Unfortunately it is impossible to implement this simple task in plain C++
@@ -122,7 +122,7 @@ Several reasons:
 
 - \c wchar_t is not really portable, it can be 2 bytes, 4 bytes or even 1 byte making Unicode aware programming harder
 - The C and C++ standard libraries use narrow strings for OS interactions. This library follows the same general rule. There is
-  no such thing as <code>fopen(wchar_t const *, wchar_t const *)</code> in the standard library, so it is better
+  no such thing as <code>fopen(const wchar_t*, const wchar_t*)</code> in the standard library, so it is better
   to stick to the standards rather than re-implement Wide API in "Microsoft Windows Style"
 
 
@@ -276,7 +276,7 @@ Under POSIX platforms, the functions in boost::nowide are aliases of their stand
 namespace boost {
 namespace nowide {
 #ifdef BOOST_WINDOWS
-inline FILE *fopen(char const *name,char const *mode)
+inline FILE *fopen(const char* name, const char* mode)
 {
     ...
 }

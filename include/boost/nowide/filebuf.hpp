@@ -6,8 +6,8 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_FILEBUF_HPP
-#define BOOST_NOWIDE_FILEBUF_HPP
+#ifndef BOOST_NOWIDE_FILEBUF_HPP_INCLUDED
+#define BOOST_NOWIDE_FILEBUF_HPP_INCLUDED
 
 #include <boost/nowide/config.hpp>
 #if BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS
@@ -54,8 +54,8 @@ namespace nowide {
     class basic_filebuf<char> : public std::basic_streambuf<char>
     {
         // Non-copyable
-        basic_filebuf(const basic_filebuf<char> &);
-        basic_filebuf &operator=(const basic_filebuf<char> &);
+        basic_filebuf(const basic_filebuf<char>&);
+        basic_filebuf& operator=(const basic_filebuf<char>&);
 
         typedef std::char_traits<char> Traits;
 
@@ -77,26 +77,26 @@ namespace nowide {
         ///
         /// Same as std::filebuf::open but s is UTF-8 string
         ///
-        basic_filebuf *open(std::string const &s, std::ios_base::openmode mode)
+        basic_filebuf* open(const std::string& s, std::ios_base::openmode mode)
         {
             return open(s.c_str(), mode);
         }
         ///
         /// Same as std::filebuf::open but s is UTF-8 string
         ///
-        basic_filebuf *open(char const *s, std::ios_base::openmode mode)
+        basic_filebuf* open(const char* s, std::ios_base::openmode mode)
         {
             if(is_open())
                 return NULL;
             validate_cvt(this->getloc());
-            bool const ate = bool(mode & std::ios_base::ate);
+            const bool ate = bool(mode & std::ios_base::ate);
             if(ate)
                 mode = mode ^ std::ios_base::ate;
-            wchar_t const *smode = get_mode(mode);
+            const wchar_t* smode = get_mode(mode);
             if(!smode)
                 return 0;
 #ifdef BOOST_WINDOWS
-            wstackstring const name(s);
+            const wstackstring name(s);
             file_ = ::_wfopen(name.get(), smode);
 #else
             short_stackstring smode2(smode);
@@ -116,7 +116,7 @@ namespace nowide {
         ///
         /// Same as std::filebuf::close()
         ///
-        basic_filebuf *close()
+        basic_filebuf* close()
         {
             if(!is_open())
                 return NULL;
@@ -152,14 +152,14 @@ namespace nowide {
                 owns_buffer_ = true;
             }
         }
-        void validate_cvt(const std::locale &loc)
+        void validate_cvt(const std::locale& loc)
         {
             if(!std::use_facet<std::codecvt<char, char, std::mbstate_t> >(loc).always_noconv())
                 throw std::runtime_error("Converting codecvts are not supported");
         }
 
     protected:
-        virtual std::streambuf *setbuf(char *s, std::streamsize n)
+        virtual std::streambuf* setbuf(char* s, std::streamsize n)
         {
             assert(n >= 0);
             // Maximum compatibility: Discard all local buffers and use user-provided values
@@ -236,7 +236,7 @@ namespace nowide {
                 return EOF;
             if(buffer_size_ == 0)
             {
-                int const c = std::fgetc(file_);
+                const int c = std::fgetc(file_);
                 if(c == EOF)
                     return EOF;
                 last_char_ = c;
@@ -244,7 +244,7 @@ namespace nowide {
             } else
             {
                 make_buffer();
-                size_t const n = std::fread(buffer_, 1, buffer_size_, file_);
+                const size_t n = std::fread(buffer_, 1, buffer_size_, file_);
                 setg(buffer_, buffer_, buffer_ + n);
                 if(n == 0)
                     return EOF;
@@ -305,7 +305,7 @@ namespace nowide {
             // Standard mandates "as-if fsetpos", but assume the effect is the same as fseek
             return seekoff(pos, std::ios_base::beg, m);
         }
-        virtual void imbue(const std::locale &loc)
+        virtual void imbue(const std::locale& loc)
         {
             validate_cvt(loc);
         }
@@ -317,7 +317,7 @@ namespace nowide {
         {
             if(gptr())
             {
-                std::streamsize const off = gptr() - egptr();
+                const std::streamsize off = gptr() - egptr();
                 setg(0, 0, 0);
                 assert(off <= std::numeric_limits<long>::max());
                 if(off && std::fseek(file_, off, SEEK_CUR) != 0)
@@ -332,8 +332,8 @@ namespace nowide {
         {
             if(pptr())
             {
-                const char *const base = pbase();
-                size_t const n = pptr() - base;
+                const char* const base = pbase();
+                const size_t n = pptr() - base;
                 setp(0, 0);
                 if(n && std::fwrite(base, 1, n, file_) != n)
                     return false;
@@ -341,7 +341,7 @@ namespace nowide {
             return true;
         }
 
-        void reset(FILE *f = 0)
+        void reset(FILE* f = 0)
         {
             sync();
             if(file_)
@@ -352,7 +352,7 @@ namespace nowide {
             file_ = f;
         }
 
-        static wchar_t const *get_mode(std::ios_base::openmode mode)
+        static const wchar_t* get_mode(std::ios_base::openmode mode)
         {
             //
             // done according to n2914 table 106 27.9.1.4
@@ -400,8 +400,8 @@ namespace nowide {
         }
 
         size_t buffer_size_;
-        char *buffer_;
-        FILE *file_;
+        char* buffer_;
+        FILE* file_;
         bool owns_buffer_;
         char last_char_;
         std::ios::openmode mode_;
@@ -422,5 +422,3 @@ namespace nowide {
 #endif
 
 #endif
-
-// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

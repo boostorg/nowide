@@ -22,9 +22,9 @@ namespace nowide {
     class args
     {
     public:
-        args(int &, char **&)
+        args(int&, char**&)
         {}
-        args(int &, char **&, char **&)
+        args(int&, char**&, char**&)
         {}
         ~args()
         {}
@@ -53,7 +53,7 @@ namespace nowide {
         ///
         /// Fix command line arguments
         ///
-        args(int &argc, char **&argv) :
+        args(int& argc, char**& argv) :
             old_argc_(argc), old_argv_(argv), old_env_(0), old_argc_ptr_(&argc), old_argv_ptr_(&argv), old_env_ptr_(0)
         {
             fix_args(argc, argv);
@@ -61,7 +61,7 @@ namespace nowide {
         ///
         /// Fix command line arguments and environment
         ///
-        args(int &argc, char **&argv, char **&env) :
+        args(int& argc, char**& argv, char**& env) :
             old_argc_(argc), old_argv_(argv), old_env_(env), old_argc_ptr_(&argc), old_argv_ptr_(&argv), old_env_ptr_(&env)
         {
             fix_args(argc, argv);
@@ -83,11 +83,11 @@ namespace nowide {
     private:
         class wargv_ptr
         {
-            wchar_t **p;
+            wchar_t** p;
             int argc;
             // Non-copyable
-            wargv_ptr(const wargv_ptr &);
-            wargv_ptr &operator=(const wargv_ptr &);
+            wargv_ptr(const wargv_ptr&);
+            wargv_ptr& operator=(const wargv_ptr&);
 
         public:
             wargv_ptr() : p(CommandLineToArgvW(GetCommandLineW(), &argc))
@@ -105,17 +105,17 @@ namespace nowide {
             {
                 return p != NULL;
             }
-            const wchar_t *operator[](size_t i) const
+            const wchar_t* operator[](size_t i) const
             {
                 return p[i];
             }
         };
         class wenv_ptr
         {
-            wchar_t *p;
+            wchar_t* p;
             // Non-copyable
-            wenv_ptr(const wenv_ptr &);
-            wenv_ptr &operator=(const wenv_ptr &);
+            wenv_ptr(const wenv_ptr&);
+            wenv_ptr& operator=(const wenv_ptr&);
 
         public:
             wenv_ptr() : p(GetEnvironmentStringsW())
@@ -125,13 +125,13 @@ namespace nowide {
                 if(p)
                     FreeEnvironmentStringsW(p);
             }
-            operator const wchar_t *() const
+            operator const wchar_t*() const
             {
                 return p;
             }
         };
 
-        void fix_args(int &argc, char **&argv)
+        void fix_args(int& argc, char**& argv)
         {
             const wargv_ptr wargv;
             if(!wargv)
@@ -143,18 +143,18 @@ namespace nowide {
             argc = wargv.size();
             argv = &args_[0];
         }
-        void fix_env(char **&env)
+        void fix_env(char**& env)
         {
             const wenv_ptr wstrings;
             if(!wstrings)
                 throw std::runtime_error("Could not get environment strings!");
-            const wchar_t *wstrings_end = 0;
+            const wchar_t* wstrings_end = 0;
             int count = 0;
             for(wstrings_end = wstrings; *wstrings_end; wstrings_end += wcslen(wstrings_end) + 1)
                 count++;
             env_.convert(wstrings, wstrings_end);
             envp_.resize(count + 1, 0);
-            char *p = env_.get();
+            char* p = env_.get();
             int pos = 0;
             for(int i = 0; i < count; i++)
             {
@@ -165,18 +165,18 @@ namespace nowide {
             env = &envp_[0];
         }
 
-        std::vector<char *> args_;
+        std::vector<char*> args_;
         std::vector<short_stackstring> arg_values_;
         stackstring env_;
-        std::vector<char *> envp_;
+        std::vector<char*> envp_;
 
         int old_argc_;
-        char **old_argv_;
-        char **old_env_;
+        char** old_argv_;
+        char** old_env_;
 
-        int *old_argc_ptr_;
-        char ***old_argv_ptr_;
-        char ***old_env_ptr_;
+        int* old_argc_ptr_;
+        char*** old_argv_ptr_;
+        char*** old_env_ptr_;
     };
 
 #endif
@@ -184,6 +184,3 @@ namespace nowide {
 } // namespace nowide
 } // namespace boost
 #endif
-
-///
-// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

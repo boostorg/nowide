@@ -31,16 +31,16 @@ namespace nowide {
     ///
     /// This function is not thread safe or reenterable as defined by the standard library
     ///
-    inline char *getenv(char const *key)
+    inline char* getenv(const char* key)
     {
         static stackstring value;
 
-        wshort_stackstring const name(key);
+        const wshort_stackstring name(key);
 
         static const size_t buf_size = 64;
         wchar_t buf[buf_size];
         std::vector<wchar_t> tmp;
-        wchar_t *ptr = buf;
+        wchar_t* ptr = buf;
         size_t n = GetEnvironmentVariableW(name.get(), buf, buf_size);
         if(n == 0 && GetLastError() == 203) // ERROR_ENVVAR_NOT_FOUND
             return 0;
@@ -62,16 +62,16 @@ namespace nowide {
     /// if overwrite is not 0, that the old value is always overwritten, otherwise,
     /// if the variable exists it remains unchanged
     ///
-    inline int setenv(char const *key, char const *value, int overwrite)
+    inline int setenv(const char* key, const char* value, int overwrite)
     {
-        wshort_stackstring const name(key);
+        const wshort_stackstring name(key);
         if(!overwrite)
         {
             wchar_t unused[2];
             if(!(GetEnvironmentVariableW(name.get(), unused, 2) == 0 && GetLastError() == 203)) // ERROR_ENVVAR_NOT_FOUND
                 return 0;
         }
-        wstackstring const wval(value);
+        const wstackstring wval(value);
         if(SetEnvironmentVariableW(name.get(), wval.get()))
             return 0;
         return -1;
@@ -79,9 +79,9 @@ namespace nowide {
     ///
     /// \brief Remove environment variable \a key
     ///
-    inline int unsetenv(char const *key)
+    inline int unsetenv(const char* key)
     {
-        wshort_stackstring const name(key);
+        const wshort_stackstring name(key);
         if(SetEnvironmentVariableW(name.get(), 0))
             return 0;
         return -1;
@@ -89,16 +89,16 @@ namespace nowide {
     ///
     /// \brief UTF-8 aware putenv implementation, expects string in format KEY=VALUE
     ///
-    inline int putenv(char *string)
+    inline int putenv(char* string)
     {
-        char const *key = string;
-        char const *key_end = string;
+        const char* key = string;
+        const char* key_end = string;
         while(*key_end != '=' && *key_end != '\0')
             key_end++;
         if(*key_end == '\0')
             return -1;
-        wshort_stackstring const wkey(key, key_end);
-        wstackstring const wvalue(key_end + 1);
+        const wshort_stackstring wkey(key, key_end);
+        const wstackstring wvalue(key_end + 1);
 
         if(SetEnvironmentVariableW(wkey.get(), wvalue.get()))
             return 0;
@@ -108,11 +108,11 @@ namespace nowide {
     ///
     /// Same as std::system but cmd is UTF-8.
     ///
-    inline int system(char const *cmd)
+    inline int system(const char* cmd)
     {
         if(!cmd)
             return _wsystem(0);
-        wstackstring const wcmd(cmd);
+        const wstackstring wcmd(cmd);
         return _wsystem(wcmd.get());
     }
 #endif
@@ -120,5 +120,3 @@ namespace nowide {
 } // namespace boost
 
 #endif
-///
-// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

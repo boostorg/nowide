@@ -31,7 +31,7 @@ run test_iostream.cpp : : : <library>/boost/nowide//boost_nowide <link>static : 
 run test_iostream.cpp : : : <library>/boost/nowide//boost_nowide <link>shared : test_iostream_shared ;
 run test_stackstring.cpp ;
 run test_stdio.cpp ;
-run test_system.cpp : "-n" : : <target-os>windows:<library>shell32 : test_system_n ;
-run test_system.cpp : "-w" : : <target-os>windows:<library>shell32 <build>no <target-os>windows:<build>yes: test_system_w ;
+run test_system.cpp : : : <define>BOOST_NOWIDE_TEST_USE_NARROW=1 <target-os>windows:<library>shell32 : test_system_n ;
+run test_system.cpp : : : <define>BOOST_NOWIDE_TEST_USE_NARROW=0 <target-os>windows:<library>shell32 <build>no <target-os>windows:<build>yes: test_system_w ;
 
 compile benchmark_fstream.cpp : <define>BOOST_NOWIDE_USE_WIN_FSTREAM=1 <library>/boost/chrono//boost_chrono/;

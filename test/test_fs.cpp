@@ -37,7 +37,7 @@ int main()
 
         TEST(!boost::filesystem::is_regular_file(boost::nowide::widen(utf8_name)));
         TEST(!boost::filesystem::is_regular_file(utf8_name));
-    } catch(std::exception const &e)
+    } catch(const std::exception& e)
     {
         std::cerr << "Failed : " << e.what() << std::endl;
         return 1;
@@ -45,6 +45,3 @@ int main()
 
     return 0;
 }
-
-///
-// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

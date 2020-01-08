@@ -16,15 +16,15 @@
 
 namespace nw = boost::nowide;
 
-void make_empty_file(const char *filepath)
+void make_empty_file(const char* filepath)
 {
     nw::ofstream f(filepath, std::ios_base::out | std::ios::trunc);
     TEST(f);
 }
 
-bool file_exists(const char *filepath)
+bool file_exists(const char* filepath)
 {
-    FILE *f = nw::fopen(filepath, "r");
+    FILE* f = nw::fopen(filepath, "r");
     if(f)
     {
         std::fclose(f);
@@ -34,9 +34,9 @@ bool file_exists(const char *filepath)
 }
 
 template<size_t N>
-bool file_contents_equal(const char *filepath, const char (&contents)[N], bool binary_mode = false)
+bool file_contents_equal(const char* filepath, const char (&contents)[N], bool binary_mode = false)
 {
-    FILE *f = nw::fopen(filepath, binary_mode ? "rb" : "r");
+    FILE* f = nw::fopen(filepath, binary_mode ? "rb" : "r");
     if(!f)
         return false;
     for(size_t i = 0; i + 1 < N; i++)
@@ -51,7 +51,7 @@ bool file_contents_equal(const char *filepath, const char (&contents)[N], bool b
 }
 
 template<typename FStream>
-void test_with_different_buffer_sizes(const char *filepath)
+void test_with_different_buffer_sizes(const char* filepath)
 {
     /* Important part of the standard for mixing input with output:
        However, output shall not be directly followed by input without an intervening call to the fflush function
@@ -131,7 +131,7 @@ void test_with_different_buffer_sizes(const char *filepath)
 }
 
 template<typename FileBuf>
-void test_close(const char *filepath)
+void test_close(const char* filepath)
 {
     const std::string filepath2 = std::string(filepath) + ".2";
     // Make sure file does not exist yet
@@ -156,7 +156,7 @@ void test_close(const char *filepath)
 }
 
 template<typename IFStream, typename OFStream>
-void test_flush(const char *filepath)
+void test_flush(const char* filepath)
 {
     OFStream fo(filepath, std::ios_base::out | std::ios::trunc);
     TEST(fo);
@@ -179,7 +179,7 @@ void test_flush(const char *filepath)
     }
 }
 
-void test_ofstream_creates_file(const char *filename)
+void test_ofstream_creates_file(const char* filename)
 {
     nw::remove(filename);
     TEST(!file_exists(filename));
@@ -203,7 +203,7 @@ void test_ofstream_creates_file(const char *filename)
 }
 
 // Create filename file with content "test\n"
-void test_ofstream_write(const char *filename)
+void test_ofstream_write(const char* filename)
 {
     // char* ctor
     {
@@ -259,7 +259,7 @@ void test_ofstream_write(const char *filename)
     TEST(nw::remove(filename) == 0);
 }
 
-void test_ifstream_open_read(const char *filename)
+void test_ifstream_open_read(const char* filename)
 {
     // Create test file
     {
@@ -336,7 +336,7 @@ void test_ifstream_open_read(const char *filename)
     }
 }
 
-void test_fstream(const char *filename)
+void test_fstream(const char* filename)
 {
     nw::remove(filename);
     TEST(!file_exists(filename));
@@ -436,16 +436,16 @@ void test_fstream(const char *filename)
 }
 
 template<typename T>
-bool is_open(T &stream)
+bool is_open(T& stream)
 {
-    // There are const and non const versions of is_open
+    // There const are and const non versions of is_open
     // Test both
-    TEST(stream.is_open() == const_cast<const T &>(stream).is_open());
+    TEST(stream.is_open() == const_cast<const T&>(stream).is_open());
     return stream.is_open();
 }
 
 template<typename T>
-void do_test_is_open(const char *filename)
+void do_test_is_open(const char* filename)
 {
     T f;
     TEST(!is_open(f));
@@ -457,7 +457,7 @@ void do_test_is_open(const char *filename)
     TEST(!is_open(f));
 }
 
-void test_is_open(const char *filename)
+void test_is_open(const char* filename)
 {
     // Note the order: Output before input so file exists
     do_test_is_open<nw::ofstream>(filename);
@@ -466,7 +466,7 @@ void test_is_open(const char *filename)
     TEST(nw::remove(filename) == 0);
 }
 
-int main(int, char **argv)
+int main(int, char** argv)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
     try
@@ -494,7 +494,7 @@ int main(int, char **argv)
         test_flush<std::ifstream, std::ofstream>(exampleFilename.c_str());
         std::cout << "Flush - Test" << std::endl;
         test_flush<nw::ifstream, nw::ofstream>(exampleFilename.c_str());
-    } catch(std::exception const &e)
+    } catch(const std::exception& e)
     {
         std::cerr << e.what() << std::endl;
         return 1;

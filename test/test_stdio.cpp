@@ -17,12 +17,12 @@
 #pragma warning(disable : 4996) // function unsafe/deprecated
 #endif
 
-bool file_exists(const std::string &filename)
+bool file_exists(const std::string& filename)
 {
 #ifdef BOOST_WINDOWS
-    FILE *f = _wfopen(boost::nowide::widen(filename).c_str(), L"r");
+    FILE* f = _wfopen(boost::nowide::widen(filename).c_str(), L"r");
 #else
-    FILE *f = std::fopen(filename.c_str(), "r");
+    FILE* f = std::fopen(filename.c_str(), "r");
 #endif
     bool result = false;
     if(f)
@@ -33,19 +33,19 @@ bool file_exists(const std::string &filename)
     return result;
 }
 
-void create_test_file(const std::string &filename)
+void create_test_file(const std::string& filename)
 {
 #ifdef BOOST_WINDOWS
-    FILE *f = _wfopen(boost::nowide::widen(filename).c_str(), L"w");
+    FILE* f = _wfopen(boost::nowide::widen(filename).c_str(), L"w");
 #else
-    FILE *f = std::fopen(filename.c_str(), "w");
+    FILE* f = std::fopen(filename.c_str(), "w");
 #endif
     TEST(f);
     TEST(std::fputs("test\n", f) >= 0);
     std::fclose(f);
 }
 
-int main(int, char **argv)
+int main(int, char** argv)
 {
     const std::string prefix = argv[0];
     const std::string filename = prefix + "\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
@@ -55,7 +55,7 @@ int main(int, char **argv)
         // fopen - existing file
         {
             create_test_file(filename);
-            FILE *f = boost::nowide::fopen(filename.c_str(), "r");
+            FILE* f = boost::nowide::fopen(filename.c_str(), "r");
             TEST(f);
             char buf[16];
             TEST(std::fgets(buf, 16, f) != 0);
@@ -79,7 +79,7 @@ int main(int, char **argv)
         // freopen
         {
             create_test_file(filename);
-            FILE *f = boost::nowide::fopen(filename.c_str(), "r+");
+            FILE* f = boost::nowide::fopen(filename.c_str(), "r+");
             TEST(f);
             // Can read & write
             {
@@ -92,7 +92,7 @@ int main(int, char **argv)
             // Reopen in read mode
             // Note that changing the mode is not possibly on all implementations
             // E.g. MSVC disallows NULL completely as the file parameter
-            FILE *f2 = boost::nowide::freopen(NULL, "r", f);
+            FILE* f2 = boost::nowide::freopen(NULL, "r", f);
             if(!f2)
                 f2 = boost::nowide::freopen(filename.c_str(), "r", f);
             // no write possible
@@ -134,7 +134,7 @@ int main(int, char **argv)
             TEST(boost::nowide::remove(filename.c_str()) < 0);
             TEST(boost::nowide::remove(filename2.c_str()) == 0);
         }
-    } catch(std::exception const &e)
+    } catch(const std::exception& e)
     {
         std::cerr << "Failed " << e.what() << std::endl;
         return 1;
@@ -142,6 +142,3 @@ int main(int, char **argv)
 
     return 0;
 }
-
-///
-// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

@@ -5,8 +5,8 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_CSTDIO_H_INCLUDED
-#define BOOST_NOWIDE_CSTDIO_H_INCLUDED
+#ifndef BOOST_NOWIDE_CSTDIO_HPP_INCLUDED
+#define BOOST_NOWIDE_CSTDIO_HPP_INCLUDED
 
 #include <boost/config.hpp>
 
@@ -32,35 +32,35 @@ namespace nowide {
     ///
     /// \brief Same as freopen but file_name and mode are UTF-8 strings
     ///
-    inline FILE *freopen(char const *file_name, char const *mode, FILE *stream)
+    inline FILE* freopen(const char* file_name, const char* mode, FILE* stream)
     {
-        wstackstring const wname(file_name);
-        wshort_stackstring const wmode(mode);
+        const wstackstring wname(file_name);
+        const wshort_stackstring wmode(mode);
         return _wfreopen(wname.get(), wmode.get(), stream);
     }
     ///
     /// \brief Same as fopen but file_name and mode are UTF-8 strings
     ///
-    inline FILE *fopen(char const *file_name, char const *mode)
+    inline FILE* fopen(const char* file_name, const char* mode)
     {
-        wstackstring const wname(file_name);
-        wshort_stackstring const wmode(mode);
+        const wstackstring wname(file_name);
+        const wshort_stackstring wmode(mode);
         return _wfopen(wname.get(), wmode.get());
     }
     ///
     /// \brief Same as rename but old_name and new_name are UTF-8 strings
     ///
-    inline int rename(char const *old_name, char const *new_name)
+    inline int rename(const char* old_name, const char* new_name)
     {
-        wstackstring const wold(old_name), wnew(new_name);
+        const wstackstring wold(old_name), wnew(new_name);
         return _wrename(wold.get(), wnew.get());
     }
     ///
     /// \brief Same as rename but name is UTF-8 string
     ///
-    inline int remove(char const *name)
+    inline int remove(const char* name)
     {
-        wstackstring const wname(name);
+        const wstackstring wname(name);
         return _wremove(wname.get());
     }
 #endif
@@ -72,5 +72,3 @@ namespace nowide {
 #endif
 
 #endif
-///
-// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

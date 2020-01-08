@@ -9,7 +9,7 @@
 #include <boost/nowide/args.hpp>
 #include <boost/nowide/convert.hpp>
 
-int main(int argc, char **argv, char **env)
+int main(int argc, char** argv, char** env)
 {
     boost::nowide::args _(argc, argv, env);
     if(argc < 1)

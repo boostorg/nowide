@@ -13,7 +13,7 @@
 
 #include "test.hpp"
 
-bool isValidUTF8(const std::string &s)
+bool isValidUTF8(const std::string& s)
 {
     using namespace boost::nowide::detail::utf;
     for(std::string::const_iterator it = s.begin(); it != s.end();)
@@ -25,9 +25,9 @@ bool isValidUTF8(const std::string &s)
     return true;
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-    char const *example = "Basic letters: \xd7\xa9-\xd0\xbc-\xce\xbd\n"
+    const char* example = "Basic letters: \xd7\xa9-\xd0\xbc-\xce\xbd\n"
                           "East Asian Letters: \xe5\x92\x8c\xe5\xb9\xb3\n"
                           "Non-BMP letters: \xf0\x9d\x84\x9e\n"
                           "Invalid UTF-8: `\xFF' `\xd7\xFF' `\xe5\xFF\x8c' `\xf0\x9d\x84\xFF' \n"
@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 
         boost::nowide::cout << "Flushing each character:" << std::endl;
 
-        for(char const *s = example; *s; s++)
+        for(const char* s = example; *s; s++)
         {
             boost::nowide::cout << *s << std::flush;
             TEST(boost::nowide::cout);
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
             boost::nowide::cout << "Second: " << v2 << std::endl;
             TEST(boost::nowide::cout);
         }
-    } catch(std::exception const &e)
+    } catch(const std::exception& e)
     {
         std::cerr << "Fail: " << e.what() << std::endl;
         return 1;

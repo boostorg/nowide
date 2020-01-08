@@ -15,13 +15,13 @@
 #pragma warning(disable : 4428) // universal-character-name encountered in source
 #endif
 
-std::wstring stackstring_to_wide(std::string const &s)
+std::wstring stackstring_to_wide(const std::string& s)
 {
     const boost::nowide::wstackstring ss(s.c_str());
     return ss.get();
 }
 
-std::string stackstring_to_narrow(std::wstring const &s)
+std::string stackstring_to_narrow(const std::wstring& s)
 {
     const boost::nowide::stackstring ss(s.c_str());
     return ss.get();
@@ -33,18 +33,18 @@ int main()
     {
         std::string hello = "\xd7\xa9\xd7\x9c\xd7\x95\xd7\x9d";
         std::wstring whello = L"\u05e9\u05dc\u05d5\u05dd";
-        const wchar_t *wempty = L"";
+        const wchar_t* wempty = L"";
 
         {
             // Default constructed string is NULL
-            boost::nowide::short_stackstring const s;
+            const boost::nowide::short_stackstring s;
             TEST(s.get() == NULL);
         }
         {
             // NULL ptr passed to ctor results in NULL
-            boost::nowide::short_stackstring const s(NULL);
+            const boost::nowide::short_stackstring s(NULL);
             TEST(s.get() == NULL);
-            boost::nowide::short_stackstring const s2(NULL, NULL);
+            const boost::nowide::short_stackstring s2(NULL, NULL);
             TEST(s2.get() == NULL);
         }
         {
@@ -60,10 +60,10 @@ int main()
         }
         {
             // An empty string is accepted
-            boost::nowide::short_stackstring const s(wempty);
+            const boost::nowide::short_stackstring s(wempty);
             TEST(s.get());
             TEST(s.get() == std::string());
-            boost::nowide::short_stackstring const s2(wempty, wempty);
+            const boost::nowide::short_stackstring s2(wempty, wempty);
             TEST(s2.get());
             TEST(s2.get() == std::string());
         }
@@ -114,8 +114,8 @@ int main()
             const std::wstring wtest = L"test";
             const std::string stackVal = "test";
             TEST(stackVal.size() < 5); // Will be put on stack
-            stackstring const heap(whello.c_str());
-            stackstring const stack(wtest.c_str());
+            const stackstring heap(whello.c_str());
+            const stackstring stack(wtest.c_str());
 
             {
                 stackstring sw2(heap), sw3;
@@ -170,7 +170,7 @@ int main()
         }
         std::cout << "- Substitutions" << std::endl;
         run_all(stackstring_to_wide, stackstring_to_narrow);
-    } catch(std::exception const &e)
+    } catch(const std::exception& e)
     {
         std::cerr << "Failed :" << e.what() << std::endl;
         return 1;
@@ -178,6 +178,3 @@ int main()
 
     return 0;
 }
-
-///
-// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
