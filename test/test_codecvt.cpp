@@ -112,10 +112,15 @@ void test_codecvt_out_n_m(const cvt_type& cvt, int n, int m)
         std::codecvt_base::result r = cvt.out(mb, from, from_end, from_next, to, to_end, to_next);
         if(r == cvt_type::partial)
         {
-            TEST(to_end - to_next < cvt.max_length());
-            to_end += n;
-            if(to_end > real_to_end)
-                to_end = real_to_end;
+            // If those are equal, then "partial" probably means: Need more input
+            // Otherwise "Need more output"
+            if(from_next != from_end)
+            {
+                TEST(to_end - to_next < cvt.max_length());
+                to_end += n;
+                if(to_end > real_to_end)
+                    to_end = real_to_end;
+            }
         } else
         {
             TEST(r == cvt_type::ok);
@@ -197,6 +202,35 @@ void test_codecvt_err()
             TEST(from_next == from + 1);
             TEST(to_next == to + 1);
             TEST(std::wstring(to, to_next) == std::wstring(L"1"));
+        }
+        {
+            char buf[4] = {};
+            char* const to = buf;
+            char* const to_end = buf + 4;
+            char* to_next = to;
+            const wchar_t* err_utf = L"\xD800"; // Trailing UTF-16 surrogate
+            std::mbstate_t mb = std::mbstate_t();
+            const wchar_t* from = err_utf;
+            const wchar_t* from_end = from + 1;
+            const wchar_t* from_next = from;
+            cvt_type::result res = cvt.out(mb, from, from_end, from_next, to, to_end, to_next);
+#ifdef BOOST_MSVC
+#pragma warning(disable : 4127) // Constant expression detected
+#endif
+            if(sizeof(wchar_t) == 2)
+            {
+                TEST(res == cvt_type::partial);
+                TEST(from_next == from_end);
+                TEST(to_next == to);
+                TEST(buf[0] == 0);
+            } else
+            {
+                TEST(res == cvt_type::ok);
+                TEST(from_next == from_end);
+                TEST(to_next == to + 3);
+                // surrogate is invalid
+                TEST(std::string(to, to_next) == boost::nowide::narrow(wreplacement_str));
+            }
         }
     }
 
