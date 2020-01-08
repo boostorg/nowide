@@ -21,6 +21,26 @@ namespace nowide {
     // Make sure that mbstate can keep 16 bit of UTF-16 sequence
     //
     BOOST_STATIC_ASSERT(sizeof(std::mbstate_t) >= 2);
+    namespace detail {
+        // Avoid including cstring for std::memcpy
+        inline void copy_uint16_t(void* dst, const void* src)
+        {
+            unsigned char* cdst = static_cast<unsigned char*>(dst);
+            const unsigned char* csrc = static_cast<const unsigned char*>(src);
+            cdst[0] = csrc[0];
+            cdst[1] = csrc[1];
+        }
+        inline boost::uint16_t read_state(const std::mbstate_t& src)
+        {
+            boost::uint16_t dst;
+            copy_uint16_t(&dst, &src);
+            return dst;
+        }
+        inline void write_state(std::mbstate_t& dst, const boost::uint16_t src)
+        {
+            copy_uint16_t(&dst, &src);
+        }
+    } // namespace detail
 
 #if defined _MSC_VER && _MSC_VER < 1700
 // MSVC do_length is non-standard it counts wide characters instead of narrow and does not change mbstate
@@ -50,8 +70,7 @@ namespace nowide {
 
         virtual std::codecvt_base::result do_unshift(std::mbstate_t& s, char* from, char* /*to*/, char*& next) const
         {
-            boost::uint16_t& state = *reinterpret_cast<boost::uint16_t*>(&s);
-            if(state != 0)
+            if(detail::read_state(s) != 0)
                 return std::codecvt_base::error;
             next = from;
             return std::codecvt_base::ok;
@@ -78,12 +97,11 @@ namespace nowide {
                               const char* from_end,
                               size_t max) const
         {
+            boost::uint16_t state = detail::read_state(std_state);
 #ifndef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
             const char* save_from = from;
-            boost::uint16_t& state = *reinterpret_cast<boost::uint16_t*>(&std_state);
 #else
             size_t save_max = max;
-            boost::uint16_t state = *reinterpret_cast<const boost::uint16_t*>(&std_state);
 #endif
             while(max > 0 && from < from_end)
             {
@@ -111,6 +129,7 @@ namespace nowide {
                 }
             }
 #ifndef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
+            detail::write_state(std_state, state);
             return static_cast<int>(from - save_from);
 #else
             return static_cast<int>(save_max - max);
@@ -132,7 +151,7 @@ namespace nowide {
             //
             // if 0 no code above >0xFFFF observed, of 1 a code above 0xFFFF observed
             // and first pair is written, but no input consumed
-            boost::uint16_t& state = *reinterpret_cast<boost::uint16_t*>(&std_state);
+            boost::uint16_t state = detail::read_state(std_state);
             while(to < to_end && from < from_end)
             {
                 const char* from_saved = from;
@@ -184,6 +203,7 @@ namespace nowide {
             to_next = to;
             if(r == std::codecvt_base::ok && (from != from_end || state != 0))
                 r = std::codecvt_base::partial;
+            detail::write_state(std_state, state);
             return r;
         }
 
@@ -203,7 +223,7 @@ namespace nowide {
             // State: state!=0 - a first surrogate pair was observed (state = first pair),
             // we expect the second one to come and then zero the state
             ///
-            boost::uint16_t& state = *reinterpret_cast<boost::uint16_t*>(&std_state);
+            boost::uint16_t state = detail::read_state(std_state);
             while(to < to_end && from < from_end)
             {
                 boost::uint32_t ch = 0;
@@ -264,6 +284,7 @@ namespace nowide {
             to_next = to;
             if(r == std::codecvt_base::ok && from != from_end)
                 r = std::codecvt_base::partial;
+            detail::write_state(std_state, state);
             return r;
         }
     };
@@ -342,11 +363,6 @@ namespace nowide {
         {
             std::codecvt_base::result r = std::codecvt_base::ok;
 
-            // mbstate_t is POD type and should be initialized to 0 (i.a. state = stateT())
-            // according to standard. We use it to keep a flag 0/1 for surrogate pair writing
-            //
-            // if 0 no code above >0xFFFF observed, of 1 a code above 0xFFFF observed
-            // and first pair is written, but no input consumed
             while(to < to_end && from < from_end)
             {
                 const char* from_saved = from;
