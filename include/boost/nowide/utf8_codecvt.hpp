@@ -27,6 +27,12 @@ namespace nowide {
 #define BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
 #endif
 
+    /// std::codecvt implementation that converts between UTF-8 and UTF-16 or UTF-32
+    ///
+    /// @tparam CharSize Determines the encoding: 2 for UTF-16, 4 for UTF-32
+    ///
+    /// Invalid sequences are replaced by #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+    /// A trailing incomplete sequence will result in a return value of std::codecvt::partial
     template<typename CharType, int CharSize = sizeof(CharType)>
     class utf8_codecvt;
 
