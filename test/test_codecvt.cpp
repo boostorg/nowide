@@ -20,18 +20,6 @@ static const char* utf8_name = "\xf0\x9d\x92\x9e-\xD0\xBF\xD1\x80\xD0\xB8\xD0\xB
 static const std::wstring wide_name_str = boost::nowide::widen(utf8_name);
 static const wchar_t* wide_name = wide_name_str.c_str();
 
-const char* res(std::codecvt_base::result r)
-{
-    switch(r)
-    {
-    case std::codecvt_base::ok: return "ok";
-    case std::codecvt_base::partial: return "partial";
-    case std::codecvt_base::error: return "error";
-    case std::codecvt_base::noconv: return "noconv";
-    default: return "error";
-    }
-}
-
 typedef std::codecvt<wchar_t, char, std::mbstate_t> cvt_type;
 
 void test_codecvt_in_n_m(const cvt_type& cvt, int n, int m)
@@ -60,8 +48,6 @@ void test_codecvt_in_n_m(const cvt_type& cvt, int n, int m)
 
         std::mbstate_t mb2 = mb;
         std::codecvt_base::result r = cvt.in(mb, from, end, from_next, to, to_end, to_next);
-        // std::cout << "In from_size=" << (end-from) << " from move=" <<  (from_next - from) << " to move= " << to_next - to << " state = "
-        // << res(r) << std::endl;
 
         int count = cvt.length(mb2, from, end, to_end - to);
 #ifndef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
@@ -124,8 +110,6 @@ void test_codecvt_out_n_m(const cvt_type& cvt, int n, int m)
         }
 
         std::codecvt_base::result r = cvt.out(mb, from, from_end, from_next, to, to_end, to_next);
-        // std::cout << "In from_size=" << (end-from) << " from move=" <<  (from_next - from) << " to move= " << to_next - to << " state = "
-        // << res(r) << std::endl;
         if(r == cvt_type::partial)
         {
             TEST(to_end - to_next < cvt.max_length());
@@ -184,11 +168,11 @@ void test_codecvt_err()
 
     std::cout << "- UTF-8" << std::endl;
     {
-        wchar_t buf[4];
-        wchar_t* const to = buf;
-        wchar_t* const to_end = buf + 4;
-        const char* err_utf = "1\xFF\xFF\xd7\xa9";
         {
+            wchar_t buf[4];
+            wchar_t* const to = buf;
+            wchar_t* const to_end = buf + 4;
+            const char* err_utf = "1\xFF\xFF\xd7\xa9";
             std::mbstate_t mb = std::mbstate_t();
             const char* from = err_utf;
             const char* from_end = from + std::strlen(from);
@@ -198,6 +182,21 @@ void test_codecvt_err()
             TEST(from_next == from + 5);
             TEST(to_next == to + 4);
             TEST(std::wstring(to, to_end) == boost::nowide::widen(err_utf));
+        }
+        {
+            wchar_t buf[4];
+            wchar_t* const to = buf;
+            wchar_t* const to_end = buf + 4;
+            const char* err_utf = "1\xd7"; // 1 valid, 1 incomplete UTF-8 char
+            std::mbstate_t mb = std::mbstate_t();
+            const char* from = err_utf;
+            const char* from_end = from + std::strlen(from);
+            const char* from_next = from;
+            wchar_t* to_next = to;
+            TEST(cvt.in(mb, from, from_end, from_next, to, to_end, to_next) == cvt_type::partial);
+            TEST(from_next == from + 1);
+            TEST(to_next == to + 1);
+            TEST(std::wstring(to, to_next) == std::wstring(L"1"));
         }
     }
 
@@ -217,7 +216,7 @@ void test_codecvt_err()
             TEST(cvt.out(mb, from, from_end, from_next, to, to_end, to_next) == cvt_type::ok);
             TEST(from_next == from + 2);
             TEST(to_next == to + 4);
-            TEST(std::memcmp(to, "1\xEF\xBF\xBD", 4) == 0);
+            TEST(std::string(to, to_next) == "1" + boost::nowide::narrow(wreplacement_str));
         }
     }
 }
@@ -229,19 +228,24 @@ std::wstring codecvt_to_wide(const std::string& s)
     const cvt_type& cvt = std::use_facet<cvt_type>(l);
 
     std::mbstate_t mb = std::mbstate_t();
-    const char* from = s.c_str();
-    const char* from_end = from + s.size();
+    const char* const from = s.c_str();
+    const char* const from_end = from + s.size();
     const char* from_next = from;
 
-    std::vector<wchar_t> buf(s.size() + 1);
-    wchar_t* to = &buf[0];
-    wchar_t* to_end = to + buf.size();
+    std::vector<wchar_t> buf(s.size() + 2); // +1 for possible incomplete char, +1 for NULL
+    wchar_t* const to = &buf[0];
+    wchar_t* const to_end = to + buf.size();
     wchar_t* to_next = to;
 
-    TEST(cvt.in(mb, from, from_end, from_next, to, to_end, to_next) == cvt_type::ok);
+    cvt_type::result res = cvt.in(mb, from, from_end, from_next, to, to_end, to_next);
+    if(res == cvt_type::partial)
+    {
+        TEST(to_next < to_end);
+        *(to_next++) = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
+    } else
+        TEST(res == cvt_type::ok);
 
-    std::wstring res(to, to_next);
-    return res;
+    return std::wstring(to, to_next);
 }
 
 std::string codecvt_to_narrow(const std::wstring& s)
@@ -251,19 +255,24 @@ std::string codecvt_to_narrow(const std::wstring& s)
     const cvt_type& cvt = std::use_facet<cvt_type>(l);
 
     std::mbstate_t mb = std::mbstate_t();
-    const wchar_t* from = s.c_str();
-    const wchar_t* from_end = from + s.size();
+    const wchar_t* const from = s.c_str();
+    const wchar_t* const from_end = from + s.size();
     const wchar_t* from_next = from;
 
-    std::vector<char> buf(s.size() * 4 + 1);
-    char* to = &buf[0];
-    char* to_end = to + buf.size();
+    std::vector<char> buf((s.size() + 1) * 4 + 1); // +1 for possible incomplete char, +1 for NULL
+    char* const to = &buf[0];
+    char* const to_end = to + buf.size();
     char* to_next = to;
 
-    TEST(cvt.out(mb, from, from_end, from_next, to, to_end, to_next) == cvt_type::ok);
+    cvt_type::result res = cvt.out(mb, from, from_end, from_next, to, to_end, to_next);
+    if(res == cvt_type::partial)
+    {
+        TEST(to_next < to_end);
+        return std::string(to, to_next) + boost::nowide::narrow(wreplacement_str);
+    } else
+        TEST(res == cvt_type::ok);
 
-    std::string res(to, to_next);
-    return res;
+    return std::string(to, to_next);
 }
 
 void test_codecvt_subst()

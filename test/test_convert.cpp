@@ -15,6 +15,44 @@
 #pragma warning(disable : 4428) // universal-character-name encountered in source
 #endif
 
+std::wstring widen_buf_ptr(const std::string& s)
+{
+    wchar_t buf[50];
+    TEST(boost::nowide::widen(buf, 50, s.c_str()) == buf);
+    return buf;
+}
+
+std::string narrow_buf_ptr(const std::wstring& s)
+{
+    char buf[50];
+    TEST(boost::nowide::narrow(buf, 50, s.c_str()) == buf);
+    return buf;
+}
+
+std::wstring widen_buf_range(const std::string& s)
+{
+    wchar_t buf[50];
+    TEST(boost::nowide::widen(buf, 50, s.c_str(), s.c_str() + s.size()) == buf);
+    return buf;
+}
+
+std::string narrow_buf_range(const std::wstring& s)
+{
+    char buf[50];
+    TEST(boost::nowide::narrow(buf, 50, s.c_str(), s.c_str() + s.size()) == buf);
+    return buf;
+}
+
+std::wstring widen_raw_string(const std::string& s)
+{
+    return boost::nowide::widen(s.c_str());
+}
+
+std::string narrow_raw_string(const std::wstring& s)
+{
+    return boost::nowide::narrow(s.c_str());
+}
+
 int main()
 {
     try
@@ -23,14 +61,11 @@ int main()
         std::wstring whello = L"\u05e9\u05dc\u05d5\u05dd";
         std::wstring whello_3e = L"\u05e9\u05dc\u05d5\ufffd";
         std::wstring whello_3 = L"\u05e9\u05dc\u05d5";
-        // Example filenames used in tests
-        std::string example = "\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
-        std::wstring wexample = L"\u05e9-\u043c-\u03bd.txt";
 
         std::cout << "- boost::nowide::widen" << std::endl;
         {
             const char* b = hello.c_str();
-            const char* e = b + 8;
+            const char* e = b + hello.size();
             wchar_t buf[6] = {0, 0, 0, 0, 0, 1};
             TEST(boost::nowide::widen(buf, 5, b, e) == buf);
             TEST(buf == whello);
@@ -42,26 +77,11 @@ int main()
             TEST(buf == whello_3);
             TEST(boost::nowide::widen(buf, 5, b, b) == buf && buf[0] == 0);
             TEST(boost::nowide::widen(buf, 5, b, b + 2) == buf && buf[1] == 0 && buf[0] == whello[0]);
-            b = "\xFF\xFF";
-            e = b + 2;
-            TEST(boost::nowide::widen(buf, 5, b, e) == buf);
-            TEST(buf == std::wstring(L"\ufffd\ufffd"));
-            b = "\xd7\xa9\xFF";
-            e = b + 3;
-            TEST(boost::nowide::widen(buf, 5, b, e) == buf);
-            TEST(buf == std::wstring(L"\u05e9\ufffd"));
-            TEST(boost::nowide::widen(buf, 5, b, b + 1) == buf);
-            TEST(buf == std::wstring(L"\ufffd"));
-            b = "\xFF\xd7\xa9";
-            e = b + 3;
-            TEST(boost::nowide::widen(buf, 5, b, e) == buf);
-            TEST(buf == std::wstring(L"\ufffd\u05e9"));
-            TEST(boost::nowide::widen(example) == wexample);
         }
         std::cout << "- boost::nowide::narrow" << std::endl;
         {
             const wchar_t* b = whello.c_str();
-            const wchar_t* e = b + 4;
+            const wchar_t* e = b + whello.size();
             char buf[10] = {0};
             buf[9] = 1;
             TEST(boost::nowide::narrow(buf, 9, b, e) == buf);
@@ -70,23 +90,15 @@ int main()
             TEST(boost::nowide::narrow(buf, 8, b, e) == 0);
             TEST(boost::nowide::narrow(buf, 7, b, e - 1) == buf);
             TEST(buf == hello.substr(0, 6));
-            wchar_t tmp[3] = {0xDC01, 0x05e9, 0};
-            b = tmp;
-            TEST(boost::nowide::narrow(buf, 10, b, b + 2) == buf);
-            TEST(buf == std::string("\xEF\xBF\xBD\xd7\xa9"));
-            wchar_t tmp2[3] = {0x05e9, 0xD800, 0};
-            b = tmp2;
-            TEST(boost::nowide::narrow(buf, 10, b, b + 2) == buf);
-            TEST(buf == std::string("\xd7\xa9\xEF\xBF\xBD"));
-            TEST(boost::nowide::narrow(wexample) == example);
         }
-        {
-            char buf[3];
-            wchar_t wbuf[3];
-            TEST(boost::nowide::narrow(buf, 3, L"xy") == std::string("xy"));
-            TEST(boost::nowide::widen(wbuf, 3, "xy") == std::wstring(L"xy"));
-        }
-        std::cout << "- Substitutions" << std::endl;
+
+        std::cout << "- (output_buffer, buffer_size, input_raw_string)" << std::endl;
+        run_all(widen_buf_ptr, narrow_buf_ptr);
+        std::cout << "- (output_buffer, buffer_size, input_raw_string, string_len)" << std::endl;
+        run_all(widen_buf_range, narrow_buf_range);
+        std::cout << "- (input_raw_string)" << std::endl;
+        run_all(widen_raw_string, narrow_raw_string);
+        std::cout << "- (const std::string&)" << std::endl;
         run_all(boost::nowide::widen, boost::nowide::narrow);
     } catch(const std::exception& e)
     {
