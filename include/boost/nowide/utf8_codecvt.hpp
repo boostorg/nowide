@@ -282,7 +282,7 @@ namespace nowide {
             }
             from_next = from;
             to_next = to;
-            if(r == std::codecvt_base::ok && from != from_end)
+            if(r == std::codecvt_base::ok && (from != from_end || state != 0))
                 r = std::codecvt_base::partial;
             detail::write_state(std_state, state);
             return r;

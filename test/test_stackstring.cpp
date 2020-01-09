@@ -27,12 +27,24 @@ std::string stackstring_to_narrow(const std::wstring& s)
     return ss.get();
 }
 
+std::wstring heap_stackstring_to_wide(const std::string& s)
+{
+    const boost::nowide::basic_stackstring<wchar_t, char, 1> ss(s.c_str());
+    return ss.get();
+}
+
+std::string heap_stackstring_to_narrow(const std::wstring& s)
+{
+    const boost::nowide::basic_stackstring<char, wchar_t, 1> ss(s.c_str());
+    return ss.get();
+}
+
 int main()
 {
     try
     {
         std::string hello = "\xd7\xa9\xd7\x9c\xd7\x95\xd7\x9d";
-        std::wstring whello = L"\u05e9\u05dc\u05d5\u05dd";
+        std::wstring whello = boost::nowide::widen(hello);
         const wchar_t* wempty = L"";
 
         {
@@ -76,6 +88,7 @@ int main()
             TEST(s2.get() == std::string());
         }
         {
+            // Will be put on heap
             TEST(whello.size() >= 3);
             boost::nowide::basic_stackstring<wchar_t, char, 3> sw;
             TEST(sw.convert(hello.c_str()));
@@ -84,6 +97,7 @@ int main()
             TEST(sw.get() == whello);
         }
         {
+            // Will be put on stack
             TEST(whello.size() < 5);
             boost::nowide::basic_stackstring<wchar_t, char, 5> sw;
             TEST(sw.convert(hello.c_str()));
@@ -92,6 +106,7 @@ int main()
             TEST(sw.get() == whello);
         }
         {
+            // Will be put on heap
             TEST(hello.size() >= 5);
             boost::nowide::basic_stackstring<char, wchar_t, 5> sw;
             TEST(sw.convert(whello.c_str()));
@@ -100,6 +115,7 @@ int main()
             TEST(sw.get() == hello);
         }
         {
+            // Will be put on stack
             TEST(hello.size() < 10);
             boost::nowide::basic_stackstring<char, wchar_t, 10> sw;
             TEST(sw.convert(whello.c_str()));
@@ -168,8 +184,10 @@ int main()
             TEST(stack.get() == stackVal);
             TEST(heap.get() == heapVal);
         }
-        std::cout << "- Substitutions" << std::endl;
+        std::cout << "- Stackstring" << std::endl;
         run_all(stackstring_to_wide, stackstring_to_narrow);
+        std::cout << "- Heap Stackstring" << std::endl;
+        run_all(heap_stackstring_to_wide, heap_stackstring_to_narrow);
     } catch(const std::exception& e)
     {
         std::cerr << "Failed :" << e.what() << std::endl;
