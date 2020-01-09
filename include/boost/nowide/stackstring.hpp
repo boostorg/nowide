@@ -93,7 +93,7 @@ namespace nowide {
         output_char* convert(const input_char* input)
         {
             if(input)
-                return convert(input, detail::basic_strend(input));
+                return convert(input, detail::strend(input));
             clear();
             return get();
         }
@@ -107,11 +107,11 @@ namespace nowide {
                 if(space <= buffer_size)
                 {
                     data_ = buffer_;
-                    basic_convert(buffer_, buffer_size, begin, end);
+                    detail::convert_buffer(buffer_, buffer_size, begin, end);
                 } else
                 {
                     data_ = new output_char[space];
-                    basic_convert(data_, space, begin, end);
+                    detail::convert_buffer(data_, space, begin, end);
                 }
             }
             return get();
