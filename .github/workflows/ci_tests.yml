@@ -28,13 +28,33 @@ jobs:
     - name: Install CMake
       if: runner.os == 'Linux' && ! matrix.standalone
       run: wget -O- https://cmake.org/files/v3.14/cmake-3.14.0-Linux-x86_64.tar.gz | sudo tar --strip-components=1 -xzC /usr/local
-    - name: Build Boost
-      if: matrix.generator == 'MinGW Makefiles'
-      shell: bash
+    # Install Boost, no wget on Windows -.-
+    - name: Download Boost
+      shell: cmake -P {0}
       run: |
-        cd "${BOOST_ROOT}"
-        ./bootstrap.sh --with-libraries=system,filesystem,chrono threading=multi
-        ./b2 link=static variant=release -j$(nproc)
+        set(version 1.56.0)
+        string(REPLACE "." "_" filename boost_${version})
+        set(BOOST_ARCHIVE ${filename}.7z)
+        set(boost_url https://sourceforge.net/projects/boost/files/boost/${version}/${BOOST_ARCHIVE}/download)
+        set(BOOST_ROOT $ENV{GITHUB_WORKSPACE}/deps/${filename})
+        set(DEP_BUILD_DIR $ENV{GITHUB_WORKSPACE}/deps/build)
+        file(MAKE_DIRECTORY ${DEP_BUILD_DIR})
+        file(DOWNLOAD "${boost_url}" ${DEP_BUILD_DIR}/${BOOST_ARCHIVE} SHOW_PROGRESS)
+        message("::set-env name=BOOST_ROOT::${BOOST_ROOT}")
+        message("::set-env name=DEP_BUILD_DIR::${DEP_BUILD_DIR}")
+        message("::set-env name=BOOST_ARCHIVE::${BOOST_ARCHIVE}")
+    - name: Build Boost
+      shell: bash
+      working-directory: ${{env.DEP_BUILD_DIR}}
+      run: |
+        7z x ${BOOST_ARCHIVE}
+        cd ${BOOST_ARCHIVE%.*}
+        [[ "${{matrix.generator}}" =~ "Unix" ]] && toolset=gcc || toolset=mingw
+        ./bootstrap.sh --with-toolset="$toolset" --with-libraries=system,filesystem,chrono threading=multi || (cat bootstrap.log && false)
+        [[ "${{matrix.generator}}" =~ "Visual Studio" ]] && toolset=msvc-14.0 || toolset=gcc
+        ./b2 link=static toolset=$toolset -j$(nproc) --prefix=$BOOST_ROOT install
+        cd $GITHUB_WORKSPACE
+        rm -r $DEP_BUILD_DIR
     - name: Configure
       working-directory: build
       run: cmake .. -DBoost_ARCHITECTURE=-x64 -DCMAKE_BUILD_TYPE=${{matrix.buildType}} -DBUILD_SHARED_LIBS=${{matrix.shared_lib}} -DCMAKE_INSTALL_PREFIX=${{runner.workspace}}/../install -G "${{matrix.generator}}" -DCMAKE_SH="CMAKE_SH-NOTFOUND"
