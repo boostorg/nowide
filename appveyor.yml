@@ -114,7 +114,7 @@ for:
       - if exist %INSTALL_DIR%\ (rmdir /S /Q %INSTALL_DIR%)
       - mkdir build
       - cd build
-      - cmake -G "%GENERATOR%" -DBOOST_NOWIDE_LAYOUT=versioned -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR% ..
+      - cmake -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR% ..
 
     build:
       project: build/boost_nowide.sln
