@@ -22,22 +22,45 @@ jobs:
           - os: windows-latest
             generator: Unix Makefiles
     runs-on: ${{matrix.os}}
+    env:
+      DEP_DIR: ${{github.workspace}}/dependencies
+      BOOST_VERSION: 1.56.0
     steps:
     - uses: actions/checkout@v2
+    - uses: actions/cache@v1
+      with:
+        path: ${{env.DEP_DIR}}
+        key: ${{matrix.os}}-${{matrix.generator}}-${{env.BOOST_VERSION}}
     # Install newer CMake to be able to find Boost
     - name: Install CMake
       if: runner.os == 'Linux' && ! matrix.standalone
-      run: wget -O- https://cmake.org/files/v3.14/cmake-3.14.0-Linux-x86_64.tar.gz | sudo tar --strip-components=1 -xzC /usr/local
-    - name: Build Boost
-      if: matrix.generator == 'MinGW Makefiles'
-      shell: bash
+      run: wget -qO- https://cmake.org/files/v3.14/cmake-3.14.0-Linux-x86_64.tar.gz | sudo tar --strip-components=1 -xzC /usr/local
+    # Install Boost, no wget on Windows -.-
+    - name: Download Boost
+      shell: cmake -P {0}
       run: |
-        cd "${BOOST_ROOT}"
-        ./bootstrap.sh --with-libraries=system,filesystem,chrono threading=multi
-        ./b2 link=static variant=release -j$(nproc)
+        string(REPLACE "." "_" filename boost_$ENV{BOOST_VERSION})
+        set(BOOST_ROOT $ENV{DEP_DIR}/${filename})
+        set(boost_url https://sourceforge.net/projects/boost/files/boost/$ENV{BOOST_VERSION}/${filename}.7z/download)
+        set(DEP_BUILD_DIR $ENV{DEP_DIR}/build)
+        file(MAKE_DIRECTORY ${DEP_BUILD_DIR})
+        file(DOWNLOAD "${boost_url}" ${DEP_BUILD_DIR}/boost.7z SHOW_PROGRESS)
+        message("::set-env name=BOOST_ROOT::${BOOST_ROOT}")
+    - name: Build Boost
+      shell: bash
+      working-directory: ${{env.DEP_DIR}}/build
+      run: |
+        7z x boost.7z > /dev/null
+        cd $(basename "$BOOST_ROOT")
+        [[ "${{matrix.generator}}" =~ "Unix" ]] && toolset=gcc || toolset=mingw
+        ./bootstrap.sh --with-toolset="$toolset" --with-libraries=system,filesystem,chrono threading=multi || (cat bootstrap.log && false)
+        sed -i 's/mingw/gcc/' project-config.jam
+        [[ "${{matrix.generator}}" =~ "Visual Studio" ]] && toolset=msvc-14.0 || toolset=gcc
+        ./b2 link=static toolset=$toolset address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install
+        cd "$DEP_DIR" && rm -r build
     - name: Configure
       working-directory: build
-      run: cmake .. -DBoost_ARCHITECTURE=-x64 -DCMAKE_BUILD_TYPE=${{matrix.buildType}} -DBUILD_SHARED_LIBS=${{matrix.shared_lib}} -DCMAKE_INSTALL_PREFIX=${{runner.workspace}}/../install -G "${{matrix.generator}}" -DCMAKE_SH="CMAKE_SH-NOTFOUND"
+      run: cmake .. -DBoost_DEBUG=ON -DCMAKE_BUILD_TYPE=${{matrix.buildType}} -DBUILD_SHARED_LIBS=${{matrix.shared_lib}} -DCMAKE_INSTALL_PREFIX=${{runner.workspace}}/../install -G "${{matrix.generator}}" -DCMAKE_SH="CMAKE_SH-NOTFOUND"
     - name: Build & Install
       run: cmake --build build --config ${{matrix.buildType}} --target install
     # Run test with both bash and powershell and watch for "Using std::cin" on bash but not on powershell
