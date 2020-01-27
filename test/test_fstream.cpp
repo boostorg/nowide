@@ -221,7 +221,7 @@ void test_ofstream_write(const char* filename)
     TEST(file_contents_equal(filename, "test2\n"));
     TEST(nw::remove(filename) == 0);
     // C++11 interfaces aren't enabled at all platforms so need to skip std::string arg for std::*fstream
-#if defined(BOOST_WINDOWS)
+#if defined(BOOST_WINDOWS) || defined(BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS)
     // string ctor
     {
         std::string name = filename;
@@ -285,7 +285,7 @@ void test_ifstream_open_read(const char* filename)
         TEST(tmp == "test");
     }
     // C++11 interfaces aren't enabled at all platforms so need to skip std::string arg for std::*fstream
-#if defined(BOOST_WINDOWS)
+#if defined(BOOST_WINDOWS) || defined(BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS)
     // string ctor
     {
         std::string name = filename;
@@ -438,8 +438,7 @@ void test_fstream(const char* filename)
 template<typename T>
 bool is_open(T& stream)
 {
-    // There const are and const non versions of is_open
-    // Test both
+    // There are const and non const versions of is_open, so test both
     TEST(stream.is_open() == const_cast<const T&>(stream).is_open());
     return stream.is_open();
 }
