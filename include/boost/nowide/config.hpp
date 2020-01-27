@@ -70,4 +70,14 @@
 #define BOOST_NOWIDE_FALLTHROUGH BOOST_FALLTHROUGH
 #endif
 
+namespace boost {
+///
+/// \brief This namespace includes implementations of the standard library functions and
+/// classes such that they accept UTF-8 strings on Windows.
+/// On other platforms (i.e. not on Windows) those functions and classes are just aliases
+/// of the corresponding ones from the std namespace or behave like them.
+///
+namespace nowide {}
+} // namespace boost
+
 #endif // boost/nowide/config.hpp

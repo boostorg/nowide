@@ -10,30 +10,11 @@
 
 #include <boost/nowide/config.hpp>
 #include <boost/nowide/filebuf.hpp>
-#if BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS
-#include <boost/nowide/convert.hpp>
-#include <iosfwd>
-#include <memory>
-#endif
-#include <fstream>
+#include <istream>
+#include <ostream>
 
 namespace boost {
-///
-/// \brief This namespace includes implementation of the standard library functions
-/// such that they accept UTF-8 strings on Windows. On other platforms it is just an alias
-/// of std namespace (i.e. not on Windows)
-///
 namespace nowide {
-#if !BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS && !defined(BOOST_NOWIDE_DOXYGEN)
-
-    using std::basic_ifstream;
-    using std::basic_ofstream;
-    using std::basic_fstream;
-    using std::ifstream;
-    using std::ofstream;
-    using std::fstream;
-
-#else
     /// \cond INTERNAL
     namespace detail {
         // clang-format off
@@ -61,6 +42,9 @@ namespace nowide {
         ///         Class used instead of value, because openmode::operator| may not be constexpr
         template<typename T_Basic_FStream, typename T_StreamType>
         class fstream_impl;
+
+        template<typename Path, typename Result>
+        struct enable_if_path;
     } // namespace detail
     /// \endcond
 
@@ -83,6 +67,13 @@ namespace nowide {
         {
             open(file_name, mode);
         }
+#ifdef BOOST_WINDOWS
+        explicit basic_ifstream(const wchar_t* file_name, std::ios_base::openmode mode = std::ios_base::in) :
+            stream_base(&this->buf_)
+        {
+            open(file_name, mode);
+        }
+#endif
 
         explicit basic_ifstream(const std::string& file_name, std::ios_base::openmode mode = std::ios_base::in) :
             stream_base(&this->buf_)
@@ -90,6 +81,14 @@ namespace nowide {
             open(file_name, mode);
         }
 
+        template<typename Path>
+        explicit basic_ifstream(
+          const Path& file_name,
+          typename detail::enable_if_path<Path, std::ios_base::openmode>::type mode = std::ios_base::in) :
+            stream_base(&this->buf_)
+        {
+            open(file_name, mode);
+        }
         using fstream_impl::open;
         using fstream_impl::is_open;
         using fstream_impl::close;
@@ -115,7 +114,22 @@ namespace nowide {
         {
             open(file_name, mode);
         }
+#ifdef BOOST_WINDOWS
+        explicit basic_ofstream(const wchar_t* file_name, std::ios_base::openmode mode = std::ios_base::out) :
+            stream_base(&this->buf_)
+        {
+            open(file_name, mode);
+        }
+#endif
         explicit basic_ofstream(const std::string& file_name, std::ios_base::openmode mode = std::ios_base::out) :
+            stream_base(&this->buf_)
+        {
+            open(file_name, mode);
+        }
+        template<typename Path>
+        explicit basic_ofstream(
+          const Path& file_name,
+          typename detail::enable_if_path<Path, std::ios_base::openmode>::type mode = std::ios_base::out) :
             stream_base(&this->buf_)
         {
             open(file_name, mode);
@@ -150,8 +164,24 @@ namespace nowide {
         {
             open(file_name, mode);
         }
+#ifdef BOOST_WINDOWS
+        explicit basic_fstream(const wchar_t* file_name,
+                               std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) :
+            stream_base(&this->buf_)
+        {
+            open(file_name, mode);
+        }
+#endif
         explicit basic_fstream(const std::string& file_name,
                                std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) :
+            stream_base(&this->buf_)
+        {
+            open(file_name, mode);
+        }
+        template<typename Path>
+        explicit basic_fstream(const Path& file_name,
+                               typename detail::enable_if_path<Path, std::ios_base::openmode>::type mode =
+                                 std::ios_base::in | std::ios_base::out) :
             stream_base(&this->buf_)
         {
             open(file_name, mode);
@@ -172,14 +202,17 @@ namespace nowide {
     typedef basic_filebuf<char> filebuf;
     ///
     /// Same as std::ifstream but accepts UTF-8 strings under Windows
+    /// and *::filesystem::path on all systems
     ///
     typedef basic_ifstream<char> ifstream;
     ///
     /// Same as std::ofstream but accepts UTF-8 strings under Windows
+    /// and *::filesystem::path on all systems
     ///
     typedef basic_ofstream<char> ofstream;
     ///
     /// Same as std::fstream but accepts UTF-8 strings under Windows
+    /// and *::filesystem::path on all systems
     ///
     typedef basic_fstream<char> fstream;
 
@@ -204,6 +237,12 @@ namespace nowide {
             {
                 open(file_name.c_str(), mode);
             }
+            template<typename Path>
+            typename detail::enable_if_path<Path, void>::type open(const Path& file_name,
+                                                                   std::ios_base::openmode mode = T_StreamType::mode())
+            {
+                return open(file_name.c_str(), mode);
+            }
             void open(const char* file_name, std::ios_base::openmode mode = T_StreamType::mode())
             {
                 if(!buf_.open(file_name, mode | T_StreamType::mode_modifier()))
@@ -211,6 +250,15 @@ namespace nowide {
                 else
                     underlying()->clear();
             }
+#ifdef BOOST_WINDOWS
+            void open(const wchar_t* file_name, std::ios_base::openmode mode = T_StreamType::mode())
+            {
+                if(!buf_.open(file_name, mode | T_StreamType::mode_modifier()))
+                    underlying()->setstate(std::ios_base::failbit);
+                else
+                    underlying()->clear();
+            }
+#endif
             bool is_open()
             {
                 return buf_.is_open();
@@ -232,8 +280,44 @@ namespace nowide {
 
             internal_buffer_type buf_;
         };
+
+        /// Trait to heuristically check for a *::filesystem::path
+        /// Done by checking for make_preferred and filename member functions with correct signature
+        template<typename T>
+        class is_path
+        {
+            typedef char one;
+            struct two
+            {
+                char dummy[2];
+            };
+
+            template<typename U, U& (U::*)(), U (U::*)() const>
+            struct Check;
+            template<typename U>
+            static one test(Check<U, &U::make_preferred, &U::filename>*);
+            template<typename U>
+            static two test(...);
+
+        public:
+            enum
+            {
+                value = sizeof(test<T>(0)) == sizeof(one)
+            };
+        };
+        template<bool B, typename T>
+        struct enable_if
+        {};
+        template<typename T>
+        struct enable_if<true, T>
+        {
+            typedef T type;
+        };
+        /// SFINAE trait which has a member "type = Result" if the Path is a *::filesystem::path
+        template<typename Path, typename Result>
+        struct enable_if_path : enable_if<is_path<Path>::value, Result>
+        {};
     } // namespace detail
-#endif
 } // namespace nowide
 } // namespace boost
 
