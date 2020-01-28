@@ -1,7 +1,7 @@
 @PACKAGE_INIT@
 
-set(_boost_nowide_standalone @NOWIDE_STANDALONE@)
-set(_boost_nowide_superproject @BOOST_SUPERPROJECT_SOURCE_DIR@)
+set(_boost_nowide_standalone @BOOST_NOWIDE_STANDALONE@)
+set(_boost_nowide_superproject "@BOOST_SUPERPROJECT_SOURCE_DIR@")
 
 if(NOT _boost_nowide_standalone)
   include(CMakeFindDependencyMacro)

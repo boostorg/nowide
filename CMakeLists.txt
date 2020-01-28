@@ -37,18 +37,26 @@ if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
 endif()
 
 include(BoostAddOptions)
-include(BoostAddLibrary)
 include(BoostAddWarnings)
-boost_add_options(nowide)
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   include(CTest)
 endif()
-if(BOOST_NOWIDE_SYSTEM_INCLUDE)
-  set(nowideSystem SYSTEM)
-else()
-  set(nowideSystem "")
+
+# Using glob here is ok as it is only for headers
+file(GLOB_RECURSE headers include/*.hpp)
+add_library(boost_nowide src/iostream.cpp ${headers})
+add_library(Boost::nowide ALIAS boost_nowide)
+set_target_properties(boost_nowide PROPERTIES
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN ON
+    VERSION ${PROJECT_VERSION}
+    EXPORT_NAME nowide
+)
+if(BUILD_SHARED_LIBS)
+  target_compile_definitions(boost_nowide PUBLIC BOOST_NOWIDE_DYN_LINK)
 endif()
-boost_add_library(nowide ${nowideSystem} LAYOUT ${BOOST_NOWIDE_LAYOUT})
+target_compile_definitions(boost_nowide PUBLIC BOOST_NOWIDE_NO_LIB)
+target_include_directories(boost_nowide PUBLIC include)
 boost_add_warnings(boost_nowide pedantic ${BOOST_NOWIDE_WERROR})
 
 if(BOOST_NOWIDE_STANDALONE)
@@ -67,15 +75,11 @@ else()
   endif()
 endif()
 
-# Using glob here is ok as it is only for headers
-file(GLOB_RECURSE headers include/*.hpp)
-target_sources(boost_nowide PRIVATE src/iostream.cpp ${headers})
-
 if(BUILD_TESTING)
   add_subdirectory(test)
 endif()
 
 if(BOOST_NOWIDE_INSTALL)
-  include(BoostInstall)
-  boost_install(TARGETS boost_nowide LAYOUT ${BOOST_NOWIDE_LAYOUT})
+  include(InstallTargets)
+  install_targets(TARGETS boost_nowide NAMESPACE Boost CONFIG_FILE ${PROJECT_SOURCE_DIR}/Config.cmake.in)
 endif()
