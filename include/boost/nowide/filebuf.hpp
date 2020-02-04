@@ -63,7 +63,8 @@ namespace nowide {
         ///
         /// Creates new filebuf
         ///
-        basic_filebuf() : buffer_size_(4), buffer_(0), file_(0), owns_buffer_(false), last_char_(0), mode_(std::ios_base::openmode(0))
+        basic_filebuf() :
+            buffer_size_(4), buffer_(0), file_(0), owns_buffer_(false), last_char_(0), mode_(std::ios_base::openmode(0))
         {
             setg(0, 0, 0);
             setp(0, 0);
@@ -277,8 +278,9 @@ namespace nowide {
             return Traits::not_eof(c);
         }
 
-        virtual std::streampos
-        seekoff(std::streamoff off, std::ios_base::seekdir seekdir, std::ios_base::openmode = std::ios_base::in | std::ios_base::out)
+        virtual std::streampos seekoff(std::streamoff off,
+                                       std::ios_base::seekdir seekdir,
+                                       std::ios_base::openmode = std::ios_base::in | std::ios_base::out)
         {
             if(!file_)
                 return EOF;
@@ -300,7 +302,8 @@ namespace nowide {
                 return EOF;
             return std::ftell(file_);
         }
-        virtual std::streampos seekpos(std::streampos pos, std::ios_base::openmode m = std::ios_base::in | std::ios_base::out)
+        virtual std::streampos seekpos(std::streampos pos,
+                                       std::ios_base::openmode m = std::ios_base::in | std::ios_base::out)
         {
             // Standard mandates "as-if fsetpos", but assume the effect is the same as fseek
             return seekoff(pos, std::ios_base::beg, m);

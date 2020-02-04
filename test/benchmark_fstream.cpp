@@ -116,8 +116,8 @@ void test_io(const char* file, const char* type)
         double tm = boost::chrono::duration_cast<boost::chrono::milliseconds>(t2 - t1).count() * 1e-3;
         // heatup
         if(block_size >= 32)
-            std::cout << "  write block size " << std::setw(8) << block_size << " " << std::fixed << std::setprecision(3)
-                      << (data_size / 1024.0 / 1024 / tm) << " MB/s" << std::endl;
+            std::cout << "  write block size " << std::setw(8) << block_size << " " << std::fixed
+                      << std::setprecision(3) << (data_size / 1024.0 / 1024 / tm) << " MB/s" << std::endl;
     }
     for(int block_size = 32; block_size <= 8192; block_size *= 2)
     {
