@@ -49,13 +49,15 @@ namespace nowide {
             this->init(&buf_);
         }
 
-        explicit basic_ifstream(const char* file_name, std::ios_base::openmode mode = std::ios_base::in) : internal_stream_type(NULL)
+        explicit basic_ifstream(const char* file_name, std::ios_base::openmode mode = std::ios_base::in) :
+            internal_stream_type(NULL)
         {
             this->init(&buf_);
             open(file_name, mode);
         }
 
-        explicit basic_ifstream(const std::string& file_name, std::ios_base::openmode mode = std::ios_base::in) : internal_stream_type(NULL)
+        explicit basic_ifstream(const std::string& file_name, std::ios_base::openmode mode = std::ios_base::in) :
+            internal_stream_type(NULL)
         {
             this->init(&buf_);
             open(file_name, mode);
@@ -110,7 +112,8 @@ namespace nowide {
         {
             this->init(&buf_);
         }
-        explicit basic_ofstream(const char* file_name, std::ios_base::openmode mode = std::ios_base::out) : internal_stream_type(NULL)
+        explicit basic_ofstream(const char* file_name, std::ios_base::openmode mode = std::ios_base::out) :
+            internal_stream_type(NULL)
         {
             this->init(&buf_);
             open(file_name, mode);
@@ -173,13 +176,15 @@ namespace nowide {
         {
             this->init(&buf_);
         }
-        explicit basic_fstream(const char* file_name, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) :
+        explicit basic_fstream(const char* file_name,
+                               std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) :
             internal_stream_type(NULL)
         {
             this->init(&buf_);
             open(file_name, mode);
         }
-        explicit basic_fstream(const std::string& file_name, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) :
+        explicit basic_fstream(const std::string& file_name,
+                               std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) :
             internal_stream_type(NULL)
         {
             this->init(&buf_);

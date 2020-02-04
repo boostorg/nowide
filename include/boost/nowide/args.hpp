@@ -62,7 +62,8 @@ namespace nowide {
         /// Fix command line arguments and environment
         ///
         args(int& argc, char**& argv, char**& env) :
-            old_argc_(argc), old_argv_(argv), old_env_(env), old_argc_ptr_(&argc), old_argv_ptr_(&argv), old_env_ptr_(&env)
+            old_argc_(argc), old_argv_(argv), old_env_(env), old_argc_ptr_(&argc), old_argv_ptr_(&argv),
+            old_env_ptr_(&env)
         {
             fix_args(argc, argv);
             fix_env(env);

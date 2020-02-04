@@ -68,7 +68,7 @@ namespace nowide {
         if(!overwrite)
         {
             wchar_t unused[2];
-            if(!(GetEnvironmentVariableW(name.get(), unused, 2) == 0 && GetLastError() == 203)) // ERROR_ENVVAR_NOT_FOUND
+            if(GetEnvironmentVariableW(name.get(), unused, 2) != 0 || GetLastError() != 203) // ERROR_ENVVAR_NOT_FOUND
                 return 0;
         }
         const wstackstring wval(value);

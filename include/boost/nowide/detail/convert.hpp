@@ -18,8 +18,8 @@ namespace nowide {
     /// \cond INTERNAL
     namespace detail {
         ///
-        /// Convert a buffer of UTF sequences in the range [source_begin, source_end) from \tparam CharIn to \tparam CharOut
-        /// to the output \a buffer of size \a buffer_size.
+        /// Convert a buffer of UTF sequences in the range [source_begin, source_end)
+        /// from \tparam CharIn to \tparam CharOut to the output \a buffer of size \a buffer_size.
         ///
         /// \return original buffer containing the NULL terminated string or NULL
         ///
@@ -27,7 +27,8 @@ namespace nowide {
         /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
         ///
         template<typename CharOut, typename CharIn>
-        CharOut* convert_buffer(CharOut* buffer, size_t buffer_size, const CharIn* source_begin, const CharIn* source_end)
+        CharOut*
+        convert_buffer(CharOut* buffer, size_t buffer_size, const CharIn* source_begin, const CharIn* source_end)
         {
             CharOut* rv = buffer;
             if(buffer_size == 0)
