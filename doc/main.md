@@ -305,12 +305,11 @@ and usage via \c string_or_path.c_str() is still possible and portable.
 
 \subsection technical_cio Console I/O
 
-Console I/O is implemented as a wrapper around ReadConsoleW/WriteConsoleW
-(used when the stream goes to the "real" console) and ReadFile/WriteFile
-(used when the stream was piped/redirected).
+Console I/O is implemented as a wrapper around ReadConsoleW/WriteConsoleW when the stream goes to the "real" console.
+When the stream was piped/redirected the standard \c cin/cout is used instead.
 
-This approach eliminates a need of manual code page handling. If TrueType
-fonts are used the Unicode aware input and output works as intended.
+This approach eliminates a need of manual code page handling.
+If TrueType fonts are used the Unicode aware input and output works as intended.
 
 \section qna Q & A
 
