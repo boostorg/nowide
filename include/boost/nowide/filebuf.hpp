@@ -87,6 +87,12 @@ namespace nowide {
         ///
         basic_filebuf* open(const char* s, std::ios_base::openmode mode)
         {
+            const wstackstring name(s);
+            return open(name.get(), mode);
+        }
+        /// Opens the file with the given name, see std::filebuf::open
+        basic_filebuf* open(const wchar_t* s, std::ios_base::openmode mode)
+        {
             if(is_open())
                 return NULL;
             validate_cvt(this->getloc());
@@ -97,11 +103,11 @@ namespace nowide {
             if(!smode)
                 return 0;
 #ifdef BOOST_WINDOWS
-            const wstackstring name(s);
-            file_ = ::_wfopen(name.get(), smode);
+            file_ = ::_wfopen(s, smode);
 #else
-            short_stackstring smode2(smode);
-            file_ = std::fopen(s, smode2.get());
+            const stackstring name(s);
+            const short_stackstring smode2(smode);
+            file_ = std::fopen(name.get(), smode2.get());
 #endif
 
             if(!file_)

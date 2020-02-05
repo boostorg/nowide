@@ -220,8 +220,6 @@ void test_ofstream_write(const char* filename)
     }
     TEST(file_contents_equal(filename, "test2\n"));
     TEST(nw::remove(filename) == 0);
-    // C++11 interfaces aren't enabled at all platforms so need to skip std::string arg for std::*fstream
-#if defined(BOOST_WINDOWS)
     // string ctor
     {
         std::string name = filename;
@@ -238,7 +236,6 @@ void test_ofstream_write(const char* filename)
     }
     TEST(file_contents_equal(filename, "test2\n"));
     TEST(nw::remove(filename) == 0);
-#endif
     // Binary mode
     {
         nw::ofstream fo(filename, std::ios::binary);
@@ -284,8 +281,6 @@ void test_ifstream_open_read(const char* filename)
         TEST(fi >> tmp);
         TEST(tmp == "test");
     }
-    // C++11 interfaces aren't enabled at all platforms so need to skip std::string arg for std::*fstream
-#if defined(BOOST_WINDOWS)
     // string ctor
     {
         std::string name = filename;
@@ -304,7 +299,6 @@ void test_ifstream_open_read(const char* filename)
         TEST(fi >> tmp);
         TEST(tmp == "test");
     }
-#endif
     // Binary mode
     {
         nw::ifstream fi(filename, std::ios::binary);
@@ -338,16 +332,21 @@ void test_ifstream_open_read(const char* filename)
 
 void test_fstream(const char* filename)
 {
+    const std::string sFilename = filename;
     nw::remove(filename);
     TEST(!file_exists(filename));
     // Fail on non-existing file
     {
         nw::fstream f(filename);
         TEST(!f);
+        nw::fstream f2(sFilename);
+        TEST(!f2);
     }
     {
         nw::fstream f;
         f.open(filename);
+        TEST(!f);
+        f.open(sFilename);
         TEST(!f);
     }
     TEST(!file_exists(filename));
@@ -357,7 +356,7 @@ void test_fstream(const char* filename)
         TEST(f);
     }
     TEST(file_contents_equal(filename, ""));
-    // Ctor
+    // Char* ctor
     {
         nw::fstream f(filename);
         TEST(f);
@@ -368,6 +367,17 @@ void test_fstream(const char* filename)
         TEST(tmp == "test");
     }
     TEST(file_contents_equal(filename, "test"));
+    // String ctor
+    {
+        nw::fstream f(sFilename);
+        TEST(f);
+        TEST(f << "string_ctor");
+        std::string tmp;
+        TEST(f.seekg(0));
+        TEST(f >> tmp);
+        TEST(tmp == "string_ctor");
+    }
+    TEST(file_contents_equal(filename, "string_ctor"));
     TEST(nw::remove(filename) == 0);
     // Create empty file (open)
     {
@@ -438,8 +448,7 @@ void test_fstream(const char* filename)
 template<typename T>
 bool is_open(T& stream)
 {
-    // There const are and const non versions of is_open
-    // Test both
+    // There are const and non const versions of is_open, so test both
     TEST(stream.is_open() == const_cast<const T&>(stream).is_open());
     return stream.is_open();
 }

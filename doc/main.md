@@ -287,14 +287,29 @@ using std::fopen
 } // boost
 \endcode
 
+There is also a \c std::filebuf compatible implementation provided for Windows which supports UTF-8 filepaths
+for \c open and behaves otherwise identical (API-wise).
+
+On all systems the \c std::fstream class and friends are provided as custom implementations supporting
+\c std::string and \c \*::filesystem::path as well as \c wchar_t\* (Windows only) overloads for the
+constructor and \c open.
+This is done so users can use e.g. \c boost::filesystem::path with \c boost::nowide::fstream without
+depending on C++17 support.
+Furthermore any path-like class is supported if it matches the interface of \c std::filesystem::path "enough".
+
+Note that there is no universal support for \c path and \c std::string in \c boost::nowide::filebuf.
+This is due to using the std variant on non-Windows systems which might be faster in some cases.
+As \c filebuf is rarely used by user code but rather indirectly through \c fstream not having string or
+path support seems a small price to pay especially as C++11 adds \c std::string support, C++17 \c path support
+and usage via \c string_or_path.c_str() is still possible and portable.
+
 \subsection technical_cio Console I/O
 
-Console I/O is implemented as a wrapper around ReadConsoleW/WriteConsoleW
-(used when the stream goes to the "real" console) and ReadFile/WriteFile
-(used when the stream was piped/redirected).
+Console I/O is implemented as a wrapper around ReadConsoleW/WriteConsoleW when the stream goes to the "real" console.
+When the stream was piped/redirected the standard \c cin/cout is used instead.
 
-This approach eliminates a need of manual code page handling. If TrueType
-fonts are used the Unicode aware input and output works as intended.
+This approach eliminates a need of manual code page handling.
+If TrueType fonts are used the Unicode aware input and output works as intended.
 
 \section qna Q & A
 
