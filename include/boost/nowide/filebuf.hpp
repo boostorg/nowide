@@ -64,7 +64,8 @@ namespace nowide {
         /// Creates new filebuf
         ///
         basic_filebuf() :
-            buffer_size_(4), buffer_(0), file_(0), owns_buffer_(false), last_char_(0), mode_(std::ios_base::openmode(0))
+            buffer_size_(BUFSIZ), buffer_(0), file_(0), owns_buffer_(false), last_char_(0),
+            mode_(std::ios_base::openmode(0))
         {
             setg(0, 0, 0);
             setp(0, 0);
