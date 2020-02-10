@@ -53,6 +53,20 @@ std::string narrow_raw_string(const std::wstring& s)
     return boost::nowide::narrow(s.c_str());
 }
 
+std::wstring widen_raw_string_and_size(const std::string& s)
+{
+    // Remove NULL
+    const std::string s2 = s + "DummyData";
+    return boost::nowide::widen(s2.c_str(), s.size());
+}
+
+std::string narrow_raw_string_and_size(const std::wstring& s)
+{
+    // Remove NULL
+    const std::wstring s2 = s + L"DummyData";
+    return boost::nowide::narrow(s2.c_str(), s.size());
+}
+
 int main()
 {
     try
@@ -98,6 +112,8 @@ int main()
         run_all(widen_buf_range, narrow_buf_range);
         std::cout << "- (input_raw_string)" << std::endl;
         run_all(widen_raw_string, narrow_raw_string);
+        std::cout << "- (input_raw_string, size)" << std::endl;
+        run_all(widen_raw_string_and_size, narrow_raw_string_and_size);
         std::cout << "- (const std::string&)" << std::endl;
         run_all(boost::nowide::widen, boost::nowide::narrow);
     } catch(const std::exception& e)

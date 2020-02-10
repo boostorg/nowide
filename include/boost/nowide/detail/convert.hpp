@@ -82,14 +82,16 @@ namespace nowide {
             return result;
         }
 
-        /// Return the pointer to the first NULL value encountered by increasing s
-        /// Equivalent to `return s + strlen(s)` but more generic
+        /// Return the length of the given string.
+        /// That is the number of characters until the first NULL character
+        /// Equivalent to `std::strlen(s)` but can handle wide-strings
         template<typename Char>
-        const Char* strend(const Char* s)
+        size_t strlen(const Char* s)
         {
-            while(*s)
-                s++;
-            return s;
+            const Char* end = s;
+            while(*end)
+                end++;
+            return end - s;
         }
 
     } // namespace detail
