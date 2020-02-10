@@ -38,16 +38,23 @@ jobs:
     # Install Boost, no wget on Windows -.-
     - name: Download Boost
       shell: cmake -P {0}
+      id: downloadBoost
       run: |
         string(REPLACE "." "_" filename boost_$ENV{BOOST_VERSION})
         set(BOOST_ROOT $ENV{DEP_DIR}/${filename})
-        set(boost_url https://sourceforge.net/projects/boost/files/boost/$ENV{BOOST_VERSION}/${filename}.7z/download)
-        set(DEP_BUILD_DIR $ENV{DEP_DIR}/build)
-        file(MAKE_DIRECTORY ${DEP_BUILD_DIR})
-        file(DOWNLOAD "${boost_url}" ${DEP_BUILD_DIR}/boost.7z SHOW_PROGRESS)
         message("::set-env name=BOOST_ROOT::${BOOST_ROOT}")
+        if(EXISTS ${BOOST_ROOT}/include)
+          message("::set-output name=update::0")
+        else()
+          message("::set-output name=update::1")
+          set(boost_url https://sourceforge.net/projects/boost/files/boost/$ENV{BOOST_VERSION}/${filename}.7z/download)
+          set(DEP_BUILD_DIR $ENV{DEP_DIR}/build)
+          file(MAKE_DIRECTORY ${DEP_BUILD_DIR})
+          file(DOWNLOAD "${boost_url}" ${DEP_BUILD_DIR}/boost.7z SHOW_PROGRESS)
+        endif()
     - name: Build Boost
       shell: bash
+      if: steps.downloadBoost.outputs.update == 1
       working-directory: ${{env.DEP_DIR}}/build
       run: |
         7z x boost.7z > /dev/null
