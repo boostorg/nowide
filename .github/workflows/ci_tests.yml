@@ -69,7 +69,7 @@ jobs:
         if ! rm -r build; then sleep 30s; rm -r build; fi
     - name: Configure
       working-directory: build
-      run: cmake .. -DBoost_DEBUG=ON -DCMAKE_BUILD_TYPE=${{matrix.buildType}} -DBUILD_SHARED_LIBS=${{matrix.shared_lib}} -DCMAKE_INSTALL_PREFIX=${{runner.workspace}}/../install -G "${{matrix.generator}}" -DCMAKE_SH="CMAKE_SH-NOTFOUND"
+      run: cmake .. -DBoost_DEBUG=ON -DCMAKE_BUILD_TYPE=${{matrix.buildType}} -DBUILD_SHARED_LIBS=${{matrix.shared_lib}} -DCMAKE_INSTALL_PREFIX=${{runner.workspace}}/../install -G "${{matrix.generator}}" -DCMAKE_SH="CMAKE_SH-NOTFOUND" -DBoost_NO_BOOST_CMAKE=ON
     - name: Build & Install
       run: cmake --build build --config ${{matrix.buildType}} --target install
     # Run test with both bash and powershell and watch for "Using std::cin" on bash but not on powershell
