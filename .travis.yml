@@ -246,7 +246,7 @@ install:
   - cd ..
   - git clone -b $BOOST_BRANCH --depth 1 https://github.com/boostorg/boost.git boost-root
   - cd boost-root
-  - git submodule update --init tools/boostdep
+  - git submodule update --init tools/boostdep libs/predef
   - mkdir -p libs/nowide
   - cp -r $TRAVIS_BUILD_DIR/* libs/nowide
   - python tools/boostdep/depinst/depinst.py nowide

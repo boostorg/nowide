@@ -65,6 +65,7 @@ int main()
         std::cerr << "Failed : " << e.what() << std::endl;
         return 1;
     }
+    std::cout << "Ok" << std::endl;
 
     return 0;
 }

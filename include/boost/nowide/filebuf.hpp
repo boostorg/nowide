@@ -48,10 +48,6 @@ namespace nowide {
     template<>
     class basic_filebuf<char> : public std::basic_streambuf<char>
     {
-        // Non-copyable
-        basic_filebuf(const basic_filebuf<char>&);
-        basic_filebuf& operator=(const basic_filebuf<char>&);
-
         typedef std::char_traits<char> Traits;
 
     public:
@@ -65,7 +61,50 @@ namespace nowide {
             setg(0, 0, 0);
             setp(0, 0);
         }
+#if !BOOST_NOWIDE_CXX11
+    private:
+        // Non-copyable
+        basic_filebuf(const basic_filebuf&);
+        basic_filebuf& operator=(const basic_filebuf&);
 
+    public:
+#else
+        basic_filebuf(const basic_filebuf&) = delete;
+        basic_filebuf& operator=(const basic_filebuf&) = delete;
+        basic_filebuf(basic_filebuf&& other) BOOST_NOWIDE_NOEXCEPT : basic_filebuf()
+        {
+            swap(other);
+        }
+        basic_filebuf& operator=(basic_filebuf&& other) BOOST_NOWIDE_NOEXCEPT
+        {
+            swap(other);
+            return *this;
+        }
+        void swap(basic_filebuf& rhs)
+        {
+            std::basic_streambuf<char>::swap(rhs);
+            using std::swap;
+            swap(buffer_size_, rhs.buffer_size_);
+            swap(buffer_, rhs.buffer_);
+            swap(file_, rhs.file_);
+            swap(owns_buffer_, rhs.owns_buffer_);
+            swap(last_char_, rhs.last_char_);
+            swap(mode_, rhs.mode_);
+            // Fixup last_char references
+            if(epptr() == &rhs.last_char_)
+                setp(&last_char_, &last_char_);
+            if(egptr() == &rhs.last_char_)
+                rhs.setg(&last_char_, gptr() == &rhs.last_char_ ? &last_char_ : &last_char_ + 1, &last_char_ + 1);
+            if(rhs.epptr() == &last_char_)
+                setp(&rhs.last_char_, &rhs.last_char_);
+            if(rhs.egptr() == &rhs.last_char_)
+            {
+                rhs.setg(&rhs.last_char_,
+                         rhs.gptr() == &last_char_ ? &rhs.last_char_ : &rhs.last_char_ + 1,
+                         &rhs.last_char_ + 1);
+            }
+        }
+#endif
         virtual ~basic_filebuf()
         {
             close();

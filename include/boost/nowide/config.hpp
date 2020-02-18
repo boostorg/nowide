@@ -79,6 +79,18 @@
 #define BOOST_NOWIDE_FALLTHROUGH BOOST_FALLTHROUGH
 #endif
 
+#if __cplusplus >= 201103L || (defined(BOOST_MSVC) && BOOST_MSVC >= 1900)
+#define BOOST_NOWIDE_CXX11 1
+#else
+#define BOOST_NOWIDE_CXX11 0
+#endif
+
+#ifdef BOOST_NO_CXX11_NOEXCEPT
+#define BOOST_NOWIDE_NOEXCEPT throw()
+#else
+#define BOOST_NOWIDE_NOEXCEPT noexcept
+#endif
+
 namespace boost {
 ///
 /// \brief This namespace includes implementations of the standard library functions and
