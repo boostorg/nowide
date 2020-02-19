@@ -47,13 +47,13 @@ namespace nowide {
         };
         // clang-format on
 
-        /// CRTP Base class for all basic_*fstream classes
+        /// Base class for all basic_*fstream classes
         /// Contains basic_filebuf instance so its pointer can be used to construct basic_*stream
         /// Provides common functions to reduce boilerplate code including inheriting from
         /// the correct std::basic_[io]stream class and initializing it
         /// \tparam T_StreamType One of StreamType* above.
         ///         Class used instead of value, because openmode::operator| may not be constexpr
-        template<typename T_Basic_FStream, typename T_StreamType>
+        template<typename CharType, typename Traits, typename T_StreamType>
         class fstream_impl;
 
         template<typename Path, typename Result>
@@ -65,9 +65,9 @@ namespace nowide {
     /// \brief Same as std::basic_ifstream<char> but accepts UTF-8 strings under Windows
     ///
     template<typename CharType, typename Traits = std::char_traits<CharType> >
-    class basic_ifstream : public detail::fstream_impl<basic_ifstream<CharType, Traits>, detail::StreamTypeIn>
+    class basic_ifstream : public detail::fstream_impl<CharType, Traits, detail::StreamTypeIn>
     {
-        typedef detail::fstream_impl<basic_ifstream, detail::StreamTypeIn> fstream_impl;
+        typedef detail::fstream_impl<CharType, Traits, detail::StreamTypeIn> fstream_impl;
 
     public:
         basic_ifstream()
@@ -107,9 +107,9 @@ namespace nowide {
     ///
 
     template<typename CharType, typename Traits = std::char_traits<CharType> >
-    class basic_ofstream : public detail::fstream_impl<basic_ofstream<CharType, Traits>, detail::StreamTypeOut>
+    class basic_ofstream : public detail::fstream_impl<CharType, Traits, detail::StreamTypeOut>
     {
-        typedef detail::fstream_impl<basic_ofstream, detail::StreamTypeOut> fstream_impl;
+        typedef detail::fstream_impl<CharType, Traits, detail::StreamTypeOut> fstream_impl;
 
     public:
         basic_ofstream()
@@ -150,9 +150,9 @@ namespace nowide {
     /// \brief Same as std::basic_fstream<char> but accepts UTF-8 strings under Windows
     ///
     template<typename CharType, typename Traits = std::char_traits<CharType> >
-    class basic_fstream : public detail::fstream_impl<basic_fstream<CharType, Traits>, detail::StreamTypeInOut>
+    class basic_fstream : public detail::fstream_impl<CharType, Traits, detail::StreamTypeInOut>
     {
-        typedef detail::fstream_impl<basic_fstream, detail::StreamTypeInOut> fstream_impl;
+        typedef detail::fstream_impl<CharType, Traits, detail::StreamTypeInOut> fstream_impl;
 
     public:
         basic_fstream()
@@ -220,13 +220,9 @@ namespace nowide {
         {
             T buf_;
         };
-        template<template<typename, typename> class T_Basic_FStream,
-                 typename CharType,
-                 typename Traits,
-                 typename T_StreamType>
-        class fstream_impl<T_Basic_FStream<CharType, Traits>, T_StreamType>
-            : private buf_holder<basic_filebuf<CharType, Traits> >, // must be first due to init order
-              public T_StreamType::template stream_base<CharType, Traits>::type
+        template<typename CharType, typename Traits, typename T_StreamType>
+        class fstream_impl : private buf_holder<basic_filebuf<CharType, Traits> >, // must be first due to init order
+                             public T_StreamType::template stream_base<CharType, Traits>::type
         {
             typedef basic_filebuf<CharType, Traits> internal_buffer_type;
             typedef typename T_StreamType::template stream_base<CharType, Traits>::type stream_base;
@@ -281,10 +277,8 @@ namespace nowide {
 
             internal_buffer_type* rdbuf() const
             {
-                return const_cast<internal_buffer_type*>(&buf_.buf_);
+                return const_cast<internal_buffer_type*>(&this->buf_);
             }
-
-            buf_holder<internal_buffer_type> buf_;
         };
 
         /// Trait to heuristically check for a *::filesystem::path
