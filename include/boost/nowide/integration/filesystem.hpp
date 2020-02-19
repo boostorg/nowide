@@ -18,10 +18,10 @@ namespace nowide {
     ///
     /// Install utf8_codecvt facet into  boost::filesystem::path such all char strings are interpreted as utf-8 strings
     ///
-    inline void nowide_filesystem()
+    inline std::locale nowide_filesystem()
     {
         std::locale tmp = std::locale(std::locale(), new boost::nowide::utf8_codecvt<wchar_t>());
-        boost::filesystem::path::imbue(tmp);
+        return boost::filesystem::path::imbue(tmp);
     }
 } // namespace nowide
 } // namespace boost
