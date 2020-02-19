@@ -281,10 +281,8 @@ namespace nowide {
 
             internal_buffer_type* rdbuf() const
             {
-                return const_cast<internal_buffer_type*>(&buf_.buf_);
+                return const_cast<internal_buffer_type*>(&this->buf_);
             }
-
-            buf_holder<internal_buffer_type> buf_;
         };
 
         /// Trait to heuristically check for a *::filesystem::path
