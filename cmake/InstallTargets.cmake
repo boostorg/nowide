@@ -10,8 +10,9 @@ include(CMakePackageConfigHelpers)
 #   - NAMESPACE: Namespace to use (Installed libraries will be available as "Namespace::Name")
 #   - CONFIG_FILE: If passed, this will be used to configure the *Config.cmake,
 #                  else a reasonable default will be used which is enough if there are no dependencies
+#   - VERSION_COMPATIBILITY: Compatibility with requested version. Defaults to SemVer semantics (SameMajorVersion)
 function(install_targets)
-  cmake_parse_arguments(PARSE_ARGV 0 ARG "" "NAMESPACE;CONFIG_FILE" "TARGETS")
+  cmake_parse_arguments(PARSE_ARGV 0 ARG "" "NAMESPACE;CONFIG_FILE;VERSION_COMPATIBILITY" "TARGETS")
   if(ARG_UNPARSED_ARGUMENTS)
     message(FATAL_ERROR "Invalid argument(s): ${ARG_UNPARSED_ARGUMENTS}")
   endif()
@@ -26,12 +27,15 @@ function(install_targets)
       "check_required_components(\"@PROJECT_NAME@\")\n"
     )
   endif()
+  if(NOT ARG_VERSION_COMPATIBILITY)
+    set(ARG_VERSION_COMPATIBILITY SameMajorVersion)
+  endif()
 
   # Fixup INTERFACE_INCLUDE_DIRECTORIES:
-  # Wrap source includes into BUILD_INTERFACE and add INSTALL_INTERFACE
+  # Wrap source includes into BUILD_INTERFACE
   foreach(tgt IN LISTS ARG_TARGETS)
     get_target_property(old_inc_dirs ${tgt} INTERFACE_INCLUDE_DIRECTORIES)
-    set(inc_dirs "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
+    set(inc_dirs "")
     foreach(dir IN LISTS old_inc_dirs)
       string(FIND "${dir}" "${PROJECT_SOURCE_DIR}" pos)
       string(FIND "${dir}" "${PROJECT_BINARY_DIR}" pos2)
@@ -48,6 +52,7 @@ function(install_targets)
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   )
   install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
@@ -56,7 +61,7 @@ function(install_targets)
   set(configInstallDestination lib/cmake/${PROJECT_NAME})
 
   configure_package_config_file(${ARG_CONFIG_FILE} ${configFile} INSTALL_DESTINATION ${configInstallDestination})
-  write_basic_package_version_file(${versionFile} COMPATIBILITY SameMajorVersion)
+  write_basic_package_version_file(${versionFile} COMPATIBILITY ${ARG_VERSION_COMPATIBILITY})
 
   install(FILES ${configFile} ${versionFile} DESTINATION ${configInstallDestination})
 
