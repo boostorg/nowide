@@ -18,6 +18,14 @@ inline void test_failed(const std::string& msg)
     throw std::runtime_error(msg);
 }
 
+#ifdef _MSC_VER
+#define DISABLE_CONST_EXPR_DETECTED __pragma(warning(push)) __pragma(warning(disable : 4127))
+#define DISABLE_CONST_EXPR_DETECTED_POP __pragma(warning(pop))
+#else
+#define DISABLE_CONST_EXPR_DETECTED
+#define DISABLE_CONST_EXPR_DETECTED_POP
+#endif
+
 #define TEST(x)                                                                         \
     do                                                                                  \
     {                                                                                   \
@@ -26,6 +34,7 @@ inline void test_failed(const std::string& msg)
         std::ostringstream ss;                                                          \
         ss << "Error " #x " in " << __FILE__ << ':' << __LINE__ << " " << __FUNCTION__; \
         test_failed(ss.str());                                                          \
-    } while(0)
+        DISABLE_CONST_EXPR_DETECTED                                                     \
+    } while(0) DISABLE_CONST_EXPR_DETECTED_POP
 
 #endif // #ifndef BOOST_NOWIDE_LIB_TEST_H_INCLUDED
