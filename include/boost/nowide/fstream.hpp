@@ -225,6 +225,7 @@ namespace nowide {
                              public T_StreamType::template stream_base<CharType, Traits>::type
         {
             typedef basic_filebuf<CharType, Traits> internal_buffer_type;
+            typedef buf_holder<internal_buffer_type> base_buf_holder;
             typedef typename T_StreamType::template stream_base<CharType, Traits>::type stream_base;
 
         public:
@@ -232,7 +233,9 @@ namespace nowide {
             using stream_base::clear;
 
         protected:
-            fstream_impl() : stream_base(rdbuf())
+            using base_buf_holder::buf_;
+
+            fstream_impl() : stream_base(&buf_)
             {}
 
             void open(const std::string& file_name, std::ios_base::openmode mode = T_StreamType::mode())
@@ -277,7 +280,7 @@ namespace nowide {
 
             internal_buffer_type* rdbuf() const
             {
-                return const_cast<internal_buffer_type*>(&this->buf_);
+                return const_cast<internal_buffer_type*>(&buf_);
             }
         };
 
