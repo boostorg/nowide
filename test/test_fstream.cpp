@@ -50,7 +50,6 @@ bool file_contents_equal(const char* filepath, const char (&contents)[N], bool b
     return true;
 }
 
-template<typename FStream>
 void test_with_different_buffer_sizes(const char* filepath)
 {
     /* Important part of the standard for mixing input with output:
@@ -63,13 +62,13 @@ void test_with_different_buffer_sizes(const char* filepath)
     {
         std::cout << "Buffer size = " << i << std::endl;
         char buf[16];
-        FStream f;
+        nw::fstream f;
         // Different conditions when setbuf might be called: Usually before opening a file is OK
         if(i >= 0)
             f.rdbuf()->pubsetbuf((i == 0) ? NULL : buf, i);
         f.open(filepath, std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
         TEST(f);
-
+        // Add 'abcdefg'
         TEST(f.put('a'));
         TEST(f.put('b'));
         TEST(f.put('c'));
@@ -77,67 +76,84 @@ void test_with_different_buffer_sizes(const char* filepath)
         TEST(f.put('e'));
         TEST(f.put('f'));
         TEST(f.put('g'));
+        // Read first char
         TEST(f.seekg(0));
         TEST(f.get() == 'a');
+        TEST(f.gcount() == 1u);
+        // Skip next char
         TEST(f.seekg(1, std::ios::cur));
         TEST(f.get() == 'c');
+        TEST(f.gcount() == 1u);
+        // Go back 1 char
         TEST(f.seekg(-1, std::ios::cur));
         TEST(f.get() == 'c');
+        TEST(f.gcount() == 1u);
+
+        // Test switching between read->write->read
+        // case 1) overwrite, flush, read
         TEST(f.seekg(1));
         TEST(f.put('B'));
         TEST(f.flush()); // Flush when changing out->in
         TEST(f.get() == 'c');
+        TEST(f.gcount() == 1u);
         TEST(f.seekg(1));
         TEST(f.get() == 'B');
+        TEST(f.gcount() == 1u);
+        // case 2) overwrite, seek, read
         TEST(f.seekg(2));
         TEST(f.put('C'));
         TEST(f.seekg(3)); // Seek when changing out->in
         TEST(f.get() == 'd');
+        TEST(f.gcount() == 1u);
+
+        // Check that sequence from start equals expected
         TEST(f.seekg(0));
         TEST(f.get() == 'a');
         TEST(f.get() == 'B');
         TEST(f.get() == 'C');
         TEST(f.get() == 'd');
         TEST(f.get() == 'e');
-        // Putback after flush
+
+        // Putback after flush is implementation defined
+        // Boost.Nowide: Works
+#if BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS
         TEST(f << std::flush);
         TEST(f.putback('e'));
         TEST(f.putback('d'));
         TEST(f.get() == 'd');
         TEST(f.get() == 'e');
+#endif
+        // Rest of sequence
         TEST(f.get() == 'f');
         TEST(f.get() == 'g');
         TEST(f.get() == EOF);
+
+        // Put back until front of file is reached
         f.clear();
         TEST(f.seekg(1));
         TEST(f.get() == 'B');
         TEST(f.putback('B'));
         // Putting back multiple chars is not possible on all implementations after a seek/flush
-        if(f.putback('a'))
-        {
-            TEST(!f.putback('x')); // At beginning of file -> No putback possible
-            // Get characters that were putback to avoid MSVC bug https://github.com/microsoft/STL/issues/342
-            f.clear();
-            TEST(f.get() == 'a');
-            TEST(f.get() == 'B');
-        } else
-        {
-            f.clear();
-            TEST(f.get() == 'B');
-        }
+#if BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS
+        TEST(f.putback('a'));
+        TEST(!f.putback('x')); // At beginning of file -> No putback possible
+        // Get characters that were putback to avoid MSVC bug https://github.com/microsoft/STL/issues/342
+        f.clear();
+        TEST(f.get() == 'a');
+#endif
+        TEST(f.get() == 'B');
         f.close();
         TEST(nw::remove(filepath) == 0);
     }
 }
 
-template<typename FileBuf>
 void test_close(const char* filepath)
 {
     const std::string filepath2 = std::string(filepath) + ".2";
     // Make sure file does not exist yet
     nw::remove(filepath2.c_str());
     TEST(!file_exists(filepath2.c_str()));
-    FileBuf buf;
+    nw::filebuf buf;
     TEST(buf.open(filepath, std::ios_base::out) == &buf);
     TEST(buf.is_open());
     // Opening when already open fails
@@ -487,17 +503,11 @@ int main(int, char** argv)
         test_fstream(exampleFilename.c_str());
         test_is_open(exampleFilename.c_str());
 
-        std::cout << "Complex IO - Sanity Check" << std::endl;
-        // Don't use chars the std stream can't properly handle
-        test_with_different_buffer_sizes<std::fstream>((std::string(argv[0]) + "-bufferSize.txt").c_str());
-        std::cout << "Complex IO - Test" << std::endl;
-        test_with_different_buffer_sizes<nw::fstream>(exampleFilename.c_str());
+        std::cout << "Complex IO" << std::endl;
+        test_with_different_buffer_sizes(exampleFilename.c_str());
 
-        std::cout << "filebuf::close - Sanity Check" << std::endl;
-        // Don't use chars the std stream can't properly handle
-        test_close<std::filebuf>((std::string(argv[0]) + "-bufferSize.txt").c_str());
-        std::cout << "filebuf::close - Test" << std::endl;
-        test_close<nw::filebuf>(exampleFilename.c_str());
+        std::cout << "filebuf::close" << std::endl;
+        test_close(exampleFilename.c_str());
 
         std::cout << "Flush - Sanity Check" << std::endl;
         test_flush<std::ifstream, std::ofstream>(exampleFilename.c_str());
