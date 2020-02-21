@@ -187,9 +187,6 @@ namespace nowide {
         using fstream_impl::close;
         using fstream_impl::rdbuf;
     };
-#ifdef BOOST_MSVC
-#pragma warning(pop)
-#endif
 
     ///
     /// Same as std::filebuf but accepts UTF-8 strings under Windows
@@ -283,7 +280,9 @@ namespace nowide {
                 return const_cast<internal_buffer_type*>(&buf_);
             }
         };
-
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
         /// Trait to heuristically check for a *::filesystem::path
         /// Done by checking for make_preferred and filename member functions with correct signature
         template<typename T>
