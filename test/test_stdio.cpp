@@ -52,7 +52,7 @@ int main(int, char** argv)
 
     try
     {
-        // fopen - existing file
+        std::cout << " -- fopen - existing file" << std::endl;
         {
             create_test_file(filename);
             FILE* f = boost::nowide::fopen(filename.c_str(), "r");
@@ -62,26 +62,26 @@ int main(int, char** argv)
             TEST(strcmp(buf, "test\n") == 0);
             std::fclose(f);
         }
-        // remove
+        std::cout << " -- remove" << std::endl;
         {
             create_test_file(filename);
             TEST(file_exists(filename));
             TEST(boost::nowide::remove(filename.c_str()) == 0);
             TEST(!file_exists(filename));
         }
-        // fopen non-existing file
+        std::cout << " -- fopen non-existing file" << std::endl;
         {
             boost::nowide::remove(filename.c_str());
             TEST(!file_exists(filename));
             TEST(boost::nowide::fopen(filename.c_str(), "r") == NULL);
             TEST(!file_exists(filename));
         }
-        // freopen
+        std::cout << " -- freopen" << std::endl;
         {
             create_test_file(filename);
             FILE* f = boost::nowide::fopen(filename.c_str(), "r+");
             TEST(f);
-            // Can read & write
+            std::cout << " -- Can read & write" << std::endl;
             {
                 char buf[32];
                 TEST(std::fgets(buf, 32, f) != 0);
@@ -95,7 +95,7 @@ int main(int, char** argv)
             FILE* f2 = boost::nowide::freopen(NULL, "r", f);
             if(!f2)
                 f2 = boost::nowide::freopen(filename.c_str(), "r", f);
-            // no write possible
+            std::cout << " -- no write possible" << std::endl;
             {
                 TEST(f2 == f);
                 TEST(std::fputs("not-written\n", f) < 0);
@@ -106,7 +106,7 @@ int main(int, char** argv)
                 TEST(std::fgets(buf, 32, f) != 0);
                 TEST(strcmp(buf, "foobar\n") == 0);
             }
-            // Reopen different file
+            std::cout << " -- Reopen different file" << std::endl;
             const std::string filename2 = filename + ".1.txt";
             TEST(boost::nowide::freopen(filename2.c_str(), "w", f) == f);
             {
@@ -121,7 +121,7 @@ int main(int, char** argv)
             std::fclose(f);
             boost::nowide::remove(filename2.c_str());
         }
-        // rename
+        std::cout << " -- rename" << std::endl;
         {
             create_test_file(filename);
             const std::string filename2 = filename + ".1.txt";
