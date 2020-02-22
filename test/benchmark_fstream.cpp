@@ -19,11 +19,21 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <stdexcept>
 #include <vector>
 
 #ifdef BOOST_MSVC
 #pragma warning(disable : 4996) // function unsafe/deprecated
 #endif
+
+template<typename Key, typename Value, typename Key2>
+Value get(const std::map<Key, Value>& map, const Key2& key)
+{
+    typename std::map<Key, Value>::const_iterator it = map.find(key);
+    if(it == map.end())
+        throw std::runtime_error("Key not found");
+    return it->second;
+}
 
 namespace nw = boost::nowide;
 template<typename FStream>
@@ -201,8 +211,8 @@ perf_data test_io_driver(const char* file, const char* type)
         double read_speed = 0, write_speed = 0;
         for(int i = 0; i < repeats; i++)
         {
-            read_speed += results[i].read.at(block_size);
-            write_speed += results[i].write.at(block_size);
+            read_speed += get(results[i].read, block_size);
+            write_speed += get(results[i].write, block_size);
         }
         results[0].read[block_size] = read_speed / repeats;
         results[0].write[block_size] = write_speed / repeats;
@@ -221,9 +231,9 @@ void print_perf_data(const std::map<size_t, double>& stdio_data,
     for(int block_size = MIN_BLOCK_SIZE; block_size <= MAX_BLOCK_SIZE; block_size *= 2)
     {
         std::cout << std::setw(8) << block_size << "  ";
-        std::cout << std::fixed << std::setprecision(3) << std::setw(8) << stdio_data.at(block_size) << " MB/s ";
-        std::cout << std::fixed << std::setprecision(3) << std::setw(8) << std_data.at(block_size) << " MB/s ";
-        std::cout << std::fixed << std::setprecision(3) << std::setw(8) << nowide_data.at(block_size) << " MB/s ";
+        std::cout << std::fixed << std::setprecision(3) << std::setw(8) << get(stdio_data, block_size) << " MB/s ";
+        std::cout << std::fixed << std::setprecision(3) << std::setw(8) << get(std_data, block_size) << " MB/s ";
+        std::cout << std::fixed << std::setprecision(3) << std::setw(8) << get(nowide_data, block_size) << " MB/s ";
         std::cout << std::endl;
     }
 }
