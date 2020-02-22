@@ -9,8 +9,39 @@
 #ifndef BOOST_NOWIDE_LIB_TEST_H_INCLUDED
 #define BOOST_NOWIDE_LIB_TEST_H_INCLUDED
 
+#include <cstdlib>
 #include <sstream>
 #include <stdexcept>
+
+#if defined(_MSC_VER) && defined(_CPPLIB_VER) && defined(_DEBUG)
+#include <crtdbg.h>
+#endif
+
+namespace boost {
+namespace nowide {
+    struct test_monitor
+    {
+        test_monitor()
+        {
+#if defined(_MSC_VER) && (_MSC_VER > 1310)
+            // disable message boxes on assert(), abort()
+            ::_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+#endif
+#if defined(_MSC_VER) && defined(_CPPLIB_VER) && defined(_DEBUG)
+            // disable message boxes on iterator debugging violations
+            _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+            _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+#endif
+        }
+    };
+} // namespace nowide
+} // namespace boost
+
+inline boost::nowide::test_monitor& test_mon()
+{
+    static boost::nowide::test_monitor instance;
+    return instance;
+}
 
 /// Function called when a test failed to be able set a breakpoint for debugging
 inline void test_failed(const std::string& msg)
@@ -29,6 +60,7 @@ inline void test_failed(const std::string& msg)
 #define TEST(x)                                                                         \
     do                                                                                  \
     {                                                                                   \
+        test_mon();                                                                     \
         if(x)                                                                           \
             break;                                                                      \
         std::ostringstream ss;                                                          \

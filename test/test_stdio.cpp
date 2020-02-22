@@ -59,8 +59,6 @@ int main(int, char** argv)
 #if BOOST_MSVC
     // Prevent abort on freopen(NULL, ...)
     _set_invalid_parameter_handler(noop_invalid_param_handler);
-    // Disable the message box for assertions.
-    _CrtSetReportMode(_CRT_ASSERT, 0);
 #endif
 
     try
