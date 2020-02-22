@@ -8,6 +8,7 @@
 //
 
 #include <boost/nowide/cstdio.hpp>
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 
@@ -45,10 +46,22 @@ void create_test_file(const std::string& filename)
     std::fclose(f);
 }
 
+#if BOOST_MSVC
+#include <crtdbg.h> // For _CrtSetReportMode
+void noop_invalid_param_handler(const wchar_t*, const wchar_t*, const wchar_t*, unsigned, uintptr_t)
+{}
+#endif
+
 int main(int, char** argv)
 {
     const std::string prefix = argv[0];
     const std::string filename = prefix + "\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
+#if BOOST_MSVC
+    // Prevent abort on freopen(NULL, ...)
+    _set_invalid_parameter_handler(noop_invalid_param_handler);
+    // Disable the message box for assertions.
+    _CrtSetReportMode(_CRT_ASSERT, 0);
+#endif
 
     try
     {
