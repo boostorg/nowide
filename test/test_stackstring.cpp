@@ -1,5 +1,6 @@
 //
 //  Copyright (c) 2012 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2019-2020 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -10,6 +11,7 @@
 #include "test_sets.hpp"
 #include <boost/nowide/stackstring.hpp>
 #include <iostream>
+#include <vector>
 
 #if defined(BOOST_MSVC) && BOOST_MSVC < 1700
 #pragma warning(disable : 4428) // universal-character-name encountered in source
@@ -48,19 +50,19 @@ int main()
         const wchar_t* wempty = L"";
 
         {
-            // Default constructed string is NULL
+            std::cout << "-- Default constructed string is NULL" << std::endl;
             const boost::nowide::short_stackstring s;
             TEST(s.get() == NULL);
         }
         {
-            // NULL ptr passed to ctor results in NULL
+            std::cout << "-- NULL ptr passed to ctor results in NULL" << std::endl;
             const boost::nowide::short_stackstring s(NULL);
             TEST(s.get() == NULL);
             const boost::nowide::short_stackstring s2(NULL, NULL);
             TEST(s2.get() == NULL);
         }
         {
-            // NULL ptr passed to convert results in NULL
+            std::cout << "-- NULL ptr passed to convert results in NULL" << std::endl;
             boost::nowide::short_stackstring s(L"foo");
             TEST(s.get() == std::string("foo"));
             s.convert(NULL);
@@ -71,7 +73,7 @@ int main()
             TEST(s2.get() == NULL);
         }
         {
-            // An empty string is accepted
+            std::cout << "-- An empty string is accepted" << std::endl;
             const boost::nowide::short_stackstring s(wempty);
             TEST(s.get());
             TEST(s.get() == std::string());
@@ -80,7 +82,7 @@ int main()
             TEST(s2.get() == std::string());
         }
         {
-            // An empty string is accepted
+            std::cout << "-- An empty string is accepted" << std::endl;
             boost::nowide::short_stackstring s, s2;
             TEST(s.convert(wempty));
             TEST(s.get() == std::string());
@@ -88,7 +90,7 @@ int main()
             TEST(s2.get() == std::string());
         }
         {
-            // Will be put on heap
+            std::cout << "-- Will be put on heap" << std::endl;
             TEST(whello.size() >= 3);
             boost::nowide::basic_stackstring<wchar_t, char, 3> sw;
             TEST(sw.convert(hello.c_str()));
@@ -97,7 +99,7 @@ int main()
             TEST(sw.get() == whello);
         }
         {
-            // Will be put on stack
+            std::cout << "-- Will be put on stack" << std::endl;
             TEST(whello.size() < 5);
             boost::nowide::basic_stackstring<wchar_t, char, 5> sw;
             TEST(sw.convert(hello.c_str()));
@@ -106,7 +108,7 @@ int main()
             TEST(sw.get() == whello);
         }
         {
-            // Will be put on heap
+            std::cout << "-- Will be put on heap" << std::endl;
             TEST(hello.size() >= 5);
             boost::nowide::basic_stackstring<char, wchar_t, 5> sw;
             TEST(sw.convert(whello.c_str()));
@@ -115,7 +117,7 @@ int main()
             TEST(sw.get() == hello);
         }
         {
-            // Will be put on stack
+            std::cout << "-- Will be put on stack" << std::endl;
             TEST(hello.size() < 10);
             boost::nowide::basic_stackstring<char, wchar_t, 10> sw;
             TEST(sw.convert(whello.c_str()));
@@ -180,9 +182,22 @@ int main()
                 TEST(sw2.get() == val2);
                 TEST(sw3.get() == stackVal);
             }
-            // Sanity check
+            std::cout << "-- Sanity check" << std::endl;
             TEST(stack.get() == stackVal);
             TEST(heap.get() == heapVal);
+        }
+        {
+            std::cout << "-- Test putting stackstrings into vector (done by args) class" << std::endl;
+            // Use a smallish buffer, to have stack and heap values
+            typedef boost::nowide::basic_stackstring<wchar_t, char, 5> stackstring;
+            std::vector<stackstring> strings;
+            strings.resize(2);
+            TEST(strings[0].convert("1234") == std::wstring(L"1234"));
+            TEST(strings[1].convert("Hello World") == std::wstring(L"Hello World"));
+            strings.push_back(stackstring("FooBar"));
+            TEST(strings[0].get() == std::wstring(L"1234"));
+            TEST(strings[1].get() == std::wstring(L"Hello World"));
+            TEST(strings[2].get() == std::wstring(L"FooBar"));
         }
         std::cout << "- Stackstring" << std::endl;
         run_all(stackstring_to_wide, stackstring_to_narrow);
