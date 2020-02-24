@@ -10,6 +10,7 @@
 import testing ;
 
 project : requirements
+  <library>/boost/nowide//boost_nowide
   <warnings>pedantic
   <warnings-as-errors>on
   <toolset>gcc:<cxxflags>-Wno-long-long

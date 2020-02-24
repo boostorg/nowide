@@ -14,7 +14,7 @@ project boost/nowide
       <link>shared:<define>BOOST_NOWIDE_DYN_LINK=1
     ;
 
-SOURCES = iostream ;
+SOURCES = cstdio cstdlib iostream ;
 
 lib boost_nowide
    : $(SOURCES).cpp

@@ -1,5 +1,6 @@
 //
 //  Copyright (c) 2012 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2020 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -8,17 +9,8 @@
 #ifndef BOOST_NOWIDE_CSTDIO_HPP_INCLUDED
 #define BOOST_NOWIDE_CSTDIO_HPP_INCLUDED
 
-#include <boost/config.hpp>
-
-#ifdef BOOST_WINDOWS
-#include <boost/nowide/stackstring.hpp>
-#endif
+#include <boost/nowide/config.hpp>
 #include <cstdio>
-
-#ifdef BOOST_MSVC
-#pragma warning(push)
-#pragma warning(disable : 4996)
-#endif
 
 namespace boost {
 namespace nowide {
@@ -32,43 +24,24 @@ namespace nowide {
     ///
     /// \brief Same as freopen but file_name and mode are UTF-8 strings
     ///
-    inline FILE* freopen(const char* file_name, const char* mode, FILE* stream)
-    {
-        const wstackstring wname(file_name);
-        const wshort_stackstring wmode(mode);
-        return _wfreopen(wname.get(), wmode.get(), stream);
-    }
+    BOOST_NOWIDE_DECL FILE* freopen(const char* file_name, const char* mode, FILE* stream);
     ///
     /// \brief Same as fopen but file_name and mode are UTF-8 strings
     ///
-    inline FILE* fopen(const char* file_name, const char* mode)
-    {
-        const wstackstring wname(file_name);
-        const wshort_stackstring wmode(mode);
-        return _wfopen(wname.get(), wmode.get());
-    }
+    BOOST_NOWIDE_DECL FILE* fopen(const char* file_name, const char* mode);
     ///
     /// \brief Same as rename but old_name and new_name are UTF-8 strings
     ///
-    inline int rename(const char* old_name, const char* new_name)
-    {
-        const wstackstring wold(old_name), wnew(new_name);
-        return _wrename(wold.get(), wnew.get());
-    }
+    BOOST_NOWIDE_DECL int rename(const char* old_name, const char* new_name);
     ///
     /// \brief Same as rename but name is UTF-8 string
     ///
-    inline int remove(const char* name)
-    {
-        const wstackstring wname(name);
-        return _wremove(wname.get());
-    }
+    BOOST_NOWIDE_DECL int remove(const char* name);
 #endif
+    namespace detail {
+        BOOST_NOWIDE_DECL FILE* wfopen(const wchar_t* filename, const wchar_t* mode);
+    }
 } // namespace nowide
 } // namespace boost
-
-#ifdef BOOST_MSVC
-#pragma warning(pop)
-#endif
 
 #endif
