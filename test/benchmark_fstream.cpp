@@ -22,10 +22,6 @@
 #include <stdexcept>
 #include <vector>
 
-#ifdef BOOST_MSVC
-#pragma warning(disable : 4996) // function unsafe/deprecated
-#endif
-
 template<typename Key, typename Value, typename Key2>
 Value get(const std::map<Key, Value>& map, const Key2& key)
 {
@@ -76,7 +72,7 @@ class io_stdio
 public:
     io_stdio(const char* file, bool read)
     {
-        f_ = std::fopen(file, read ? "r" : "w+");
+        f_ = nw::fopen(file, read ? "r" : "w+");
         TEST(f_);
     }
     ~io_stdio()

@@ -14,14 +14,20 @@
 
 #include "test.hpp"
 
-#ifdef BOOST_MSVC
-#pragma warning(disable : 4996) // function unsafe/deprecated
+#ifdef _MSC_VER
+FILE* wfopen(const wchar_t* filename, const wchar_t* mode)
+{
+    FILE* f;
+    return (_wfopen_s(&f, filename, mode) == 0) ? f : NULL;
+}
+#else
+#define wfopen _wfopen
 #endif
 
 bool file_exists(const std::string& filename)
 {
 #ifdef BOOST_WINDOWS
-    FILE* f = _wfopen(boost::nowide::widen(filename).c_str(), L"r");
+    FILE* f = wfopen(boost::nowide::widen(filename).c_str(), L"r");
 #else
     FILE* f = std::fopen(filename.c_str(), "r");
 #endif
@@ -37,7 +43,7 @@ bool file_exists(const std::string& filename)
 void create_test_file(const std::string& filename)
 {
 #ifdef BOOST_WINDOWS
-    FILE* f = _wfopen(boost::nowide::widen(filename).c_str(), L"w");
+    FILE* f = wfopen(boost::nowide::widen(filename).c_str(), L"w");
 #else
     FILE* f = std::fopen(filename.c_str(), "w");
 #endif

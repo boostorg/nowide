@@ -16,9 +16,17 @@
 
 #include "test.hpp"
 
-#ifdef BOOST_MSVC
-#pragma warning(disable : 4996) // function unsafe/deprecated
-#endif
+// "Safe" strcpy version with NULL termination to make MSVC runtime happy
+// which warns when using strncpy
+template<size_t size>
+void strcpy_safe(char (&dest)[size], const char* src)
+{
+    size_t len = std::strlen(src);
+    if(len >= size)
+        len = size - 1u;
+    std::memcpy(dest, src, len);
+    dest[len] = 0;
+}
 
 int main()
 {
@@ -26,7 +34,7 @@ int main()
     {
         std::string example = "\xd7\xa9-\xd0\xbc-\xce\xbd";
         char penv[256] = {0};
-        strncpy(penv, ("BOOST_TEST2=" + example + "x").c_str(), sizeof(penv) - 1);
+        strcpy_safe(penv, ("BOOST_TEST2=" + example + "x").c_str());
 
         TEST(boost::nowide::setenv("BOOST_TEST1", example.c_str(), 1) == 0);
         TEST(boost::nowide::getenv("BOOST_TEST1"));
@@ -42,7 +50,7 @@ int main()
         // But GLIBC has an extension that unsets the env var instead
         char penv2[256] = {0};
         const char* sPenv2 = "BOOST_TEST1SOMEGARBAGE=";
-        strncpy(penv2, sPenv2, sizeof(penv2) - 1);
+        strcpy_safe(penv2, sPenv2);
         // End the string before the equals sign -> Expect fail
         penv2[strlen("BOOST_TEST1")] = '\0';
         TEST(boost::nowide::putenv(penv2) == -1);
