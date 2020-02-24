@@ -91,7 +91,6 @@ int main()
         }
         {
             std::cout << "-- Will be put on heap" << std::endl;
-            TEST(whello.size() >= 3);
             boost::nowide::basic_stackstring<wchar_t, char, 3> sw;
             TEST(sw.convert(hello.c_str()));
             TEST(sw.get() == whello);
@@ -100,8 +99,7 @@ int main()
         }
         {
             std::cout << "-- Will be put on stack" << std::endl;
-            TEST(whello.size() < 5);
-            boost::nowide::basic_stackstring<wchar_t, char, 5> sw;
+            boost::nowide::basic_stackstring<wchar_t, char, 40> sw;
             TEST(sw.convert(hello.c_str()));
             TEST(sw.get() == whello);
             TEST(sw.convert(hello.c_str(), hello.c_str() + hello.size()));
@@ -109,8 +107,7 @@ int main()
         }
         {
             std::cout << "-- Will be put on heap" << std::endl;
-            TEST(hello.size() >= 5);
-            boost::nowide::basic_stackstring<char, wchar_t, 5> sw;
+            boost::nowide::basic_stackstring<char, wchar_t, 3> sw;
             TEST(sw.convert(whello.c_str()));
             TEST(sw.get() == hello);
             TEST(sw.convert(whello.c_str(), whello.c_str() + whello.size()));
@@ -118,22 +115,20 @@ int main()
         }
         {
             std::cout << "-- Will be put on stack" << std::endl;
-            TEST(hello.size() < 10);
-            boost::nowide::basic_stackstring<char, wchar_t, 10> sw;
+            boost::nowide::basic_stackstring<char, wchar_t, 40> sw;
             TEST(sw.convert(whello.c_str()));
             TEST(sw.get() == hello);
             TEST(sw.convert(whello.c_str(), whello.c_str() + whello.size()));
             TEST(sw.get() == hello);
         }
         {
-            typedef boost::nowide::basic_stackstring<char, wchar_t, 5> stackstring;
-            const std::string heapVal = hello;
-            TEST(heapVal.size() >= 5); // Will be put on heap
-            const std::wstring wtest = L"test";
-            const std::string stackVal = "test";
-            TEST(stackVal.size() < 5); // Will be put on stack
-            const stackstring heap(whello.c_str());
-            const stackstring stack(wtest.c_str());
+            typedef boost::nowide::basic_stackstring<wchar_t, char, 6> stackstring;
+            const std::wstring heapVal = L"heapValue";
+            TEST(heapVal.size() >= 6); // Will be put on heap
+            const std::wstring stackVal = L"stack";
+            TEST(stackVal.size() < 6); // Will be put on stack
+            const stackstring heap(boost::nowide::narrow(heapVal).c_str());
+            const stackstring stack(boost::nowide::narrow(stackVal).c_str());
 
             {
                 stackstring sw2(heap), sw3, sEmpty;
@@ -170,18 +165,24 @@ int main()
                 TEST(sw2.get() == stackVal);
             }
             {
-                stackstring sw2(heap), sw3(stack);
+                stackstring sw2(heap), sw3(stack), sEmpty1, sEmpty2;
                 swap(sw2, sw3);
                 TEST(sw2.get() == stackVal);
                 TEST(sw3.get() == heapVal);
                 swap(sw2, sw3);
                 TEST(sw2.get() == heapVal);
                 TEST(sw3.get() == stackVal);
+                swap(sw2, sEmpty1);
+                TEST(sEmpty1.get() == heapVal);
+                TEST(sw2.get() == NULL);
+                swap(sw3, sEmpty2);
+                TEST(sEmpty2.get() == stackVal);
+                TEST(sw3.get() == NULL);
             }
             {
                 stackstring sw2(heap), sw3(heap);
                 sw3.get()[0] = 'z';
-                const std::string val2 = sw3.get();
+                const std::wstring val2 = sw3.get();
                 swap(sw2, sw3);
                 TEST(sw2.get() == val2);
                 TEST(sw3.get() == heapVal);
@@ -189,7 +190,7 @@ int main()
             {
                 stackstring sw2(stack), sw3(stack);
                 sw3.get()[0] = 'z';
-                const std::string val2 = sw3.get();
+                const std::wstring val2 = sw3.get();
                 swap(sw2, sw3);
                 TEST(sw2.get() == val2);
                 TEST(sw3.get() == stackVal);
