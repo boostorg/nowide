@@ -10,7 +10,7 @@
 #define BOOST_NOWIDE_FILEBUF_HPP_INCLUDED
 
 #include <boost/nowide/config.hpp>
-#if BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS
+#if BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
 #include <boost/nowide/cstdio.hpp>
 #include <boost/nowide/stackstring.hpp>
 #include <cassert>
@@ -26,7 +26,7 @@
 
 namespace boost {
 namespace nowide {
-#if !BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS && !defined(BOOST_NOWIDE_DOXYGEN)
+#if !BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT && !defined(BOOST_NOWIDE_DOXYGEN)
     using std::basic_filebuf;
     using std::filebuf;
 #else // Windows
