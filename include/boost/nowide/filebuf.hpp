@@ -92,9 +92,9 @@ namespace nowide {
             if(is_open())
                 return NULL;
             validate_cvt(this->getloc());
-            const bool ate = bool(mode & std::ios_base::ate);
+            const bool ate = (mode & std::ios_base::ate) != 0;
             if(ate)
-                mode = mode ^ std::ios_base::ate;
+                mode &= ~std::ios_base::ate;
             const wchar_t* smode = get_mode(mode);
             if(!smode)
                 return 0;
