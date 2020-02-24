@@ -243,7 +243,7 @@ namespace nowide {
             typename detail::enable_if_path<Path, void>::type open(const Path& file_name,
                                                                    std::ios_base::openmode mode = T_StreamType::mode())
             {
-                return open(file_name.c_str(), mode);
+                open(file_name.c_str(), mode);
             }
             void open(const char* file_name, std::ios_base::openmode mode = T_StreamType::mode())
             {
