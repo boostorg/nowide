@@ -34,50 +34,6 @@ namespace nowide {
         typedef CharOut output_char;
         typedef CharIn input_char;
 
-        basic_stackstring(const basic_stackstring& other) : data_(NULL)
-        {
-            *this = other;
-        }
-
-        friend void swap(basic_stackstring& lhs, basic_stackstring& rhs)
-        {
-            if(lhs.uses_stack_memory())
-            {
-                if(rhs.uses_stack_memory())
-                {
-                    for(size_t i = 0; i < buffer_size; i++)
-                        std::swap(lhs.buffer_[i], rhs.buffer_[i]);
-                } else
-                {
-                    lhs.data_ = rhs.data_;
-                    rhs.data_ = rhs.buffer_;
-                    for(size_t i = 0; i < buffer_size; i++)
-                        rhs.buffer_[i] = lhs.buffer_[i];
-                }
-            } else if(rhs.uses_stack_memory())
-            {
-                rhs.data_ = lhs.data_;
-                lhs.data_ = lhs.buffer_;
-                for(size_t i = 0; i < buffer_size; i++)
-                    lhs.buffer_[i] = rhs.buffer_[i];
-            } else
-                std::swap(lhs.data_, rhs.data_);
-        }
-        basic_stackstring& operator=(const basic_stackstring& other)
-        {
-            if(this != &other)
-            {
-                clear();
-                const size_t len = other.length();
-                if(other.uses_stack_memory())
-                    data_ = buffer_;
-                else
-                    data_ = new output_char[len + 1];
-                std::memcpy(data_, other.data_, sizeof(output_char) * (len + 1));
-            }
-            return *this;
-        }
-
         basic_stackstring() : data_(NULL)
         {
             buffer_[0] = 0;
@@ -90,6 +46,36 @@ namespace nowide {
         {
             convert(begin, end);
         }
+
+        basic_stackstring(const basic_stackstring& other) : data_(NULL)
+        {
+            *this = other;
+        }
+        basic_stackstring& operator=(const basic_stackstring& other)
+        {
+            if(this != &other)
+            {
+                clear();
+                const size_t len = other.length();
+                if(other.uses_stack_memory())
+                    data_ = buffer_;
+                else if(other.data_)
+                    data_ = new output_char[len + 1];
+                else
+                {
+                    data_ = NULL;
+                    return *this;
+                }
+                std::memcpy(data_, other.data_, sizeof(output_char) * (len + 1));
+            }
+            return *this;
+        }
+
+        ~basic_stackstring()
+        {
+            clear();
+        }
+
         output_char* convert(const input_char* input)
         {
             if(input)
@@ -132,9 +118,30 @@ namespace nowide {
                 delete[] data_;
             data_ = NULL;
         }
-        ~basic_stackstring()
+
+        friend void swap(basic_stackstring& lhs, basic_stackstring& rhs)
         {
-            clear();
+            if(lhs.uses_stack_memory())
+            {
+                if(rhs.uses_stack_memory())
+                {
+                    for(size_t i = 0; i < buffer_size; i++)
+                        std::swap(lhs.buffer_[i], rhs.buffer_[i]);
+                } else
+                {
+                    lhs.data_ = rhs.data_;
+                    rhs.data_ = rhs.buffer_;
+                    for(size_t i = 0; i < buffer_size; i++)
+                        rhs.buffer_[i] = lhs.buffer_[i];
+                }
+            } else if(rhs.uses_stack_memory())
+            {
+                rhs.data_ = lhs.data_;
+                lhs.data_ = lhs.buffer_;
+                for(size_t i = 0; i < buffer_size; i++)
+                    lhs.buffer_[i] = rhs.buffer_[i];
+            } else
+                std::swap(lhs.data_, rhs.data_);
         }
 
     private:

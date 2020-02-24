@@ -136,16 +136,28 @@ int main()
             const stackstring stack(wtest.c_str());
 
             {
-                stackstring sw2(heap), sw3;
+                stackstring sw2(heap), sw3, sEmpty;
                 sw3 = heap;
                 TEST(sw2.get() == heapVal);
                 TEST(sw3.get() == heapVal);
+                // Self assign avoiding clang self-assign-overloaded warning
+                sw3 = static_cast<const stackstring&>(sw3);
+                TEST(sw3.get() == heapVal);
+                // Assign empty
+                sw3 = sEmpty;
+                TEST(sw3.get() == NULL);
             }
             {
-                stackstring sw2(stack), sw3;
+                stackstring sw2(stack), sw3, sEmpty;
                 sw3 = stack;
                 TEST(sw2.get() == stackVal);
                 TEST(sw3.get() == stackVal);
+                // Self assign avoiding clang self-assign-overloaded warning
+                sw3 = static_cast<const stackstring&>(sw3);
+                TEST(sw3.get() == stackVal);
+                // Assign empty
+                sw3 = sEmpty;
+                TEST(sw3.get() == NULL);
             }
             {
                 stackstring sw2(stack);
