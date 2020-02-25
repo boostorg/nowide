@@ -1,6 +1,6 @@
 //
 //  Copyright (c) 2012 Artyom Beilis (Tonkikh)
-//  Copyright (c) 2019 Alexander Grund
+//  Copyright (c) 2019-2020 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -10,7 +10,8 @@
 #define BOOST_NOWIDE_FILEBUF_HPP_INCLUDED
 
 #include <boost/nowide/config.hpp>
-#if BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS
+#if BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
+#include <boost/nowide/cstdio.hpp>
 #include <boost/nowide/stackstring.hpp>
 #include <cassert>
 #include <cstdio>
@@ -23,18 +24,12 @@
 #include <fstream>
 #endif
 
-#ifdef BOOST_MSVC
-#pragma warning(push)
-#pragma warning(disable : 4996 4244 4800)
-#endif
-
 namespace boost {
 namespace nowide {
-#if !BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS && !defined(BOOST_NOWIDE_DOXYGEN)
+#if !BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT && !defined(BOOST_NOWIDE_DOXYGEN)
     using std::basic_filebuf;
     using std::filebuf;
 #else // Windows
-
     ///
     /// \brief This forward declaration defines the basic_filebuf type.
     ///
@@ -97,20 +92,13 @@ namespace nowide {
             if(is_open())
                 return NULL;
             validate_cvt(this->getloc());
-            const bool ate = bool(mode & std::ios_base::ate);
+            const bool ate = (mode & std::ios_base::ate) != 0;
             if(ate)
-                mode = mode ^ std::ios_base::ate;
+                mode &= ~std::ios_base::ate;
             const wchar_t* smode = get_mode(mode);
             if(!smode)
                 return 0;
-#ifdef BOOST_WINDOWS
-            file_ = ::_wfopen(s, smode);
-#else
-            const stackstring name(s);
-            const short_stackstring smode2(smode);
-            file_ = std::fopen(name.get(), smode2.get());
-#endif
-
+            file_ = detail::wfopen(s, smode);
             if(!file_)
                 return 0;
             if(ate && std::fseek(file_, 0, SEEK_END) != 0)
@@ -177,7 +165,7 @@ namespace nowide {
             if(owns_buffer_)
                 delete[] buffer_;
             buffer_ = s;
-            buffer_size_ = (n >= 0) ? n : 0;
+            buffer_size_ = (n >= 0) ? static_cast<size_t>(n) : 0;
             return this;
         }
 
@@ -197,7 +185,7 @@ namespace nowide {
                 setp(buffer_, buffer_ + buffer_size_);
                 if(c != EOF)
                 {
-                    *buffer_ = c;
+                    *buffer_ = Traits::to_char_type(c);
                     pbump(1);
                 }
             } else if(c != EOF)
@@ -206,7 +194,7 @@ namespace nowide {
                 {
                     make_buffer();
                     setp(buffer_, buffer_ + buffer_size_);
-                    *buffer_ = c;
+                    *buffer_ = Traits::to_char_type(c);
                     pbump(1);
                 } else if(std::fputc(c, file_) == EOF)
                 {
@@ -247,7 +235,7 @@ namespace nowide {
                 const int c = std::fgetc(file_);
                 if(c == EOF)
                     return EOF;
-                last_char_ = c;
+                last_char_ = Traits::to_char_type(c);
                 setg(&last_char_, &last_char_, &last_char_ + 1);
             } else
             {
@@ -305,7 +293,8 @@ namespace nowide {
             case std::ios_base::end: whence = SEEK_END; break;
             default: assert(false); return EOF;
             }
-            if(std::fseek(file_, off, whence) != 0)
+            assert(off <= std::numeric_limits<long>::max());
+            if(std::fseek(file_, static_cast<long>(off), whence) != 0)
                 return EOF;
             return std::ftell(file_);
         }
@@ -330,7 +319,7 @@ namespace nowide {
                 const std::streamsize off = gptr() - egptr();
                 setg(0, 0, 0);
                 assert(off <= std::numeric_limits<long>::max());
-                if(off && std::fseek(file_, off, SEEK_CUR) != 0)
+                if(off && std::fseek(file_, static_cast<long>(off), SEEK_CUR) != 0)
                     return false;
             }
             return true;
@@ -426,9 +415,5 @@ namespace nowide {
 
 } // namespace nowide
 } // namespace boost
-
-#ifdef BOOST_MSVC
-#pragma warning(pop)
-#endif
 
 #endif

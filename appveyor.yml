@@ -13,7 +13,7 @@ branches:
     - /feature\/.*/
 
 matrix:
-  fast_finish: true
+  fast_finish: false
 
 environment:
   matrix:
@@ -81,7 +81,7 @@ test_script:
   - PATH=%ADDPATH%%PATH%
   - if not "%CXXSTD%" == "" set CXXSTD=cxxstd=%CXXSTD%
   - if not "%ADDRMD%" == "" set ADDRMD=address-model=%ADDRMD%
-  - b2 -j3 libs/nowide/test toolset=%TOOLSET% %CXXSTD% %ADDRMD% variant=debug,release
+  - b2 -j3 libs/nowide/test toolset=%TOOLSET% %CXXSTD% %ADDRMD% variant=debug,release link=shared,static
   - ps: |
         If ("$env:BOOST_CMAKE" -eq "1") {
           ./b2 --clean

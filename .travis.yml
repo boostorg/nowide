@@ -262,8 +262,14 @@ script:
     else
         false
     fi
+    # DYLD_LIBRARY_PATH causes problems on system() spawned processes
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        LINK=static
+    else
+        LINK=static,shared
+    fi
   -  which $TRAVIS_COMPILER
   -  $TRAVIS_COMPILER --version
   - |
     echo "using $TOOLSET : : $TRAVIS_COMPILER ;" > ~/user-config.jam
-  - ./b2 -j3 libs/nowide/test toolset=$TOOLSET cxxstd=$CXXSTD variant=debug,release ${UBSAN:+cxxflags=-fsanitize=undefined cxxflags=-fno-sanitize-recover=undefined linkflags=-fsanitize=undefined define=UBSAN=1 debug-symbols=on} ${LINKFLAGS:+linkflags=$LINKFLAGS} ${VISIBILITY:+visibility=$VISIBILITY}
+  - ./b2 -j3 libs/nowide/test toolset=$TOOLSET cxxstd=$CXXSTD variant=debug,release link=$LINK ${UBSAN:+cxxflags=-fsanitize=undefined cxxflags=-fno-sanitize-recover=undefined linkflags=-fsanitize=undefined define=UBSAN=1 debug-symbols=on} ${LINKFLAGS:+linkflags=$LINKFLAGS} ${VISIBILITY:+visibility=$VISIBILITY}

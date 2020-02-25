@@ -46,22 +46,31 @@
 #include <boost/config/auto_link.hpp>
 #endif // auto-linking disabled
 
-/// @def BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS
-/// @brief Define to 1 to use internal classes from fstream.hpp
+/// @def BOOST_NOWIDE_USE_WCHAR_OVERLOADS
+/// @brief Whether to use the wchar_t* overloads in fstream/filebuf
+/// Enabled on Windows and Cygwin as the latter may use wchar_t in filesystem::path
+#if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
+#define BOOST_NOWIDE_USE_WCHAR_OVERLOADS 1
+#else
+#define BOOST_NOWIDE_USE_WCHAR_OVERLOADS 0
+#endif
+
+/// @def BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
+/// @brief Define to 1 to use internal class from filebuf.hpp
 ///
-/// - On Non-Windows platforms: Define to 1 to use the same classes from header <fstream.hpp>
-/// that are used on Windows.
+/// - On Non-Windows platforms: Define to 1 to use the same class from header <filebuf.hpp>
+///   that is used on Windows.
 /// - On Windows: No effect, always overwritten to 1
 ///
 /// Affects boost::nowide::basic_filebuf,
 /// boost::nowide::basic_ofstream, boost::nowide::basic_ifstream, boost::nowide::basic_fstream
-#if defined(BOOST_WINDOWS)
-#ifdef BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS
-#undef BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS
+#if defined(BOOST_WINDOWS) || BOOST_NOWIDE_USE_WCHAR_OVERLOADS
+#ifdef BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
+#undef BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
 #endif
-#define BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS 1
-#elif !defined(BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS)
-#define BOOST_NOWIDE_USE_FSTREAM_REPLACEMENTS 0
+#define BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT 1
+#elif !defined(BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT)
+#define BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT 0
 #endif
 
 #if BOOST_VERSION < 106500 && defined(BOOST_GCC) && __GNUC__ >= 7

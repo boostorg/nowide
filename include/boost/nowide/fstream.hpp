@@ -77,7 +77,7 @@ namespace nowide {
         {
             open(file_name, mode);
         }
-#ifdef BOOST_WINDOWS
+#if BOOST_NOWIDE_USE_WCHAR_OVERLOADS
         explicit basic_ifstream(const wchar_t* file_name, std::ios_base::openmode mode = std::ios_base::in)
         {
             open(file_name, mode);
@@ -118,7 +118,7 @@ namespace nowide {
         {
             open(file_name, mode);
         }
-#ifdef BOOST_WINDOWS
+#if BOOST_NOWIDE_USE_WCHAR_OVERLOADS
         explicit basic_ofstream(const wchar_t* file_name, std::ios_base::openmode mode = std::ios_base::out)
         {
             open(file_name, mode);
@@ -162,7 +162,7 @@ namespace nowide {
         {
             open(file_name, mode);
         }
-#ifdef BOOST_WINDOWS
+#if BOOST_NOWIDE_USE_WCHAR_OVERLOADS
         explicit basic_fstream(const wchar_t* file_name,
                                std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
         {
@@ -187,9 +187,6 @@ namespace nowide {
         using fstream_impl::close;
         using fstream_impl::rdbuf;
     };
-#ifdef BOOST_MSVC
-#pragma warning(pop)
-#endif
 
     ///
     /// Same as std::filebuf but accepts UTF-8 strings under Windows
@@ -225,6 +222,7 @@ namespace nowide {
                              public T_StreamType::template stream_base<CharType, Traits>::type
         {
             typedef basic_filebuf<CharType, Traits> internal_buffer_type;
+            typedef buf_holder<internal_buffer_type> base_buf_holder;
             typedef typename T_StreamType::template stream_base<CharType, Traits>::type stream_base;
 
         public:
@@ -232,7 +230,9 @@ namespace nowide {
             using stream_base::clear;
 
         protected:
-            fstream_impl() : stream_base(rdbuf())
+            using base_buf_holder::buf_;
+
+            fstream_impl() : stream_base(&buf_)
             {}
 
             void open(const std::string& file_name, std::ios_base::openmode mode = T_StreamType::mode())
@@ -243,7 +243,7 @@ namespace nowide {
             typename detail::enable_if_path<Path, void>::type open(const Path& file_name,
                                                                    std::ios_base::openmode mode = T_StreamType::mode())
             {
-                return open(file_name.c_str(), mode);
+                open(file_name.c_str(), mode);
             }
             void open(const char* file_name, std::ios_base::openmode mode = T_StreamType::mode())
             {
@@ -252,7 +252,7 @@ namespace nowide {
                 else
                     clear();
             }
-#ifdef BOOST_WINDOWS
+#if BOOST_NOWIDE_USE_WCHAR_OVERLOADS
             void open(const wchar_t* file_name, std::ios_base::openmode mode = T_StreamType::mode())
             {
                 if(!rdbuf()->open(file_name, mode | T_StreamType::mode_modifier()))
@@ -277,10 +277,12 @@ namespace nowide {
 
             internal_buffer_type* rdbuf() const
             {
-                return const_cast<internal_buffer_type*>(&this->buf_);
+                return const_cast<internal_buffer_type*>(&buf_);
             }
         };
-
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
         /// Trait to heuristically check for a *::filesystem::path
         /// Done by checking for make_preferred and filename member functions with correct signature
         template<typename T>
