@@ -77,7 +77,7 @@ namespace nowide {
         {
             open(file_name, mode);
         }
-#ifdef BOOST_WINDOWS
+#if BOOST_NOWIDE_USE_WCHAR_OVERLOADS
         explicit basic_ifstream(const wchar_t* file_name, std::ios_base::openmode mode = std::ios_base::in)
         {
             open(file_name, mode);
@@ -118,7 +118,7 @@ namespace nowide {
         {
             open(file_name, mode);
         }
-#ifdef BOOST_WINDOWS
+#if BOOST_NOWIDE_USE_WCHAR_OVERLOADS
         explicit basic_ofstream(const wchar_t* file_name, std::ios_base::openmode mode = std::ios_base::out)
         {
             open(file_name, mode);
@@ -162,7 +162,7 @@ namespace nowide {
         {
             open(file_name, mode);
         }
-#ifdef BOOST_WINDOWS
+#if BOOST_NOWIDE_USE_WCHAR_OVERLOADS
         explicit basic_fstream(const wchar_t* file_name,
                                std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
         {
@@ -252,7 +252,7 @@ namespace nowide {
                 else
                     clear();
             }
-#ifdef BOOST_WINDOWS
+#if BOOST_NOWIDE_USE_WCHAR_OVERLOADS
             void open(const wchar_t* file_name, std::ios_base::openmode mode = T_StreamType::mode())
             {
                 if(!rdbuf()->open(file_name, mode | T_StreamType::mode_modifier()))

@@ -46,6 +46,15 @@
 #include <boost/config/auto_link.hpp>
 #endif // auto-linking disabled
 
+/// @def BOOST_NOWIDE_USE_WCHAR_OVERLOADS
+/// @brief Whether to use the wchar_t* overloads in fstream/filebuf
+/// Enabled on Windows and Cygwin as the latter may use wchar_t in filesystem::path
+#if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
+#define BOOST_NOWIDE_USE_WCHAR_OVERLOADS 1
+#else
+#define BOOST_NOWIDE_USE_WCHAR_OVERLOADS 0
+#endif
+
 /// @def BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
 /// @brief Define to 1 to use internal class from filebuf.hpp
 ///
@@ -55,7 +64,7 @@
 ///
 /// Affects boost::nowide::basic_filebuf,
 /// boost::nowide::basic_ofstream, boost::nowide::basic_ifstream, boost::nowide::basic_fstream
-#if defined(BOOST_WINDOWS)
+#if defined(BOOST_WINDOWS) || BOOST_NOWIDE_USE_WCHAR_OVERLOADS
 #ifdef BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
 #undef BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
 #endif
