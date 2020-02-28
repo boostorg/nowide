@@ -88,12 +88,6 @@
 #define BOOST_NOWIDE_CXX11 0
 #endif
 
-#ifdef BOOST_NO_CXX11_NOEXCEPT
-#define BOOST_NOWIDE_NOEXCEPT throw()
-#else
-#define BOOST_NOWIDE_NOEXCEPT noexcept
-#endif
-
 namespace boost {
 ///
 /// \brief This namespace includes implementations of the standard library functions and

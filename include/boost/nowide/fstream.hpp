@@ -104,9 +104,9 @@ namespace nowide {
         using fstream_impl::swap;
         basic_ifstream(const basic_ifstream& other) = delete;
         basic_ifstream& operator=(const basic_ifstream& rhs) = delete;
-        basic_ifstream(basic_ifstream&& other) BOOST_NOWIDE_NOEXCEPT : fstream_impl(std::move(other))
+        basic_ifstream(basic_ifstream&& other) noexcept : fstream_impl(std::move(other))
         {}
-        basic_ifstream& operator=(basic_ifstream&& rhs) BOOST_NOWIDE_NOEXCEPT
+        basic_ifstream& operator=(basic_ifstream&& rhs) noexcept
         {
             fstream_impl::operator=(std::move(rhs));
             return *this;
@@ -156,7 +156,7 @@ namespace nowide {
         using fstream_impl::swap;
         basic_ofstream(const basic_ofstream& other) = delete;
         basic_ofstream& operator=(const basic_ofstream& rhs) = delete;
-        basic_ofstream(basic_ofstream&& other) BOOST_NOWIDE_NOEXCEPT : fstream_impl(std::move(other))
+        basic_ofstream(basic_ofstream&& other) noexcept : fstream_impl(std::move(other))
         {}
         basic_ofstream& operator=(basic_ofstream&& rhs)
         {
@@ -214,7 +214,7 @@ namespace nowide {
         using fstream_impl::swap;
         basic_fstream(const basic_fstream& other) = delete;
         basic_fstream& operator=(const basic_fstream& rhs) = delete;
-        basic_fstream(basic_fstream&& other) BOOST_NOWIDE_NOEXCEPT : fstream_impl(std::move(other))
+        basic_fstream(basic_fstream&& other) noexcept : fstream_impl(std::move(other))
         {}
         basic_fstream& operator=(basic_fstream&& rhs)
         {
@@ -297,12 +297,12 @@ namespace nowide {
             fstream_impl(const fstream_impl& other) = delete;
             fstream_impl& operator=(const fstream_impl& other) = delete;
 
-            fstream_impl(fstream_impl&& other) BOOST_NOWIDE_NOEXCEPT : base_buf_holder(std::move(other)),
-                                                                       stream_base(std::move(other))
+            fstream_impl(fstream_impl&& other) noexcept : base_buf_holder(std::move(other)),
+                                                          stream_base(std::move(other))
             {
                 this->set_rdbuf(rdbuf());
             }
-            fstream_impl& operator=(fstream_impl&& rhs) BOOST_NOWIDE_NOEXCEPT
+            fstream_impl& operator=(fstream_impl&& rhs) noexcept
             {
                 base_buf_holder::operator=(std::move(rhs));
                 stream_base::operator=(std::move(rhs));
