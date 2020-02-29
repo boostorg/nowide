@@ -30,6 +30,8 @@ environment:
     B2_LINK: shared,static
     # B2_THREADING: threading=multi,single
     B2_VARIANT: release,debug
+    # Include OpenCppCoverage and git bash (avoid WSL bash)
+    PATH: 'C:\Program Files\OpenCppCoverage;C:\Program Files\Git\bin;%PATH%'
   matrix:
     - FLAVOR: Visual Studio 2019
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
@@ -106,6 +108,14 @@ environment:
       configuration: Debug
       BOOST_ROOT: C:\Libraries\boost_1_71_0
       CMAKE: true
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      TOOLSET: msvc-14.2
+      GENERATOR: Visual Studio 16 2019
+      configuration: Debug
+      COVERAGE: true
+      # Work around for https://community.codecov.io/t/bash-script-does-not-detect-appveyor/1094
+      APPVEYOR: true
+      CI: true
 
 install:
   - set SELF=%APPVEYOR_PROJECT_NAME:-=_%
@@ -171,3 +181,21 @@ for:
       - cmake ../test/exampleProject -G "%GENERATOR%" -DCMAKE_PREFIX_PATH=%APPVEYOR_BUILD_FOLDER%\installed
       - cmake --build . --config %configuration%
       - ctest --output-on-failure -C %configuration% --parallel 4
+  - matrix:
+      only:
+        - COVERAGE: true
+    shallow_clone: false
+    before_build:
+      - b2 -j3 --with-filesystem --with-system --with-chrono toolset=%TOOLSET% address-model=64 variant=debug link=static
+      - choco install opencppcoverage
+      - ps: Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile $env:APPVEYOR_BUILD_FOLDER\codecov.sh
+    build_script:
+      - set BOOST_ROOT=%cd%
+      - mkdir build
+      - cd build
+      - cmake -G "%GENERATOR%" %BOOST_ROOT%\libs\nowide -DBOOST_NOWIDE_COVERAGE=ON
+      - cmake --build . --config Debug --target boost_nowide-coverage --parallel 4
+      - cp test\cobertura.xml %APPVEYOR_BUILD_FOLDER%
+    test_script:
+      - cd %APPVEYOR_BUILD_FOLDER%
+      - bash codecov.sh -f cobertura.xml -e APPVEYOR_BUILD_WORKER_IMAGE -X gcov -X search -Z

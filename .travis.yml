@@ -140,7 +140,6 @@ install:
     fi
     export BOOST_CI=$PWD/boost-ci
   - git clone https://github.com/boostorg/boost-ci.git $BOOST_CI
-  - cp $BOOST_CI/.codecov.yml .
   # Workaround
   - cp -pr $BOOST_CI/ci .
   - echo "build-project test ;" > Jamfile.v2
