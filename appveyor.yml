@@ -112,7 +112,6 @@ environment:
       
 
 install:
-  - cp ci/appveyor.codecov.yml codecov.yml
   - set SELF=%APPVEYOR_PROJECT_NAME:-=_%
   - git clone https://github.com/boostorg/boost-ci.git C:\boost-ci
   - xcopy /s /e /q /i C:\boost-ci\ci .\ci
@@ -182,7 +181,7 @@ for:
     before_build:
       - b2 -j3 --with-filesystem --with-system --with-chrono toolset=%TOOLSET% %CXXSTD% address-model=64 variant=debug link=static
       - choco install opencppcoverage
-      - pip install codecov
+      - ps: Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile $env:APPVEYOR_BUILD_FOLDER\codecov.sh
     build_script:
       - set PATH=C:\Program Files\OpenCppCoverage;%PATH%
       - set BOOST_ROOT=%cd%
@@ -190,8 +189,14 @@ for:
       - cd build
       - cmake -G "%GENERATOR%" %BOOST_ROOT%\libs\nowide -DBOOST_NOWIDE_COVERAGE=ON
       - cmake --build . --config Debug --target boost_nowide-coverage --parallel 4
-      - set COVERAGE_XML=%cd%\test\cobertura.xml
+      - copy test\cobertura.xml %APPVEYOR_BUILD_FOLDER%
+    test_script:
+      - set COVERAGE_XML=cobertura.xml
       #- ps: (Get-Content $env:COVERAGE_XML) -replace '(.*)filename=\".*\\libs\\nowide\\(.*)\"(.*)', '$1 filename="$2"$3' | Set-Content $env:COVERAGE_XML
       - cd %APPVEYOR_BUILD_FOLDER%
-      - codecov --file %COVERAGE_XML% --required --name AppveyorBuild -X gcov -X search -e APPVEYOR_BUILD_WORKER_IMAGE --verbose
-    test_script: echo "Skipped"
+      # Work around for https://community.codecov.io/t/bash-script-does-not-detect-appveyor/1094
+      - ps: |
+            $env:APPVEYOR="true"
+            $env:CI="true"
+            $env:PATH="C:\Program Files\Git\bin;$env:PATH"
+            bash codecov.sh -f "$env:COVERAGE_XML" -e APPVEYOR_BUILD_WORKER_IMAGE -X gcov -X search -Z -y ci/codecov.appveyor.yml
