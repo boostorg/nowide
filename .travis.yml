@@ -122,6 +122,7 @@ jobs:
 
 stages:
   - essential
+    if: false
   - name: additional
     if: type != "pull_request"
 
