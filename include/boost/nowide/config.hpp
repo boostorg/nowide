@@ -79,6 +79,15 @@
 #define BOOST_NOWIDE_FALLTHROUGH BOOST_FALLTHROUGH
 #endif
 
+// MSVC 2015 (1900) has reasonable C++11 support (especially auto-generated move ctors)
+// libstdc++ < 5 does not support movable streams
+#if(__cplusplus >= 201103L || (defined(BOOST_MSVC) && BOOST_MSVC >= 1900)) \
+  && (!defined(BOOST_LIBSTDCXX_VERSION) || BOOST_LIBSTDCXX_VERSION >= 50000)
+#define BOOST_NOWIDE_CXX11 1
+#else
+#define BOOST_NOWIDE_CXX11 0
+#endif
+
 namespace boost {
 ///
 /// \brief This namespace includes implementations of the standard library functions and
