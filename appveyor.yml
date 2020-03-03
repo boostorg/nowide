@@ -124,4 +124,4 @@ for:
             $env:APPVEYOR="true"
             $env:CI="true"
             $env:PATH="C:\Program Files\Git\bin;$env:PATH"
-            bash codecov.sh -f "$env:COVERAGE_XML" -e APPVEYOR_BUILD_WORKER_IMAGE -X gcov -X search -Z -y ci/codecov.appveyor.yml
+            bash codecov.sh -f "$env:COVERAGE_XML" -e APPVEYOR_BUILD_WORKER_IMAGE -X gcov -X search -Z
