@@ -6,8 +6,6 @@
 
 version: 1.0.{build}-{branch}
 
-shallow_clone: true
-
 branches:
   only:
     - master
@@ -108,10 +106,6 @@ environment:
       configuration: Debug
       BOOST_ROOT: C:\Libraries\boost_1_71_0
       CMAKE: true
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      TOOLSET: msvc-14.2
-      GENERATOR: Visual Studio 16 2019
-      configuration: Debug
       COVERAGE: true
       # Work around for https://community.codecov.io/t/bash-script-does-not-detect-appveyor/1094
       APPVEYOR: true
@@ -175,27 +169,18 @@ for:
 
     test_script:
       - ctest --output-on-failure -C %configuration% --parallel 4
+      - ps: |
+            If ($env:COVERAGE -eq "true") {
+              choco install opencppcoverage
+              Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile codecov.sh
+              OpenCppCoverage.exe --quiet --export_type cobertura:cobertura.xml `
+              --sources ${env:APPVEYOR_BUILD_FOLDER} --modules "$PWD" `
+              --cover_children --working_dir "$PWD" -- ctest -C Debug
+              bash codecov.sh -f cobertura.xml -n Appveyor -e APPVEYOR_BUILD_WORKER_IMAGE -X gcov -X search -Z
+            }
       # Build consumer example test
       - cmake --build . --config %configuration% --target install
       - del /F /S /Q *
       - cmake ../test/exampleProject -G "%GENERATOR%" -DCMAKE_PREFIX_PATH=%APPVEYOR_BUILD_FOLDER%\installed
       - cmake --build . --config %configuration%
       - ctest --output-on-failure -C %configuration% --parallel 4
-  - matrix:
-      only:
-        - COVERAGE: true
-    shallow_clone: false
-    before_build:
-      - b2 -j3 --with-filesystem --with-system --with-chrono toolset=%TOOLSET% address-model=64 variant=debug link=static
-      - choco install opencppcoverage
-      - ps: Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile $env:APPVEYOR_BUILD_FOLDER\codecov.sh
-    build_script:
-      - set BOOST_ROOT=%cd%
-      - mkdir build
-      - cd build
-      - cmake -G "%GENERATOR%" %BOOST_ROOT%\libs\nowide -DBOOST_NOWIDE_COVERAGE=ON
-      - cmake --build . --config Debug --target boost_nowide-coverage --parallel 4
-      - cp test\cobertura.xml %APPVEYOR_BUILD_FOLDER%
-    test_script:
-      - cd %APPVEYOR_BUILD_FOLDER%
-      - bash codecov.sh -f cobertura.xml -e APPVEYOR_BUILD_WORKER_IMAGE -X gcov -X search -Z
