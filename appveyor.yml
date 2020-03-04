@@ -6,8 +6,6 @@
 
 version: 1.0.{build}-{branch}
 
-shallow_clone: true
-
 branches:
   only:
     - master
@@ -30,6 +28,8 @@ environment:
     B2_LINK: shared,static
     # B2_THREADING: threading=multi,single
     B2_VARIANT: release,debug
+    # Include OpenCppCoverage and git bash (avoid WSL bash)
+    PATH: 'C:\Program Files\OpenCppCoverage;C:\Program Files\Git\bin;%PATH%'
   matrix:
     - FLAVOR: Visual Studio 2019
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
@@ -106,6 +106,10 @@ environment:
       configuration: Debug
       BOOST_ROOT: C:\Libraries\boost_1_71_0
       CMAKE: true
+      COVERAGE: true
+      # Work around for https://community.codecov.io/t/bash-script-does-not-detect-appveyor/1094
+      APPVEYOR: true
+      CI: true
 
 install:
   - set SELF=%APPVEYOR_PROJECT_NAME:-=_%
@@ -165,6 +169,15 @@ for:
 
     test_script:
       - ctest --output-on-failure -C %configuration% --parallel 4
+      - ps: |
+            If ($env:COVERAGE -eq "true") {
+              choco install opencppcoverage
+              Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile codecov.sh
+              OpenCppCoverage.exe --quiet --export_type cobertura:cobertura.xml `
+              --sources ${env:APPVEYOR_BUILD_FOLDER} --modules "$PWD" `
+              --cover_children --working_dir "$PWD" -- ctest -C Debug
+              bash codecov.sh -f cobertura.xml -n Appveyor -e APPVEYOR_BUILD_WORKER_IMAGE -X gcov -X search -Z
+            }
       # Build consumer example test
       - cmake --build . --config %configuration% --target install
       - del /F /S /Q *
