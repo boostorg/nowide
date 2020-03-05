@@ -112,14 +112,6 @@ jobs:
     - { compiler: clang++-9,      env: 'B2_CXXSTD=03,11,14,17,2a', addons: *clang-9  }
     - { compiler: clang++-libc++, env: 'B2_CXXSTD=03,11,14',       addons: *libcpp   }
 
-# Coverity Scan
-    - if: (env(COVERITY_SCAN_NOTIFICATION_EMAIL) IS present) AND (branch IN (develop, master)) AND (type IN (cron, push))
-      compiler: clang++
-      env: COMMENT="Coverity Scan"
-      script:
-        - cd $BOOST_ROOT/libs/$SELF
-        - $BOOST_CI/ci/travis/coverity.sh
-
 stages:
   - essential
   - name: additional
