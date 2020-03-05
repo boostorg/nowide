@@ -57,7 +57,7 @@ namespace nowide {
     class utf8_codecvt;
 
     template<typename CharType>
-    class utf8_codecvt<CharType, 2> : public std::codecvt<CharType, char, std::mbstate_t>
+    class BOOST_SYMBOL_VISIBLE utf8_codecvt<CharType, 2> : public std::codecvt<CharType, char, std::mbstate_t>
     {
     public:
         BOOST_STATIC_ASSERT_MSG(sizeof(CharType) >= 2, "CharType must be able to store UTF16 code point");
@@ -290,7 +290,7 @@ namespace nowide {
     };
 
     template<typename CharType>
-    class utf8_codecvt<CharType, 4> : public std::codecvt<CharType, char, std::mbstate_t>
+    class BOOST_SYMBOL_VISIBLE utf8_codecvt<CharType, 4> : public std::codecvt<CharType, char, std::mbstate_t>
     {
     public:
         utf8_codecvt(size_t refs = 0) : std::codecvt<CharType, char, std::mbstate_t>(refs)

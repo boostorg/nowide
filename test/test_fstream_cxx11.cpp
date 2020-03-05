@@ -85,7 +85,7 @@ void test_ifstream(const std::string& filename)
         TEST(f >> s);
         TEST(s == "World");
     }
-    nw::remove(filename.c_str());
+    TEST(nw::remove(filename.c_str()) == 0);
 }
 
 nw::ofstream make_ofstream(const std::string& filename)
@@ -131,7 +131,7 @@ void test_ofstream(const std::string& filename)
         f.close();
         TEST(get_file_contents(filename) == "Hello world");
     }
-    nw::remove(filename.c_str());
+    TEST(nw::remove(filename.c_str()) == 0);
 }
 
 nw::fstream make_fstream(const std::string& filename)
@@ -177,7 +177,7 @@ void test_fstream(const std::string& filename)
         f.seekg(0);
         TEST(get_file_contents(f) == "Hello world");
     }
-    nw::remove(filename.c_str());
+    TEST(nw::remove(filename.c_str()) == 0);
 }
 
 int main(int, char** argv)
