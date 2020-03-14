@@ -297,6 +297,7 @@ namespace nowide {
             fstream_impl(const fstream_impl& other) = delete;
             fstream_impl& operator=(const fstream_impl& other) = delete;
 
+            // coverity[exn_spec_violation]
             fstream_impl(fstream_impl&& other) noexcept : base_buf_holder(std::move(other)),
                                                           stream_base(std::move(other))
             {

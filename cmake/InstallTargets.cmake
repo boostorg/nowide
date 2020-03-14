@@ -23,7 +23,7 @@ function(install_targets)
     set(ARG_CONFIG_FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake.in")
     file(WRITE ${ARG_CONFIG_FILE}
       "@PACKAGE_INIT@\n"
-      "include(\"${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake\")\n"
+      "include(\"\${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake\")\n"
       "check_required_components(\"@PROJECT_NAME@\")\n"
     )
   endif()

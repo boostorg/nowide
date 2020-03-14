@@ -91,8 +91,10 @@ namespace nowide {
             wargv_ptr& operator=(const wargv_ptr&);
 
         public:
-            wargv_ptr() : p(CommandLineToArgvW(GetCommandLineW(), &argc))
-            {}
+            wargv_ptr()
+            {
+                p = CommandLineToArgvW(GetCommandLineW(), &argc);
+            }
             ~wargv_ptr()
             {
                 if(p)

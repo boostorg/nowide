@@ -144,7 +144,7 @@ namespace nowide {
                 std::swap(lhs.data_, rhs.data_);
         }
 
-    private:
+    protected:
         /// True if the stack memory is used
         bool uses_stack_memory() const
         {
@@ -170,6 +170,8 @@ namespace nowide {
             else // if(insize == 4 && outsize == 2)
                 return 2 * in;
         }
+
+    private:
         output_char buffer_[buffer_size];
         output_char* data_;
     }; // basic_stackstring

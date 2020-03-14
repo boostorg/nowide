@@ -44,9 +44,11 @@ inline boost::nowide::test_monitor& test_mon()
 }
 
 /// Function called when a test failed to be able set a breakpoint for debugging
-inline void test_failed(const std::string& msg)
+inline void test_failed(const char* expr, const char* file, const int line, const char* function)
 {
-    throw std::runtime_error(msg);
+    std::ostringstream ss;
+    ss << "Error " << expr << " at " << file << ':' << line << " in " << function;
+    throw std::runtime_error(ss.str());
 }
 
 #ifdef _MSC_VER
@@ -57,16 +59,14 @@ inline void test_failed(const std::string& msg)
 #define DISABLE_CONST_EXPR_DETECTED_POP
 #endif
 
-#define TEST(x)                                                                         \
-    do                                                                                  \
-    {                                                                                   \
-        test_mon();                                                                     \
-        if(x)                                                                           \
-            break;                                                                      \
-        std::ostringstream ss;                                                          \
-        ss << "Error " #x " in " << __FILE__ << ':' << __LINE__ << " " << __FUNCTION__; \
-        test_failed(ss.str());                                                          \
-        DISABLE_CONST_EXPR_DETECTED                                                     \
+#define TEST(x)                                            \
+    do                                                     \
+    {                                                      \
+        test_mon();                                        \
+        if(x)                                              \
+            break;                                         \
+        test_failed(#x, __FILE__, __LINE__, __FUNCTION__); \
+        DISABLE_CONST_EXPR_DETECTED                        \
     } while(0) DISABLE_CONST_EXPR_DETECTED_POP
 
 #endif // #ifndef BOOST_NOWIDE_LIB_TEST_H_INCLUDED

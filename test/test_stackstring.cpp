@@ -17,27 +17,57 @@
 #pragma warning(disable : 4428) // universal-character-name encountered in source
 #endif
 
+template<typename CharOut, typename CharIn, size_t BufferSize>
+class test_basic_stackstring : public boost::nowide::basic_stackstring<CharOut, CharIn, BufferSize>
+{
+public:
+    typedef boost::nowide::basic_stackstring<CharOut, CharIn, BufferSize> parent;
+
+#if BOOST_NOWIDE_CXX11
+    using parent::parent;
+#else
+    test_basic_stackstring()
+    {}
+    explicit test_basic_stackstring(const CharIn* input) : parent(input)
+    {}
+    test_basic_stackstring(const CharIn* begin, const CharIn* end) : parent(begin, end)
+    {}
+#endif
+    using parent::uses_stack_memory;
+    bool uses_heap_memory() const
+    {
+        return !uses_stack_memory() && this->get();
+    }
+};
+
+typedef test_basic_stackstring<wchar_t, char, 256> test_wstackstring;
+typedef test_basic_stackstring<char, wchar_t, 256> test_stackstring;
+
 std::wstring stackstring_to_wide(const std::string& s)
 {
-    const boost::nowide::wstackstring ss(s.c_str());
+    const test_wstackstring ss(s.c_str());
+    TEST(ss.uses_stack_memory());
     return ss.get();
 }
 
 std::string stackstring_to_narrow(const std::wstring& s)
 {
-    const boost::nowide::stackstring ss(s.c_str());
+    const test_stackstring ss(s.c_str());
+    TEST(ss.uses_stack_memory());
     return ss.get();
 }
 
 std::wstring heap_stackstring_to_wide(const std::string& s)
 {
-    const boost::nowide::basic_stackstring<wchar_t, char, 1> ss(s.c_str());
+    const test_basic_stackstring<wchar_t, char, 1> ss(s.c_str());
+    TEST(ss.uses_heap_memory() || s.empty());
     return ss.get();
 }
 
 std::string heap_stackstring_to_narrow(const std::wstring& s)
 {
-    const boost::nowide::basic_stackstring<char, wchar_t, 1> ss(s.c_str());
+    const test_basic_stackstring<char, wchar_t, 1> ss(s.c_str());
+    TEST(ss.uses_heap_memory() || s.empty());
     return ss.get();
 }
 
@@ -91,44 +121,52 @@ int main()
         }
         {
             std::cout << "-- Will be put on heap" << std::endl;
-            boost::nowide::basic_stackstring<wchar_t, char, 3> sw;
+            test_basic_stackstring<wchar_t, char, 3> sw;
             TEST(sw.convert(hello.c_str()));
+            TEST(sw.uses_heap_memory());
             TEST(sw.get() == whello);
             TEST(sw.convert(hello.c_str(), hello.c_str() + hello.size()));
+            TEST(sw.uses_heap_memory());
             TEST(sw.get() == whello);
         }
         {
             std::cout << "-- Will be put on stack" << std::endl;
-            boost::nowide::basic_stackstring<wchar_t, char, 40> sw;
+            test_basic_stackstring<wchar_t, char, 40> sw;
             TEST(sw.convert(hello.c_str()));
+            TEST(sw.uses_stack_memory());
             TEST(sw.get() == whello);
             TEST(sw.convert(hello.c_str(), hello.c_str() + hello.size()));
+            TEST(sw.uses_stack_memory());
             TEST(sw.get() == whello);
         }
         {
             std::cout << "-- Will be put on heap" << std::endl;
-            boost::nowide::basic_stackstring<char, wchar_t, 3> sw;
+            test_basic_stackstring<char, wchar_t, 3> sw;
             TEST(sw.convert(whello.c_str()));
+            TEST(sw.uses_heap_memory());
             TEST(sw.get() == hello);
             TEST(sw.convert(whello.c_str(), whello.c_str() + whello.size()));
+            TEST(sw.uses_heap_memory());
             TEST(sw.get() == hello);
         }
         {
             std::cout << "-- Will be put on stack" << std::endl;
-            boost::nowide::basic_stackstring<char, wchar_t, 40> sw;
+            test_basic_stackstring<char, wchar_t, 40> sw;
             TEST(sw.convert(whello.c_str()));
+            TEST(sw.uses_stack_memory());
             TEST(sw.get() == hello);
             TEST(sw.convert(whello.c_str(), whello.c_str() + whello.size()));
+            TEST(sw.uses_stack_memory());
             TEST(sw.get() == hello);
         }
         {
-            typedef boost::nowide::basic_stackstring<wchar_t, char, 6> stackstring;
+            typedef test_basic_stackstring<wchar_t, char, 6> stackstring;
             const std::wstring heapVal = L"heapValue";
-            TEST(heapVal.size() >= 6); // Will be put on heap
             const std::wstring stackVal = L"stack";
-            TEST(stackVal.size() < 6); // Will be put on stack
             const stackstring heap(boost::nowide::narrow(heapVal).c_str());
             const stackstring stack(boost::nowide::narrow(stackVal).c_str());
+            TEST(heap.uses_heap_memory());
+            TEST(stack.uses_stack_memory());
 
             {
                 stackstring sw2(heap), sw3, sEmpty;
@@ -136,10 +174,10 @@ int main()
                 TEST(sw2.get() == heapVal);
                 TEST(sw3.get() == heapVal);
                 // Self assign avoiding clang self-assign-overloaded warning
-                sw3 = static_cast<const stackstring&>(sw3);
+                sw3 = static_cast<const stackstring&>(sw3); //-V570
                 TEST(sw3.get() == heapVal);
                 // Assign empty
-                sw3 = sEmpty;
+                sw3 = sEmpty; //-V820
                 TEST(sw3.get() == NULL);
             }
             {
@@ -148,10 +186,10 @@ int main()
                 TEST(sw2.get() == stackVal);
                 TEST(sw3.get() == stackVal);
                 // Self assign avoiding clang self-assign-overloaded warning
-                sw3 = static_cast<const stackstring&>(sw3);
+                sw3 = static_cast<const stackstring&>(sw3); //-V570
                 TEST(sw3.get() == stackVal);
                 // Assign empty
-                sw3 = sEmpty;
+                sw3 = sEmpty; //-V820
                 TEST(sw3.get() == NULL);
             }
             {

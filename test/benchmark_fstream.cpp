@@ -41,6 +41,7 @@ public:
         f_.open(file, read ? std::fstream::in : std::fstream::out | std::fstream::trunc);
         TEST(f_);
     }
+    // coverity[exn_spec_violation]
     ~io_fstream()
     {
         f_.close();
@@ -123,6 +124,7 @@ struct perf_data
 
 char rand_char()
 {
+    // coverity[dont_call]
     return static_cast<char>(std::rand());
 }
 
@@ -160,10 +162,10 @@ perf_data test_io(const char* file)
         }
         tmp.flush();
         start_and_end[1] = clock::now();
-        const milliseconds duration = chrono::duration_cast<milliseconds>(start_and_end[1] - start_and_end[0]);
         // heatup
         if(block_size >= MIN_BLOCK_SIZE)
         {
+            const milliseconds duration = chrono::duration_cast<milliseconds>(start_and_end[1] - start_and_end[0]);
             const double speed = data_size / duration.count() / 1024; // MB/s
             results.write[block_size] = speed;
             std::cout << "  write block size " << std::setw(8) << block_size << " " << std::fixed
@@ -189,7 +191,7 @@ perf_data test_io(const char* file)
         std::cout << "  read block size " << std::setw(8) << block_size << " " << std::fixed << std::setprecision(3)
                   << speed << " MB/s" << std::endl;
     }
-    std::remove(file);
+    TEST(std::remove(file) == 0);
     return results;
 }
 
@@ -256,6 +258,13 @@ int main(int argc, char** argv)
         std::cerr << "Usage: " << argv[0] << " [test_filepath]" << std::endl;
         return 1;
     }
-    test_perf(filename.c_str());
+    try
+    {
+        test_perf(filename.c_str());
+    } catch(const std::runtime_error& err)
+    {
+        std::cerr << "Benchmarking failed: " << err.what() << std::endl;
+        return 1;
+    }
     return 0;
 }

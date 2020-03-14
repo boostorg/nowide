@@ -33,7 +33,7 @@ int main()
         TEST(boost::filesystem::is_regular_file(boost::nowide::widen(utf8_name)));
         TEST(boost::filesystem::is_regular_file(utf8_name));
 
-        boost::nowide::remove(utf8_name.c_str());
+        TEST(boost::nowide::remove(utf8_name.c_str()) == 0);
 
         TEST(!boost::filesystem::is_regular_file(boost::nowide::widen(utf8_name)));
         TEST(!boost::filesystem::is_regular_file(utf8_name));

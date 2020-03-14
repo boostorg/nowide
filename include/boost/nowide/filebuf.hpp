@@ -51,16 +51,23 @@ namespace nowide {
         typedef std::char_traits<char> Traits;
 
     public:
+#ifdef BOOST_MSVC
+#pragma warning(push)
+#pragma warning(disable : 4351) // new behavior : elements of array will be default initialized
+#endif
         ///
         /// Creates new filebuf
         ///
         basic_filebuf() :
-            buffer_size_(BUFSIZ), buffer_(0), file_(0), owns_buffer_(false), last_char_(0),
+            buffer_size_(BUFSIZ), buffer_(0), file_(0), owns_buffer_(false), last_char_(),
             mode_(std::ios_base::openmode(0))
         {
             setg(0, 0, 0);
             setp(0, 0);
         }
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
 #if !BOOST_NOWIDE_CXX11
     private:
         // Non-copyable
@@ -88,20 +95,20 @@ namespace nowide {
             swap(buffer_, rhs.buffer_);
             swap(file_, rhs.file_);
             swap(owns_buffer_, rhs.owns_buffer_);
-            swap(last_char_, rhs.last_char_);
+            swap(last_char_[0], rhs.last_char_[0]);
             swap(mode_, rhs.mode_);
             // Fixup last_char references
-            if(epptr() == &rhs.last_char_)
-                setp(&last_char_, &last_char_);
-            if(egptr() == &rhs.last_char_)
-                rhs.setg(&last_char_, gptr() == &rhs.last_char_ ? &last_char_ : &last_char_ + 1, &last_char_ + 1);
-            if(rhs.epptr() == &last_char_)
-                setp(&rhs.last_char_, &rhs.last_char_);
-            if(rhs.egptr() == &rhs.last_char_)
+            if(epptr() == rhs.last_char_)
+                setp(last_char_, last_char_);
+            if(egptr() == rhs.last_char_)
+                rhs.setg(last_char_, gptr() == rhs.last_char_ ? last_char_ : last_char_ + 1, last_char_ + 1);
+            if(rhs.epptr() == last_char_)
+                setp(rhs.last_char_, rhs.last_char_);
+            if(rhs.egptr() == rhs.last_char_)
             {
-                rhs.setg(&rhs.last_char_,
-                         rhs.gptr() == &last_char_ ? &rhs.last_char_ : &rhs.last_char_ + 1,
-                         &rhs.last_char_ + 1);
+                rhs.setg(rhs.last_char_,
+                         rhs.gptr() == last_char_ ? rhs.last_char_ : rhs.last_char_ + 1,
+                         rhs.last_char_ + 1);
             }
         }
 #endif
@@ -241,7 +248,7 @@ namespace nowide {
                 } else if(!pptr())
                 {
                     // Set to dummy value so we know we have written something
-                    setp(&last_char_, &last_char_);
+                    setp(last_char_, last_char_);
                 }
             }
             return Traits::not_eof(c);
@@ -274,8 +281,8 @@ namespace nowide {
                 const int c = std::fgetc(file_);
                 if(c == EOF)
                     return EOF;
-                last_char_ = Traits::to_char_type(c);
-                setg(&last_char_, &last_char_, &last_char_ + 1);
+                last_char_[0] = Traits::to_char_type(c);
+                setg(last_char_, last_char_, last_char_ + 1);
             } else
             {
                 make_buffer();
@@ -441,7 +448,7 @@ namespace nowide {
         char* buffer_;
         FILE* file_;
         bool owns_buffer_;
-        char last_char_;
+        char last_char_[1];
         std::ios::openmode mode_;
     };
 
