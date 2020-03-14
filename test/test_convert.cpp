@@ -95,7 +95,7 @@ int main()
         std::cout << "- boost::nowide::narrow" << std::endl;
         {
             const wchar_t* b = whello.c_str();
-            const wchar_t* e = b + whello.size();
+            const wchar_t* e = b + whello.size(); //-V594
             char buf[10] = {0};
             buf[9] = 1;
             TEST(boost::nowide::narrow(buf, 9, b, e) == buf);

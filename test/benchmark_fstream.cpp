@@ -162,10 +162,10 @@ perf_data test_io(const char* file)
         }
         tmp.flush();
         start_and_end[1] = clock::now();
-        const milliseconds duration = chrono::duration_cast<milliseconds>(start_and_end[1] - start_and_end[0]);
         // heatup
         if(block_size >= MIN_BLOCK_SIZE)
         {
+            const milliseconds duration = chrono::duration_cast<milliseconds>(start_and_end[1] - start_and_end[0]);
             const double speed = data_size / duration.count() / 1024; // MB/s
             results.write[block_size] = speed;
             std::cout << "  write block size " << std::setw(8) << block_size << " " << std::fixed

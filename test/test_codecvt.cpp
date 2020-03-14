@@ -23,7 +23,7 @@ static const wchar_t* wide_name = wide_name_str.c_str();
 
 typedef std::codecvt<wchar_t, char, std::mbstate_t> cvt_type;
 
-void test_codecvt_in_n_m(const cvt_type& cvt, int n, int m)
+void test_codecvt_in_n_m(const cvt_type& cvt, size_t n, size_t m)
 {
     const wchar_t* wptr = wide_name;
     size_t wlen = std::wcslen(wide_name);
@@ -82,7 +82,7 @@ void test_codecvt_in_n_m(const cvt_type& cvt, int n, int m)
     TEST(from == real_end);
 }
 
-void test_codecvt_out_n_m(const cvt_type& cvt, int n, int m)
+void test_codecvt_out_n_m(const cvt_type& cvt, size_t n, size_t m)
 {
     const char* nptr = utf8_name;
     size_t wlen = std::wcslen(wide_name);
@@ -147,10 +147,12 @@ void test_codecvt_conv()
     std::locale l(std::locale::classic(), new boost::nowide::utf8_codecvt<wchar_t>());
 
     const cvt_type& cvt = std::use_facet<cvt_type>(l);
+    const size_t utf8_len = std::strlen(utf8_name);
+    const size_t wide_len = std::wcslen(wide_name);
 
-    for(int i = 1; i <= (int)std::strlen(utf8_name) + 1; i++)
+    for(size_t i = 1; i <= utf8_len + 1; i++)
     {
-        for(int j = 1; j <= (int)std::wcslen(wide_name) + 1; j++)
+        for(size_t j = 1; j <= wide_len + 1; j++)
         {
             try
             {

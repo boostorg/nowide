@@ -202,7 +202,7 @@ void test_ofstream_creates_file(const char* filename)
         TEST(fo);
     }
     TEST(file_exists(filename));
-    TEST(read_file(filename) == "");
+    TEST(read_file(filename).empty());
     TEST(nw::remove(filename) == 0);
     // Open
     {
@@ -211,7 +211,7 @@ void test_ofstream_creates_file(const char* filename)
         TEST(fo);
     }
     TEST(file_exists(filename));
-    TEST(read_file(filename) == "");
+    TEST(read_file(filename).empty());
     TEST(nw::remove(filename) == 0);
 }
 
@@ -368,7 +368,7 @@ void test_fstream(const char* filename)
         nw::fstream f(filename, std::ios::out);
         TEST(f);
     }
-    TEST(read_file(filename) == "");
+    TEST(read_file(filename).empty());
     // Char* ctor
     {
         nw::fstream f(filename);
@@ -398,7 +398,7 @@ void test_fstream(const char* filename)
         f.open(filename, std::ios::out);
         TEST(f);
     }
-    TEST(read_file(filename) == "");
+    TEST(read_file(filename).empty());
     // Open
     {
         nw::fstream f;

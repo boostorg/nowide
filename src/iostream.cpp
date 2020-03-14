@@ -170,16 +170,14 @@ namespace nowide {
                 namespace uf = detail::utf;
                 DWORD read_wchars = 0;
                 size_t n = wbuffer_size - wsize_;
-                if(!ReadConsoleW(handle_, wbuffer_, static_cast<DWORD>(n), &read_wchars, 0))
+                if(!ReadConsoleW(handle_, wbuffer_ + wsize_, static_cast<DWORD>(n), &read_wchars, 0))
                     return 0;
                 wsize_ += read_wchars;
                 char* out = buffer_;
-                wchar_t* b = wbuffer_;
-                wchar_t* e = b + wsize_;
-                wchar_t* p = b;
+                wchar_t* p = wbuffer_;
+                wchar_t* e = wbuffer_ + wsize_;
                 uf::code_point c = 0;
-                wsize_ = e - p;
-                while(p < e && (c = uf::utf_traits<wchar_t>::decode(p, e)) != uf::illegal && c != uf::incomplete)
+                while((c = uf::utf_traits<wchar_t>::decode(p, e)) != uf::illegal && c != uf::incomplete)
                 {
                     out = uf::utf_traits<char>::encode(c, out);
                     wsize_ = e - p;
@@ -188,18 +186,16 @@ namespace nowide {
                 if(c == uf::illegal)
                     return 0;
 
-                if(c == uf::incomplete)
-                {
-                    std::memmove(b, e - wsize_, sizeof(wchar_t) * wsize_);
-                }
+                if(wsize_ > 0)
+                    std::memmove(wbuffer_, e - wsize_, sizeof(wchar_t) * wsize_);
 
                 return out - buffer_;
             }
 
-            static const size_t buffer_size = 1024 * 3;
             static const size_t wbuffer_size = 1024;
+            static const size_t buffer_size = wbuffer_size * 3;
             char buffer_[buffer_size];
-            wchar_t wbuffer_[buffer_size]; // for null
+            wchar_t wbuffer_[wbuffer_size];
             HANDLE handle_;
             size_t wsize_;
             std::vector<char> pback_buffer_;
