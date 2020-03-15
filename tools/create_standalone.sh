@@ -24,24 +24,25 @@ fi
 mkdir -p "$targetFolder"/include
 
 cp -r include/boost/nowide "$targetFolder"/include
-cp -r src test cmake CMakeLists.txt "$targetFolder"
+cp -r src test cmake CMakeLists.txt LICENSE "$targetFolder"
 cp standalone/*.hpp "$targetFolder"/include/nowide
 mv "$targetFolder/cmake/BoostAddOptions.cmake"  "$targetFolder/cmake/NowideAddOptions.cmake"
 mv "$targetFolder/cmake/BoostAddWarnings.cmake" "$targetFolder/cmake/NowideAddWarnings.cmake"
 find "$targetFolder" -name 'Jamfile*' -delete
 
-SOURCES=$(find "$targetFolder" -type f -not -name '*.txt' -not -name '*.cmake')
+SOURCES=$(find "$targetFolder" -name '*.hpp' -or -name '*.cpp')
+SOURCES_NO_BOOST=$(echo "$SOURCES" | grep -v 'filesystem.hpp')
 
 sed 's/BOOST_NOWIDE_/NOWIDE_/g' -i $SOURCES
 sed 's/BOOST_/NOWIDE_/g' -i $SOURCES
 sed 's/boost::nowide/nowide/g' -i $SOURCES
 sed 's/boost::chrono/std::chrono/g' -i $SOURCES
 sed 's/boost::milli/std::milli/g' -i $SOURCES
-sed 's/boost::/nowide::/g' -i $SOURCES
+sed 's/boost::/nowide::/g' -i $SOURCES_NO_BOOST
 sed '/namespace boost/d' -i $SOURCES
 sed 's/<boost\/chrono.hpp/<chrono/g' -i $SOURCES
 sed 's/<boost\/nowide\//<nowide\//g' -i $SOURCES
-sed 's/<boost\//<nowide\//g' -i $SOURCES
+sed 's/<boost\//<nowide\//g' -i $SOURCES_NO_BOOST
 sed '/config\/abi_/d' -i $SOURCES
 
 CMLs=$(find "$targetFolder" -name 'CMakeLists.txt' -or -name '*.cmake')
