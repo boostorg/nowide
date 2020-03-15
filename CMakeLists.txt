@@ -1,10 +1,9 @@
 # Builds the libraries for Boost.Nowide
-# Automatically detects if build as standalone or as "part of boost" (with boost namespace)
 #
 # Options:
 # BOOST_NOWIDE_INSTALL
-# BOOST_NOWIDE_BUILD_TESTS
-# BOOST_NOWIDE_SYSTEM_INCLUDE
+# BOOST_NOWIDE_WERROR
+# BUILD_TESTING
 #
 # Created target: Boost::nowide
 #
@@ -23,13 +22,6 @@ if(POLICY CMP0074)
 endif()
 
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-
-# Find out if we are beeing build as standalone or boost version
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include/nowide)
-  set(BOOST_NOWIDE_STANDALONE ON)
-else()
-  set(BOOST_NOWIDE_STANDALONE OFF)
-endif()
 
 if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
   # Make sure all binarys (especially exe/dll) are in one directory for tests to work
@@ -59,20 +51,16 @@ target_compile_definitions(boost_nowide PUBLIC BOOST_NOWIDE_NO_LIB)
 target_include_directories(boost_nowide PUBLIC include)
 boost_add_warnings(boost_nowide pedantic ${BOOST_NOWIDE_WERROR})
 
-if(BOOST_NOWIDE_STANDALONE)
-  target_compile_features(boost_nowide PUBLIC cxx_std_11)
+if(BOOST_SUPERPROJECT_SOURCE_DIR)
+  target_link_libraries(boost_nowide PUBLIC Boost::config Boost::smart_ptr Boost::static_assert)
+  set(BOOST_NOWIDE_INSTALL OFF) # smart_ptr does not support installation
 else()
-  if(BOOST_SUPERPROJECT_SOURCE_DIR)
-    target_link_libraries(boost_nowide PUBLIC Boost::config Boost::smart_ptr Boost::static_assert)
-    set(BOOST_NOWIDE_INSTALL OFF) # smart_ptr does not support installation
-  else()
-    # Default boost libs are static on windows and dynamic on linux
-    if(WIN32 AND NOT DEFINED Boost_USE_STATIC_LIBS)
-      set(Boost_USE_STATIC_LIBS ON)
-    endif()
-    find_package(Boost 1.56 REQUIRED)
-    target_link_libraries(boost_nowide PUBLIC Boost::boost)
+  # Default boost libs are static on windows and dynamic on linux
+  if(WIN32 AND NOT DEFINED Boost_USE_STATIC_LIBS)
+    set(Boost_USE_STATIC_LIBS ON)
   endif()
+  find_package(Boost 1.56 REQUIRED)
+  target_link_libraries(boost_nowide PUBLIC Boost::boost)
 endif()
 
 if(BUILD_TESTING)

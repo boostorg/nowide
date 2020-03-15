@@ -23,7 +23,7 @@
 #endif // BOOST_NOWIDE_SOURCE
 #else
 #define BOOST_NOWIDE_DECL
-#endif // DYN_LINK
+#endif // BOOST_NOWIDE_DYN_LINK
 
 //
 // Automatically link to the correct build variant where possible.

@@ -9,7 +9,7 @@
 #define BOOST_NOWIDE_CSTDLIB_HPP_INCLUDED
 
 #include <boost/nowide/config.hpp>
-#if !BOOST_WINDOWS
+#if !defined(BOOST_WINDOWS)
 #include <cstdlib>
 #endif
 

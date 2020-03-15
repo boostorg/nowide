@@ -18,7 +18,7 @@
 
 #include <boost/nowide/cstdlib.hpp>
 
-#if !BOOST_WINDOWS
+#if !defined(BOOST_WINDOWS)
 namespace boost {
 namespace nowide {
     int setenv(const char* key, const char* value, int overwrite)

@@ -8,8 +8,8 @@
 
 #include <boost/nowide/convert.hpp>
 #include <boost/nowide/cstdio.hpp>
+#include <boost/nowide/filesystem.hpp>
 #include <boost/nowide/fstream.hpp>
-#include <boost/nowide/integration/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <iostream>
 
