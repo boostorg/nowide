@@ -9,6 +9,7 @@
 #define BOOST_NOWIDE_STACKSTRING_HPP_INCLUDED
 
 #include <boost/nowide/convert.hpp>
+#include <cassert>
 #include <cstring>
 
 namespace boost {
@@ -89,15 +90,21 @@ namespace nowide {
 
             if(begin)
             {
-                size_t space = get_space(sizeof(input_char), sizeof(output_char), end - begin) + 1;
-                if(space <= buffer_size)
-                {
+                const size_t input_len = end - begin;
+                // Minimum size required: 1 output char per input char + trailing NULL
+                const size_t min_output_size = input_len + 1;
+                // If there is a chance the converted string fits on stack, try it
+                if(min_output_size <= buffer_size && detail::convert_buffer(buffer_, buffer_size, begin, end))
                     data_ = buffer_;
-                    detail::convert_buffer(buffer_, buffer_size, begin, end);
-                } else
+                else
                 {
-                    data_ = new output_char[space];
-                    detail::convert_buffer(data_, space, begin, end);
+                    // Fallback: Allocate a buffer that is surely large enough on heap
+                    // Max size: Every input char is transcoded to the output char with maximum with + trailing NULL
+                    const size_t max_output_size = input_len * detail::utf::utf_traits<output_char>::max_width + 1;
+                    data_ = new output_char[max_output_size];
+                    const bool success = detail::convert_buffer(data_, max_output_size, begin, end) == data_;
+                    assert(success);
+                    (void)success;
                 }
             }
             return get();
@@ -158,17 +165,6 @@ namespace nowide {
             while(data_[len])
                 len++;
             return len;
-        }
-        static size_t get_space(size_t insize, size_t outsize, size_t in)
-        {
-            if(insize <= outsize)
-                return in;
-            else if(insize == 2 && outsize == 1)
-                return 3 * in;
-            else if(insize == 4 && outsize == 1)
-                return 4 * in;
-            else // if(insize == 4 && outsize == 2)
-                return 2 * in;
         }
 
     private:
