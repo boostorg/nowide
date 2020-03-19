@@ -19,6 +19,7 @@ Table of Contents:
     - \ref main_the_problem
     - \ref main_the_solution
     - \ref main_wide
+    - \ref alternative
     - \ref main_reading
 - \ref using
     - \ref using_standard
@@ -125,6 +126,22 @@ Several reasons:
   no such thing as <code>fopen(const wchar_t*, const wchar_t*)</code> in the standard library, so it is better
   to stick to the standards rather than re-implement Wide API in "Microsoft Windows Style"
 
+
+\subsection alternative Alternatives
+
+Since the May 2019 update Windows 10 does support UTF-8 for narrow strings via a manifest file.
+So setting "UTF-8" as the active code page would allow using the narrow API without any other changes with UTF-8 encoded strings.
+See <a href="https://docs.microsoft.com/en-us/windows/uwp/design/globalizing/use-utf8-code-page">the documentation</a> for details.
+
+Since April 2018 there is a (Beta) function available in Windows 10 to use UTF-8 code pages by default via a user setting.
+
+Both methods do work but have a major drawback: They are not fully reliable for the app developer.
+The code page via manifest method falls back to a legacy code page when an older Windows version than 1903 is used.
+Hence it is only usable if the targetted system is Windows 10 after May 2019.   
+The second method relies on user interaction prior to starting the program.
+Obviously this is not reliable when expecting only UTF-8 in the code.
+
+Hence under some circumstances (and hopefully always somewhen in the future) this library will not be required and even Windows I/O can be used with UTF-8 encoded text.
 
 \subsection main_reading Further Reading
 

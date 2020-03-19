@@ -20,6 +20,7 @@ namespace nowide {
 #else
 
 #include <boost/nowide/convert.hpp>
+#include <cassert>
 #include <cstring>
 #include <iostream>
 #include <vector>
@@ -78,6 +79,9 @@ namespace nowide {
             }
 
         private:
+            typedef detail::utf::utf_traits<char> decoder;
+            typedef detail::utf::utf_traits<wchar_t> encoder;
+
             int write(const char* p, int n)
             {
                 namespace uf = detail::utf;
@@ -89,11 +93,12 @@ namespace nowide {
                 wchar_t* out = wbuffer_;
                 uf::code_point c;
                 size_t decoded = 0;
-                while(p < e && (c = uf::utf_traits<char>::decode(p, e)) != uf::incomplete)
+                while((c = decoder::decode(p, e)) != uf::incomplete)
                 {
                     if(c == uf::illegal)
                         c = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
-                    out = uf::utf_traits<wchar_t>::encode(c, out);
+                    assert(out - wbuffer_ + encoder::width(c) <= static_cast<int>(wbuffer_size));
+                    out = encoder::encode(c, out);
                     decoded = p - b;
                 }
                 if(!WriteConsoleW(handle_, wbuffer_, static_cast<DWORD>(out - wbuffer_), &size, 0))
@@ -102,8 +107,9 @@ namespace nowide {
             }
 
             static const int buffer_size = 1024;
+            static const int wbuffer_size = buffer_size * encoder::max_width;
             char buffer_[buffer_size];
-            wchar_t wbuffer_[buffer_size];
+            wchar_t wbuffer_[wbuffer_size];
             HANDLE handle_;
         };
 
@@ -165,6 +171,9 @@ namespace nowide {
             }
 
         private:
+            typedef detail::utf::utf_traits<wchar_t> decoder;
+            typedef detail::utf::utf_traits<char> encoder;
+
             size_t read()
             {
                 namespace uf = detail::utf;
@@ -177,14 +186,14 @@ namespace nowide {
                 wchar_t* p = wbuffer_;
                 wchar_t* e = wbuffer_ + wsize_;
                 uf::code_point c = 0;
-                while((c = uf::utf_traits<wchar_t>::decode(p, e)) != uf::illegal && c != uf::incomplete)
+                while((c = decoder::decode(p, e)) != uf::incomplete)
                 {
-                    out = uf::utf_traits<char>::encode(c, out);
+                    if(c == uf::illegal)
+                        c = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
+                    assert(out - buffer_ + encoder::width(c) <= static_cast<int>(buffer_size));
+                    out = encoder::encode(c, out);
                     wsize_ = e - p;
                 }
-
-                if(c == uf::illegal)
-                    return 0;
 
                 if(wsize_ > 0)
                     std::memmove(wbuffer_, e - wsize_, sizeof(wchar_t) * wsize_);
@@ -193,7 +202,7 @@ namespace nowide {
             }
 
             static const size_t wbuffer_size = 1024;
-            static const size_t buffer_size = wbuffer_size * 3;
+            static const size_t buffer_size = wbuffer_size * encoder::max_width;
             char buffer_[buffer_size];
             wchar_t wbuffer_[wbuffer_size];
             HANDLE handle_;
