@@ -6,97 +6,121 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include "test.hpp"
+#include "test_sets.hpp"
 #include <boost/nowide/convert.hpp>
-#include <boost/nowide/stackstring.hpp>
 #include <iostream>
 
-#include "test.hpp"
+#if defined(BOOST_MSVC) && BOOST_MSVC < 1700
+#pragma warning(disable : 4428) // universal-character-name encountered in source
+#endif
+
+std::wstring widen_buf_ptr(const std::string& s)
+{
+    wchar_t buf[50];
+    TEST(boost::nowide::widen(buf, 50, s.c_str()) == buf);
+    return buf;
+}
+
+std::string narrow_buf_ptr(const std::wstring& s)
+{
+    char buf[50];
+    TEST(boost::nowide::narrow(buf, 50, s.c_str()) == buf);
+    return buf;
+}
+
+std::wstring widen_buf_range(const std::string& s)
+{
+    wchar_t buf[50];
+    TEST(boost::nowide::widen(buf, 50, s.c_str(), s.c_str() + s.size()) == buf);
+    return buf;
+}
+
+std::string narrow_buf_range(const std::wstring& s)
+{
+    char buf[50];
+    TEST(boost::nowide::narrow(buf, 50, s.c_str(), s.c_str() + s.size()) == buf);
+    return buf;
+}
+
+std::wstring widen_raw_string(const std::string& s)
+{
+    return boost::nowide::widen(s.c_str());
+}
+
+std::string narrow_raw_string(const std::wstring& s)
+{
+    return boost::nowide::narrow(s.c_str());
+}
+
+std::wstring widen_raw_string_and_size(const std::string& s)
+{
+    // Remove NULL
+    const std::string s2 = s + "DummyData";
+    return boost::nowide::widen(s2.c_str(), s.size());
+}
+
+std::string narrow_raw_string_and_size(const std::wstring& s)
+{
+    // Remove NULL
+    const std::wstring s2 = s + L"DummyData";
+    return boost::nowide::narrow(s2.c_str(), s.size());
+}
 
 int main()
 {
-    try {
+    try
+    {
         std::string hello = "\xd7\xa9\xd7\x9c\xd7\x95\xd7\x9d";
         std::wstring whello = L"\u05e9\u05dc\u05d5\u05dd";
+        std::wstring whello_3e = L"\u05e9\u05dc\u05d5\ufffd";
+        std::wstring whello_3 = L"\u05e9\u05dc\u05d5";
+
         std::cout << "- boost::nowide::widen" << std::endl;
         {
-            char const *b=hello.c_str();
-            char const *e=b+8;
-            wchar_t buf[6] = { 0,0,0,0,0,1 };
-            TEST(boost::nowide::widen(buf,5,b,e)==buf);
+            const char* b = hello.c_str();
+            const char* e = b + hello.size();
+            wchar_t buf[6] = {0, 0, 0, 0, 0, 1};
+            TEST(boost::nowide::widen(buf, 5, b, e) == buf);
             TEST(buf == whello);
             TEST(buf[5] == 1);
-            TEST(boost::nowide::widen(buf,4,b,e)==0);
-            TEST(boost::nowide::widen(buf,5,b,e-1)==0);
-            TEST(boost::nowide::widen(buf,5,b,e-2)==buf);
-            TEST(boost::nowide::widen(buf,5,b,b)==buf && buf[0]==0);
-            TEST(boost::nowide::widen(buf,5,b,b+2)==buf && buf[1]==0 && buf[0]==whello[0]);
-            b="\xFF\xFF";
-            e=b+2;
-            TEST(boost::nowide::widen(buf,5,b,e)==0);
-            b="\xd7\xa9\xFF";
-            e=b+3;
-            TEST(boost::nowide::widen(buf,5,b,e)==0);
-            TEST(boost::nowide::widen(buf,5,b,b+1)==0);
+            TEST(boost::nowide::widen(buf, 4, b, e) == 0);
+            TEST(boost::nowide::widen(buf, 5, b, e - 1) == buf);
+            TEST(buf == whello_3e);
+            TEST(boost::nowide::widen(buf, 5, b, e - 2) == buf);
+            TEST(buf == whello_3);
+            TEST(boost::nowide::widen(buf, 5, b, b) == buf && buf[0] == 0);
+            TEST(boost::nowide::widen(buf, 5, b, b + 2) == buf && buf[1] == 0 && buf[0] == whello[0]);
         }
         std::cout << "- boost::nowide::narrow" << std::endl;
         {
-            wchar_t const *b=whello.c_str();
-            wchar_t const *e=b+4;
+            const wchar_t* b = whello.c_str();
+            const wchar_t* e = b + whello.size(); //-V594
             char buf[10] = {0};
-            buf[9]=1;
-            TEST(boost::nowide::narrow(buf,9,b,e)==buf);
+            buf[9] = 1;
+            TEST(boost::nowide::narrow(buf, 9, b, e) == buf);
             TEST(buf == hello);
             TEST(buf[9] == 1);
-            TEST(boost::nowide::narrow(buf,8,b,e)==0);
-            TEST(boost::nowide::narrow(buf,7,b,e-1)==buf);
-            TEST(buf==hello.substr(0,6));
+            TEST(boost::nowide::narrow(buf, 8, b, e) == 0);
+            TEST(boost::nowide::narrow(buf, 7, b, e - 1) == buf);
+            TEST(buf == hello.substr(0, 6));
         }
-        {
-            char buf[3];
-            wchar_t wbuf[3];
-            TEST(boost::nowide::narrow(buf,3,L"xy")==std::string("xy"));
-            TEST(boost::nowide::widen(wbuf,3,"xy")==std::wstring(L"xy"));
-        }
-        std::cout << "- boost::nowide::stackstring" << std::endl;
-        {
-            {
-                boost::nowide::basic_stackstring<wchar_t,char,3> sw;
-                TEST(sw.convert(hello.c_str()));
-                TEST(sw.c_str() == whello);
-                TEST(sw.convert(hello.c_str(),hello.c_str()+hello.size()));
-                TEST(sw.c_str() == whello);
-            }
-            {
-                boost::nowide::basic_stackstring<wchar_t,char,5> sw;
-                TEST(sw.convert(hello.c_str()));
-                TEST(sw.c_str() == whello);
-                TEST(sw.convert(hello.c_str(),hello.c_str()+hello.size()));
-                TEST(sw.c_str() == whello);
-            }
-            {
-                boost::nowide::basic_stackstring<char,wchar_t,5> sw;
-                TEST(sw.convert(whello.c_str()));
-                TEST(sw.c_str() == hello);
-                TEST(sw.convert(whello.c_str(),whello.c_str()+whello.size()));
-                TEST(sw.c_str() == hello);
-            }
-            {
-                boost::nowide::basic_stackstring<char,wchar_t,10> sw;
-                TEST(sw.convert(whello.c_str()));
-                TEST(sw.c_str() == hello);
-                TEST(sw.convert(whello.c_str(),whello.c_str()+whello.size()));
-                TEST(sw.c_str() == hello);
-            }
-        }
-    }
-    catch(std::exception const &e) {
+
+        std::cout << "- (output_buffer, buffer_size, input_raw_string)" << std::endl;
+        run_all(widen_buf_ptr, narrow_buf_ptr);
+        std::cout << "- (output_buffer, buffer_size, input_raw_string, string_len)" << std::endl;
+        run_all(widen_buf_range, narrow_buf_range);
+        std::cout << "- (input_raw_string)" << std::endl;
+        run_all(widen_raw_string, narrow_raw_string);
+        std::cout << "- (input_raw_string, size)" << std::endl;
+        run_all(widen_raw_string_and_size, narrow_raw_string_and_size);
+        std::cout << "- (const std::string&)" << std::endl;
+        run_all(boost::nowide::widen, boost::nowide::narrow);
+    } catch(const std::exception& e)
+    {
         std::cerr << "Failed :" << e.what() << std::endl;
         return 1;
     }
 
-    return boost::report_errors();
+    return 0;
 }
-
-
-///
-// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

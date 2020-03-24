@@ -5,150 +5,191 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_DETAILS_WIDESTR_H_INCLUDED
-#define BOOST_NOWIDE_DETAILS_WIDESTR_H_INCLUDED
+#ifndef BOOST_NOWIDE_STACKSTRING_HPP_INCLUDED
+#define BOOST_NOWIDE_STACKSTRING_HPP_INCLUDED
+
 #include <boost/nowide/convert.hpp>
-#include <string.h>
-#include <algorithm>
+#include <cassert>
+#include <cstring>
 
 namespace boost {
 namespace nowide {
 
-///
-/// \brief A class that allows to create a temporary wide or narrow UTF strings from
-/// wide or narrow UTF source.
-///
-/// It uses on stack buffer of the string is short enough
-/// and allocated a buffer on the heap if the size of the buffer is too small
-///    
-template<typename CharOut=wchar_t,typename CharIn = char,size_t BufferSize = 256>
-class basic_stackstring {
-public:
-   
-    static const size_t buffer_size = BufferSize; 
-    typedef CharOut output_char;
-    typedef CharIn input_char;
+    ///
+    /// \brief A class that allows to create a temporary wide or narrow UTF strings from
+    /// wide or narrow UTF source.
+    ///
+    /// It uses a stack buffer if the string is short enough
+    /// otherwise allocates a buffer on the heap.
+    ///
+    /// Invalid UTF characters are replaced by the substitution character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+    ///
+    /// If a NULL pointer is passed to the constructor or convert method, NULL will be returned by c_str.
+    /// Similarily a default constructed stackstring will return NULL on calling c_str.
+    ///
+    template<typename CharOut = wchar_t, typename CharIn = char, size_t BufferSize = 256>
+    class basic_stackstring
+    {
+    public:
+        static const size_t buffer_size = BufferSize;
+        typedef CharOut output_char;
+        typedef CharIn input_char;
 
-    basic_stackstring(basic_stackstring const &other) : 
-    mem_buffer_(0)
-    {
-        clear();
-        if(other.mem_buffer_) {
-            size_t len = 0;
-            while(other.mem_buffer_[len])
-                len ++;
-            mem_buffer_ = new output_char[len + 1];
-            memcpy(mem_buffer_,other.mem_buffer_,sizeof(output_char) * (len+1));
+        basic_stackstring() : data_(NULL)
+        {
+            buffer_[0] = 0;
         }
-        else {
-            memcpy(buffer_,other.buffer_,buffer_size * sizeof(output_char));
+        explicit basic_stackstring(const input_char* input) : data_(NULL)
+        {
+            convert(input);
         }
-    }
-    
-    void swap(basic_stackstring &other)
-    {
-        std::swap(mem_buffer_,other.mem_buffer_);
-        for(size_t i=0;i<buffer_size;i++)
-            std::swap(buffer_[i],other.buffer_[i]);
-    }
-    basic_stackstring &operator=(basic_stackstring const &other)
-    {
-        if(this != &other) {
-            basic_stackstring tmp(other);
-            swap(tmp);            
+        basic_stackstring(const input_char* begin, const input_char* end) : data_(NULL)
+        {
+            convert(begin, end);
         }
-        return *this;
-    }
 
-    basic_stackstring() : mem_buffer_(0)
-    {
-    }
-    bool convert(input_char const *input)
-    {
-        return convert(input,details::basic_strend(input));
-    }
-    bool convert(input_char const *begin,input_char const *end)
-    {
-        clear();
-
-        size_t space = get_space(sizeof(input_char),sizeof(output_char),end - begin) + 1;
-        if(space <= buffer_size) {
-            if(basic_convert(buffer_,buffer_size,begin,end))
-                return true;
-            clear();
-            return false;
+        basic_stackstring(const basic_stackstring& other) : data_(NULL)
+        {
+            *this = other;
         }
-        else {
-            mem_buffer_ = new output_char[space];
-            if(!basic_convert(mem_buffer_,space,begin,end)) {
+        basic_stackstring& operator=(const basic_stackstring& other)
+        {
+            if(this != &other)
+            {
                 clear();
-                return false;
+                const size_t len = other.length();
+                if(other.uses_stack_memory())
+                    data_ = buffer_;
+                else if(other.data_)
+                    data_ = new output_char[len + 1];
+                else
+                {
+                    data_ = NULL;
+                    return *this;
+                }
+                std::memcpy(data_, other.data_, sizeof(output_char) * (len + 1));
             }
-            return true;
+            return *this;
         }
 
-    }
-    output_char *c_str()
-    {
-        if(mem_buffer_)
-            return mem_buffer_;
-        return buffer_;
-    }
-    output_char const *c_str() const
-    {
-        if(mem_buffer_)
-            return mem_buffer_;
-        return buffer_;
-    }
-    void clear()
-    {
-        if(mem_buffer_) {
-            delete [] mem_buffer_;
-            mem_buffer_=0;
+        ~basic_stackstring()
+        {
+            clear();
         }
-        buffer_[0] = 0;
-    }
-    ~basic_stackstring()
-    {
-        clear();
-    }
-private:
-    static size_t get_space(size_t insize,size_t outsize,size_t in)
-    {
-        if(insize <= outsize)
-            return in;
-        else if(insize == 2 && outsize == 1) 
-            return 3 * in;
-        else if(insize == 4 && outsize == 1) 
-            return 4 * in;
-        else  // if(insize == 4 && outsize == 2) 
-            return 2 * in;
-    }
-    output_char buffer_[buffer_size];
-    output_char *mem_buffer_;
-};  //basic_stackstring
 
-///
-/// Convinience typedef
-///
-typedef basic_stackstring<wchar_t,char,256> wstackstring;
-///
-/// Convinience typedef
-///
-typedef basic_stackstring<char,wchar_t,256> stackstring;
-///
-/// Convinience typedef
-///
-typedef basic_stackstring<wchar_t,char,16> wshort_stackstring;
-///
-/// Convinience typedef
-///
-typedef basic_stackstring<char,wchar_t,16> short_stackstring;
+        output_char* convert(const input_char* input)
+        {
+            if(input)
+                return convert(input, input + detail::strlen(input));
+            clear();
+            return get();
+        }
+        output_char* convert(const input_char* begin, const input_char* end)
+        {
+            clear();
 
+            if(begin)
+            {
+                const size_t input_len = end - begin;
+                // Minimum size required: 1 output char per input char + trailing NULL
+                const size_t min_output_size = input_len + 1;
+                // If there is a chance the converted string fits on stack, try it
+                if(min_output_size <= buffer_size && detail::convert_buffer(buffer_, buffer_size, begin, end))
+                    data_ = buffer_;
+                else
+                {
+                    // Fallback: Allocate a buffer that is surely large enough on heap
+                    // Max size: Every input char is transcoded to the output char with maximum with + trailing NULL
+                    const size_t max_output_size = input_len * detail::utf::utf_traits<output_char>::max_width + 1;
+                    data_ = new output_char[max_output_size];
+                    const bool success = detail::convert_buffer(data_, max_output_size, begin, end) == data_;
+                    assert(success);
+                    (void)success;
+                }
+            }
+            return get();
+        }
+        /// Return the converted, NULL-terminated string or NULL if no string was converted
+        output_char* get()
+        {
+            return data_;
+        }
+        /// Return the converted, NULL-terminated string or NULL if no string was converted
+        const output_char* get() const
+        {
+            return data_;
+        }
+        void clear()
+        {
+            if(!uses_stack_memory())
+                delete[] data_;
+            data_ = NULL;
+        }
 
-} // nowide
+        friend void swap(basic_stackstring& lhs, basic_stackstring& rhs)
+        {
+            if(lhs.uses_stack_memory())
+            {
+                if(rhs.uses_stack_memory())
+                {
+                    for(size_t i = 0; i < buffer_size; i++)
+                        std::swap(lhs.buffer_[i], rhs.buffer_[i]);
+                } else
+                {
+                    lhs.data_ = rhs.data_;
+                    rhs.data_ = rhs.buffer_;
+                    for(size_t i = 0; i < buffer_size; i++)
+                        rhs.buffer_[i] = lhs.buffer_[i];
+                }
+            } else if(rhs.uses_stack_memory())
+            {
+                rhs.data_ = lhs.data_;
+                lhs.data_ = lhs.buffer_;
+                for(size_t i = 0; i < buffer_size; i++)
+                    lhs.buffer_[i] = rhs.buffer_[i];
+            } else
+                std::swap(lhs.data_, rhs.data_);
+        }
+
+    protected:
+        /// True if the stack memory is used
+        bool uses_stack_memory() const
+        {
+            return data_ == buffer_;
+        }
+        size_t length() const
+        {
+            if(!data_)
+                return 0;
+            size_t len = 0;
+            while(data_[len])
+                len++;
+            return len;
+        }
+
+    private:
+        output_char buffer_[buffer_size];
+        output_char* data_;
+    }; // basic_stackstring
+
+    ///
+    /// Convenience typedef
+    ///
+    typedef basic_stackstring<wchar_t, char, 256> wstackstring;
+    ///
+    /// Convenience typedef
+    ///
+    typedef basic_stackstring<char, wchar_t, 256> stackstring;
+    ///
+    /// Convenience typedef
+    ///
+    typedef basic_stackstring<wchar_t, char, 16> wshort_stackstring;
+    ///
+    /// Convenience typedef
+    ///
+    typedef basic_stackstring<char, wchar_t, 16> short_stackstring;
+
+} // namespace nowide
 } // namespace boost
 
 #endif
-///
-// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
