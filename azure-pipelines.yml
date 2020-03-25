@@ -36,6 +36,8 @@ pr:
 variables:
   - name: B2_VARIANT
     value: variant=release,debug
+  - name: B2_LINK
+    value: link=shared,static
 
 stages:
 
@@ -47,98 +49,17 @@ stages:
       vmImage: 'ubuntu-16.04'
     strategy:
       matrix:
-        GCC 8:
+        GCC_8:
           B2_TOOLSET: gcc
-          B2_CXXSTD: 14,17,2a
+          B2_CXXSTD: 03,11,14,17,2a
           CXX: g++-8
           PACKAGES: g++-8
-        GCC 7:
-          B2_TOOLSET: gcc
-          B2_CXXSTD: 11,14,17
-          CXX: g++-7
-          PACKAGES: g++-7
-        GCC 6:
-          B2_TOOLSET: gcc
-          B2_CXXSTD: 11,14
-          CXX: g++-6
-          PACKAGES: g++-6
-        GCC 5:
-          B2_TOOLSET: gcc
-          B2_CXXSTD: 11
-          CXX: g++-5
-          PACKAGES: g++-5
-        GCC 4.9:
-          B2_TOOLSET: gcc
-          B2_CXXSTD: 03,11
-          CXX: g++-4.9
-          PACKAGES: g++-4.9
-        GCC 4.8:
-          B2_TOOLSET: gcc
-          B2_CXXSTD: 03,11
-          CXX: g++-4.8
-          PACKAGES: g++-4.8
-        Clang 8:
+        Clang_8:
           B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
+          B2_CXXSTD: 03,11,14,17,2a
           CXX: clang++-8
           PACKAGES: clang-8
           LLVM_REPO: llvm-toolchain-xenial-8
-        Clang 7:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
-          CXX: clang++-7
-          PACKAGES: clang-7
-          LLVM_REPO: llvm-toolchain-xenial-7
-        Clang 6 libc++:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 03,11,14,17,2a
-          B2_CXXFLAGS: -stdlib=libc++
-          CXX: clang++-6.0
-          PACKAGES: clang-6.0
-          LLVM_REPO: llvm-toolchain-xenial-6.0
-        Clang 6:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
-          CXX: clang++-6.0
-          PACKAGES: clang-6.0
-          LLVM_REPO: llvm-toolchain-xenial-6.0
-        Clang 5:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11,14,17
-          PACKAGES: clang-5.0
-          CXX: clang++-5.0
-          LLVM_REPO: llvm-toolchain-xenial-5.0
-        Clang 4:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11,14,17
-          CXX: clang++-4.0
-          PACKAGES: clang-4.0
-          LLVM_REPO: llvm-toolchain-xenial-4.0
-        Clang 3.9:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 03,11,14
-          CXX: clang++-3.9
-          PACKAGES: clang-3.9
-        Clang 3.8:
-          B2_TOOLSET: clang
-          CXX: clang++-3.8
-          B2_CXXSTD: 03,11,14
-          PACKAGES: clang-3.8
-        Clang 3.7:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 03,11
-          CXX: clang++-3.7
-          PACKAGES: clang-3.7
-        Clang 3.6:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 03,11
-          CXX: clang++-3.6
-          PACKAGES: clang-3.6
-        Clang 3.5:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 03,11
-          CXX: clang++-3.5
-          PACKAGES: clang-3.5
     steps:
     - bash: |
         set -e
@@ -167,44 +88,35 @@ stages:
         set -x
       displayName: 'Install'
     - bash: |
-        set -e
-        echo "SELF=$SELF"
-        echo "BOOST_ROOT=$BOOST_ROOT"
-
         cd $BOOST_ROOT/libs/$SELF
-        ci/azure-pipelines/build.sh --debug-configuration
+        ci/azure-pipelines/build.sh
       displayName: 'Build'
 
   - job: 'Windows'
     strategy:
       matrix:
-        VS 2019 C++2a Strict:
+        VS_2019-CXX2a_Strict:
           B2_TOOLSET: msvc-14.2
           B2_CXXSTD: latest # 2a
           B2_CXXFLAGS: cxxflags=-permissive-
           B2_ADDRESS_MODEL: address-model=64
           VM_IMAGE: 'windows-2019'
-        VS 2017 C++2a Strict:
+        VS_2017_CXX2a_Strict:
           B2_TOOLSET: msvc-14.1
           B2_CXXSTD: latest # 2a
           B2_CXXFLAGS: cxxflags=-permissive-
           B2_ADDRESS_MODEL: address-model=64
           VM_IMAGE: 'vs2017-win2016'
-        VS 2017 C++17:
+        VS_2017_CXX17:
           B2_TOOLSET: msvc-14.1
           B2_CXXSTD: 17
           B2_ADDRESS_MODEL: address-model=64,32
           VM_IMAGE: 'vs2017-win2016'
-        VS 2017 C++14:
+        VS_2017_CXX14:
           B2_TOOLSET: msvc-14.1
           #B2_CXXSTD: 14 # default
           B2_ADDRESS_MODEL: address-model=64,32
           VM_IMAGE: 'vs2017-win2016'
-        VS 2015 C++14:
-          B2_TOOLSET: msvc-14.0
-          #B2_CXXSTD: 14 # default
-          B2_ADDRESS_MODEL: address-model=64,32
-          VM_IMAGE: 'vs2015-win2012r2'
 
     pool:
       vmImage: $(VM_IMAGE)
@@ -233,57 +145,18 @@ stages:
 
   - job: 'macOS'
     pool:
-      vmImage: 'macOS-10.13'
+      vmImage: 'macOS-10.14'
     strategy:
       matrix:
-        Xcode 10.1:
+        Xcode_11_3_1:
           B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
-          XCODE_APP: /Applications/Xcode_10.1.app
-        Xcode 10.0:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
-          XCODE_APP: /Applications/Xcode_10.app
-        Xcode 9.4.1:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11,14,17
-          XCODE_APP: /Applications/Xcode_9.4.1.app
-        Xcode 9.4:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11,14,17
-          XCODE_APP: /Applications/Xcode_9.4.app
-        Xcode 9.3.1:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11,14,17
-          XCODE_APP: /Applications/Xcode_9.3.1.app
-        Xcode 9.3:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11,14
-          XCODE_APP: /Applications/Xcode_9.3.app
-        Xcode 9.2:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11,14
-          XCODE_APP: /Applications/Xcode_9.2.app
-        Xcode 9.1:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 03,11
-          XCODE_APP: /Applications/Xcode_9.1.app
-        Xcode 9.0.1:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 03,11
-          XCODE_APP: /Applications/Xcode_9.0.1.app
-        Xcode 9.0:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 03,11
-          XCODE_APP: /Applications/Xcode_9.app
-        Xcode 8.3.3:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 03,11
-          XCODE_APP: /Applications/Xcode_8.3.3.app
+          B2_CXXSTD: 03,11,14,17,2a
+          XCODE_APP: /Applications/Xcode_11.3.1.app
+          B2_LINK: link=static
+          B2_JOBS: 3 # Workaround for https://github.com/boostorg/boost-ci/issues/50
     steps:
     - bash: |
         set -e
-        uname -a
         sudo xcode-select -switch ${XCODE_APP}
         which clang++
 
@@ -303,10 +176,6 @@ stages:
         set -x
       displayName: Install
     - bash: |
-        set -e
-        echo "SELF=$SELF"
-        echo "BOOST_ROOT=$BOOST_ROOT"
-
         cd $BOOST_ROOT/libs/$SELF
-        ci/azure-pipelines/build.sh --debug-configuration
+        ci/azure-pipelines/build.sh
       displayName: 'Build'
