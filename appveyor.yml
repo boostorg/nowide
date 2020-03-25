@@ -37,7 +37,6 @@ environment:
       B2_CXXFLAGS: -permissive-
       B2_CXXSTD: 14,17,latest # 2a
       B2_TOOLSET: msvc-14.2
-      BOOST_CMAKE: 1
 
     - FLAVOR: Visual Studio 2017 C++2a Strict
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
@@ -96,20 +95,24 @@ environment:
       B2_CXXSTD: 03,11,14,1z
 
     # CMake builds
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    - CMAKE: true
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       GENERATOR: Visual Studio 14 2015 Win64
       configuration: Debug
       BOOST_ROOT: C:\Libraries\boost_1_60_0
-      CMAKE: true
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    - CMAKE: true
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       GENERATOR: Visual Studio 16 2019
       configuration: Debug
       BOOST_ROOT: C:\Libraries\boost_1_71_0
-      CMAKE: true
       COVERAGE: true
       # Work around for https://community.codecov.io/t/bash-script-does-not-detect-appveyor/1094
       APPVEYOR: true
       CI: true
+    # Superproject CMake build
+    - FLAVOR: Superproject CMake build - VS 2019
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      BOOST_CMAKE: true
     # Coverity
     - COVERITY: true
       # Coverity doesn't really support MSVC 2019 yet
@@ -141,26 +144,6 @@ test_script:
   - IF NOT DEFINED SCRIPT                         (ECHO b2 libs/%SELF:\=/%/test %B2_TOOLCXX% %B2_CXXFLAGS% %B2_DEFINES% %B2_THREADING% %B2_ADDRESS_MODEL% %B2_LINK% %B2_THREADING% %B2_VARIANT% -j3)
   # Now go build...
   - IF DEFINED SCRIPT (call libs\%SELF%\%SCRIPT%) ELSE (b2 libs/%SELF:\=/%/test %B2_TOOLCXX% %B2_CXXFLAGS% %B2_DEFINES% %B2_THREADING% %B2_ADDRESS_MODEL% %B2_LINK% %B2_THREADING% %B2_VARIANT% -j3)
-  - ps: |
-        If ("$env:BOOST_CMAKE" -eq "1") {
-          ./b2 --clean
-
-          mkdir __build_static | cd
-          cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide ..
-          cmake --build . --config Debug --parallel 4
-          ctest --output-on-failure --build-config Debug
-          cmake --build . --config Release --parallel 4
-          ctest --output-on-failure --build-config Release
-
-          cd ..
-
-          mkdir __build_shared | cd
-          cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBUILD_SHARED_LIBS=ON -DBOOST_INCLUDE_LIBRARIES=nowide ..
-          cmake --build . --config Debug --parallel 4
-          ctest --output-on-failure --build-config Debug
-          cmake --build . --config Release --parallel 4
-          ctest --output-on-failure --build-config Release
-        }
 
 for:
   - matrix:
@@ -191,6 +174,26 @@ for:
       - cmake ../test/exampleProject -G "%GENERATOR%" -DCMAKE_PREFIX_PATH=%APPVEYOR_BUILD_FOLDER%\installed
       - cmake --build . --config %configuration%
       - ctest --output-on-failure -C %configuration% --parallel 4
+  # Superproject CMake build
+  - matrix:
+      only: [BOOST_CMAKE: true]
+    branches:
+      only: [develop] # Doesn't work on master yet
+    test_script:
+      - ps: |
+            mkdir __build_static | cd
+            cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide ..
+            cmake --build . --config Debug --parallel 4
+            ctest --output-on-failure --build-config Debug
+            cmake --build . --config Release --parallel 4
+            ctest --output-on-failure --build-config Release
+            cd ..
+            mkdir __build_shared | cd
+            cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBUILD_SHARED_LIBS=ON -DBOOST_INCLUDE_LIBRARIES=nowide ..
+            cmake --build . --config Debug --parallel 4
+            ctest --output-on-failure --build-config Debug
+            cmake --build . --config Release --parallel 4
+            ctest --output-on-failure --build-config Release
   # Coverity build
   - matrix:
       only: [COVERITY: true]
