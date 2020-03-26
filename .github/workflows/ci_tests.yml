@@ -103,6 +103,8 @@ jobs:
 
   BoostCMakeBuild:
     runs-on: ubuntu-16.04
+    # Doesn't work on master yet
+    if: "! endsWith(github.ref, '/master') && ! endsWith(github.base_ref, '/master')"
     steps:
     - name: Get Boost branch
       id: get_branch
