@@ -110,7 +110,7 @@ stages:
           LLVM_REPO: llvm-toolchain-xenial-5.0
         Clang 4:
           B2_TOOLSET: clang
-          B2_CXXSTD: 11,14,17
+          B2_CXXSTD: 11,14
           CXX: clang++-4.0
           PACKAGES: clang-4.0
           LLVM_REPO: llvm-toolchain-xenial-4.0
@@ -152,7 +152,7 @@ stages:
         sudo -E apt-get -yq --no-install-suggests --no-install-recommends install ${PACKAGES}
 
         git clone --branch master https://github.com/boostorg/boost-ci.git boost-ci-cloned
-        cp -pr boost-ci/ci .
+        cp -prf boost-ci-cloned/ci .
         rm -rf boost-ci-cloned
         source ci/azure-pipelines/install.sh
 
@@ -249,28 +249,24 @@ stages:
           XCODE_APP: /Applications/Xcode_11.1.app
         Xcode 10.3:
           B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
+          B2_CXXSTD: 11,14,17,2a
           XCODE_APP: /Applications/Xcode_10.3.app
         Xcode 10.2.1:
           B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
+          B2_CXXSTD: 11,14,17,2a
           XCODE_APP: /Applications/Xcode_10.2.1.app
         Xcode 10.2:
           B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
+          B2_CXXSTD: 11,14,17,2a
           XCODE_APP: /Applications/Xcode_10.2.app
         Xcode 10.1:
           B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
+          B2_CXXSTD: 11,14,17,2a
           XCODE_APP: /Applications/Xcode_10.1.app
         Xcode 10.0:
           B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
+          B2_CXXSTD: 11,14,17,2a
           XCODE_APP: /Applications/Xcode_10.app
-        Xcode 9.4.1:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11,14,17
-          XCODE_APP: /Applications/Xcode_9.4.1.app
     steps:
     - bash: |
         set -e
