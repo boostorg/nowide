@@ -30,11 +30,12 @@ int main(int argc, char** argv, char** env)
             for(char** e = env; *e != 0; e++)
             {
                 char* eptr = *e;
-                // printf("%s\n",eptr);
+                std::cout << "Checking " << eptr << std::endl;
                 char* key_end = strchr(eptr, '=');
                 TEST(key_end);
                 std::string key = std::string(eptr, key_end);
                 std::string value = key_end + 1;
+                std::cout << "Key: " << key << " Value: " << value << std::endl;
                 TEST(boost::nowide::getenv(key.c_str()));
                 TEST(boost::nowide::getenv(key.c_str()) == value);
                 if(*e == sample)
