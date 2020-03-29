@@ -49,6 +49,7 @@ CMLs=$(find "$targetFolder" -name 'CMakeLists.txt' -or -name '*.cmake')
 
 sed 's/ BOOST_ALL_NO_LIB//' -i $CMLs
 sed 's/BOOST_NOWIDE_/NOWIDE_/g' -i $CMLs
+sed 's/Boost_NOWIDE_/NOWIDE_/g' -i $CMLs
 sed 's/boost_nowide/nowide/g' -i $CMLs
 sed 's/boost_/nowide_/g' -i $CMLs
 sed 's/Boost::nowide/nowide::nowide/g' -i $CMLs

@@ -7,7 +7,7 @@ function(boost_nowide_add_test name)
   
   add_executable(${name} ${ARG_SRC})
   target_link_libraries(${name} PRIVATE Boost::nowide ${ARG_LIBRARIES})
-  boost_add_warnings(${name} pedantic ${BOOST_NOWIDE_WERROR})
+  boost_add_warnings(${name} pedantic ${Boost_NOWIDE_WERROR})
   target_compile_definitions(${name} PRIVATE BOOST_ALL_NO_LIB ${ARG_DEFINITIONS})
   if(NOT ARG_COMPILE_ONLY)
     add_test(NAME ${name} COMMAND ${name} ${ARG_ARGS})
