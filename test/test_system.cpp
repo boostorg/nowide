@@ -25,16 +25,27 @@ int main(int argc, char** argv, char** env)
             TEST(boost::nowide::getenv("BOOST_NOWIDE_TEST"));
             TEST(boost::nowide::getenv("BOOST_NOWIDE_TEST_NONE") == 0);
             TEST(boost::nowide::getenv("BOOST_NOWIDE_TEST") == example);
+            // Empty variables are unreliable on windows, hence skip. E.g. using "set FOO=" unsets FOO
+#ifndef BOOST_WINDOWS
+            TEST(boost::nowide::getenv("BOOST_NOWIDE_EMPTY"));
+            TEST(boost::nowide::getenv("BOOST_NOWIDE_EMPTY") == std::string());
+#endif // !_WIN32
+
             std::string sample = "BOOST_NOWIDE_TEST=" + example;
             bool found = false;
             for(char** e = env; *e != 0; e++)
             {
                 char* eptr = *e;
-                // printf("%s\n",eptr);
+                std::cout << "Checking " << eptr << std::endl;
                 char* key_end = strchr(eptr, '=');
                 TEST(key_end);
                 std::string key = std::string(eptr, key_end);
                 std::string value = key_end + 1;
+#ifdef BOOST_WINDOWS
+                if(value.empty())
+                    continue;
+#endif
+                std::cout << "Key: " << key << " Value: " << value << std::endl;
                 TEST(boost::nowide::getenv(key.c_str()));
                 TEST(boost::nowide::getenv(key.c_str()) == value);
                 if(*e == sample)
@@ -48,6 +59,8 @@ int main(int argc, char** argv, char** env)
             TEST(boost::nowide::setenv("BOOST_NOWIDE_TEST", example.c_str(), 1) == 0);
             TEST(boost::nowide::setenv("BOOST_NOWIDE_TEST_NONE", example.c_str(), 1) == 0);
             TEST(boost::nowide::unsetenv("BOOST_NOWIDE_TEST_NONE") == 0);
+            TEST(boost::nowide::setenv("BOOST_NOWIDE_EMPTY", "", 1) == 0);
+            TEST(boost::nowide::getenv("BOOST_NOWIDE_EMPTY"));
             std::string command = "\"";
             command += argv[0];
             command += "\" ";
