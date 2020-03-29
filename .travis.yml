@@ -134,7 +134,6 @@ install:
   - git clone https://github.com/boostorg/boost-ci.git $BOOST_CI
   # Workaround
   - cp -pr $BOOST_CI/ci .
-  - echo "build-project test ;" > Jamfile.v2
 
   - source $BOOST_CI/ci/travis/install.sh && set +x
   - |
