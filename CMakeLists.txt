@@ -1,8 +1,8 @@
 # Builds the libraries for Boost.Nowide
 #
 # Options:
-# BOOST_NOWIDE_INSTALL
-# BOOST_NOWIDE_WERROR
+# Boost_NOWIDE_INSTALL
+# Boost_NOWIDE_WERROR
 # BUILD_TESTING
 #
 # Created target: Boost::nowide
@@ -49,11 +49,11 @@ if(BUILD_SHARED_LIBS)
 endif()
 target_compile_definitions(boost_nowide PUBLIC BOOST_NOWIDE_NO_LIB)
 target_include_directories(boost_nowide PUBLIC include)
-boost_add_warnings(boost_nowide pedantic ${BOOST_NOWIDE_WERROR})
+boost_add_warnings(boost_nowide pedantic ${Boost_NOWIDE_WERROR})
 
 if(BOOST_SUPERPROJECT_SOURCE_DIR)
   target_link_libraries(boost_nowide PUBLIC Boost::config Boost::smart_ptr Boost::static_assert)
-  set(BOOST_NOWIDE_INSTALL OFF) # smart_ptr does not support installation
+  set(Boost_NOWIDE_INSTALL OFF) # smart_ptr does not support installation
 else()
   # Default boost libs are static on windows and dynamic on linux
   if(WIN32 AND NOT DEFINED Boost_USE_STATIC_LIBS)
@@ -67,7 +67,7 @@ if(BUILD_TESTING)
   add_subdirectory(test)
 endif()
 
-if(BOOST_NOWIDE_INSTALL)
+if(Boost_NOWIDE_INSTALL)
   include(InstallTargets)
   install_targets(TARGETS boost_nowide NAMESPACE Boost CONFIG_FILE ${PROJECT_SOURCE_DIR}/Config.cmake.in)
 endif()

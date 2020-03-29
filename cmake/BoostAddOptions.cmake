@@ -7,7 +7,8 @@ else()
   set(def_WERROR OFF)
 endif()
 
-string(TOUPPER ${PROJECT_NAME} NAME)
+string(TOUPPER ${PROJECT_NAME} name)
+string(REPLACE BOOST_ Boost_ name ${name})
 
-option(${NAME}_INSTALL "Install library" "${def_INSTALL}")
-option(${NAME}_WERROR "Treat warnings as errors" "${def_WERROR}")
+option(${name}_INSTALL "Install library" "${def_INSTALL}")
+option(${name}_WERROR "Treat warnings as errors" "${def_WERROR}")
