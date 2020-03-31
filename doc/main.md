@@ -330,10 +330,29 @@ If TrueType fonts are used the Unicode aware input and output works as intended.
 
 \section qna Q & A
 
+<b>Q: What happens to invalid UTF passed through Boost.Nowide? For example Windows using UCS-2 instead of UTF-16.</b>
+
+A: The policy of Boost.Nowide is to always yield valid UTF encoded strings.
+So invalid UTF characters are replaced by the replacement character \c U+FFFD.
+
+This happens in both directions:\n
+When passing a (presumptly) UTF-8 encoded string to Boost.Nowide it will convert it to UTF-16 and replace every invalid character before passing it to the OS.\n
+On retrieval of a value from the OS (e.g. \c boost::nowide::getenv or command line arguments through \c boost::nowide::args) the value is assumed to be UTF-16 and converted to UTF-8 replacing any invalid character.
+
+This means that if one somehow manages to create an invalid UTF-16 filename in Windows it will be **impossible** to handle it with Boost.Nowide.
+But as Microsoft switched from UCS-2 (aka strings with arbitrary 2 Byte values) to UTF-16 in Windows 2000 it won't be a problem in most environments.
+
+<b>Q: What kind of error reporting is used?</b>
+
+A: There are in fact 3:
+
+- Invalid UTF encoded strings are used by replacing invalid chars by the replacement character U+FFFD
+- API calls mirroring the standard API use the same error reporting as that, e.g. by returning a non-zero value on failure
+- Non-continuable errors are reported by standard exceptions. Main example is failure to get the command line parameters via the WinAPI
+
 <b>Q: Why doesn't the library convert the string to/from the locale's encoding (instead of UTF-8) on POSIX systems?</b>
 
-A: It is inherently incorrect
-to convert strings to/from locale encodings on POSIX platforms.
+A: It is inherently incorrect to convert strings to/from locale encodings on POSIX platforms.
 
 You can create a file named "\xFF\xFF.txt" (invalid UTF-8), remove it, pass its name as a parameter to a program
 and it would work whether the current locale is UTF-8 or not.
@@ -342,8 +361,7 @@ files in the OS or the strings a user may pass to the program (which is differen
 
 POSIX OSs treat strings as \c NULL terminated cookies.
 
-So altering their content according to the locale would
-actually lead to incorrect behavior.
+So altering their content according to the locale would actually lead to incorrect behavior.
 
 For example, this is a naive implementation of a standard program "rm"
 
@@ -358,11 +376,9 @@ int main(int argc,char **argv)
 }
 \endcode
 
-It would work with ANY locale and changing the strings would
-lead to incorrect behavior.
+It would work with ANY locale and changing the strings would lead to incorrect behavior.
 
-The meaning of a locale under POSIX and Windows platforms
-is different and has very different effects.
+The meaning of a locale under POSIX and Windows platforms is different and has very different effects.
 
 \subsection standalone_version Standalone Version
 
