@@ -51,6 +51,16 @@ inline void test_failed(const char* expr, const char* file, const int line, cons
     throw std::runtime_error(ss.str());
 }
 
+template<typename T, typename U>
+inline void test_equal_impl(const T& lhs, const U& rhs, const char* file, const int line, const char* function)
+{
+    if(lhs == rhs)
+        return;
+    std::ostringstream ss;
+    ss << "[" << lhs << "!=" << rhs << "]";
+    test_failed(ss.str().c_str(), file, line, function);
+}
+
 #ifdef _MSC_VER
 #define DISABLE_CONST_EXPR_DETECTED __pragma(warning(push)) __pragma(warning(disable : 4127))
 #define DISABLE_CONST_EXPR_DETECTED_POP __pragma(warning(pop))
@@ -67,6 +77,14 @@ inline void test_failed(const char* expr, const char* file, const int line, cons
             break;                                         \
         test_failed(#x, __FILE__, __LINE__, __FUNCTION__); \
         DISABLE_CONST_EXPR_DETECTED                        \
+    } while(0) DISABLE_CONST_EXPR_DETECTED_POP
+#define TEST_EQ(lhs, rhs)                                                \
+    do                                                                   \
+    {                                                                    \
+        test_mon();                                                      \
+        test_equal_impl((lhs), (rhs), __FILE__, __LINE__, __FUNCTION__); \
+        break;                                                           \
+        DISABLE_CONST_EXPR_DETECTED                                      \
     } while(0) DISABLE_CONST_EXPR_DETECTED_POP
 
 #endif // #ifndef BOOST_NOWIDE_LIB_TEST_H_INCLUDED
