@@ -126,7 +126,6 @@ stages:
           B2_TOOLSET: clang
           B2_CXXSTD: 03,11,14,17,2a
           XCODE_APP: /Applications/Xcode_11.3.1.app
-          B2_LINK: static
           B2_JOBS: 3 # Workaround for https://github.com/boostorg/boost-ci/issues/50
     steps:
     - bash: |

@@ -77,8 +77,7 @@ jobs:
     - { compiler: clang++-libc++, env: 'SANITIZERS=1 B2_CXXSTD=03,11,14', addons: *libcpp, dist: trusty }
     - os: osx
       compiler: clang++
-      # DYLD_LIBRARY_PATH causes problems on system() spawned processes -> static build only
-      env: SANITIZERS=1 B2_CXXSTD=03,11,14,1z B2_LINK=link=static
+      env: SANITIZERS=1 B2_CXXSTD=03,11,14,1z
     # Codecov
     - compiler: g++-8
       env: COMMENT=codecov.io B2_CXXSTD=03,11 GCOV=gcov-8
