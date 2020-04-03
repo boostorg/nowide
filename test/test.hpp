@@ -1,6 +1,6 @@
 //
 //  Copyright (c) 2012 Artyom Beilis (Tonkikh)
-//  Copyright (c) 2019 Alexander Grund
+//  Copyright (c) 2019-2020 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -10,6 +10,7 @@
 #define BOOST_NOWIDE_LIB_TEST_H_INCLUDED
 
 #include <cstdlib>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
@@ -88,3 +89,21 @@ inline void test_equal_impl(const T& lhs, const U& rhs, const char* file, const 
     } while(0) DISABLE_CONST_EXPR_DETECTED_POP
 
 #endif // #ifndef BOOST_NOWIDE_LIB_TEST_H_INCLUDED
+
+#ifndef BOOST_NOWIDE_TEST_NO_MAIN
+// Tests should implement this
+void test_main(int argc, char** argv, char** env);
+
+int main(int argc, char** argv, char** env)
+{
+    try
+    {
+        test_main(argc, argv, env);
+    } catch(const std::exception& e)
+    {
+        std::cerr << "Failed " << e.what() << std::endl;
+        return 1;
+    }
+    return 0;
+}
+#endif

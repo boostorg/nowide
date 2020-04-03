@@ -6,9 +6,9 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <boost/nowide/detail/utf.hpp>
 #include <boost/nowide/iostream.hpp>
-#include <iostream>
+
+#include <boost/nowide/detail/utf.hpp>
 #include <string>
 
 #include "test.hpp"
@@ -25,7 +25,7 @@ bool isValidUTF8(const std::string& s)
     return true;
 }
 
-int main(int argc, char** argv)
+void test_main(int argc, char** argv, char**)
 {
     const char* example = "Basic letters: \xd7\xa9-\xd0\xbc-\xce\xbd\n"
                           "East Asian Letters: \xe5\x92\x8c\xe5\xb9\xb3\n"
@@ -33,64 +33,55 @@ int main(int argc, char** argv)
                           "Invalid UTF-8: `\xFF' `\xd7\xFF' `\xe5\xFF\x8c' `\xf0\x9d\x84\xFF' \n"
                           "\n";
 
-    try
+    // If we are using the standard rdbuf we can only put back 1 char
+    if(boost::nowide::cin.rdbuf() == std::cin.rdbuf())
     {
-        // If we are using the standard rdbuf we can only put back 1 char
-        if(boost::nowide::cin.rdbuf() == std::cin.rdbuf())
+        std::cout << "Using std::cin" << std::endl;
+        int maxval = 15000;
+        for(int i = 0; i < maxval; i++)
         {
-            std::cout << "Using std::cin" << std::endl;
-            int maxval = 15000;
-            for(int i = 0; i < maxval; i++)
-            {
-                char c = i % 96 + ' ';
-                TEST(boost::nowide::cin.putback(c));
-                int ci = i % 96 + ' ';
-                TEST(boost::nowide::cin.get() == ci);
-            }
-        } else
-        {
-            int maxval = 15000;
-            for(int i = 0; i < maxval; i++)
-            {
-                char c = i % 96 + ' ';
-                TEST(boost::nowide::cin.putback(c));
-            }
-            for(int i = maxval - 1; i >= 0; i--)
-            {
-                int c = i % 96 + ' ';
-                TEST(boost::nowide::cin.get() == c);
-            }
+            char c = i % 96 + ' ';
+            TEST(boost::nowide::cin.putback(c));
+            int ci = i % 96 + ' ';
+            TEST(boost::nowide::cin.get() == ci);
         }
-        boost::nowide::cout << "Normal I/O:" << std::endl;
-        boost::nowide::cout << example << std::endl;
-        boost::nowide::cerr << example << std::endl;
-
-        boost::nowide::cout << "Flushing each character:" << std::endl;
-
-        for(const char* s = example; *s; s++)
+    } else
+    {
+        int maxval = 15000;
+        for(int i = 0; i < maxval; i++)
         {
-            boost::nowide::cout << *s << std::flush;
-            TEST(boost::nowide::cout);
+            char c = i % 96 + ' ';
+            TEST(boost::nowide::cin.putback(c));
         }
+        for(int i = maxval - 1; i >= 0; i--)
+        {
+            int c = i % 96 + ' ';
+            TEST(boost::nowide::cin.get() == c);
+        }
+    }
+    boost::nowide::cout << "Normal I/O:" << std::endl;
+    boost::nowide::cout << example << std::endl;
+    boost::nowide::cerr << example << std::endl;
 
+    boost::nowide::cout << "Flushing each character:" << std::endl;
+
+    for(const char* s = example; *s; s++)
+    {
+        boost::nowide::cout << *s << std::flush;
         TEST(boost::nowide::cout);
-        TEST(boost::nowide::cerr);
-        if(argc == 2 && argv[1] == std::string("-i"))
-        {
-            std::string v1, v2;
-            boost::nowide::cin >> v1 >> v2;
-            TEST(boost::nowide::cin);
-            TEST(isValidUTF8(v1));
-            TEST(isValidUTF8(v2));
-            boost::nowide::cout << "First:  " << v1 << std::endl;
-            boost::nowide::cout << "Second: " << v2 << std::endl;
-            TEST(boost::nowide::cout);
-        }
-    } catch(const std::exception& e)
-    {
-        std::cerr << "Fail: " << e.what() << std::endl;
-        return 1;
     }
 
-    return 0;
+    TEST(boost::nowide::cout);
+    TEST(boost::nowide::cerr);
+    if(argc == 2 && argv[1] == std::string("-i"))
+    {
+        std::string v1, v2;
+        boost::nowide::cin >> v1 >> v2;
+        TEST(boost::nowide::cin);
+        TEST(isValidUTF8(v1));
+        TEST(isValidUTF8(v2));
+        boost::nowide::cout << "First:  " << v1 << std::endl;
+        boost::nowide::cout << "Second: " << v2 << std::endl;
+        TEST(boost::nowide::cout);
+    }
 }

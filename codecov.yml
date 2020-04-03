@@ -6,3 +6,5 @@ codecov:
     wait_for_ci: yes
 comment:
   layout: "diff, files"
+ignore:
+  - "test/test.hpp"

@@ -9,9 +9,9 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "test.hpp"
-#include <boost/nowide/args.hpp>
 #include <boost/nowide/cstdlib.hpp>
+
+#include <boost/nowide/args.hpp>
 #include <boost/nowide/detail/convert.hpp>
 #include <algorithm>
 #include <cstdlib>
@@ -19,6 +19,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include "test.hpp"
 
 bool is_ascii(const std::string& s)
 {
@@ -66,9 +68,7 @@ void compare_string_arrays(char** main_val, char** utf8_val, bool sort)
     for(size_t i = 0; i < vec_main.size(); ++i)
     {
         // Skip strings with non-ascii chars
-        if(!is_ascii(vec_main[i]))
-            continue;
-        if(vec_main[i] != vec_utf8[i])
+        if(is_ascii(vec_main[i]) && vec_main[i] != vec_utf8[i])
             TEST_EQ(vec_main[i], replace_non_ascii(vec_utf8[i]));
     }
 }
@@ -89,9 +89,7 @@ void compare_getenv(char** env)
         {
             TEST(bnw_value);
             // Compare only if ascii
-            if(!is_ascii(std_value))
-                continue;
-            if(std::string(std_value) != std::string(bnw_value))
+            if(is_ascii(std_value) && std::string(std_value) != std::string(bnw_value))
                 TEST_EQ(std_value, replace_non_ascii(bnw_value));
         } else
             TEST(!bnw_value);
@@ -153,37 +151,28 @@ void run_parent(const char* exe_path)
 #endif
 }
 
-int main(int argc, char** argv, char** env)
+void test_main(int argc, char** argv, char** env)
 {
-    try
+    const int old_argc = argc;
+    char** old_argv = argv;
+    char** old_env = env;
     {
-        const int old_argc = argc;
-        char** old_argv = argv;
-        char** old_env = env;
-        {
-            boost::nowide::args _(argc, argv, env);
-            TEST(argc == old_argc);
-            std::cout << "Checking arguments" << std::endl;
-            compare_string_arrays(old_argv, argv, false);
-            std::cout << "Checking env" << std::endl;
-            compare_string_arrays(old_env, env, true);
-            compare_getenv(env);
-        }
-        // When `args` is destructed the old values must be restored
+        boost::nowide::args _(argc, argv, env);
         TEST(argc == old_argc);
-        TEST(argv == old_argv);
-        TEST(env == old_env);
-
-        boost::nowide::args a(argc, argv, env);
-        if(argc == 1)
-            run_parent(argv[0]);
-        else
-            run_child(argc, argv, env);
-    } catch(const std::exception& e)
-    {
-        std::cerr << "Failed " << e.what() << std::endl;
-        return 1;
+        std::cout << "Checking arguments" << std::endl;
+        compare_string_arrays(old_argv, argv, false);
+        std::cout << "Checking env" << std::endl;
+        compare_string_arrays(old_env, env, true);
+        compare_getenv(env);
     }
+    // When `args` is destructed the old values must be restored
+    TEST(argc == old_argc);
+    TEST(argv == old_argv);
+    TEST(env == old_env);
 
-    return 0;
+    boost::nowide::args a(argc, argv, env);
+    if(argc == 1)
+        run_parent(argv[0]);
+    else
+        run_child(argc, argv, env);
 }
