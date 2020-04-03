@@ -34,10 +34,9 @@ pr:
     - develop
 
 variables:
-  - name: B2_VARIANT
-    value: release,debug
-  - name: B2_LINK
-    value: shared,static
+  B2_CI_VERSION: 1
+  B2_VARIANT: release,debug
+  B2_LINK: shared,static
 
 stages:
 
@@ -126,7 +125,6 @@ stages:
           B2_TOOLSET: clang
           B2_CXXSTD: 03,11,14,17,2a
           XCODE_APP: /Applications/Xcode_11.3.1.app
-          B2_LINK: static
           B2_JOBS: 3 # Workaround for https://github.com/boostorg/boost-ci/issues/50
     steps:
     - bash: |

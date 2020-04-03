@@ -6,15 +6,17 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "test.hpp"
-#include "test_sets.hpp"
-#include <boost/nowide/convert.hpp>
 #include <boost/nowide/utf8_codecvt.hpp>
+
+#include <boost/nowide/convert.hpp>
 #include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <locale>
 #include <vector>
+
+#include "test.hpp"
+#include "test_sets.hpp"
 
 static const char* utf8_name =
   "\xf0\x9d\x92\x9e-\xD0\xBF\xD1\x80\xD0\xB8\xD0\xB2\xD0\xB5\xD1\x82-\xE3\x82\x84\xE3\x81\x82.txt";
@@ -318,19 +320,9 @@ void test_codecvt_subst()
     run_all(codecvt_to_wide, codecvt_to_narrow);
 }
 
-int main()
+void test_main(int, char**, char**)
 {
-    try
-    {
-        test_codecvt_conv();
-        test_codecvt_err();
-        test_codecvt_subst();
-
-    } catch(const std::exception& e)
-    {
-        std::cerr << "Failed : " << e.what() << std::endl;
-        return 1;
-    }
-
-    return 0;
+    test_codecvt_conv();
+    test_codecvt_err();
+    test_codecvt_subst();
 }
