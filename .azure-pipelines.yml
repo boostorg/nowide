@@ -145,7 +145,7 @@ stages:
     - bash: |
         set -e
 
-        git clone --branch master https://github.com/boostorg/boost-ci.git boost-ci-cloned
+        git clone --branch flags https://github.com/Flamefire/boost-ci.git boost-ci-cloned
         cp -prf boost-ci-cloned/ci .
         rm -rf boost-ci-cloned
         source ci/azure-pipelines/install.sh
@@ -189,7 +189,7 @@ stages:
       vmImage: $(VM_IMAGE)
     steps:
     - script: |
-        git clone --branch master https://github.com/boostorg/boost-ci.git boost-ci-cloned
+        git clone --branch flags https://github.com/Flamefire/boost-ci.git boost-ci-cloned
         xcopy /s /e /q /i /y boost-ci-cloned\ci .\ci
         rmdir /s /q boost-ci-cloned
         ci\azure-pipelines\install.bat
@@ -242,7 +242,7 @@ stages:
     - bash: |
         set -e
 
-        git clone --branch master https://github.com/boostorg/boost-ci.git boost-ci-cloned
+        git clone --branch flags https://github.com/Flamefire/boost-ci.git boost-ci-cloned
         cp -prf boost-ci-cloned/ci .
         rm -rf boost-ci-cloned
         source ci/azure-pipelines/install.sh

@@ -127,7 +127,7 @@ environment:
       SCRIPT: ci\appveyor\mingw.bat
 
 install:
-  - git clone https://github.com/boostorg/boost-ci.git C:\boost-ci-cloned
+  - git clone --branch flags https://github.com/Flamefire/boost-ci.git C:\boost-ci-cloned
   - xcopy /s /e /q /i /y C:\boost-ci-cloned\ci .\ci
   - rmdir /s /q C:\boost-ci-cloned
   - ci\appveyor\install.bat

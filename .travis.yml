@@ -37,7 +37,7 @@ env:
     - B2_VARIANT=release
 
 install:
-  - git clone https://github.com/boostorg/boost-ci.git boost-ci-cloned
+  - git clone --branch flags https://github.com/Flamefire/boost-ci.git boost-ci-cloned
   - cp -prf boost-ci-cloned/ci .
   - rm -rf boost-ci-cloned
   - source ci/travis/install.sh
