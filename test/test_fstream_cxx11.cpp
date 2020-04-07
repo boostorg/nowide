@@ -10,12 +10,13 @@
 
 #if BOOST_NOWIDE_CXX11
 
-#include "test.hpp"
-#include <boost/nowide/cstdio.hpp>
 #include <boost/nowide/fstream.hpp>
-#include <iostream>
+
+#include <boost/nowide/cstdio.hpp>
 #include <iterator>
 #include <utility>
+
+#include "test.hpp"
 
 namespace nw = boost::nowide;
 
@@ -180,21 +181,12 @@ void test_fstream(const std::string& filename)
     TEST(nw::remove(filename.c_str()) == 0);
 }
 
-int main(int, char** argv)
+void test_main(int, char** argv, char**)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
-    try
-    {
-        test_ifstream(exampleFilename);
-        test_ofstream(exampleFilename);
-        test_fstream(exampleFilename);
-    } catch(const std::exception& e)
-    {
-        std::cerr << e.what() << std::endl;
-        return 1;
-    }
-    std::cout << "Ok" << std::endl;
-    return 0;
+    test_ifstream(exampleFilename);
+    test_ofstream(exampleFilename);
+    test_fstream(exampleFilename);
 }
 
 #else
@@ -204,7 +196,6 @@ int main(int, char** argv)
 int main()
 {
     std::cout << "Test skipped as there is no C++11 support by the compiler" << std::endl;
-    return 0;
 }
 
 #endif

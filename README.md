@@ -17,7 +17,7 @@ Distributed under the [Boost Software License, Version 1.0](http://www.boost.org
 
 ### Properties
 
-* C++03
+* C++03 **(will be raised to C++11 by mid 2020)**
 * optional C++11/17 support
 * Usable outside of Boost via CMake
 

@@ -7,13 +7,15 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "test.hpp"
+#include <boost/nowide/fstream.hpp>
+
 #include <boost/nowide/convert.hpp>
 #include <boost/nowide/cstdio.hpp>
-#include <boost/nowide/fstream.hpp>
 #include <fstream>
 #include <iostream>
 #include <string>
+
+#include "test.hpp"
 
 namespace nw = boost::nowide;
 
@@ -488,33 +490,24 @@ void test_is_open(const char* filename)
     TEST(nw::remove(filename) == 0);
 }
 
-int main(int, char** argv)
+void test_main(int, char** argv, char**)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
-    try
-    {
-        std::cout << "Testing fstream" << std::endl;
-        test_ofstream_creates_file(exampleFilename.c_str());
-        test_ofstream_write(exampleFilename.c_str());
-        test_ifstream_open_read(exampleFilename.c_str());
-        test_fstream(exampleFilename.c_str());
-        test_is_open(exampleFilename.c_str());
+    std::cout << "Testing fstream" << std::endl;
+    test_ofstream_creates_file(exampleFilename.c_str());
+    test_ofstream_write(exampleFilename.c_str());
+    test_ifstream_open_read(exampleFilename.c_str());
+    test_fstream(exampleFilename.c_str());
+    test_is_open(exampleFilename.c_str());
 
-        std::cout << "Complex IO" << std::endl;
-        test_with_different_buffer_sizes(exampleFilename.c_str());
+    std::cout << "Complex IO" << std::endl;
+    test_with_different_buffer_sizes(exampleFilename.c_str());
 
-        std::cout << "filebuf::close" << std::endl;
-        test_close(exampleFilename.c_str());
+    std::cout << "filebuf::close" << std::endl;
+    test_close(exampleFilename.c_str());
 
-        std::cout << "Flush - Sanity Check" << std::endl;
-        test_flush<std::ifstream, std::ofstream>(exampleFilename.c_str());
-        std::cout << "Flush - Test" << std::endl;
-        test_flush<nw::ifstream, nw::ofstream>(exampleFilename.c_str());
-    } catch(const std::exception& e)
-    {
-        std::cerr << e.what() << std::endl;
-        return 1;
-    }
-    std::cout << "Ok" << std::endl;
-    return 0;
+    std::cout << "Flush - Sanity Check" << std::endl;
+    test_flush<std::ifstream, std::ofstream>(exampleFilename.c_str());
+    std::cout << "Flush - Test" << std::endl;
+    test_flush<nw::ifstream, nw::ofstream>(exampleFilename.c_str());
 }

@@ -7,7 +7,8 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "test.hpp"
+#define BOOST_NOWIDE_TEST_NO_MAIN
+
 #include <boost/nowide/convert.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/nowide/fstream.hpp>
@@ -21,6 +22,8 @@
 #include <map>
 #include <stdexcept>
 #include <vector>
+
+#include "test.hpp"
 
 template<typename Key, typename Value, typename Key2>
 Value get(const std::map<Key, Value>& map, const Key2& key)
