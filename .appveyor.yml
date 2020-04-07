@@ -20,11 +20,12 @@ matrix:
 
 environment:
   global:
+    B2_CI_VERSION: 1
     # see: http://www.boost.org/build/doc/html/bbv2/overview/invocation.html#bbv2.overview.invocation.properties
     # to use the default for a given environment, comment it out; recommend you build debug and release however:
     # on Windows it is important to exercise all the possibilities, especially shared vs static, however most
     # libraries that care about this exercise it in their Jamfiles...
-    # B2_ADDRESS_MODEL: 64,32
+    B2_ADDRESS_MODEL: 32,64
     B2_LINK: shared,static
     # B2_THREADING: threading=multi,single
     B2_VARIANT: release,debug
@@ -33,21 +34,18 @@ environment:
   matrix:
     - FLAVOR: Visual Studio 2019
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      B2_ADDRESS_MODEL: 32,64
       B2_CXXFLAGS: -permissive-
       B2_CXXSTD: 14,17,latest # 2a
       B2_TOOLSET: msvc-14.2
 
     - FLAVOR: Visual Studio 2017 C++2a Strict
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      B2_ADDRESS_MODEL: 32,64
       B2_CXXFLAGS: -permissive-
       B2_CXXSTD: latest # 2a
       B2_TOOLSET: msvc-14.1
 
     - FLAVOR: Visual Studio 2017 C++14/17
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      B2_ADDRESS_MODEL: 32,64
       B2_CXXSTD: 14,17
       B2_TOOLSET: msvc-14.1
 
@@ -57,14 +55,14 @@ environment:
       B2_CXXSTD: 11,14,17
       B2_TOOLSET: clang-win
 
-    - FLAVOR: Visual Studio 2015 C++14 (Default)
+    - FLAVOR: Visual Studio 2015, 2013
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      B2_ADDRESS_MODEL: 64,32
-      B2_TOOLSET: msvc-14.0
+      B2_TOOLSET: msvc-12.0,msvc-14.0
 
-    - FLAVOR: Visual Studio 2008, 2010, 2012, 2013
+    - FLAVOR: Visual Studio 2008, 2010, 2012
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      B2_TOOLSET: msvc-9.0,msvc-10.0,msvc-11.0,msvc-12.0
+      B2_TOOLSET: msvc-9.0,msvc-10.0,msvc-11.0
+      B2_ADDRESS_MODEL: 32 # No 64bit support
 
     - FLAVOR: cygwin (32-bit)
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
@@ -125,25 +123,14 @@ environment:
         secure: Qq4PZ3QlpYtg3HEyn9r2Og==
 
 install:
-  - set SELF=%APPVEYOR_PROJECT_NAME:-=_%
-  - git clone https://github.com/boostorg/boost-ci.git C:\boost-ci
-  - xcopy /s /e /q /i C:\boost-ci\ci .\ci
+  - git clone https://github.com/boostorg/boost-ci.git C:\boost-ci-cloned
+  - xcopy /s /e /q /i /y C:\boost-ci-cloned\ci .\ci
+  - rmdir /s /q C:\boost-ci-cloned
   - ci\appveyor\install.bat
 
 build: off
 
-test_script:
-  - PATH=%ADDPATH%%PATH%
-  - IF DEFINED B2_ADDRESS_MODEL (SET B2_ADDRESS_MODEL=address-model=%B2_ADDRESS_MODEL%)
-  - IF DEFINED B2_LINK (SET B2_LINK=link=%B2_LINK%)
-  - IF DEFINED B2_VARIANT (SET B2_VARIANT=variant=%B2_VARIANT%)
-  - IF DEFINED B2_CXXFLAGS (SET B2_CXXFLAGS=cxxflags=%B2_CXXFLAGS%)
-  # The definition of B2_TOOLCXX omits B2_CXXSTD= if it was not defined above
-  - IF NOT DEFINED B2_CXXSTD (SET B2_TOOLCXX=toolset=%B2_TOOLSET%) ELSE (SET B2_TOOLCXX=toolset=%B2_TOOLSET% cxxstd=%B2_CXXSTD%)
-  # Echo the complete build command to the build log
-  - IF NOT DEFINED SCRIPT                         (ECHO b2 libs/%SELF:\=/%/test %B2_TOOLCXX% %B2_CXXFLAGS% %B2_DEFINES% %B2_THREADING% %B2_ADDRESS_MODEL% %B2_LINK% %B2_THREADING% %B2_VARIANT% -j3)
-  # Now go build...
-  - IF DEFINED SCRIPT (call libs\%SELF%\%SCRIPT%) ELSE (b2 libs/%SELF:\=/%/test %B2_TOOLCXX% %B2_CXXFLAGS% %B2_DEFINES% %B2_THREADING% %B2_ADDRESS_MODEL% %B2_LINK% %B2_THREADING% %B2_VARIANT% -j3)
+test_script: ci\build.bat
 
 for:
   - matrix:
@@ -181,6 +168,7 @@ for:
       only: [develop] # Doesn't work on master yet
     test_script:
       - ps: |
+            cd "$env:BOOST_ROOT"
             mkdir __build_static | cd
             cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide ..
             cmake --build . --config Debug --parallel 4
