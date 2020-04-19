@@ -367,7 +367,7 @@ namespace nowide {
         /// Trait to heuristically check for a *::filesystem::path
         /// Done by checking for make_preferred and filename member functions with correct signature
         template<typename T>
-        class is_path
+        struct is_path
         {
             typedef char one;
             struct two
@@ -382,7 +382,6 @@ namespace nowide {
             template<typename U>
             static two test(...);
 
-        public:
             enum
             {
                 value = sizeof(test<T>(0)) == sizeof(one)
