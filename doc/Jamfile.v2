@@ -13,7 +13,7 @@ path-constant here : . ;
 .doxygen = [ doxygen.name ] ;
 .doxygen ?= doxygen ;
 
-local sources = [ path.glob-tree ../include/boost/nowide : *.hpp : detail ] main.md ;
+local sources = [ path.glob-tree ../include/boost/nowide : *.hpp : detail ] main.dox changelog.dox ;
 
 make html : ./Doxyfile : @make-html : <dependency>$(sources) ;
 
