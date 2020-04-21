@@ -252,17 +252,17 @@ namespace nowide {
     typedef basic_filebuf<char> filebuf;
     ///
     /// Same as std::ifstream but accepts UTF-8 strings under Windows
-    /// and *::filesystem::path on all systems
+    /// and *\::filesystem::path on all systems
     ///
     typedef basic_ifstream<char> ifstream;
     ///
     /// Same as std::ofstream but accepts UTF-8 strings under Windows
-    /// and *::filesystem::path on all systems
+    /// and *\::filesystem::path on all systems
     ///
     typedef basic_ofstream<char> ofstream;
     ///
     /// Same as std::fstream but accepts UTF-8 strings under Windows
-    /// and *::filesystem::path on all systems
+    /// and *\::filesystem::path on all systems
     ///
     typedef basic_fstream<char> fstream;
 
@@ -364,7 +364,7 @@ namespace nowide {
 #ifdef BOOST_MSVC
 #pragma warning(pop)
 #endif
-        /// Trait to heuristically check for a *::filesystem::path
+        /// Trait to heuristically check for a *\::filesystem::path
         /// Done by checking for make_preferred and filename member functions with correct signature
         template<typename T>
         struct is_path
@@ -395,7 +395,7 @@ namespace nowide {
         {
             typedef T type;
         };
-        /// SFINAE trait which has a member "type = Result" if the Path is a *::filesystem::path
+        /// SFINAE trait which has a member "type = Result" if the Path is a *\::filesystem::path
         template<typename Path, typename Result>
         struct enable_if_path : enable_if<is_path<Path>::value, Result>
         {};
