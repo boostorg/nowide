@@ -17,9 +17,7 @@
 namespace boost {
 namespace nowide {
 
-    //
     // Make sure that mbstate can keep 16 bit of UTF-16 sequence
-    //
     BOOST_STATIC_ASSERT(sizeof(std::mbstate_t) >= 2);
     namespace detail {
         // Avoid including cstring for std::memcpy
@@ -56,6 +54,7 @@ namespace nowide {
     template<typename CharType, int CharSize = sizeof(CharType)>
     class utf8_codecvt;
 
+    /// Specialization for the UTF-8 <-> UTF-16 variant of the std::codecvt implementation
     template<typename CharType>
     class BOOST_SYMBOL_VISIBLE utf8_codecvt<CharType, 2> : public std::codecvt<CharType, char, std::mbstate_t>
     {
@@ -289,6 +288,7 @@ namespace nowide {
         }
     };
 
+    /// Specialization for the UTF-8 <-> UTF-32 variant of the std::codecvt implementation
     template<typename CharType>
     class BOOST_SYMBOL_VISIBLE utf8_codecvt<CharType, 4> : public std::codecvt<CharType, char, std::mbstate_t>
     {

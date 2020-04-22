@@ -74,8 +74,6 @@ namespace nowide {
     ///
     /// Convert wide string (UTF-16/32) to narrow string (UTF-8).
     ///
-    /// \param s Input string
-    /// \param count Number of characters to convert
     /// \param s NULL terminated input string
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
@@ -97,7 +95,8 @@ namespace nowide {
     ///
     /// Convert narrow string (UTF-8) to wide string (UTF-16/32).
     ///
-    /// \param s NULL terminated input string
+    /// \param s Input string
+    /// \param count Number of characters to convert
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
     inline std::wstring widen(const char* s, size_t count)
@@ -107,6 +106,7 @@ namespace nowide {
     ///
     /// Convert narrow string (UTF-8) to wide string (UTF-16/32).
     ///
+    /// \param s NULL terminated input string
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
     inline std::wstring widen(const char* s)

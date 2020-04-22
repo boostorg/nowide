@@ -1,0 +1,22 @@
+//
+//  Copyright (c) 2019-2020 Alexander Grund
+//
+//  Distributed under the Boost Software License, Version 1.0. (See
+//  accompanying file LICENSE_1_0.txt or copy at
+//  http://www.boost.org/LICENSE_1_0.txt)
+//
+
+/*! \page changelog_page Changelog
+
+\section changelog Changelog
+
+\subsection changelog_10_0_1 Nowide 10.0.1 (Boost 1.73)
+
+- IMPORTANT: C++03 support is deprecated and will be removed in the next Boost release
+- Fix -Wctor-dtor-privacy warning in trait
+
+\subsection changelog_10_0_0 Nowide 10.0.0
+
+- Initial Release
+
+*/

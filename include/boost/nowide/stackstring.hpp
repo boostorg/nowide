@@ -31,27 +31,36 @@ namespace nowide {
     class basic_stackstring
     {
     public:
+        /// Size of the stack buffer
         static const size_t buffer_size = BufferSize;
+        /// Type of the output character (converted to)
         typedef CharOut output_char;
+        /// Type of the input character (converted from)
         typedef CharIn input_char;
 
+        /// Creates a NULL stackstring
         basic_stackstring() : data_(NULL)
         {
             buffer_[0] = 0;
         }
+        /// Convert the NULL terminated string input and store in internal buffer
+        /// If input is NULL, nothing will be stored
         explicit basic_stackstring(const input_char* input) : data_(NULL)
         {
             convert(input);
         }
+        /// Convert the sequence [begin, end) and store in internal buffer
+        /// If begin is NULL, nothing will be stored
         basic_stackstring(const input_char* begin, const input_char* end) : data_(NULL)
         {
             convert(begin, end);
         }
-
+        /// Copy construct from other
         basic_stackstring(const basic_stackstring& other) : data_(NULL)
         {
             *this = other;
         }
+        /// Copy assign from other
         basic_stackstring& operator=(const basic_stackstring& other)
         {
             if(this != &other)
@@ -77,6 +86,8 @@ namespace nowide {
             clear();
         }
 
+        /// Convert the NULL terminated string input and store in internal buffer
+        /// If input is NULL, the current buffer will be reset to NULL
         output_char* convert(const input_char* input)
         {
             if(input)
@@ -84,6 +95,8 @@ namespace nowide {
             clear();
             return get();
         }
+        /// Convert the sequence [begin, end) and store in internal buffer
+        /// If begin is NULL, the current buffer will be reset to NULL
         output_char* convert(const input_char* begin, const input_char* end)
         {
             clear();
@@ -119,13 +132,14 @@ namespace nowide {
         {
             return data_;
         }
+        /// Reset the internal buffer to NULL
         void clear()
         {
             if(!uses_stack_memory())
                 delete[] data_;
             data_ = NULL;
         }
-
+        /// Swap lhs with rhs
         friend void swap(basic_stackstring& lhs, basic_stackstring& rhs)
         {
             if(lhs.uses_stack_memory())
@@ -157,6 +171,8 @@ namespace nowide {
         {
             return data_ == buffer_;
         }
+        /// Return the current length of the string excluding the NULL terminator
+        /// If NULL is stored returns NULL
         size_t length() const
         {
             if(!data_)
