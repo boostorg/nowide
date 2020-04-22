@@ -15,6 +15,8 @@
 #include <boost/nowide/replacement.hpp>
 #include <boost/version.hpp>
 
+//! @cond Doxygen_Suppress
+
 #if defined(BOOST_ALL_DYN_LINK) || defined(BOOST_NOWIDE_DYN_LINK)
 #ifdef BOOST_NOWIDE_SOURCE
 #define BOOST_NOWIDE_DECL BOOST_SYMBOL_EXPORT
@@ -46,6 +48,8 @@
 #include <boost/config/auto_link.hpp>
 #endif // auto-linking disabled
 
+//! @endcond
+
 /// @def BOOST_NOWIDE_USE_WCHAR_OVERLOADS
 /// @brief Whether to use the wchar_t* overloads in fstream/filebuf
 /// Enabled on Windows and Cygwin as the latter may use wchar_t in filesystem::path
@@ -73,6 +77,8 @@
 #define BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT 0
 #endif
 
+//! @cond Doxygen_Suppress
+
 #if BOOST_VERSION < 106500 && defined(BOOST_GCC) && __GNUC__ >= 7
 #define BOOST_NOWIDE_FALLTHROUGH __attribute__((fallthrough))
 #else
@@ -87,6 +93,8 @@
 #else
 #define BOOST_NOWIDE_CXX11 0
 #endif
+
+//! @endcond
 
 namespace boost {
 ///

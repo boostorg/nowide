@@ -12,6 +12,8 @@
 
 namespace boost {
 namespace nowide {
+    /// Avoid empty compilation unit warnings
+    /// \internal
     BOOST_NOWIDE_DECL void dummy_exported_function()
     {}
 } // namespace nowide

@@ -12,6 +12,8 @@
 
 \mainpage Boost.Nowide
 
+\ref changelog_page
+
 Table of Contents:
 
 - \ref main
@@ -308,7 +310,7 @@ There is also a \c std::filebuf compatible implementation provided for Windows w
 for \c open and behaves otherwise identical (API-wise).
 
 On all systems the \c std::fstream class and friends are provided as custom implementations supporting
-\c std::string and \c \*::filesystem::path as well as \c wchar_t\* (Windows only) overloads for the
+\c std::string and \c \*\::filesystem::path as well as \c wchar_t\* (Windows only) overloads for the
 constructor and \c open.
 This is done so users can use e.g. \c boost::filesystem::path with \c boost::nowide::fstream without
 depending on C++17 support.
@@ -422,3 +424,5 @@ The upstream sources can be found at GitHub: <a href="https://github.com/boostor
 You can download the latest sources there:
 
 - Standard Version: <a href="https://github.com/boostorg/nowide/archive/master.zip">nowide-master.zip</a>
+
+*/
