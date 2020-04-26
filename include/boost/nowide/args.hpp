@@ -33,14 +33,14 @@ namespace nowide {
 #else
 
     ///
-    /// \brief args is a class that fixes standard main() function arguments and changes them to UTF-8 under
-    /// Microsoft Windows.
+    /// \brief \c args is a class that temporarily covers standard main() function arguments encoded by an non-Unicode character set
+    /// and changes them to UTF-8 under Microsoft Windows while its instance alive.
     ///
     /// The class uses \c GetCommandLineW(), \c CommandLineToArgvW() and \c GetEnvironmentStringsW()
-    /// in order to obtain the information. It does not relate to actual values of argc,argv and env
+    /// in order to obtain Unicode-encoded values. It does not relate to actual values of argc,argv and env
     /// under Windows.
     ///
-    /// It restores the original values in its destructor
+    /// It restores the original values in its destructor (usually just before \c return statements in the function \c main).
     ///
     /// If any of the system calls fails, an exception of type std::runtime_error will be thrown
     /// and argc, argv, env remain unchanged.
