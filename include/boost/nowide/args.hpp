@@ -33,20 +33,29 @@ namespace nowide {
 #else
 
     ///
-    /// \brief \c args is a class that temporarily covers standard main() function arguments encoded by an non-Unicode character set
-    /// and changes them to UTF-8 under Microsoft Windows while its instance alive.
+    /// \brief \c args is a class that temporarily replaces standard main() function arguments with their
+    /// equal, but UTF-8 encoded values under Microsoft Windows for the lifetime of the instance.
     ///
     /// The class uses \c GetCommandLineW(), \c CommandLineToArgvW() and \c GetEnvironmentStringsW()
-    /// in order to obtain Unicode-encoded values. It does not relate to actual values of argc,argv and env
-    /// under Windows.
+    /// in order to obtain Unicode-encoded values.
+    /// It does not relate to actual values of argc, argv and env under Windows.
     ///
-    /// It restores the original values in its destructor (usually just before \c return statements in the function \c main).
+    /// It restores the original values in its destructor (usually at the end of the \c main function).
     ///
     /// If any of the system calls fails, an exception of type std::runtime_error will be thrown
     /// and argc, argv, env remain unchanged.
     ///
-    /// \note the class owns the memory of the newly allocated strings
+    /// \note The class owns the memory of the newly allocated strings.
+    /// So you need to keep it alive as long as you use the values.
     ///
+    /// Usage:
+    /// \code
+    /// int main(int argc, char** argv, char** env) {
+    ///   boost::nowide::args _(argc, argv, env); // Note the _ as a "don't care" name for the instance
+    ///   // Use argv and env as usual, they are now UTF-8 encoded on Windows
+    ///   return 0; // Memory held by args is released
+    /// }
+    /// \endcode
     class args
     {
     public:
@@ -69,7 +78,7 @@ namespace nowide {
             fix_env(env);
         }
         ///
-        /// Restore original argc,argv,env values, if changed
+        /// Restore original argc, argv, env values, if changed
         ///
         ~args()
         {

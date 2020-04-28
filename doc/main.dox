@@ -223,8 +223,8 @@ Watch the use of \c boost::nowide::args, \c boost::nowide::ifstream and \c boost
 On Non-Windows it does nothing, but on Windows the following happens:
 
 - \c boost::nowide::args retrieves UTF-16 arguments from the Windows API, converts them to UTF-8,
-and temporarily covers the original \c argv (and optionally \c env) with point to those, internally stored
-UTF-8 strings, while its instance alive.
+and temporarily replaces the original \c argv (and optionally \c env) with pointers to those internally stored
+UTF-8 strings for the lifetime of the instance.
 - \c boost::nowide::ifstream converts the passed filename (which is now valid UTF-8) to UTF-16
 and calls the Windows Wide API to open the file stream which can then be used as usual.
 - Similarily \c boost::nowide::cerr and \c boost::nowide::cout use an underlying stream buffer
