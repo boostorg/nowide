@@ -118,7 +118,7 @@ namespace nowide {
         class console_input_buffer : public std::streambuf
         {
         public:
-            console_input_buffer(HANDLE h) : handle_(h), wsize_(0)
+            console_input_buffer(HANDLE h) : handle_(h), wsize_(0), was_newline_(true)
             {}
 
         protected:
@@ -127,6 +127,7 @@ namespace nowide {
                 if(FlushConsoleInputBuffer(handle_) == 0)
                     return -1;
                 wsize_ = 0;
+                was_newline_ = true;
                 pback_buffer_.clear();
                 setg(0, 0, 0);
                 return 0;
@@ -199,7 +200,8 @@ namespace nowide {
                 {
                     const wchar_t* const prev_p = p;
                     detail::utf::code_point c = decoder::decode(p, e);
-                    if(c == detail::utf::incomplete){
+                    if(c == detail::utf::incomplete)
+                    {
                         p = prev_p;
                         break;
                     }
@@ -215,6 +217,14 @@ namespace nowide {
                 if(wsize_ > 0)
                     std::memmove(wbuffer_, e - wsize_, sizeof(wchar_t) * wsize_);
 
+                // A CTRL+Z at the start of the line should be treated as EOF
+                if(was_newline_ && out > buffer_ && buffer_[0] == '\x1a')
+                {
+                    sync();
+                    return 0;
+                }
+                was_newline_ = out == buffer_ || out[-1] == '\n';
+
                 return out - buffer_;
             }
 
@@ -225,6 +235,7 @@ namespace nowide {
             HANDLE handle_;
             size_t wsize_;
             std::vector<char> pback_buffer_;
+            bool was_newline_;
         };
 
         winconsole_ostream::winconsole_ostream(int fd, winconsole_ostream* tieStream) : std::ostream(0)
