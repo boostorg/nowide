@@ -122,6 +122,15 @@ namespace nowide {
             {}
 
         protected:
+            int sync()
+            {
+                if(FlushConsoleInputBuffer(handle_) == 0)
+                    return -1;
+                wsize_ = 0;
+                pback_buffer_.clear();
+                setg(0, 0, 0);
+                return 0;
+            }
             int pbackfail(int c)
             {
                 if(c == traits_type::eof())
