@@ -187,25 +187,31 @@ namespace nowide {
 
             size_t read()
             {
-                namespace uf = detail::utf;
                 DWORD read_wchars = 0;
-                size_t n = wbuffer_size - wsize_;
+                const size_t n = wbuffer_size - wsize_;
                 if(!ReadConsoleW(handle_, wbuffer_ + wsize_, static_cast<DWORD>(n), &read_wchars, 0))
                     return 0;
                 wsize_ += read_wchars;
                 char* out = buffer_;
-                wchar_t* p = wbuffer_;
-                wchar_t* e = wbuffer_ + wsize_;
-                uf::code_point c = 0;
-                while((c = decoder::decode(p, e)) != uf::incomplete)
+                const wchar_t* p = wbuffer_;
+                const wchar_t* const e = wbuffer_ + wsize_;
+                while(true)
                 {
-                    if(c == uf::illegal)
+                    const wchar_t* const prev_p = p;
+                    detail::utf::code_point c = decoder::decode(p, e);
+                    if(c == detail::utf::incomplete){
+                        p = prev_p;
+                        break;
+                    }
+                    if(c == detail::utf::illegal)
                         c = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
                     assert(out - buffer_ + encoder::width(c) <= static_cast<int>(buffer_size));
-                    out = encoder::encode(c, out);
-                    wsize_ = e - p;
+                    // Skip \r chars as std::cin does
+                    if(c != '\r')
+                        out = encoder::encode(c, out);
                 }
 
+                wsize_ = e - p;
                 if(wsize_ > 0)
                     std::memmove(wbuffer_, e - wsize_, sizeof(wchar_t) * wsize_);
 

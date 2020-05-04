@@ -9,6 +9,7 @@
 #include <boost/nowide/iostream.hpp>
 
 #include <boost/nowide/detail/utf.hpp>
+#include <limits>
 #include <string>
 
 #include "test.hpp"
@@ -91,8 +92,10 @@ void test_main(int argc, char** argv, char**)
         TEST(boost::nowide::cin >> v1);
         boost::nowide::cin.sync();
         boost::nowide::cout << "First:  " << v1 << std::endl;
-        boost::nowide::cout << "2nd string should be ignored. Input 1 more" << std::endl;
-        TEST(boost::nowide::cin >> v1);
+        boost::nowide::cout << "2nd string should be ignored. Input 1 more + [ENTER]" << std::endl;
+        // And check getline not getting the CR
+        TEST(std::getline(boost::nowide::cin, v1));
+        TEST(!v1.empty() && v1[v1.size() - 1u] != '\r');
         boost::nowide::cout << "Value:  " << v1 << std::endl;
 
         boost::nowide::cout << "Press ENTER to exit";
