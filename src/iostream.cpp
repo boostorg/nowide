@@ -144,26 +144,23 @@ namespace nowide {
                     return 0;
                 }
 
+                char* pnext;
                 if(pback_buffer_.empty())
                 {
                     pback_buffer_.resize(4);
-                    char* b = &pback_buffer_[0];
-                    char* e = b + pback_buffer_.size();
-                    setg(b, e - 1, e);
-                    *gptr() = traits_type::to_char_type(c);
+                    pnext = &pback_buffer_[0] + pback_buffer_.size() - 1u;
                 } else
                 {
                     size_t n = pback_buffer_.size();
-                    std::vector<char> tmp;
-                    tmp.resize(n * 2);
-                    memcpy(&tmp[n], &pback_buffer_[0], n);
-                    tmp.swap(pback_buffer_);
-                    char* b = &pback_buffer_[0];
-                    char* e = b + n * 2;
-                    char* p = b + n - 1;
-                    *p = traits_type::to_char_type(c);
-                    setg(b, p, e);
+                    pback_buffer_.resize(n * 2);
+                    std::memcpy(&pback_buffer_[n], &pback_buffer_[0], n);
+                    pnext = &pback_buffer_[0] + n - 1;
                 }
+
+                char* pFirst = &pback_buffer_[0];
+                char* pLast = pFirst + pback_buffer_.size();
+                setg(pFirst, pnext, pLast);
+                *gptr() = traits_type::to_char_type(c);
 
                 return 0;
             }
