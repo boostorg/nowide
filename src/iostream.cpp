@@ -191,15 +191,16 @@ namespace nowide {
                     return 0;
                 wsize_ += read_wchars;
                 char* out = buffer_;
-                const wchar_t* p = wbuffer_;
-                const wchar_t* const e = wbuffer_ + wsize_;
-                while(true)
+                const wchar_t* cur_input_ptr = wbuffer_;
+                const wchar_t* const end_input_ptr = wbuffer_ + wsize_;
+                while(cur_input_ptr != end_input_ptr)
                 {
-                    const wchar_t* const prev_p = p;
-                    detail::utf::code_point c = decoder::decode(p, e);
+                    const wchar_t* const prev_input_ptr = cur_input_ptr;
+                    detail::utf::code_point c = decoder::decode(cur_input_ptr, end_input_ptr);
+                    // If incomplete restore to beginning of incomplete char to use on next buffer
                     if(c == detail::utf::incomplete)
                     {
-                        p = prev_p;
+                        cur_input_ptr = prev_input_ptr;
                         break;
                     }
                     if(c == detail::utf::illegal)
@@ -210,9 +211,9 @@ namespace nowide {
                         out = encoder::encode(c, out);
                 }
 
-                wsize_ = e - p;
+                wsize_ = end_input_ptr - cur_input_ptr;
                 if(wsize_ > 0)
-                    std::memmove(wbuffer_, e - wsize_, sizeof(wchar_t) * wsize_);
+                    std::memmove(wbuffer_, end_input_ptr - wsize_, sizeof(wchar_t) * wsize_);
 
                 // A CTRL+Z at the start of the line should be treated as EOF
                 if(was_newline_ && out > buffer_ && buffer_[0] == '\x1a')
