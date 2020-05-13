@@ -6,19 +6,19 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <boost/nowide/config.hpp>
+#include <nowide/config.hpp>
 
-#if BOOST_NOWIDE_CXX11
+#if NOWIDE_CXX11
 
-#include <boost/nowide/fstream.hpp>
+#include <nowide/fstream.hpp>
 
-#include <boost/nowide/cstdio.hpp>
+#include <nowide/cstdio.hpp>
 #include <iterator>
 #include <utility>
 
 #include "test.hpp"
 
-namespace nw = boost::nowide;
+namespace nw = nowide;
 
 void create_file(const std::string& filename, const std::string& contents)
 {

@@ -5,14 +5,13 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_STACKSTRING_HPP_INCLUDED
-#define BOOST_NOWIDE_STACKSTRING_HPP_INCLUDED
+#ifndef NOWIDE_STACKSTRING_HPP_INCLUDED
+#define NOWIDE_STACKSTRING_HPP_INCLUDED
 
-#include <boost/nowide/convert.hpp>
+#include <nowide/convert.hpp>
 #include <cassert>
 #include <cstring>
 
-namespace boost {
 namespace nowide {
 
     ///
@@ -22,7 +21,7 @@ namespace nowide {
     /// It uses a stack buffer if the string is short enough
     /// otherwise allocates a buffer on the heap.
     ///
-    /// Invalid UTF characters are replaced by the substitution character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+    /// Invalid UTF characters are replaced by the substitution character, see #NOWIDE_REPLACEMENT_CHARACTER
     ///
     /// If a NULL pointer is passed to the constructor or convert method, NULL will be returned by c_str.
     /// Similarily a default constructed stackstring will return NULL on calling c_str.
@@ -206,6 +205,5 @@ namespace nowide {
     typedef basic_stackstring<char, wchar_t, 16> short_stackstring;
 
 } // namespace nowide
-} // namespace boost
 
 #endif

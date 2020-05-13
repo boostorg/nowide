@@ -4,7 +4,7 @@
 #   level: Which warnings to add. Valid values: off, on, all, extra
 #   warningsAsErrors: Optional, ON to treat warnings as errors
 # Optionally can pass a bool as warnings-as-errors
-function(boost_add_warnings target level)
+function(nowide_add_warnings target level)
   if(ARGC GREATER 2)
     set(warningsAsErrors ${ARGV2})
   else()

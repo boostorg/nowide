@@ -5,23 +5,21 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#define BOOST_NOWIDE_SOURCE
-#include <boost/nowide/iostream.hpp>
+#define NOWIDE_SOURCE
+#include <nowide/iostream.hpp>
 
-#ifndef BOOST_WINDOWS
+#ifndef NOWIDE_WINDOWS
 
-namespace boost {
 namespace nowide {
     /// Avoid empty compilation unit warnings
     /// \internal
-    BOOST_NOWIDE_DECL void dummy_exported_function()
+    NOWIDE_DECL void dummy_exported_function()
     {}
 } // namespace nowide
-} // namespace boost
 
 #else
 
-#include <boost/nowide/convert.hpp>
+#include <nowide/convert.hpp>
 #include <cassert>
 #include <cstring>
 #include <iostream>
@@ -33,7 +31,6 @@ namespace nowide {
 
 #include <windows.h>
 
-namespace boost {
 namespace nowide {
     namespace detail {
 
@@ -98,7 +95,7 @@ namespace nowide {
                 while((c = decoder::decode(p, e)) != uf::incomplete)
                 {
                     if(c == uf::illegal)
-                        c = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
+                        c = NOWIDE_REPLACEMENT_CHARACTER;
                     assert(out - wbuffer_ + encoder::width(c) <= static_cast<int>(wbuffer_size));
                     out = encoder::encode(c, out);
                     decoded = p - b;
@@ -204,7 +201,7 @@ namespace nowide {
                         break;
                     }
                     if(c == detail::utf::illegal)
-                        c = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
+                        c = NOWIDE_REPLACEMENT_CHARACTER;
                     assert(out - buffer_ + encoder::width(c) <= static_cast<int>(buffer_size));
                     // Skip \r chars as std::cin does
                     if(c != '\r')
@@ -289,6 +286,5 @@ namespace nowide {
     detail::winconsole_ostream cerr(2, &cout);
     detail::winconsole_ostream clog(2, &cout);
 } // namespace nowide
-} // namespace boost
 
 #endif

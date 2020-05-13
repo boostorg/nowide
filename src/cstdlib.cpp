@@ -7,7 +7,7 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#define BOOST_NOWIDE_SOURCE
+#define NOWIDE_SOURCE
 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
@@ -16,10 +16,9 @@
 #undef __STRICT_ANSI__
 #endif
 
-#include <boost/nowide/cstdlib.hpp>
+#include <nowide/cstdlib.hpp>
 
-#if !defined(BOOST_WINDOWS)
-namespace boost {
+#if !defined(NOWIDE_WINDOWS)
 namespace nowide {
     int setenv(const char* key, const char* value, int overwrite)
     {
@@ -36,13 +35,11 @@ namespace nowide {
         return ::putenv(string);
     }
 } // namespace nowide
-} // namespace boost
 #else
-#include <boost/nowide/stackstring.hpp>
+#include <nowide/stackstring.hpp>
 #include <vector>
 #include <windows.h>
 
-namespace boost {
 namespace nowide {
     char* getenv(const char* key)
     {
@@ -117,5 +114,4 @@ namespace nowide {
         return _wsystem(wcmd.get());
     }
 } // namespace nowide
-} // namespace boost
 #endif

@@ -5,20 +5,19 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_ARGS_HPP_INCLUDED
-#define BOOST_NOWIDE_ARGS_HPP_INCLUDED
+#ifndef NOWIDE_ARGS_HPP_INCLUDED
+#define NOWIDE_ARGS_HPP_INCLUDED
 
-#include <boost/config.hpp>
-#ifdef BOOST_WINDOWS
-#include <boost/nowide/stackstring.hpp>
-#include <boost/nowide/windows.hpp>
+#include <nowide/config.hpp>
+#ifdef NOWIDE_WINDOWS
+#include <nowide/stackstring.hpp>
+#include <nowide/windows.hpp>
 #include <stdexcept>
 #include <vector>
 #endif
 
-namespace boost {
 namespace nowide {
-#if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_DOXYGEN)
+#if !defined(NOWIDE_WINDOWS) && !defined(NOWIDE_DOXYGEN)
     class args
     {
     public:
@@ -51,7 +50,7 @@ namespace nowide {
     /// Usage:
     /// \code
     /// int main(int argc, char** argv, char** env) {
-    ///   boost::nowide::args _(argc, argv, env); // Note the _ as a "don't care" name for the instance
+    ///   nowide::args _(argc, argv, env); // Note the _ as a "don't care" name for the instance
     ///   // Use argv and env as usual, they are now UTF-8 encoded on Windows
     ///   return 0; // Memory held by args is released
     /// }
@@ -194,5 +193,4 @@ namespace nowide {
 #endif
 
 } // namespace nowide
-} // namespace boost
 #endif

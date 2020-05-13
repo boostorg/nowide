@@ -5,25 +5,23 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_INTEGRATION_FILESYSTEM_HPP_INCLUDED
-#define BOOST_NOWIDE_INTEGRATION_FILESYSTEM_HPP_INCLUDED
+#ifndef NOWIDE_INTEGRATION_FILESYSTEM_HPP_INCLUDED
+#define NOWIDE_INTEGRATION_FILESYSTEM_HPP_INCLUDED
 
 #if(defined(__GNUC__) && __GNUC__ < 5)
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif
-#include <boost/nowide/utf8_codecvt.hpp>
+#include <nowide/utf8_codecvt.hpp>
 #include <boost/filesystem/path.hpp>
-namespace boost {
 namespace nowide {
     ///
     /// Install utf8_codecvt facet into  boost::filesystem::path such all char strings are interpreted as utf-8 strings
     ///
     inline std::locale nowide_filesystem()
     {
-        std::locale tmp = std::locale(std::locale(), new boost::nowide::utf8_codecvt<wchar_t>());
+        std::locale tmp = std::locale(std::locale(), new nowide::utf8_codecvt<wchar_t>());
         return boost::filesystem::path::imbue(tmp);
     }
 } // namespace nowide
-} // namespace boost
 
 #endif

@@ -5,13 +5,12 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_CONVERT_HPP_INCLUDED
-#define BOOST_NOWIDE_CONVERT_HPP_INCLUDED
+#ifndef NOWIDE_CONVERT_HPP_INCLUDED
+#define NOWIDE_CONVERT_HPP_INCLUDED
 
-#include <boost/nowide/detail/convert.hpp>
+#include <nowide/detail/convert.hpp>
 #include <string>
 
-namespace boost {
 namespace nowide {
 
     ///
@@ -19,7 +18,7 @@ namespace nowide {
     /// stored in \a output of size \a output_size (including NULL)
     ///
     /// If there is not enough room NULL is returned, else output is returned.
-    /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+    /// Any illegal sequences are replaced with the replacement character, see #NOWIDE_REPLACEMENT_CHARACTER
     ///
     inline char* narrow(char* output, size_t output_size, const wchar_t* begin, const wchar_t* end)
     {
@@ -30,7 +29,7 @@ namespace nowide {
     /// stored in \a output of size \a output_size (including NULL)
     ///
     /// If there is not enough room NULL is returned, else output is returned.
-    /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+    /// Any illegal sequences are replaced with the replacement character, see #NOWIDE_REPLACEMENT_CHARACTER
     ///
     inline char* narrow(char* output, size_t output_size, const wchar_t* source)
     {
@@ -42,7 +41,7 @@ namespace nowide {
     /// stored in \a output of size \a output_size (including NULL)
     ///
     /// If there is not enough room NULL is returned, else output is returned.
-    /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+    /// Any illegal sequences are replaced with the replacement character, see #NOWIDE_REPLACEMENT_CHARACTER
     ///
     inline wchar_t* widen(wchar_t* output, size_t output_size, const char* begin, const char* end)
     {
@@ -53,7 +52,7 @@ namespace nowide {
     /// most output_size (including NULL)
     ///
     /// If there is not enough room NULL is returned, else output is returned.
-    /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+    /// Any illegal sequences are replaced with the replacement character, see #NOWIDE_REPLACEMENT_CHARACTER
     ///
     inline wchar_t* widen(wchar_t* output, size_t output_size, const char* source)
     {
@@ -65,7 +64,7 @@ namespace nowide {
     ///
     /// \param s Input string
     /// \param count Number of characters to convert
-    /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+    /// Any illegal sequences are replaced with the replacement character, see #NOWIDE_REPLACEMENT_CHARACTER
     ///
     inline std::string narrow(const wchar_t* s, size_t count)
     {
@@ -75,7 +74,7 @@ namespace nowide {
     /// Convert wide string (UTF-16/32) to narrow string (UTF-8).
     ///
     /// \param s NULL terminated input string
-    /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+    /// Any illegal sequences are replaced with the replacement character, see #NOWIDE_REPLACEMENT_CHARACTER
     ///
     inline std::string narrow(const wchar_t* s)
     {
@@ -85,7 +84,7 @@ namespace nowide {
     /// Convert wide string (UTF-16/32) to narrow string (UTF-8).
     ///
     /// \param s Input string
-    /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+    /// Any illegal sequences are replaced with the replacement character, see #NOWIDE_REPLACEMENT_CHARACTER
     ///
     inline std::string narrow(const std::wstring& s)
     {
@@ -97,7 +96,7 @@ namespace nowide {
     ///
     /// \param s Input string
     /// \param count Number of characters to convert
-    /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+    /// Any illegal sequences are replaced with the replacement character, see #NOWIDE_REPLACEMENT_CHARACTER
     ///
     inline std::wstring widen(const char* s, size_t count)
     {
@@ -107,7 +106,7 @@ namespace nowide {
     /// Convert narrow string (UTF-8) to wide string (UTF-16/32).
     ///
     /// \param s NULL terminated input string
-    /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+    /// Any illegal sequences are replaced with the replacement character, see #NOWIDE_REPLACEMENT_CHARACTER
     ///
     inline std::wstring widen(const char* s)
     {
@@ -117,13 +116,12 @@ namespace nowide {
     /// Convert narrow string (UTF-8) to wide string (UTF-16/32).
     ///
     /// \param s Input string
-    /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+    /// Any illegal sequences are replaced with the replacement character, see #NOWIDE_REPLACEMENT_CHARACTER
     ///
     inline std::wstring widen(const std::string& s)
     {
         return widen(s.c_str(), s.size());
     }
 } // namespace nowide
-} // namespace boost
 
 #endif

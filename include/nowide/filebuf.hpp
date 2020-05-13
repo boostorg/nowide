@@ -6,13 +6,13 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_FILEBUF_HPP_INCLUDED
-#define BOOST_NOWIDE_FILEBUF_HPP_INCLUDED
+#ifndef NOWIDE_FILEBUF_HPP_INCLUDED
+#define NOWIDE_FILEBUF_HPP_INCLUDED
 
-#include <boost/nowide/config.hpp>
-#if BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
-#include <boost/nowide/cstdio.hpp>
-#include <boost/nowide/stackstring.hpp>
+#include <nowide/config.hpp>
+#if NOWIDE_USE_FILEBUF_REPLACEMENT
+#include <nowide/cstdio.hpp>
+#include <nowide/stackstring.hpp>
 #include <cassert>
 #include <cstdio>
 #include <iosfwd>
@@ -24,9 +24,8 @@
 #include <fstream>
 #endif
 
-namespace boost {
 namespace nowide {
-#if !BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT && !defined(BOOST_NOWIDE_DOXYGEN)
+#if !NOWIDE_USE_FILEBUF_REPLACEMENT && !defined(NOWIDE_DOXYGEN)
     using std::basic_filebuf;
     using std::filebuf;
 #else // Windows
@@ -51,7 +50,7 @@ namespace nowide {
         typedef std::char_traits<char> Traits;
 
     public:
-#ifdef BOOST_MSVC
+#ifdef NOWIDE_MSVC
 #pragma warning(push)
 #pragma warning(disable : 4351) // new behavior : elements of array will be default initialized
 #endif
@@ -65,10 +64,10 @@ namespace nowide {
             setg(0, 0, 0);
             setp(0, 0);
         }
-#ifdef BOOST_MSVC
+#ifdef NOWIDE_MSVC
 #pragma warning(pop)
 #endif
-#if !BOOST_NOWIDE_CXX11
+#if !NOWIDE_CXX11
     private:
         // Non-copyable
         basic_filebuf(const basic_filebuf&);
@@ -460,6 +459,5 @@ namespace nowide {
 #endif // windows
 
 } // namespace nowide
-} // namespace boost
 
 #endif

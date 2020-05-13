@@ -5,10 +5,10 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_WINDOWS_HPP_INCLUDED
-#define BOOST_NOWIDE_WINDOWS_HPP_INCLUDED
+#ifndef NOWIDE_WINDOWS_HPP_INCLUDED
+#define NOWIDE_WINDOWS_HPP_INCLUDED
 
-#ifdef BOOST_USE_WINDOWS_H
+#ifdef NOWIDE_USE_WINDOWS_H
 #include <windows.h>
 #else
 

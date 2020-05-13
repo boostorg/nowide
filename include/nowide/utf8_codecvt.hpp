@@ -5,20 +5,19 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_UTF8_CODECVT_HPP_INCLUDED
-#define BOOST_NOWIDE_UTF8_CODECVT_HPP_INCLUDED
+#ifndef NOWIDE_UTF8_CODECVT_HPP_INCLUDED
+#define NOWIDE_UTF8_CODECVT_HPP_INCLUDED
 
-#include <boost/nowide/detail/utf.hpp>
-#include <boost/nowide/replacement.hpp>
-#include <boost/cstdint.hpp>
-#include <boost/static_assert.hpp>
+#include <nowide/detail/utf.hpp>
+#include <nowide/replacement.hpp>
+#include <nowide/cstdint.hpp>
+#include <nowide/static_assert.hpp>
 #include <locale>
 
-namespace boost {
 namespace nowide {
 
     // Make sure that mbstate can keep 16 bit of UTF-16 sequence
-    BOOST_STATIC_ASSERT(sizeof(std::mbstate_t) >= 2);
+    NOWIDE_STATIC_ASSERT(sizeof(std::mbstate_t) >= 2);
     namespace detail {
         // Avoid including cstring for std::memcpy
         inline void copy_uint16_t(void* dst, const void* src)
@@ -28,13 +27,13 @@ namespace nowide {
             cdst[0] = csrc[0];
             cdst[1] = csrc[1];
         }
-        inline boost::uint16_t read_state(const std::mbstate_t& src)
+        inline nowide::uint16_t read_state(const std::mbstate_t& src)
         {
-            boost::uint16_t dst;
+            nowide::uint16_t dst;
             copy_uint16_t(&dst, &src);
             return dst;
         }
-        inline void write_state(std::mbstate_t& dst, const boost::uint16_t src)
+        inline void write_state(std::mbstate_t& dst, const nowide::uint16_t src)
         {
             copy_uint16_t(&dst, &src);
         }
@@ -42,24 +41,24 @@ namespace nowide {
 
 #if defined _MSC_VER && _MSC_VER < 1700
 // MSVC do_length is non-standard it counts wide characters instead of narrow and does not change mbstate
-#define BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
+#define NOWIDE_DO_LENGTH_MBSTATE_CONST
 #endif
 
     /// std::codecvt implementation that converts between UTF-8 and UTF-16 or UTF-32
     ///
     /// @tparam CharSize Determines the encoding: 2 for UTF-16, 4 for UTF-32
     ///
-    /// Invalid sequences are replaced by #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+    /// Invalid sequences are replaced by #NOWIDE_REPLACEMENT_CHARACTER
     /// A trailing incomplete sequence will result in a return value of std::codecvt::partial
     template<typename CharType, int CharSize = sizeof(CharType)>
     class utf8_codecvt;
 
     /// Specialization for the UTF-8 <-> UTF-16 variant of the std::codecvt implementation
     template<typename CharType>
-    class BOOST_SYMBOL_VISIBLE utf8_codecvt<CharType, 2> : public std::codecvt<CharType, char, std::mbstate_t>
+    class NOWIDE_SYMBOL_VISIBLE utf8_codecvt<CharType, 2> : public std::codecvt<CharType, char, std::mbstate_t>
     {
     public:
-        BOOST_STATIC_ASSERT_MSG(sizeof(CharType) >= 2, "CharType must be able to store UTF16 code point");
+        NOWIDE_STATIC_ASSERT_MSG(sizeof(CharType) >= 2, "CharType must be able to store UTF16 code point");
 
         utf8_codecvt(size_t refs = 0) : std::codecvt<CharType, char, std::mbstate_t>(refs)
         {}
@@ -88,7 +87,7 @@ namespace nowide {
         }
 
         virtual int do_length(std::mbstate_t
-#ifdef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
+#ifdef NOWIDE_DO_LENGTH_MBSTATE_CONST
                               const
 #endif
                                 & std_state,
@@ -96,8 +95,8 @@ namespace nowide {
                               const char* from_end,
                               size_t max) const
         {
-            boost::uint16_t state = detail::read_state(std_state);
-#ifndef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
+            nowide::uint16_t state = detail::read_state(std_state);
+#ifndef NOWIDE_DO_LENGTH_MBSTATE_CONST
             const char* save_from = from;
 #else
             size_t save_max = max;
@@ -105,10 +104,10 @@ namespace nowide {
             while(max > 0 && from < from_end)
             {
                 const char* prev_from = from;
-                boost::uint32_t ch = detail::utf::utf_traits<char>::decode(from, from_end);
+                nowide::uint32_t ch = detail::utf::utf_traits<char>::decode(from, from_end);
                 if(ch == detail::utf::illegal)
                 {
-                    ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
+                    ch = NOWIDE_REPLACEMENT_CHARACTER;
                 } else if(ch == detail::utf::incomplete)
                 {
                     from = prev_from;
@@ -127,7 +126,7 @@ namespace nowide {
                     }
                 }
             }
-#ifndef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
+#ifndef NOWIDE_DO_LENGTH_MBSTATE_CONST
             detail::write_state(std_state, state);
             return static_cast<int>(from - save_from);
 #else
@@ -150,7 +149,7 @@ namespace nowide {
             //
             // if 0 no code above >0xFFFF observed, of 1 a code above 0xFFFF observed
             // and first pair is written, but no input consumed
-            boost::uint16_t state = detail::read_state(std_state);
+            nowide::uint16_t state = detail::read_state(std_state);
             while(to < to_end && from < from_end)
             {
                 const char* from_saved = from;
@@ -159,7 +158,7 @@ namespace nowide {
 
                 if(ch == detail::utf::illegal)
                 {
-                    ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
+                    ch = NOWIDE_REPLACEMENT_CHARACTER;
                 } else if(ch == detail::utf::incomplete)
                 {
                     from = from_saved;
@@ -182,10 +181,10 @@ namespace nowide {
                     //    once again and then we would consume our input together with writing
                     //    second surrogate pair
                     ch -= 0x10000;
-                    boost::uint16_t vh = static_cast<boost::uint16_t>(ch >> 10);
-                    boost::uint16_t vl = ch & 0x3FF;
-                    boost::uint16_t w1 = vh + 0xD800;
-                    boost::uint16_t w2 = vl + 0xDC00;
+                    nowide::uint16_t vh = static_cast<nowide::uint16_t>(ch >> 10);
+                    nowide::uint16_t vl = ch & 0x3FF;
+                    nowide::uint16_t w1 = vh + 0xD800;
+                    nowide::uint16_t w2 = vl + 0xDC00;
                     if(state == 0)
                     {
                         from = from_saved;
@@ -222,27 +221,27 @@ namespace nowide {
             // State: state!=0 - a first surrogate pair was observed (state = first pair),
             // we expect the second one to come and then zero the state
             ///
-            boost::uint16_t state = detail::read_state(std_state);
+            nowide::uint16_t state = detail::read_state(std_state);
             while(to < to_end && from < from_end)
             {
-                boost::uint32_t ch = 0;
+                nowide::uint32_t ch = 0;
                 if(state != 0)
                 {
                     // if the state indicates that 1st surrogate pair was written
                     // we should make sure that the second one that comes is actually
                     // second surrogate
-                    boost::uint16_t w1 = state;
-                    boost::uint16_t w2 = *from;
+                    nowide::uint16_t w1 = state;
+                    nowide::uint16_t w2 = *from;
                     // we don't forward from as writing may fail to incomplete or
                     // partial conversion
                     if(0xDC00 <= w2 && w2 <= 0xDFFF)
                     {
-                        boost::uint16_t vh = w1 - 0xD800;
-                        boost::uint16_t vl = w2 - 0xDC00;
+                        nowide::uint16_t vh = w1 - 0xD800;
+                        nowide::uint16_t vl = w2 - 0xDC00;
                         ch = ((uint32_t(vh) << 10) | vl) + 0x10000;
                     } else
                     {
-                        ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
+                        ch = NOWIDE_REPLACEMENT_CHARACTER;
                     }
                 } else
                 {
@@ -253,7 +252,7 @@ namespace nowide {
                         // it into the state and consume it, note we don't
                         // go forward as it should be illegal so we increase
                         // the from pointer manually
-                        state = static_cast<boost::uint16_t>(ch);
+                        state = static_cast<nowide::uint16_t>(ch);
                         from++;
                         continue;
                     } else if(0xDC00 <= ch && ch <= 0xDFFF)
@@ -261,7 +260,7 @@ namespace nowide {
                         // if we observe second surrogate pair and
                         // first only may be expected we should break from the loop with error
                         // as it is illegal input
-                        ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
+                        ch = NOWIDE_REPLACEMENT_CHARACTER;
                     }
                 }
                 if(!detail::utf::is_valid_codepoint(ch))
@@ -290,7 +289,7 @@ namespace nowide {
 
     /// Specialization for the UTF-8 <-> UTF-32 variant of the std::codecvt implementation
     template<typename CharType>
-    class BOOST_SYMBOL_VISIBLE utf8_codecvt<CharType, 4> : public std::codecvt<CharType, char, std::mbstate_t>
+    class NOWIDE_SYMBOL_VISIBLE utf8_codecvt<CharType, 4> : public std::codecvt<CharType, char, std::mbstate_t>
     {
     public:
         utf8_codecvt(size_t refs = 0) : std::codecvt<CharType, char, std::mbstate_t>(refs)
@@ -318,7 +317,7 @@ namespace nowide {
         }
 
         virtual int do_length(std::mbstate_t
-#ifdef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
+#ifdef NOWIDE_DO_LENGTH_MBSTATE_CONST
                               const
 #endif
                                 & /*state*/,
@@ -326,7 +325,7 @@ namespace nowide {
                               const char* from_end,
                               size_t max) const
         {
-#ifndef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
+#ifndef NOWIDE_DO_LENGTH_MBSTATE_CONST
             const char* start_from = from;
 #else
             size_t save_max = max;
@@ -335,18 +334,18 @@ namespace nowide {
             while(max > 0 && from < from_end)
             {
                 const char* save_from = from;
-                boost::uint32_t ch = detail::utf::utf_traits<char>::decode(from, from_end);
+                nowide::uint32_t ch = detail::utf::utf_traits<char>::decode(from, from_end);
                 if(ch == detail::utf::incomplete)
                 {
                     from = save_from;
                     break;
                 } else if(ch == detail::utf::illegal)
                 {
-                    ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
+                    ch = NOWIDE_REPLACEMENT_CHARACTER;
                 }
                 max--;
             }
-#ifndef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
+#ifndef NOWIDE_DO_LENGTH_MBSTATE_CONST
             return from - start_from;
 #else
             return save_max - max;
@@ -371,7 +370,7 @@ namespace nowide {
 
                 if(ch == detail::utf::illegal)
                 {
-                    ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
+                    ch = NOWIDE_REPLACEMENT_CHARACTER;
                 } else if(ch == detail::utf::incomplete)
                 {
                     r = std::codecvt_base::partial;
@@ -398,11 +397,11 @@ namespace nowide {
             std::codecvt_base::result r = std::codecvt_base::ok;
             while(to < to_end && from < from_end)
             {
-                boost::uint32_t ch = 0;
+                nowide::uint32_t ch = 0;
                 ch = *from;
                 if(!detail::utf::is_valid_codepoint(ch))
                 {
-                    ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
+                    ch = NOWIDE_REPLACEMENT_CHARACTER;
                 }
                 int len = detail::utf::utf_traits<char>::width(ch);
                 if(to_end - to < len)
@@ -422,6 +421,5 @@ namespace nowide {
     };
 
 } // namespace nowide
-} // namespace boost
 
 #endif

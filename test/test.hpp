@@ -6,8 +6,8 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_LIB_TEST_H_INCLUDED
-#define BOOST_NOWIDE_LIB_TEST_H_INCLUDED
+#ifndef NOWIDE_LIB_TEST_H_INCLUDED
+#define NOWIDE_LIB_TEST_H_INCLUDED
 
 #include <cstdlib>
 #include <iostream>
@@ -18,7 +18,6 @@
 #include <crtdbg.h>
 #endif
 
-namespace boost {
 namespace nowide {
     struct test_monitor
     {
@@ -36,11 +35,10 @@ namespace nowide {
         }
     };
 } // namespace nowide
-} // namespace boost
 
-inline boost::nowide::test_monitor& test_mon()
+inline nowide::test_monitor& test_mon()
 {
-    static boost::nowide::test_monitor instance;
+    static nowide::test_monitor instance;
     return instance;
 }
 
@@ -88,9 +86,9 @@ inline void test_equal_impl(const T& lhs, const U& rhs, const char* file, const 
         DISABLE_CONST_EXPR_DETECTED                                      \
     } while(0) DISABLE_CONST_EXPR_DETECTED_POP
 
-#endif // #ifndef BOOST_NOWIDE_LIB_TEST_H_INCLUDED
+#endif // #ifndef NOWIDE_LIB_TEST_H_INCLUDED
 
-#ifndef BOOST_NOWIDE_TEST_NO_MAIN
+#ifndef NOWIDE_TEST_NO_MAIN
 // Tests should implement this
 void test_main(int argc, char** argv, char** env);
 

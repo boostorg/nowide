@@ -1,5 +1,5 @@
 # Add common options for the current library project
-if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR OR BOOST_SUPERPROJECT_SOURCE_DIR)
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   set(def_INSTALL ON)
   set(def_WERROR ON)
 else()
@@ -8,7 +8,7 @@ else()
 endif()
 
 string(TOUPPER ${PROJECT_NAME} name)
-string(REPLACE BOOST_ Boost_ name ${name})
+string(REPLACE BOOST_ Nowide_ name ${name})
 
 option(${name}_INSTALL "Install library" "${def_INSTALL}")
 option(${name}_WERROR "Treat warnings as errors" "${def_WERROR}")

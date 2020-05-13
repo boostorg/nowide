@@ -5,17 +5,16 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_CSTDLIB_HPP_INCLUDED
-#define BOOST_NOWIDE_CSTDLIB_HPP_INCLUDED
+#ifndef NOWIDE_CSTDLIB_HPP_INCLUDED
+#define NOWIDE_CSTDLIB_HPP_INCLUDED
 
-#include <boost/nowide/config.hpp>
-#if !defined(BOOST_WINDOWS)
+#include <nowide/config.hpp>
+#if !defined(NOWIDE_WINDOWS)
 #include <cstdlib>
 #endif
 
-namespace boost {
 namespace nowide {
-#if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_DOXYGEN)
+#if !defined(NOWIDE_WINDOWS) && !defined(NOWIDE_DOXYGEN)
     using std::getenv;
     using std::system;
 #else
@@ -24,12 +23,12 @@ namespace nowide {
     ///
     /// This function is not thread safe or reenterable as defined by the standard library
     ///
-    BOOST_NOWIDE_DECL char* getenv(const char* key);
+    NOWIDE_DECL char* getenv(const char* key);
 
     ///
     /// Same as std::system but cmd is UTF-8.
     ///
-    BOOST_NOWIDE_DECL int system(const char* cmd);
+    NOWIDE_DECL int system(const char* cmd);
 
 #endif
     ///
@@ -41,7 +40,7 @@ namespace nowide {
     /// \a key and \a value are UTF-8 on Windows
     /// \return zero on success, else nonzero
     ///
-    BOOST_NOWIDE_DECL int setenv(const char* key, const char* value, int overwrite);
+    NOWIDE_DECL int setenv(const char* key, const char* value, int overwrite);
 
     ///
     /// \brief Remove environment variable \a key
@@ -49,7 +48,7 @@ namespace nowide {
     /// \a key is UTF-8 on Windows
     /// \return zero on success, else nonzero
     ///
-    BOOST_NOWIDE_DECL int unsetenv(const char* key);
+    NOWIDE_DECL int unsetenv(const char* key);
 
     ///
     /// \brief Adds or changes an environment variable, \a string must be in format KEY=VALUE
@@ -59,9 +58,8 @@ namespace nowide {
     /// \a string is UTF-8 on Windows
     /// \return zero on success, else nonzero
     ///
-    BOOST_NOWIDE_DECL int putenv(char* string);
+    NOWIDE_DECL int putenv(char* string);
 
 } // namespace nowide
-} // namespace boost
 
 #endif

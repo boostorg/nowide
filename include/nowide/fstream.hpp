@@ -5,15 +5,14 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_FSTREAM_HPP_INCLUDED
-#define BOOST_NOWIDE_FSTREAM_HPP_INCLUDED
+#ifndef NOWIDE_FSTREAM_HPP_INCLUDED
+#define NOWIDE_FSTREAM_HPP_INCLUDED
 
-#include <boost/nowide/config.hpp>
-#include <boost/nowide/filebuf.hpp>
+#include <nowide/config.hpp>
+#include <nowide/filebuf.hpp>
 #include <istream>
 #include <ostream>
 
-namespace boost {
 namespace nowide {
     /// \cond INTERNAL
     namespace detail {
@@ -77,7 +76,7 @@ namespace nowide {
         {
             open(file_name, mode);
         }
-#if BOOST_NOWIDE_USE_WCHAR_OVERLOADS
+#if NOWIDE_USE_WCHAR_OVERLOADS
         explicit basic_ifstream(const wchar_t* file_name, std::ios_base::openmode mode = std::ios_base::in)
         {
             open(file_name, mode);
@@ -100,7 +99,7 @@ namespace nowide {
         using fstream_impl::is_open;
         using fstream_impl::close;
         using fstream_impl::rdbuf;
-#if BOOST_NOWIDE_CXX11
+#if NOWIDE_CXX11
         using fstream_impl::swap;
         basic_ifstream(const basic_ifstream& other) = delete;
         basic_ifstream& operator=(const basic_ifstream& rhs) = delete;
@@ -130,7 +129,7 @@ namespace nowide {
         {
             open(file_name, mode);
         }
-#if BOOST_NOWIDE_USE_WCHAR_OVERLOADS
+#if NOWIDE_USE_WCHAR_OVERLOADS
         explicit basic_ofstream(const wchar_t* file_name, std::ios_base::openmode mode = std::ios_base::out)
         {
             open(file_name, mode);
@@ -152,7 +151,7 @@ namespace nowide {
         using fstream_impl::is_open;
         using fstream_impl::close;
         using fstream_impl::rdbuf;
-#if BOOST_NOWIDE_CXX11
+#if NOWIDE_CXX11
         using fstream_impl::swap;
         basic_ofstream(const basic_ofstream& other) = delete;
         basic_ofstream& operator=(const basic_ofstream& rhs) = delete;
@@ -166,7 +165,7 @@ namespace nowide {
 #endif
     };
 
-#ifdef BOOST_MSVC
+#ifdef NOWIDE_MSVC
 #pragma warning(push)
 #pragma warning(disable : 4250) // <class> : inherits <method> via dominance
 #endif
@@ -186,7 +185,7 @@ namespace nowide {
         {
             open(file_name, mode);
         }
-#if BOOST_NOWIDE_USE_WCHAR_OVERLOADS
+#if NOWIDE_USE_WCHAR_OVERLOADS
         explicit basic_fstream(const wchar_t* file_name,
                                std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
         {
@@ -210,7 +209,7 @@ namespace nowide {
         using fstream_impl::is_open;
         using fstream_impl::close;
         using fstream_impl::rdbuf;
-#if BOOST_NOWIDE_CXX11
+#if NOWIDE_CXX11
         using fstream_impl::swap;
         basic_fstream(const basic_fstream& other) = delete;
         basic_fstream& operator=(const basic_fstream& rhs) = delete;
@@ -223,7 +222,7 @@ namespace nowide {
         }
 #endif
     };
-#if BOOST_NOWIDE_CXX11
+#if NOWIDE_CXX11
     template<typename CharType, typename Traits>
     void swap(basic_filebuf<CharType, Traits>& lhs, basic_filebuf<CharType, Traits>& rhs)
     {
@@ -293,7 +292,7 @@ namespace nowide {
             fstream_impl() : stream_base(&buf_)
             {}
 
-#if BOOST_NOWIDE_CXX11
+#if NOWIDE_CXX11
             fstream_impl(const fstream_impl& other) = delete;
             fstream_impl& operator=(const fstream_impl& other) = delete;
 
@@ -333,7 +332,7 @@ namespace nowide {
                 else
                     clear();
             }
-#if BOOST_NOWIDE_USE_WCHAR_OVERLOADS
+#if NOWIDE_USE_WCHAR_OVERLOADS
             void open(const wchar_t* file_name, std::ios_base::openmode mode = T_StreamType::mode())
             {
                 if(!rdbuf()->open(file_name, mode | T_StreamType::mode_modifier()))
@@ -361,7 +360,7 @@ namespace nowide {
                 return const_cast<internal_buffer_type*>(&buf_);
             }
         };
-#ifdef BOOST_MSVC
+#ifdef NOWIDE_MSVC
 #pragma warning(pop)
 #endif
         /// Trait to heuristically check for a *\::filesystem::path
@@ -401,6 +400,5 @@ namespace nowide {
         {};
     } // namespace detail
 } // namespace nowide
-} // namespace boost
 
 #endif

@@ -5,15 +5,15 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_REPLACEMENT_HPP_INCLUDED
-#define BOOST_NOWIDE_REPLACEMENT_HPP_INCLUDED
+#ifndef NOWIDE_REPLACEMENT_HPP_INCLUDED
+#define NOWIDE_REPLACEMENT_HPP_INCLUDED
 
 /// @file
 
-/// \def BOOST_NOWIDE_REPLACEMENT_CHARACTER
+/// \def NOWIDE_REPLACEMENT_CHARACTER
 /// Unicode character to be used to replace invalid UTF-8 sequences
-#ifndef BOOST_NOWIDE_REPLACEMENT_CHARACTER
-#define BOOST_NOWIDE_REPLACEMENT_CHARACTER 0xFFFD
+#ifndef NOWIDE_REPLACEMENT_CHARACTER
+#define NOWIDE_REPLACEMENT_CHARACTER 0xFFFD
 #endif
 
 #endif // boost/nowide/replacement.hpp

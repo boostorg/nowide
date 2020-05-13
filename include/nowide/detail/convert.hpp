@@ -5,15 +5,14 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_DETAIL_CONVERT_HPP_INCLUDED
-#define BOOST_NOWIDE_DETAIL_CONVERT_HPP_INCLUDED
+#ifndef NOWIDE_DETAIL_CONVERT_HPP_INCLUDED
+#define NOWIDE_DETAIL_CONVERT_HPP_INCLUDED
 
-#include <boost/nowide/detail/utf.hpp>
-#include <boost/nowide/replacement.hpp>
+#include <nowide/detail/utf.hpp>
+#include <nowide/replacement.hpp>
 #include <iterator>
 #include <string>
 
-namespace boost {
 namespace nowide {
     /// \cond INTERNAL
     namespace detail {
@@ -24,7 +23,7 @@ namespace nowide {
         /// \return original buffer containing the NULL terminated string or NULL
         ///
         /// If there is not enough room in the buffer NULL is returned, and the content of the buffer is undefined.
-        /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+        /// Any illegal sequences are replaced with the replacement character, see #NOWIDE_REPLACEMENT_CHARACTER
         ///
         template<typename CharOut, typename CharIn>
         CharOut*
@@ -40,7 +39,7 @@ namespace nowide {
                 code_point c = utf_traits<CharIn>::template decode(source_begin, source_end);
                 if(c == illegal || c == incomplete)
                 {
-                    c = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
+                    c = NOWIDE_REPLACEMENT_CHARACTER;
                 }
                 size_t width = utf_traits<CharOut>::width(c);
                 if(buffer_size < width)
@@ -59,7 +58,7 @@ namespace nowide {
         /// Convert the UTF sequences in range [begin, end) from \tparam CharIn to \tparam CharOut
         /// and return it as a string
         ///
-        /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+        /// Any illegal sequences are replaced with the replacement character, see #NOWIDE_REPLACEMENT_CHARACTER
         ///
         template<typename CharOut, typename CharIn>
         std::basic_string<CharOut> convert_string(const CharIn* begin, const CharIn* end)
@@ -75,7 +74,7 @@ namespace nowide {
                 c = utf_traits<CharIn>::template decode(begin, end);
                 if(c == illegal || c == incomplete)
                 {
-                    c = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
+                    c = NOWIDE_REPLACEMENT_CHARACTER;
                 }
                 utf_traits<CharOut>::template encode(c, inserter);
             }
@@ -97,6 +96,5 @@ namespace nowide {
     } // namespace detail
       /// \endcond
 } // namespace nowide
-} // namespace boost
 
 #endif

@@ -7,13 +7,13 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#define BOOST_NOWIDE_TEST_NO_MAIN
+#define NOWIDE_TEST_NO_MAIN
 
-#include <boost/nowide/convert.hpp>
-#include <boost/nowide/cstdio.hpp>
-#include <boost/nowide/fstream.hpp>
-#define BOOST_CHRONO_HEADER_ONLY
-#include <boost/chrono.hpp>
+#include <nowide/convert.hpp>
+#include <nowide/cstdio.hpp>
+#include <nowide/fstream.hpp>
+#define NOWIDE_CHRONO_HEADER_ONLY
+#include <chrono>
 #include <algorithm>
 #include <cstdio>
 #include <fstream>
@@ -34,7 +34,7 @@ Value get(const std::map<Key, Value>& map, const Key2& key)
     return it->second;
 }
 
-namespace nw = boost::nowide;
+namespace nw = nowide;
 template<typename FStream>
 class io_fstream
 {
@@ -108,15 +108,15 @@ private:
 #if defined(_MSC_VER)
 extern "C" void _ReadWriteBarrier(void);
 #pragma intrinsic(_ReadWriteBarrier)
-#define BOOST_NOWIDE_READ_WRITE_BARRIER() _ReadWriteBarrier()
+#define NOWIDE_READ_WRITE_BARRIER() _ReadWriteBarrier()
 #elif defined(__GNUC__)
 #if(__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
-#define BOOST_NOWIDE_READ_WRITE_BARRIER() __sync_synchronize()
+#define NOWIDE_READ_WRITE_BARRIER() __sync_synchronize()
 #else
-#define BOOST_NOWIDE_READ_WRITE_BARRIER() __asm__ __volatile__("" : : : "memory")
+#define NOWIDE_READ_WRITE_BARRIER() __asm__ __volatile__("" : : : "memory")
 #endif
 #else
-#define BOOST_NOWIDE_READ_WRITE_BARRIER() (void)
+#define NOWIDE_READ_WRITE_BARRIER() (void)
 #endif
 
 struct perf_data
@@ -144,9 +144,9 @@ static const int MAX_BLOCK_SIZE = 8192;
 template<typename FStream>
 perf_data test_io(const char* file)
 {
-    namespace chrono = boost::chrono;
+    namespace chrono = std::chrono;
     typedef chrono::high_resolution_clock clock;
-    typedef chrono::duration<double, boost::milli> milliseconds;
+    typedef chrono::duration<double, std::milli> milliseconds;
     perf_data results;
     // Use vector to force write to memory and avoid possible reordering
     std::vector<clock::time_point> start_and_end(2);
@@ -157,11 +157,11 @@ perf_data test_io(const char* file)
         FStream tmp(file, false);
         tmp.rewind();
         start_and_end[0] = clock::now();
-        BOOST_NOWIDE_READ_WRITE_BARRIER();
+        NOWIDE_READ_WRITE_BARRIER();
         for(int size = 0; size < data_size; size += block_size)
         {
             tmp.write(&buf[0], block_size);
-            BOOST_NOWIDE_READ_WRITE_BARRIER();
+            NOWIDE_READ_WRITE_BARRIER();
         }
         tmp.flush();
         start_and_end[1] = clock::now();
@@ -181,11 +181,11 @@ perf_data test_io(const char* file)
         FStream tmp(file, true);
         tmp.rewind();
         start_and_end[0] = clock::now();
-        BOOST_NOWIDE_READ_WRITE_BARRIER();
+        NOWIDE_READ_WRITE_BARRIER();
         for(int size = 0; size < data_size; size += block_size)
         {
             tmp.read(&buf[0], block_size);
-            BOOST_NOWIDE_READ_WRITE_BARRIER();
+            NOWIDE_READ_WRITE_BARRIER();
         }
         start_and_end[1] = clock::now();
         const milliseconds duration = chrono::duration_cast<milliseconds>(start_and_end[1] - start_and_end[0]);

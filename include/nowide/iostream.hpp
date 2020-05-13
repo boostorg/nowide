@@ -5,28 +5,26 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_IOSTREAM_HPP_INCLUDED
-#define BOOST_NOWIDE_IOSTREAM_HPP_INCLUDED
+#ifndef NOWIDE_IOSTREAM_HPP_INCLUDED
+#define NOWIDE_IOSTREAM_HPP_INCLUDED
 
-#include <boost/nowide/config.hpp>
-#ifdef BOOST_WINDOWS
-#include <boost/scoped_ptr.hpp>
+#include <nowide/config.hpp>
+#ifdef NOWIDE_WINDOWS
+#include <nowide/scoped_ptr.hpp>
 #include <istream>
 #include <ostream>
 
-#include <boost/config/abi_prefix.hpp> // must be the last #include
 #else
 #include <iostream>
 #endif
 
-#ifdef BOOST_MSVC
+#ifdef NOWIDE_MSVC
 #pragma warning(push)
 #pragma warning(disable : 4251)
 #endif
 
-namespace boost {
 namespace nowide {
-#if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_DOXYGEN)
+#if !defined(NOWIDE_WINDOWS) && !defined(NOWIDE_DOXYGEN)
     using std::cout;
     using std::cerr;
     using std::cin;
@@ -38,7 +36,7 @@ namespace nowide {
         class console_output_buffer;
         class console_input_buffer;
 
-        class BOOST_NOWIDE_DECL winconsole_ostream : public std::ostream
+        class NOWIDE_DECL winconsole_ostream : public std::ostream
         {
             winconsole_ostream(const winconsole_ostream&);
             void operator=(const winconsole_ostream&);
@@ -48,10 +46,10 @@ namespace nowide {
             ~winconsole_ostream();
 
         private:
-            boost::scoped_ptr<console_output_buffer> d;
+            nowide::scoped_ptr<console_output_buffer> d;
         };
 
-        class BOOST_NOWIDE_DECL winconsole_istream : public std::istream
+        class NOWIDE_DECL winconsole_istream : public std::istream
         {
             winconsole_istream(const winconsole_istream&);
             void operator=(const winconsole_istream&);
@@ -61,7 +59,7 @@ namespace nowide {
             ~winconsole_istream();
 
         private:
-            boost::scoped_ptr<console_input_buffer> d;
+            nowide::scoped_ptr<console_input_buffer> d;
         };
     } // namespace detail
 
@@ -72,37 +70,35 @@ namespace nowide {
     ///
     /// Note, the stream is not synchronized with stdio and not affected by std::ios::sync_with_stdio
     ///
-    extern BOOST_NOWIDE_DECL detail::winconsole_istream cin;
+    extern NOWIDE_DECL detail::winconsole_istream cin;
     ///
     /// \brief Same as std::cout, but uses UTF-8
     ///
     /// Note, the stream is not synchronized with stdio and not affected by std::ios::sync_with_stdio
     ///
-    extern BOOST_NOWIDE_DECL detail::winconsole_ostream cout;
+    extern NOWIDE_DECL detail::winconsole_ostream cout;
     ///
     /// \brief Same as std::cerr, but uses UTF-8
     ///
     /// Note, the stream is not synchronized with stdio and not affected by std::ios::sync_with_stdio
     ///
-    extern BOOST_NOWIDE_DECL detail::winconsole_ostream cerr;
+    extern NOWIDE_DECL detail::winconsole_ostream cerr;
     ///
     /// \brief Same as std::clog, but uses UTF-8
     ///
     /// Note, the stream is not synchronized with stdio and not affected by std::ios::sync_with_stdio
     ///
-    extern BOOST_NOWIDE_DECL detail::winconsole_ostream clog;
+    extern NOWIDE_DECL detail::winconsole_ostream clog;
 
 #endif
 
 } // namespace nowide
-} // namespace boost
 
-#ifdef BOOST_MSVC
+#ifdef NOWIDE_MSVC
 #pragma warning(pop)
 #endif
 
-#ifdef BOOST_WINDOWS
-#include <boost/config/abi_suffix.hpp> // pops abi_prefix.hpp pragmas
+#ifdef NOWIDE_WINDOWS
 #endif
 
 #endif

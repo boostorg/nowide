@@ -5,13 +5,12 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_UTF_HPP_INCLUDED
-#define BOOST_NOWIDE_UTF_HPP_INCLUDED
+#ifndef NOWIDE_UTF_HPP_INCLUDED
+#define NOWIDE_UTF_HPP_INCLUDED
 
-#include <boost/nowide/config.hpp>
-#include <boost/cstdint.hpp>
+#include <nowide/config.hpp>
+#include <nowide/cstdint.hpp>
 
-namespace boost {
 namespace nowide {
     namespace detail {
         ///
@@ -49,7 +48,7 @@ namespace nowide {
                 return true;
             }
 
-#ifdef BOOST_NOWIDE_DOXYGEN
+#ifdef NOWIDE_DOXYGEN
             ///
             /// \brief UTF Traits class - functions to convert UTF sequences to and from Unicode code points
             ///
@@ -144,13 +143,13 @@ namespace nowide {
                     unsigned char c = ci;
                     if(c < 128)
                         return 0;
-                    if(BOOST_UNLIKELY(c < 194))
+                    if(NOWIDE_UNLIKELY(c < 194))
                         return -1;
                     if(c < 224)
                         return 1;
                     if(c < 240)
                         return 2;
-                    if(BOOST_LIKELY(c <= 244))
+                    if(NOWIDE_LIKELY(c <= 244))
                         return 3;
                     return -1;
                 }
@@ -165,7 +164,7 @@ namespace nowide {
                     } else if(value <= 0x7FF)
                     {
                         return 2;
-                    } else if(BOOST_LIKELY(value <= 0xFFFF))
+                    } else if(NOWIDE_LIKELY(value <= 0xFFFF))
                     {
                         return 3;
                     } else
@@ -188,7 +187,7 @@ namespace nowide {
                 template<typename Iterator>
                 static code_point decode(Iterator& p, Iterator e)
                 {
-                    if(BOOST_UNLIKELY(p == e))
+                    if(NOWIDE_UNLIKELY(p == e))
                         return incomplete;
 
                     unsigned char lead = *p++;
@@ -196,7 +195,7 @@ namespace nowide {
                     // First byte is fully validated here
                     int trail_size = trail_length(lead);
 
-                    if(BOOST_UNLIKELY(trail_size < 0))
+                    if(NOWIDE_UNLIKELY(trail_size < 0))
                         return illegal;
 
                     //
@@ -213,23 +212,23 @@ namespace nowide {
                     switch(trail_size)
                     {
                     case 3:
-                        if(BOOST_UNLIKELY(p == e))
+                        if(NOWIDE_UNLIKELY(p == e))
                             return incomplete;
                         tmp = *p++;
                         if(!is_trail(tmp))
                             return illegal;
                         c = (c << 6) | (tmp & 0x3F);
-                        BOOST_NOWIDE_FALLTHROUGH;
+                        NOWIDE_FALLTHROUGH;
                     case 2:
-                        if(BOOST_UNLIKELY(p == e))
+                        if(NOWIDE_UNLIKELY(p == e))
                             return incomplete;
                         tmp = *p++;
                         if(!is_trail(tmp))
                             return illegal;
                         c = (c << 6) | (tmp & 0x3F);
-                        BOOST_NOWIDE_FALLTHROUGH;
+                        NOWIDE_FALLTHROUGH;
                     case 1:
-                        if(BOOST_UNLIKELY(p == e))
+                        if(NOWIDE_UNLIKELY(p == e))
                             return incomplete;
                         tmp = *p++;
                         if(!is_trail(tmp))
@@ -239,11 +238,11 @@ namespace nowide {
 
                     // Check code point validity: no surrogates and
                     // valid range
-                    if(BOOST_UNLIKELY(!is_valid_codepoint(c)))
+                    if(NOWIDE_UNLIKELY(!is_valid_codepoint(c)))
                         return illegal;
 
                     // make sure it is the most compact representation
-                    if(BOOST_UNLIKELY(width(c) != trail_size + 1))
+                    if(NOWIDE_UNLIKELY(width(c) != trail_size + 1))
                         return illegal;
 
                     return c;
@@ -260,7 +259,7 @@ namespace nowide {
 
                     if(lead < 224)
                         trail_size = 1;
-                    else if(BOOST_LIKELY(lead < 240)) // non-BMP rare
+                    else if(NOWIDE_LIKELY(lead < 240)) // non-BMP rare
                         trail_size = 2;
                     else
                         trail_size = 3;
@@ -269,8 +268,8 @@ namespace nowide {
 
                     switch(trail_size)
                     {
-                    case 3: c = (c << 6) | (static_cast<unsigned char>(*p++) & 0x3F); BOOST_NOWIDE_FALLTHROUGH;
-                    case 2: c = (c << 6) | (static_cast<unsigned char>(*p++) & 0x3F); BOOST_NOWIDE_FALLTHROUGH;
+                    case 3: c = (c << 6) | (static_cast<unsigned char>(*p++) & 0x3F); NOWIDE_FALLTHROUGH;
+                    case 2: c = (c << 6) | (static_cast<unsigned char>(*p++) & 0x3F); NOWIDE_FALLTHROUGH;
                     case 1: c = (c << 6) | (static_cast<unsigned char>(*p++) & 0x3F);
                     }
 
@@ -287,7 +286,7 @@ namespace nowide {
                     {
                         *out++ = static_cast<char_type>((value >> 6) | 0xC0);
                         *out++ = static_cast<char_type>((value & 0x3F) | 0x80);
-                    } else if(BOOST_LIKELY(value <= 0xFFFF))
+                    } else if(NOWIDE_LIKELY(value <= 0xFFFF))
                     {
                         *out++ = static_cast<char_type>((value >> 12) | 0xE0);
                         *out++ = static_cast<char_type>(((value >> 6) & 0x3F) | 0x80);
@@ -347,10 +346,10 @@ namespace nowide {
                 template<typename It>
                 static code_point decode(It& current, It last)
                 {
-                    if(BOOST_UNLIKELY(current == last))
+                    if(NOWIDE_UNLIKELY(current == last))
                         return incomplete;
                     uint16_t w1 = *current++;
-                    if(BOOST_LIKELY(w1 < 0xD800 || 0xDFFF < w1))
+                    if(NOWIDE_LIKELY(w1 < 0xD800 || 0xDFFF < w1))
                     {
                         return w1;
                     }
@@ -367,7 +366,7 @@ namespace nowide {
                 static code_point decode_valid(It& current)
                 {
                     uint16_t w1 = *current++;
-                    if(BOOST_LIKELY(w1 < 0xD800 || 0xDFFF < w1))
+                    if(NOWIDE_LIKELY(w1 < 0xD800 || 0xDFFF < w1))
                     {
                         return w1;
                     }
@@ -383,7 +382,7 @@ namespace nowide {
                 template<typename It>
                 static It encode(code_point u, It out)
                 {
-                    if(BOOST_LIKELY(u <= 0xFFFF))
+                    if(NOWIDE_LIKELY(u <= 0xFFFF))
                     {
                         *out++ = static_cast<char_type>(u);
                     } else
@@ -424,10 +423,10 @@ namespace nowide {
                 template<typename It>
                 static code_point decode(It& current, It last)
                 {
-                    if(BOOST_UNLIKELY(current == last))
+                    if(NOWIDE_UNLIKELY(current == last))
                         return incomplete;
                     code_point c = *current++;
-                    if(BOOST_UNLIKELY(!is_valid_codepoint(c)))
+                    if(NOWIDE_UNLIKELY(!is_valid_codepoint(c)))
                         return illegal;
                     return c;
                 }
@@ -450,6 +449,5 @@ namespace nowide {
         } // namespace utf
     }     // namespace detail
 } // namespace nowide
-} // namespace boost
 
 #endif

@@ -9,10 +9,10 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include <boost/nowide/cstdlib.hpp>
+#include <nowide/cstdlib.hpp>
 
-#include <boost/nowide/args.hpp>
-#include <boost/nowide/detail/convert.hpp>
+#include <nowide/args.hpp>
+#include <nowide/detail/convert.hpp>
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
@@ -35,7 +35,7 @@ bool is_ascii(const std::string& s)
 std::string replace_non_ascii(const std::string& s)
 {
     std::string::const_iterator it = s.begin();
-    namespace utf = boost::nowide::detail::utf;
+    namespace utf = nowide::detail::utf;
     typedef utf::utf_traits<char> utf8;
     std::string result;
     result.reserve(s.size());
@@ -83,7 +83,7 @@ void compare_getenv(char** env)
         TEST(key_end);
         std::string key = std::string(key_begin, key_end);
         const char* std_value = std::getenv(key.c_str());
-        const char* bnw_value = boost::nowide::getenv(key.c_str());
+        const char* bnw_value = nowide::getenv(key.c_str());
         // If std_value is set, bnw value must be too and be equal, else bnw value must be unset too
         if(std_value)
         {
@@ -106,17 +106,17 @@ void run_child(int argc, char** argv, char** env)
     TEST(argv[2] == 0);
 
     // Test getenv
-    TEST(boost::nowide::getenv("BOOST_NOWIDE_TEST"));
-    TEST_EQ(boost::nowide::getenv("BOOST_NOWIDE_TEST"), example);
-    TEST(boost::nowide::getenv("BOOST_NOWIDE_TEST_NONE") == 0);
+    TEST(nowide::getenv("NOWIDE_TEST"));
+    TEST_EQ(nowide::getenv("NOWIDE_TEST"), example);
+    TEST(nowide::getenv("NOWIDE_TEST_NONE") == 0);
     // Empty variables are unreliable on windows, hence skip. E.g. using "set FOO=" unsets FOO
-#ifndef BOOST_WINDOWS
-    TEST(boost::nowide::getenv("BOOST_NOWIDE_EMPTY"));
-    TEST_EQ(boost::nowide::getenv("BOOST_NOWIDE_EMPTY"), std::string());
+#ifndef NOWIDE_WINDOWS
+    TEST(nowide::getenv("NOWIDE_EMPTY"));
+    TEST_EQ(nowide::getenv("NOWIDE_EMPTY"), std::string());
 #endif // !_WIN32
 
     // This must be contained in env
-    std::string sample = "BOOST_NOWIDE_TEST=" + example;
+    std::string sample = "NOWIDE_TEST=" + example;
     bool found = false;
     for(char** e = env; *e != 0; e++)
     {
@@ -130,22 +130,22 @@ void run_child(int argc, char** argv, char** env)
 
 void run_parent(const char* exe_path)
 {
-#if BOOST_NOWIDE_TEST_USE_NARROW
-    TEST(boost::nowide::setenv("BOOST_NOWIDE_TEST", example.c_str(), 1) == 0);
-    TEST(boost::nowide::setenv("BOOST_NOWIDE_TEST_NONE", example.c_str(), 1) == 0);
-    TEST(boost::nowide::unsetenv("BOOST_NOWIDE_TEST_NONE") == 0);
-    TEST(boost::nowide::setenv("BOOST_NOWIDE_EMPTY", "", 1) == 0);
-    TEST(boost::nowide::getenv("BOOST_NOWIDE_EMPTY"));
+#if NOWIDE_TEST_USE_NARROW
+    TEST(nowide::setenv("NOWIDE_TEST", example.c_str(), 1) == 0);
+    TEST(nowide::setenv("NOWIDE_TEST_NONE", example.c_str(), 1) == 0);
+    TEST(nowide::unsetenv("NOWIDE_TEST_NONE") == 0);
+    TEST(nowide::setenv("NOWIDE_EMPTY", "", 1) == 0);
+    TEST(nowide::getenv("NOWIDE_EMPTY"));
     std::string command = "\"";
     command += exe_path;
     command += "\" ";
     command += example;
-    TEST(boost::nowide::system(command.c_str()) == 0);
+    TEST(nowide::system(command.c_str()) == 0);
     std::cout << "Parent ok" << std::endl;
 #else
-    std::wstring envVar = L"BOOST_NOWIDE_TEST=" + boost::nowide::widen(example);
+    std::wstring envVar = L"NOWIDE_TEST=" + nowide::widen(example);
     TEST(_wputenv(envVar.c_str()) == 0);
-    std::wstring wcommand = boost::nowide::widen(exe_path) + L" " + boost::nowide::widen(example);
+    std::wstring wcommand = nowide::widen(exe_path) + L" " + nowide::widen(example);
     TEST(_wsystem(wcommand.c_str()) == 0);
     std::cout << "Wide Parent ok" << std::endl;
 #endif
@@ -157,7 +157,7 @@ void test_main(int argc, char** argv, char** env)
     char** old_argv = argv;
     char** old_env = env;
     {
-        boost::nowide::args _(argc, argv, env);
+        nowide::args _(argc, argv, env);
         TEST(argc == old_argc);
         std::cout << "Checking arguments" << std::endl;
         compare_string_arrays(old_argv, argv, false);
@@ -170,7 +170,7 @@ void test_main(int argc, char** argv, char** env)
     TEST(argv == old_argv);
     TEST(env == old_env);
 
-    boost::nowide::args a(argc, argv, env);
+    nowide::args a(argc, argv, env);
     if(argc == 1)
         run_parent(argv[0]);
     else

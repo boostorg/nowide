@@ -6,9 +6,9 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <boost/nowide/utf8_codecvt.hpp>
+#include <nowide/utf8_codecvt.hpp>
 
-#include <boost/nowide/convert.hpp>
+#include <nowide/convert.hpp>
 #include <cstring>
 #include <iomanip>
 #include <iostream>
@@ -20,7 +20,7 @@
 
 static const char* utf8_name =
   "\xf0\x9d\x92\x9e-\xD0\xBF\xD1\x80\xD0\xB8\xD0\xB2\xD0\xB5\xD1\x82-\xE3\x82\x84\xE3\x81\x82.txt";
-static const std::wstring wide_name_str = boost::nowide::widen(utf8_name);
+static const std::wstring wide_name_str = nowide::widen(utf8_name);
 static const wchar_t* wide_name = wide_name_str.c_str();
 
 typedef std::codecvt<wchar_t, char, std::mbstate_t> cvt_type;
@@ -53,7 +53,7 @@ void test_codecvt_in_n_m(const cvt_type& cvt, size_t n, size_t m)
         std::codecvt_base::result r = cvt.in(mb, from, end, from_next, to, to_end, to_next);
 
         int count = cvt.length(mb2, from, end, to_end - to);
-#ifndef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
+#ifndef NOWIDE_DO_LENGTH_MBSTATE_CONST
         TEST(std::memcmp(&mb, &mb2, sizeof(mb)) == 0);
         if(count != from_next - from)
         {
@@ -146,7 +146,7 @@ void test_codecvt_out_n_m(const cvt_type& cvt, size_t n, size_t m)
 void test_codecvt_conv()
 {
     std::cout << "Conversions " << std::endl;
-    std::locale l(std::locale::classic(), new boost::nowide::utf8_codecvt<wchar_t>());
+    std::locale l(std::locale::classic(), new nowide::utf8_codecvt<wchar_t>());
 
     const cvt_type& cvt = std::use_facet<cvt_type>(l);
     const size_t utf8_len = std::strlen(utf8_name);
@@ -172,7 +172,7 @@ void test_codecvt_conv()
 void test_codecvt_err()
 {
     std::cout << "Errors " << std::endl;
-    std::locale l(std::locale::classic(), new boost::nowide::utf8_codecvt<wchar_t>());
+    std::locale l(std::locale::classic(), new nowide::utf8_codecvt<wchar_t>());
 
     const cvt_type& cvt = std::use_facet<cvt_type>(l);
 
@@ -191,7 +191,7 @@ void test_codecvt_err()
             TEST(cvt.in(mb, from, from_end, from_next, to, to_end, to_next) == cvt_type::ok);
             TEST(from_next == from + 5);
             TEST(to_next == to + 4);
-            TEST(std::wstring(to, to_end) == boost::nowide::widen(err_utf));
+            TEST(std::wstring(to, to_end) == nowide::widen(err_utf));
         }
         {
             wchar_t buf[4];
@@ -219,7 +219,7 @@ void test_codecvt_err()
             const wchar_t* from_end = from + 1;
             const wchar_t* from_next = from;
             cvt_type::result res = cvt.out(mb, from, from_end, from_next, to, to_end, to_next);
-#ifdef BOOST_MSVC
+#ifdef NOWIDE_MSVC
 #pragma warning(disable : 4127) // Constant expression detected
 #endif
             if(sizeof(wchar_t) == 2)
@@ -234,7 +234,7 @@ void test_codecvt_err()
                 TEST(from_next == from_end);
                 TEST(to_next == to + 3);
                 // surrogate is invalid
-                TEST(std::string(to, to_next) == boost::nowide::narrow(wreplacement_str));
+                TEST(std::string(to, to_next) == nowide::narrow(wreplacement_str));
             }
         }
     }
@@ -255,14 +255,14 @@ void test_codecvt_err()
             TEST(cvt.out(mb, from, from_end, from_next, to, to_end, to_next) == cvt_type::ok);
             TEST(from_next == from + 2);
             TEST(to_next == to + 4);
-            TEST(std::string(to, to_next) == "1" + boost::nowide::narrow(wreplacement_str));
+            TEST(std::string(to, to_next) == "1" + nowide::narrow(wreplacement_str));
         }
     }
 }
 
 std::wstring codecvt_to_wide(const std::string& s)
 {
-    std::locale l(std::locale::classic(), new boost::nowide::utf8_codecvt<wchar_t>());
+    std::locale l(std::locale::classic(), new nowide::utf8_codecvt<wchar_t>());
 
     const cvt_type& cvt = std::use_facet<cvt_type>(l);
 
@@ -280,7 +280,7 @@ std::wstring codecvt_to_wide(const std::string& s)
     if(res == cvt_type::partial)
     {
         TEST(to_next < to_end);
-        *(to_next++) = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
+        *(to_next++) = NOWIDE_REPLACEMENT_CHARACTER;
     } else
         TEST(res == cvt_type::ok);
 
@@ -289,7 +289,7 @@ std::wstring codecvt_to_wide(const std::string& s)
 
 std::string codecvt_to_narrow(const std::wstring& s)
 {
-    std::locale l(std::locale::classic(), new boost::nowide::utf8_codecvt<wchar_t>());
+    std::locale l(std::locale::classic(), new nowide::utf8_codecvt<wchar_t>());
 
     const cvt_type& cvt = std::use_facet<cvt_type>(l);
 
@@ -307,7 +307,7 @@ std::string codecvt_to_narrow(const std::wstring& s)
     if(res == cvt_type::partial)
     {
         TEST(to_next < to_end);
-        return std::string(to, to_next) + boost::nowide::narrow(wreplacement_str);
+        return std::string(to, to_next) + nowide::narrow(wreplacement_str);
     } else
         TEST(res == cvt_type::ok);
 

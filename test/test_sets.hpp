@@ -5,10 +5,10 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_NOWIDE_TEST_SETS_HPP_INCLUDED
-#define BOOST_NOWIDE_TEST_SETS_HPP_INCLUDED
+#ifndef NOWIDE_TEST_SETS_HPP_INCLUDED
+#define NOWIDE_TEST_SETS_HPP_INCLUDED
 
-#include <boost/nowide/config.hpp>
+#include <nowide/config.hpp>
 #include <iostream>
 #include <string>
 
@@ -24,11 +24,11 @@ struct wide_to_utf8
     const char* utf8;
 };
 
-#if defined(BOOST_MSVC) && BOOST_MSVC < 1700
+#if defined(NOWIDE_MSVC) && NOWIDE_MSVC < 1700
 #pragma warning(disable : 4428) // universal-character-name encountered in source
 #endif
 
-const std::wstring wreplacement_str(1, wchar_t(BOOST_NOWIDE_REPLACEMENT_CHARACTER));
+const std::wstring wreplacement_str(1, wchar_t(NOWIDE_REPLACEMENT_CHARACTER));
 
 // clang-format off
 const utf8_to_wide roundtrip_tests[] = {
@@ -78,7 +78,7 @@ const wide_to_utf8 invalid_utf32_tests[] = {
 
 // clang-format on
 
-#ifdef BOOST_MSVC
+#ifdef NOWIDE_MSVC
 #pragma warning(push)
 #pragma warning(disable : 4127) // Constant expression detected
 #endif
@@ -130,6 +130,6 @@ void run_all(std::wstring (*to_wide)(const std::string&), std::string (*to_narro
 
 #endif
 
-#ifdef BOOST_MSVC
+#ifdef NOWIDE_MSVC
 #pragma warning(pop)
 #endif

@@ -7,7 +7,7 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#define BOOST_NOWIDE_SOURCE
+#define NOWIDE_SOURCE
 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
@@ -16,15 +16,14 @@
 #undef __STRICT_ANSI__
 #endif
 
-#include <boost/nowide/cstdio.hpp>
-#include <boost/nowide/stackstring.hpp>
+#include <nowide/cstdio.hpp>
+#include <nowide/stackstring.hpp>
 
-namespace boost {
 namespace nowide {
     namespace detail {
         FILE* wfopen(const wchar_t* filename, const wchar_t* mode)
         {
-#ifdef BOOST_WINDOWS
+#ifdef NOWIDE_WINDOWS
             return ::_wfopen(filename, mode);
 #else
             const stackstring name(filename);
@@ -34,7 +33,7 @@ namespace nowide {
         }
     } // namespace detail
 
-#ifdef BOOST_WINDOWS
+#ifdef NOWIDE_WINDOWS
     ///
     /// \brief Same as freopen but file_name and mode are UTF-8 strings
     ///
@@ -71,4 +70,3 @@ namespace nowide {
     }
 #endif
 } // namespace nowide
-} // namespace boost
