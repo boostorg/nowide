@@ -9,6 +9,7 @@
 #include <boost/nowide/iostream.hpp>
 
 #include <boost/nowide/detail/utf.hpp>
+#include <limits>
 #include <string>
 
 #include "test.hpp"
@@ -75,6 +76,7 @@ void test_main(int argc, char** argv, char**)
     TEST(boost::nowide::cerr);
     if(argc == 2 && argv[1] == std::string("-i"))
     {
+        boost::nowide::cout << "Input 2 strings" << std::endl;
         std::string v1, v2;
         boost::nowide::cin >> v1 >> v2;
         TEST(boost::nowide::cin);
@@ -83,5 +85,22 @@ void test_main(int argc, char** argv, char**)
         boost::nowide::cout << "First:  " << v1 << std::endl;
         boost::nowide::cout << "Second: " << v2 << std::endl;
         TEST(boost::nowide::cout);
+
+        // Check sync
+        boost::nowide::cout << "Input 2 strings\n";
+        boost::nowide::cout.flush();
+        TEST(boost::nowide::cin >> v1);
+        boost::nowide::cin.sync();
+        boost::nowide::cout << "First:  " << v1 << std::endl;
+        boost::nowide::cout << "2nd string should be ignored. Input 1 more + [ENTER]" << std::endl;
+        // And check getline not getting the CR
+        TEST(std::getline(boost::nowide::cin, v1));
+        TEST(!v1.empty() && v1[v1.size() - 1u] != '\r');
+        boost::nowide::cout << "Value:  " << v1 << std::endl;
+
+        boost::nowide::cout << "Press ENTER to exit";
+        boost::nowide::cin.clear();
+        boost::nowide::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        boost::nowide::cin.get();
     }
 }

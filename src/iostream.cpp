@@ -118,10 +118,20 @@ namespace nowide {
         class console_input_buffer : public std::streambuf
         {
         public:
-            console_input_buffer(HANDLE h) : handle_(h), wsize_(0)
+            console_input_buffer(HANDLE h) : handle_(h), wsize_(0), was_newline_(true)
             {}
 
         protected:
+            int sync()
+            {
+                if(FlushConsoleInputBuffer(handle_) == 0)
+                    return -1;
+                wsize_ = 0;
+                was_newline_ = true;
+                pback_buffer_.clear();
+                setg(0, 0, 0);
+                return 0;
+            }
             int pbackfail(int c)
             {
                 if(c == traits_type::eof())
@@ -134,26 +144,23 @@ namespace nowide {
                     return 0;
                 }
 
+                char* pnext;
                 if(pback_buffer_.empty())
                 {
                     pback_buffer_.resize(4);
-                    char* b = &pback_buffer_[0];
-                    char* e = b + pback_buffer_.size();
-                    setg(b, e - 1, e);
-                    *gptr() = traits_type::to_char_type(c);
+                    pnext = &pback_buffer_[0] + pback_buffer_.size() - 1u;
                 } else
                 {
                     size_t n = pback_buffer_.size();
-                    std::vector<char> tmp;
-                    tmp.resize(n * 2);
-                    memcpy(&tmp[n], &pback_buffer_[0], n);
-                    tmp.swap(pback_buffer_);
-                    char* b = &pback_buffer_[0];
-                    char* e = b + n * 2;
-                    char* p = b + n - 1;
-                    *p = traits_type::to_char_type(c);
-                    setg(b, p, e);
+                    pback_buffer_.resize(n * 2);
+                    std::memcpy(&pback_buffer_[n], &pback_buffer_[0], n);
+                    pnext = &pback_buffer_[0] + n - 1;
                 }
+
+                char* pFirst = &pback_buffer_[0];
+                char* pLast = pFirst + pback_buffer_.size();
+                setg(pFirst, pnext, pLast);
+                *gptr() = traits_type::to_char_type(c);
 
                 return 0;
             }
@@ -178,27 +185,43 @@ namespace nowide {
 
             size_t read()
             {
-                namespace uf = detail::utf;
                 DWORD read_wchars = 0;
-                size_t n = wbuffer_size - wsize_;
+                const size_t n = wbuffer_size - wsize_;
                 if(!ReadConsoleW(handle_, wbuffer_ + wsize_, static_cast<DWORD>(n), &read_wchars, 0))
                     return 0;
                 wsize_ += read_wchars;
                 char* out = buffer_;
-                wchar_t* p = wbuffer_;
-                wchar_t* e = wbuffer_ + wsize_;
-                uf::code_point c = 0;
-                while((c = decoder::decode(p, e)) != uf::incomplete)
+                const wchar_t* cur_input_ptr = wbuffer_;
+                const wchar_t* const end_input_ptr = wbuffer_ + wsize_;
+                while(cur_input_ptr != end_input_ptr)
                 {
-                    if(c == uf::illegal)
+                    const wchar_t* const prev_input_ptr = cur_input_ptr;
+                    detail::utf::code_point c = decoder::decode(cur_input_ptr, end_input_ptr);
+                    // If incomplete restore to beginning of incomplete char to use on next buffer
+                    if(c == detail::utf::incomplete)
+                    {
+                        cur_input_ptr = prev_input_ptr;
+                        break;
+                    }
+                    if(c == detail::utf::illegal)
                         c = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
                     assert(out - buffer_ + encoder::width(c) <= static_cast<int>(buffer_size));
-                    out = encoder::encode(c, out);
-                    wsize_ = e - p;
+                    // Skip \r chars as std::cin does
+                    if(c != '\r')
+                        out = encoder::encode(c, out);
                 }
 
+                wsize_ = end_input_ptr - cur_input_ptr;
                 if(wsize_ > 0)
-                    std::memmove(wbuffer_, e - wsize_, sizeof(wchar_t) * wsize_);
+                    std::memmove(wbuffer_, end_input_ptr - wsize_, sizeof(wchar_t) * wsize_);
+
+                // A CTRL+Z at the start of the line should be treated as EOF
+                if(was_newline_ && out > buffer_ && buffer_[0] == '\x1a')
+                {
+                    sync();
+                    return 0;
+                }
+                was_newline_ = out == buffer_ || out[-1] == '\n';
 
                 return out - buffer_;
             }
@@ -210,6 +233,7 @@ namespace nowide {
             HANDLE handle_;
             size_t wsize_;
             std::vector<char> pback_buffer_;
+            bool was_newline_;
         };
 
         winconsole_ostream::winconsole_ostream(int fd, winconsole_ostream* tieStream) : std::ostream(0)

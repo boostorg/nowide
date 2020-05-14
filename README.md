@@ -20,6 +20,26 @@ Distributed under the [Boost Software License, Version 1.0](http://www.boost.org
 * C++03 **(will be raised to C++11 by mid 2020)**
 * optional C++11/17 support
 * Usable outside of Boost via CMake
+* Compiled library on every OS
+
+Note on the last point:
+Having a compiled library allows cross-platform access to e.g. `setenv` which would not be available when using a `-std=c++nn` flag.
+This is different to the version available prior to the inclusion in Boost.
+
+### Requirements (Boost version)
+
+* C++03 (or higher) compatible compiler
+* Boost (>= 1.56)
+* CMake (when not using as part of Boost) or B2 (otherwise)
+
+### Requirements (Standalone version)
+
+The [standalone branch](https://github.com/boostorg/nowide/tree/standalone) keeps track of the [develop branch](https://github.com/boostorg/nowide/tree/develop) and can be used without any other part of Boost.
+It is automatically updated so referring to a specific commit is recommended.
+You can also use the standalone source archive which is part of every release.
+
+* C++11 (or higher) compatible compiler
+* CMake
 
 # Quickstart
 
