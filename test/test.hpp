@@ -88,8 +88,6 @@ inline void test_equal_impl(const T& lhs, const U& rhs, const char* file, const 
         DISABLE_CONST_EXPR_DETECTED                                      \
     } while(0) DISABLE_CONST_EXPR_DETECTED_POP
 
-#endif // #ifndef BOOST_NOWIDE_LIB_TEST_H_INCLUDED
-
 #ifndef BOOST_NOWIDE_TEST_NO_MAIN
 // Tests should implement this
 void test_main(int argc, char** argv, char** env);
@@ -107,3 +105,5 @@ int main(int argc, char** argv, char** env)
     return 0;
 }
 #endif
+
+#endif // #ifndef BOOST_NOWIDE_LIB_TEST_H_INCLUDED
