@@ -26,8 +26,6 @@ namespace nowide {
         {}
         args(int&, char**&, char**&)
         {}
-        ~args()
-        {}
     };
 
 #else
@@ -95,9 +93,6 @@ namespace nowide {
         {
             wchar_t** p;
             int argc;
-            // Non-copyable
-            wargv_ptr(const wargv_ptr&);
-            wargv_ptr& operator=(const wargv_ptr&);
 
         public:
             wargv_ptr()
@@ -109,6 +104,9 @@ namespace nowide {
                 if(p)
                     LocalFree(p);
             }
+            wargv_ptr(const wargv_ptr&) = delete;
+            wargv_ptr& operator=(const wargv_ptr&) = delete;
+
             int size() const
             {
                 return argc;
@@ -125,9 +123,6 @@ namespace nowide {
         class wenv_ptr
         {
             wchar_t* p;
-            // Non-copyable
-            wenv_ptr(const wenv_ptr&);
-            wenv_ptr& operator=(const wenv_ptr&);
 
         public:
             wenv_ptr() : p(GetEnvironmentStringsW())
@@ -137,6 +132,9 @@ namespace nowide {
                 if(p)
                     FreeEnvironmentStringsW(p);
             }
+            wenv_ptr(const wenv_ptr&) = delete;
+            wenv_ptr& operator=(const wenv_ptr&) = delete;
+
             operator const wchar_t*() const
             {
                 return p;

@@ -10,6 +10,10 @@
 
 \section changelog Changelog
 
+\subsection changelog_11_0_0 Nowide 11.0.0
+
+- Require C++11 compatible compiler and stdlib
+
 \subsection changelog_10_0_2 Nowide 10.0.2
 
 - boost::nowide::cin now ignores CR (\r) characters and treats CTRL+Z at the beginning of a line as EOF (matching std::cin behavior)

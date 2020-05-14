@@ -1,3 +1,7 @@
+# Copyright 2019 - 2020 Alexander Grund
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or copy at http://boost.org/LICENSE_1_0.txt)
+
 # Builds the libraries for Boost.Nowide
 #
 # Options:
@@ -11,7 +15,7 @@
 
 cmake_minimum_required(VERSION 3.9)
 # Version number starts at 10 to avoid conflicts with Boost version
-set(_version 10.0.1)
+set(_version 11.0.0)
 if(BOOST_SUPERPROJECT_SOURCE_DIR)
   set(_version ${BOOST_SUPERPROJECT_VERSION})
 endif()
@@ -50,15 +54,11 @@ endif()
 target_compile_definitions(boost_nowide PUBLIC BOOST_NOWIDE_NO_LIB)
 target_include_directories(boost_nowide PUBLIC include)
 boost_add_warnings(boost_nowide pedantic ${Boost_NOWIDE_WERROR})
+target_compile_features(boost_nowide PUBLIC cxx_std_11)
 
 if(BOOST_SUPERPROJECT_SOURCE_DIR)
-  target_link_libraries(boost_nowide PUBLIC Boost::config Boost::smart_ptr Boost::static_assert)
-  set(Boost_NOWIDE_INSTALL OFF) # smart_ptr does not support installation
+  target_link_libraries(boost_nowide PUBLIC Boost::config)
 else()
-  # Default boost libs are static on windows and dynamic on linux
-  if(WIN32 AND NOT DEFINED Boost_USE_STATIC_LIBS)
-    set(Boost_USE_STATIC_LIBS ON)
-  endif()
   find_package(Boost 1.56 REQUIRED)
   target_link_libraries(boost_nowide PUBLIC Boost::boost)
 endif()

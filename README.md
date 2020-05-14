@@ -17,8 +17,7 @@ Distributed under the [Boost Software License, Version 1.0](http://www.boost.org
 
 ### Properties
 
-* C++03 **(will be raised to C++11 by mid 2020)**
-* optional C++11/17 support
+* optional C++17 (filesystem) support
 * Usable outside of Boost via CMake
 * Compiled library on every OS
 
@@ -28,7 +27,7 @@ This is different to the version available prior to the inclusion in Boost.
 
 ### Requirements (Boost version)
 
-* C++03 (or higher) compatible compiler
+* C++11 (or higher) compatible compiler
 * Boost (>= 1.56)
 * CMake (when not using as part of Boost) or B2 (otherwise)
 

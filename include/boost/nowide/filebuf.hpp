@@ -68,14 +68,6 @@ namespace nowide {
 #ifdef BOOST_MSVC
 #pragma warning(pop)
 #endif
-#if !BOOST_NOWIDE_CXX11
-    private:
-        // Non-copyable
-        basic_filebuf(const basic_filebuf&);
-        basic_filebuf& operator=(const basic_filebuf&);
-
-    public:
-#else
         basic_filebuf(const basic_filebuf&) = delete;
         basic_filebuf& operator=(const basic_filebuf&) = delete;
         basic_filebuf(basic_filebuf&& other) noexcept : basic_filebuf()
@@ -111,7 +103,7 @@ namespace nowide {
                          rhs.last_char_ + 1);
             }
         }
-#endif
+
         virtual ~basic_filebuf()
         {
             close();

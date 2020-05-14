@@ -24,16 +24,7 @@ class test_basic_stackstring : public boost::nowide::basic_stackstring<CharOut, 
 public:
     typedef boost::nowide::basic_stackstring<CharOut, CharIn, BufferSize> parent;
 
-#if BOOST_NOWIDE_CXX11
     using parent::parent;
-#else
-    test_basic_stackstring()
-    {}
-    explicit test_basic_stackstring(const CharIn* input) : parent(input)
-    {}
-    test_basic_stackstring(const CharIn* begin, const CharIn* end) : parent(begin, end)
-    {}
-#endif
     using parent::uses_stack_memory;
     bool uses_heap_memory() const
     {

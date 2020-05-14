@@ -1,3 +1,7 @@
+# Copyright 2019 - 2020 Alexander Grund
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or copy at http://boost.org/LICENSE_1_0.txt)
+
 function(boost_nowide_add_test name)
   cmake_parse_arguments(PARSE_ARGV 1 ARG "COMPILE_ONLY" "SRC" "LIBRARIES;DEFINITIONS;ARGS")
   if(NOT ARG_SRC)
@@ -35,7 +39,11 @@ else()
 endif()
 
 if(NOT BOOST_SUPERPROJECT_SOURCE_DIR)
-  find_package(Boost 1.56 REQUIRED COMPONENTS filesystem system chrono)
+  # Default boost libs are static on windows and dynamic on linux
+  if(WIN32 AND NOT DEFINED Boost_USE_STATIC_LIBS)
+    set(Boost_USE_STATIC_LIBS ON)
+  endif()
+  find_package(Boost 1.56 REQUIRED COMPONENTS filesystem system)
 endif()
 boost_nowide_add_test(test_fs LIBRARIES Boost::filesystem)
-boost_nowide_add_test(benchmark_fstream COMPILE_ONLY DEFINITIONS BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT=1 LIBRARIES Boost::chrono)
+boost_nowide_add_test(benchmark_fstream COMPILE_ONLY DEFINITIONS BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT=1)

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Copyright 2019 - 2020 Alexander Grund
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or copy at http://boost.org/LICENSE_1_0.txt)
+
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -36,11 +40,8 @@ SOURCES_NO_BOOST=$(echo "$SOURCES" | grep -v 'filesystem.hpp')
 sed 's/BOOST_NOWIDE_/NOWIDE_/g' -i $SOURCES
 sed 's/BOOST_/NOWIDE_/g' -i $SOURCES
 sed 's/boost::nowide/nowide/g' -i $SOURCES
-sed 's/boost::chrono/std::chrono/g' -i $SOURCES
-sed 's/boost::milli/std::milli/g' -i $SOURCES
 sed 's/boost::/nowide::/g' -i $SOURCES_NO_BOOST
 sed '/namespace boost/d' -i $SOURCES
-sed 's/<boost\/chrono.hpp/<chrono/g' -i $SOURCES
 sed 's/<boost\/nowide\//<nowide\//g' -i $SOURCES
 sed 's/<boost\//<nowide\//g' -i $SOURCES_NO_BOOST
 sed '/config\/abi_/d' -i $SOURCES
@@ -58,9 +59,7 @@ sed 's/ OR BOOST_SUPERPROJECT_SOURCE_DIR//' -i $CMLs
 
 sed '/PUBLIC BOOST_NOWIDE_NO_LIB)/d' -i "$targetFolder/CMakeLists.txt"
 sed '/^if(BOOST_SUPERPROJECT_SOURCE_DIR)/,/^endif/d' -i "$targetFolder/CMakeLists.txt"
-sed '/add_warnings/atarget_compile_features(nowide PUBLIC cxx_std_11)' -i "$targetFolder/CMakeLists.txt"
 sed 's/NAMESPACE Nowide CONFIG_FILE.*$/NAMESPACE nowide)/' -i "$targetFolder/CMakeLists.txt"
 
-sed '/if(NOT BOOST_SUPERPROJECT_SOURCE_DIR)/,/endif/d' -i "$targetFolder/test/CMakeLists.txt"
-sed 's/ LIBRARIES Nowide::chrono//' -i "$targetFolder/test/CMakeLists.txt"
+sed '/^if(NOT BOOST_SUPERPROJECT_SOURCE_DIR)/,/^endif/d' -i "$targetFolder/test/CMakeLists.txt"
 sed '/Nowide::filesystem/d' -i "$targetFolder/test/CMakeLists.txt"
