@@ -11,6 +11,9 @@
 import testing ;
 import config : requires ;
 
+obj cxx11_moveable_fstreams : check_movable_fstreams.cpp ;
+explicit cxx11_moveable_fstreams ;
+
 project : requirements
   <library>/boost/nowide//boost_nowide
   <warnings>pedantic
@@ -21,6 +24,7 @@ project : requirements
       cxx11_rvalue_references
       cxx11_static_assert
   ]
+  [ check-target-builds cxx11_moveable_fstreams "std::fstream is moveable and swappable" : : <build>no ] 
   ;
 
 lib shell32 ;

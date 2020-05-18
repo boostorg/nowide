@@ -25,9 +25,14 @@ Note on the last point:
 Having a compiled library allows cross-platform access to e.g. `setenv` which would not be available when using a `-std=c++nn` flag.
 This is different to the version available prior to the inclusion in Boost.
 
-### Requirements (Boost version)
+### Requirements (All versions)
 
 * C++11 (or higher) compatible compiler
+    * MSVC 2015 and up work
+    * libstdc++ < 5 is unsupported as it is silently lacking C++11 features
+
+### Requirements (Boost version)
+
 * Boost (>= 1.56)
 * CMake (when not using as part of Boost) or B2 (otherwise)
 
@@ -37,7 +42,6 @@ The [standalone branch](https://github.com/boostorg/nowide/tree/standalone) keep
 It is automatically updated so referring to a specific commit is recommended.
 You can also use the standalone source archive which is part of every release.
 
-* C++11 (or higher) compatible compiler
 * CMake
 
 # Quickstart
