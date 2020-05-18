@@ -14,6 +14,16 @@ import config : requires ;
 obj cxx11_moveable_fstreams : check_movable_fstreams.cpp ;
 explicit cxx11_moveable_fstreams ;
 
+rule require-windows ( properties * )
+{
+    local result ;
+    if ! <target-os>windows in $(properties)
+    {
+        result = <build>no ;
+    }
+    return $(result) ;
+}
+
 project : requirements
   <library>/boost/nowide//boost_nowide
   <warnings>pedantic
@@ -42,6 +52,6 @@ run test_iostream.cpp ;
 run test_stackstring.cpp ;
 run test_stdio.cpp ;
 run test_system.cpp : : : <define>BOOST_NOWIDE_TEST_USE_NARROW=1 <target-os>windows:<library>shell32 <target-os>darwin,<link>shared:<build>no : test_system_n ;
-run test_system.cpp : : : <define>BOOST_NOWIDE_TEST_USE_NARROW=0 <target-os>windows:<library>shell32 <build>no <target-os>windows:<build>yes : test_system_w ;
+run test_system.cpp : : : <define>BOOST_NOWIDE_TEST_USE_NARROW=0 <target-os>windows:<library>shell32 <conditional>@require-windows : test_system_w ;
 
 compile benchmark_fstream.cpp : <define>BOOST_NOWIDE_USE_WIN_FSTREAM=1 [ requires cxx11_hdr_chrono ] ;
