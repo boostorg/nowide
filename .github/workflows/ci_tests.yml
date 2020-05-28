@@ -1,3 +1,7 @@
+# Copyright 2019 - 2020 Alexander Grund
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE or copy at http://boost.org/LICENSE_1_0.txt)
+
 name: CI Tests
 
 on:
@@ -62,7 +66,7 @@ jobs:
         7z x boost.7z > /dev/null
         cd $(basename "$BOOST_ROOT")
         [[ "${{matrix.generator}}" =~ "Unix" ]] && toolset=gcc || toolset=mingw
-        ./bootstrap.sh --with-toolset="$toolset" --with-libraries=system,filesystem,chrono threading=multi || (cat bootstrap.log && false)
+        ./bootstrap.sh --with-toolset="$toolset" --with-libraries=system,filesystem threading=multi || (cat bootstrap.log && false)
         sed -i 's/mingw/gcc/' project-config.jam
         [[ "${{matrix.generator}}" =~ "Visual Studio" ]] && toolset=msvc-14.0 || toolset=gcc
         ./b2 link=static toolset=$toolset address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install

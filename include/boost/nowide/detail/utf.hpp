@@ -1,15 +1,16 @@
 //
 //  Copyright (c) 2009-2011 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2020 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
-//  accompanying file LICENSE_1_0.txt or copy at
+//  accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 #ifndef BOOST_NOWIDE_UTF_HPP_INCLUDED
 #define BOOST_NOWIDE_UTF_HPP_INCLUDED
 
 #include <boost/nowide/config.hpp>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
 namespace boost {
 namespace nowide {

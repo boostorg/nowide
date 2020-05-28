@@ -3,7 +3,7 @@
 //  Copyright (c) 2020 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
-//  accompanying file LICENSE_1_0.txt or copy at
+//  accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 #ifndef NOWIDE_CONFIG_HPP_INCLUDED
@@ -62,13 +62,6 @@
 #define BOOST_NOWIDE_FALLTHROUGH __attribute__((fallthrough))
 #else
 #define BOOST_NOWIDE_FALLTHROUGH
-#endif
-
-// MSVC 2015 (1900) has reasonable C++11 support (especially auto-generated move ctors)
-#if __cplusplus >= 201103L || (defined(NOWIDE_MSVC) && NOWIDE_MSVC >= 1900)
-#define BOOST_NOWIDE_CXX11 1
-#else
-#define BOOST_NOWIDE_CXX11 0
 #endif
 
 #if !defined(BOOST_LIKELY)

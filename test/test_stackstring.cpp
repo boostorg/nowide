@@ -3,7 +3,7 @@
 //  Copyright (c) 2019-2020 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
-//  accompanying file LICENSE_1_0.txt or copy at
+//  accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
@@ -24,16 +24,7 @@ class test_basic_stackstring : public boost::nowide::basic_stackstring<CharOut, 
 public:
     typedef boost::nowide::basic_stackstring<CharOut, CharIn, BufferSize> parent;
 
-#if BOOST_NOWIDE_CXX11
     using parent::parent;
-#else
-    test_basic_stackstring()
-    {}
-    explicit test_basic_stackstring(const CharIn* input) : parent(input)
-    {}
-    test_basic_stackstring(const CharIn* begin, const CharIn* end) : parent(begin, end)
-    {}
-#endif
     using parent::uses_stack_memory;
     bool uses_heap_memory() const
     {
