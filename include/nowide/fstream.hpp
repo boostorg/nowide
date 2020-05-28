@@ -2,7 +2,7 @@
 //  Copyright (c) 2012 Artyom Beilis (Tonkikh)
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
-//  accompanying file LICENSE_1_0.txt or copy at
+//  accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 #ifndef NOWIDE_FSTREAM_HPP_INCLUDED
@@ -99,10 +99,9 @@ namespace nowide {
         using fstream_impl::is_open;
         using fstream_impl::close;
         using fstream_impl::rdbuf;
-#if NOWIDE_CXX11
         using fstream_impl::swap;
-        basic_ifstream(const basic_ifstream& other) = delete;
-        basic_ifstream& operator=(const basic_ifstream& rhs) = delete;
+        basic_ifstream(const basic_ifstream&) = delete;
+        basic_ifstream& operator=(const basic_ifstream&) = delete;
         basic_ifstream(basic_ifstream&& other) noexcept : fstream_impl(std::move(other))
         {}
         basic_ifstream& operator=(basic_ifstream&& rhs) noexcept
@@ -110,7 +109,6 @@ namespace nowide {
             fstream_impl::operator=(std::move(rhs));
             return *this;
         }
-#endif
     };
 
     ///
@@ -151,10 +149,9 @@ namespace nowide {
         using fstream_impl::is_open;
         using fstream_impl::close;
         using fstream_impl::rdbuf;
-#if NOWIDE_CXX11
         using fstream_impl::swap;
-        basic_ofstream(const basic_ofstream& other) = delete;
-        basic_ofstream& operator=(const basic_ofstream& rhs) = delete;
+        basic_ofstream(const basic_ofstream&) = delete;
+        basic_ofstream& operator=(const basic_ofstream&) = delete;
         basic_ofstream(basic_ofstream&& other) noexcept : fstream_impl(std::move(other))
         {}
         basic_ofstream& operator=(basic_ofstream&& rhs)
@@ -162,7 +159,6 @@ namespace nowide {
             fstream_impl::operator=(std::move(rhs));
             return *this;
         }
-#endif
     };
 
 #ifdef NOWIDE_MSVC
@@ -209,10 +205,9 @@ namespace nowide {
         using fstream_impl::is_open;
         using fstream_impl::close;
         using fstream_impl::rdbuf;
-#if NOWIDE_CXX11
         using fstream_impl::swap;
-        basic_fstream(const basic_fstream& other) = delete;
-        basic_fstream& operator=(const basic_fstream& rhs) = delete;
+        basic_fstream(const basic_fstream&) = delete;
+        basic_fstream& operator=(const basic_fstream&) = delete;
         basic_fstream(basic_fstream&& other) noexcept : fstream_impl(std::move(other))
         {}
         basic_fstream& operator=(basic_fstream&& rhs)
@@ -220,9 +215,7 @@ namespace nowide {
             fstream_impl::operator=(std::move(rhs));
             return *this;
         }
-#endif
     };
-#if NOWIDE_CXX11
     template<typename CharType, typename Traits>
     void swap(basic_filebuf<CharType, Traits>& lhs, basic_filebuf<CharType, Traits>& rhs)
     {
@@ -243,7 +236,6 @@ namespace nowide {
     {
         lhs.swap(rhs);
     }
-#endif
 
     ///
     /// Same as std::filebuf but accepts UTF-8 strings under Windows
@@ -291,10 +283,8 @@ namespace nowide {
 
             fstream_impl() : stream_base(&buf_)
             {}
-
-#if NOWIDE_CXX11
-            fstream_impl(const fstream_impl& other) = delete;
-            fstream_impl& operator=(const fstream_impl& other) = delete;
+            fstream_impl(const fstream_impl&) = delete;
+            fstream_impl& operator=(const fstream_impl&) = delete;
 
             // coverity[exn_spec_violation]
             fstream_impl(fstream_impl&& other) noexcept : base_buf_holder(std::move(other)),
@@ -313,7 +303,6 @@ namespace nowide {
                 stream_base::swap(other);
                 rdbuf()->swap(*other.rdbuf());
             }
-#endif
 
             void open(const std::string& file_name, std::ios_base::openmode mode = T_StreamType::mode())
             {

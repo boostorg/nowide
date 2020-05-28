@@ -2,7 +2,7 @@
 //  Copyright (c) 2012 Artyom Beilis (Tonkikh)
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
-//  accompanying file LICENSE_1_0.txt or copy at
+//  accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 #ifndef NOWIDE_ARGS_HPP_INCLUDED
@@ -24,8 +24,6 @@ namespace nowide {
         args(int&, char**&)
         {}
         args(int&, char**&, char**&)
-        {}
-        ~args()
         {}
     };
 
@@ -94,9 +92,6 @@ namespace nowide {
         {
             wchar_t** p;
             int argc;
-            // Non-copyable
-            wargv_ptr(const wargv_ptr&);
-            wargv_ptr& operator=(const wargv_ptr&);
 
         public:
             wargv_ptr()
@@ -108,6 +103,9 @@ namespace nowide {
                 if(p)
                     LocalFree(p);
             }
+            wargv_ptr(const wargv_ptr&) = delete;
+            wargv_ptr& operator=(const wargv_ptr&) = delete;
+
             int size() const
             {
                 return argc;
@@ -124,9 +122,6 @@ namespace nowide {
         class wenv_ptr
         {
             wchar_t* p;
-            // Non-copyable
-            wenv_ptr(const wenv_ptr&);
-            wenv_ptr& operator=(const wenv_ptr&);
 
         public:
             wenv_ptr() : p(GetEnvironmentStringsW())
@@ -136,6 +131,9 @@ namespace nowide {
                 if(p)
                     FreeEnvironmentStringsW(p);
             }
+            wenv_ptr(const wenv_ptr&) = delete;
+            wenv_ptr& operator=(const wenv_ptr&) = delete;
+
             operator const wchar_t*() const
             {
                 return p;

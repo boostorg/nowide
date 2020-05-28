@@ -1,8 +1,9 @@
 //
 //  Copyright (c) 2012 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2020 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
-//  accompanying file LICENSE_1_0.txt or copy at
+//  accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 #ifndef NOWIDE_IOSTREAM_HPP_INCLUDED
@@ -10,8 +11,8 @@
 
 #include <nowide/config.hpp>
 #ifdef NOWIDE_WINDOWS
-#include <nowide/scoped_ptr.hpp>
 #include <istream>
+#include <memory>
 #include <ostream>
 
 #else
@@ -38,28 +39,22 @@ namespace nowide {
 
         class NOWIDE_DECL winconsole_ostream : public std::ostream
         {
-            winconsole_ostream(const winconsole_ostream&);
-            void operator=(const winconsole_ostream&);
-
         public:
             winconsole_ostream(int fd, winconsole_ostream* tieStream);
             ~winconsole_ostream();
 
         private:
-            nowide::scoped_ptr<console_output_buffer> d;
+            std::unique_ptr<console_output_buffer> d;
         };
 
         class NOWIDE_DECL winconsole_istream : public std::istream
         {
-            winconsole_istream(const winconsole_istream&);
-            void operator=(const winconsole_istream&);
-
         public:
             explicit winconsole_istream(winconsole_ostream* tieStream);
             ~winconsole_istream();
 
         private:
-            nowide::scoped_ptr<console_input_buffer> d;
+            std::unique_ptr<console_input_buffer> d;
         };
     } // namespace detail
 

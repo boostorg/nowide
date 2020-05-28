@@ -1,9 +1,9 @@
 //
 //  Copyright (c) 2012 Artyom Beilis (Tonkikh)
-//  Copyright (c) 2019 Alexander Grund
+//  Copyright (c) 2019 - 2020 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
-//  accompanying file LICENSE_1_0.txt or copy at
+//  accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
@@ -12,9 +12,8 @@
 #include <nowide/convert.hpp>
 #include <nowide/cstdio.hpp>
 #include <nowide/fstream.hpp>
-#define NOWIDE_CHRONO_HEADER_ONLY
-#include <chrono>
 #include <algorithm>
+#include <chrono>
 #include <cstdio>
 #include <fstream>
 #include <iomanip>

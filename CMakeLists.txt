@@ -1,3 +1,7 @@
+# Copyright 2019 - 2020 Alexander Grund
+# Distributed under the Nowide Software License, Version 1.0.
+# (See accompanying file LICENSE or copy at http://boost.org/LICENSE_1_0.txt)
+
 # Builds the libraries for Nowide.Nowide
 #
 # Options:
@@ -11,7 +15,7 @@
 
 cmake_minimum_required(VERSION 3.9)
 # Version number starts at 10 to avoid conflicts with Nowide version
-set(_version 10.0.1)
+set(_version 11.0.0)
 project(nowide VERSION ${_version} LANGUAGES CXX)
 
 if(POLICY CMP0074)

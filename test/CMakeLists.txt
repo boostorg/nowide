@@ -1,3 +1,7 @@
+# Copyright 2019 - 2020 Alexander Grund
+# Distributed under the Nowide Software License, Version 1.0.
+# (See accompanying file LICENSE or copy at http://boost.org/LICENSE_1_0.txt)
+
 function(nowide_add_test name)
   cmake_parse_arguments(PARSE_ARGV 1 ARG "COMPILE_ONLY" "SRC" "LIBRARIES;DEFINITIONS;ARGS")
   if(NOT ARG_SRC)

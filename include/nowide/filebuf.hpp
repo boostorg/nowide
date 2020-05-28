@@ -3,7 +3,7 @@
 //  Copyright (c) 2019-2020 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
-//  accompanying file LICENSE_1_0.txt or copy at
+//  accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 #ifndef NOWIDE_FILEBUF_HPP_INCLUDED
@@ -67,14 +67,6 @@ namespace nowide {
 #ifdef NOWIDE_MSVC
 #pragma warning(pop)
 #endif
-#if !NOWIDE_CXX11
-    private:
-        // Non-copyable
-        basic_filebuf(const basic_filebuf&);
-        basic_filebuf& operator=(const basic_filebuf&);
-
-    public:
-#else
         basic_filebuf(const basic_filebuf&) = delete;
         basic_filebuf& operator=(const basic_filebuf&) = delete;
         basic_filebuf(basic_filebuf&& other) noexcept : basic_filebuf()
@@ -110,7 +102,7 @@ namespace nowide {
                          rhs.last_char_ + 1);
             }
         }
-#endif
+
         virtual ~basic_filebuf()
         {
             close();
