@@ -20,6 +20,7 @@
 #include <locale>
 #include <stdexcept>
 #include <streambuf>
+#include <ios>
 #else
 #include <fstream>
 #endif
