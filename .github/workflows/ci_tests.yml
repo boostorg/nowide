@@ -24,8 +24,6 @@ jobs:
             generator: Visual Studio 16 2019
           - os: ubuntu-16.04
             buildType: Debug
-          - os: windows-latest
-            generator: Unix Makefiles
     runs-on: ${{matrix.os}}
     env:
       DEP_DIR: ${{github.workspace}}/dependencies
