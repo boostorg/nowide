@@ -66,34 +66,34 @@ namespace nowide {
     protected:
         typedef CharType uchar;
 
-        virtual std::codecvt_base::result do_unshift(std::mbstate_t& s, char* from, char* /*to*/, char*& next) const
+        std::codecvt_base::result do_unshift(std::mbstate_t& s, char* from, char* /*to*/, char*& next) const override
         {
             if(detail::read_state(s) != 0)
                 return std::codecvt_base::error;
             next = from;
             return std::codecvt_base::ok;
         }
-        virtual int do_encoding() const throw()
+        int do_encoding() const throw() override
         {
             return 0;
         }
-        virtual int do_max_length() const throw()
+        int do_max_length() const throw() override
         {
             return 4;
         }
-        virtual bool do_always_noconv() const throw()
+        bool do_always_noconv() const throw() override
         {
             return false;
         }
 
-        virtual int do_length(std::mbstate_t
+        int do_length(std::mbstate_t
 #ifdef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
-                              const
+                      const
 #endif
-                                & std_state,
-                              const char* from,
-                              const char* from_end,
-                              size_t max) const
+                        & std_state,
+                      const char* from,
+                      const char* from_end,
+                      size_t max) const override
         {
             std::uint16_t state = detail::read_state(std_state);
 #ifndef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
@@ -134,13 +134,13 @@ namespace nowide {
 #endif
         }
 
-        virtual std::codecvt_base::result do_in(std::mbstate_t& std_state,
-                                                const char* from,
-                                                const char* from_end,
-                                                const char*& from_next,
-                                                uchar* to,
-                                                uchar* to_end,
-                                                uchar*& to_next) const
+        std::codecvt_base::result do_in(std::mbstate_t& std_state,
+                                        const char* from,
+                                        const char* from_end,
+                                        const char*& from_next,
+                                        uchar* to,
+                                        uchar* to_end,
+                                        uchar*& to_next) const override
         {
             std::codecvt_base::result r = std::codecvt_base::ok;
 
@@ -205,13 +205,13 @@ namespace nowide {
             return r;
         }
 
-        virtual std::codecvt_base::result do_out(std::mbstate_t& std_state,
-                                                 const uchar* from,
-                                                 const uchar* from_end,
-                                                 const uchar*& from_next,
-                                                 char* to,
-                                                 char* to_end,
-                                                 char*& to_next) const
+        std::codecvt_base::result do_out(std::mbstate_t& std_state,
+                                         const uchar* from,
+                                         const uchar* from_end,
+                                         const uchar*& from_next,
+                                         char* to,
+                                         char* to_end,
+                                         char*& to_next) const override
         {
             std::codecvt_base::result r = std::codecvt_base::ok;
             // mbstate_t is POD type and should be initialized to 0 (i.a. state = stateT())
@@ -298,32 +298,33 @@ namespace nowide {
     protected:
         typedef CharType uchar;
 
-        virtual std::codecvt_base::result do_unshift(std::mbstate_t& /*s*/, char* from, char* /*to*/, char*& next) const
+        std::codecvt_base::result
+        do_unshift(std::mbstate_t& /*s*/, char* from, char* /*to*/, char*& next) const override
         {
             next = from;
             return std::codecvt_base::ok;
         }
-        virtual int do_encoding() const throw()
+        int do_encoding() const throw() override
         {
             return 0;
         }
-        virtual int do_max_length() const throw()
+        int do_max_length() const throw() override
         {
             return 4;
         }
-        virtual bool do_always_noconv() const throw()
+        bool do_always_noconv() const throw() override
         {
             return false;
         }
 
-        virtual int do_length(std::mbstate_t
+        int do_length(std::mbstate_t
 #ifdef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
-                              const
+                      const
 #endif
-                                & /*state*/,
-                              const char* from,
-                              const char* from_end,
-                              size_t max) const
+                        & /*state*/,
+                      const char* from,
+                      const char* from_end,
+                      size_t max) const override
         {
 #ifndef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
             const char* start_from = from;
@@ -352,13 +353,13 @@ namespace nowide {
 #endif
         }
 
-        virtual std::codecvt_base::result do_in(std::mbstate_t& /*state*/,
-                                                const char* from,
-                                                const char* from_end,
-                                                const char*& from_next,
-                                                uchar* to,
-                                                uchar* to_end,
-                                                uchar*& to_next) const
+        std::codecvt_base::result do_in(std::mbstate_t& /*state*/,
+                                        const char* from,
+                                        const char* from_end,
+                                        const char*& from_next,
+                                        uchar* to,
+                                        uchar* to_end,
+                                        uchar*& to_next) const override
         {
             std::codecvt_base::result r = std::codecvt_base::ok;
 
@@ -386,13 +387,13 @@ namespace nowide {
             return r;
         }
 
-        virtual std::codecvt_base::result do_out(std::mbstate_t& /*std_state*/,
-                                                 const uchar* from,
-                                                 const uchar* from_end,
-                                                 const uchar*& from_next,
-                                                 char* to,
-                                                 char* to_end,
-                                                 char*& to_next) const
+        std::codecvt_base::result do_out(std::mbstate_t& /*std_state*/,
+                                         const uchar* from,
+                                         const uchar* from_end,
+                                         const uchar*& from_next,
+                                         char* to,
+                                         char* to_end,
+                                         char*& to_next) const override
         {
             std::codecvt_base::result r = std::codecvt_base::ok;
             while(to < to_end && from < from_end)
