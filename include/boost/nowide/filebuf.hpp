@@ -16,7 +16,6 @@
 #include <cassert>
 #include <cstdio>
 #include <ios>
-#include <iosfwd>
 #include <limits>
 #include <locale>
 #include <stdexcept>
