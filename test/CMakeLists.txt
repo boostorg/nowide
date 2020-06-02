@@ -2,6 +2,9 @@
 # Distributed under the Nowide Software License, Version 1.0.
 # (See accompanying file LICENSE or copy at http://boost.org/LICENSE_1_0.txt)
 
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag(-Wsuggest-override _NOWIDE_SUGGEST_OVERRIDE_SUPPORTED)
+
 function(nowide_add_test name)
   cmake_parse_arguments(PARSE_ARGV 1 ARG "COMPILE_ONLY" "SRC" "LIBRARIES;DEFINITIONS;ARGS")
   if(NOT ARG_SRC)
@@ -12,6 +15,9 @@ function(nowide_add_test name)
   add_executable(${name} ${ARG_SRC})
   target_link_libraries(${name} PRIVATE nowide::nowide ${ARG_LIBRARIES})
   nowide_add_warnings(${name} pedantic ${NOWIDE_WERROR})
+  if(_NOWIDE_SUGGEST_OVERRIDE_SUPPORTED)
+    target_compile_options(${name} PRIVATE -Wsuggest-override -Wno-error=suggest-override)
+  endif()
   target_compile_definitions(${name} PRIVATE ${ARG_DEFINITIONS})
   if(NOT ARG_COMPILE_ONLY)
     add_test(NAME ${name} COMMAND ${name} ${ARG_ARGS})

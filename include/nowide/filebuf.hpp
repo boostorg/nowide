@@ -192,7 +192,7 @@ namespace nowide {
         }
 
     protected:
-        virtual std::streambuf* setbuf(char* s, std::streamsize n)
+        std::streambuf* setbuf(char* s, std::streamsize n) override
         {
             assert(n >= 0);
             // Maximum compatibility: Discard all local buffers and use user-provided values
@@ -206,7 +206,7 @@ namespace nowide {
             return this;
         }
 
-        virtual int overflow(int c = EOF)
+        int overflow(int c = EOF) override
         {
             if(!(mode_ & std::ios_base::out))
                 return EOF;
@@ -245,7 +245,7 @@ namespace nowide {
             return Traits::not_eof(c);
         }
 
-        virtual int sync()
+        int sync() override
         {
             if(!file_)
                 return 0;
@@ -261,7 +261,7 @@ namespace nowide {
             return result ? 0 : -1;
         }
 
-        virtual int underflow()
+        int underflow() override
         {
             if(!(mode_ & std::ios_base::in))
                 return EOF;
@@ -285,7 +285,7 @@ namespace nowide {
             return Traits::to_int_type(*gptr());
         }
 
-        virtual int pbackfail(int c = EOF)
+        int pbackfail(int c = EOF) override
         {
             if(!(mode_ & std::ios_base::in))
                 return EOF;
@@ -310,9 +310,9 @@ namespace nowide {
             return Traits::not_eof(c);
         }
 
-        virtual std::streampos seekoff(std::streamoff off,
-                                       std::ios_base::seekdir seekdir,
-                                       std::ios_base::openmode = std::ios_base::in | std::ios_base::out)
+        std::streampos seekoff(std::streamoff off,
+                               std::ios_base::seekdir seekdir,
+                               std::ios_base::openmode = std::ios_base::in | std::ios_base::out) override
         {
             if(!file_)
                 return EOF;
@@ -335,13 +335,13 @@ namespace nowide {
                 return EOF;
             return std::ftell(file_);
         }
-        virtual std::streampos seekpos(std::streampos pos,
-                                       std::ios_base::openmode m = std::ios_base::in | std::ios_base::out)
+        std::streampos seekpos(std::streampos pos,
+                               std::ios_base::openmode m = std::ios_base::in | std::ios_base::out) override
         {
             // Standard mandates "as-if fsetpos", but assume the effect is the same as fseek
             return seekoff(pos, std::ios_base::beg, m);
         }
-        virtual void imbue(const std::locale& loc)
+        void imbue(const std::locale& loc) override
         {
             validate_cvt(loc);
         }
