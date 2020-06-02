@@ -17,6 +17,10 @@
 
 #ifdef _MSC_VER
 #define NOWIDE_MSVC _MSC_VER
+# if (_MSC_VER >= 1400)
+#   define ftello64 _ftelli64
+#   define fseeko64 _fseeki64
+# endif
 #endif
 
 #ifdef __GNUC__
