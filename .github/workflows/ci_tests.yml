@@ -24,8 +24,6 @@ jobs:
             generator: Visual Studio 16 2019
           - os: ubuntu-16.04
             buildType: Debug
-          - os: windows-latest
-            generator: Unix Makefiles
     runs-on: ${{matrix.os}}
     env:
       DEP_DIR: ${{github.workspace}}/dependencies
@@ -65,7 +63,7 @@ jobs:
       run: |
         7z x boost.7z > /dev/null
         cd $(basename "$BOOST_ROOT")
-        [[ "${{matrix.generator}}" =~ "Unix" ]] && toolset=gcc || toolset=mingw
+        [[ "${{matrix.os}}" =~ "windows" ]] && toolset=mingw || toolset=gcc
         ./bootstrap.sh --with-toolset="$toolset" --with-libraries=system,filesystem threading=multi || (cat bootstrap.log && false)
         sed -i 's/mingw/gcc/' project-config.jam
         [[ "${{matrix.generator}}" =~ "Visual Studio" ]] && toolset=msvc-14.0 || toolset=gcc
