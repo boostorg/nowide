@@ -139,7 +139,7 @@ namespace nowide {
             file_ = detail::wfopen(s, smode);
             if(!file_)
                 return 0;
-            if(ate && fseeko64(file_, 0, SEEK_END) != 0)
+            if(ate && BOOST_NOWIDE_FSEEK64(file_, 0, SEEK_END) != 0)
             {
                 close();
                 return 0;
@@ -332,9 +332,9 @@ namespace nowide {
             default: assert(false); return EOF;
             }
             assert(off <= std::numeric_limits<int64_t>::max());
-            if(fseeko64(file_, static_cast<int64_t>(off), whence) != 0)
+            if(BOOST_NOWIDE_FSEEK64(file_, static_cast<int64_t>(off), whence) != 0)
                 return EOF;
-            return ftello64(file_);
+            return BOOST_NOWIDE_FTELL64(file_);
         }
         virtual std::streampos seekpos(std::streampos pos,
                                        std::ios_base::openmode m = std::ios_base::in | std::ios_base::out)
@@ -357,7 +357,7 @@ namespace nowide {
                 const std::streamsize off = gptr() - egptr();
                 setg(0, 0, 0);
                 assert(off <= std::numeric_limits<int64_t>::max());
-                if(off && fseeko64(file_, static_cast<int64_t>(off), SEEK_CUR) != 0)
+                if(off && BOOST_NOWIDE_FSEEK64(file_, static_cast<int64_t>(off), SEEK_CUR) != 0)
                     return false;
             }
             return true;

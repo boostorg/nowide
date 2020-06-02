@@ -17,10 +17,17 @@
 
 #ifdef _MSC_VER
 #define NOWIDE_MSVC _MSC_VER
-# if (_MSC_VER >= 1400)
-#   define ftello64 _ftelli64
-#   define fseeko64 _fseeki64
-# endif
+#endif
+
+#if(defined(__GNUC__) || defined(__MINGW32__))
+#define BOOST_NOWIDE_FTELL64 ftello64
+#define BOOST_NOWIDE_FSEEK64 fseeko64
+#elif(defined(_MSC_VER) && defined(_MSC_VER) >= 1400)
+#define BOOST_NOWIDE_FTELL64 _ftelli64
+#define BOOST_NOWIDE_FSEEK64 _fseeki64
+#else
+#define BOOST_NOWIDE_FTELL64 ftell
+#define BOOST_NOWIDE_FSEEK64 fseek
 #endif
 
 #ifdef __GNUC__
