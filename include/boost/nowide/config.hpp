@@ -50,13 +50,14 @@
 
 //! @endcond
 
-#if(defined(__GNUC__) && !defined(__APPLE__) || defined(__MINGW32__))
+
+#if defined(__MINGW64__) || defined(__CYGWIN__)
 #define BOOST_NOWIDE_FTELL64 ftello64
 #define BOOST_NOWIDE_FSEEK64 fseeko64
-#elif(defined(__APPLE__))
+#elif defined(__APPLE__)
 #define BOOST_NOWIDE_FTELL64 ftello
 #define BOOST_NOWIDE_FSEEK64 fseeko
-#elif(defined(_MSC_VER))
+#elif defined(_MSC_VER)
 #define BOOST_NOWIDE_FTELL64 _ftelli64
 #define BOOST_NOWIDE_FSEEK64 _fseeki64
 #else
