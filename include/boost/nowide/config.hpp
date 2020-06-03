@@ -50,7 +50,7 @@
 
 //! @endcond
 
-#if defined(__MINGW64__) 
+#if defined(__MINGW64__)
 #define BOOST_NOWIDE_FTELL64 ftello64
 #define BOOST_NOWIDE_FSEEK64 fseeko64
 #elif defined(__APPLE__)
