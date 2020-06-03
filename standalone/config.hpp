@@ -25,7 +25,7 @@
 #elif(defined(__APPLE__))
 #define BOOST_NOWIDE_FTELL64 ftello
 #define BOOST_NOWIDE_FSEEK64 fseeko
-#elif(defined(_MSC_VER) && defined(_MSC_VER) >= 1400)
+#elif(defined(_MSC_VER))
 #define BOOST_NOWIDE_FTELL64 _ftelli64
 #define BOOST_NOWIDE_FSEEK64 _fseeki64
 #else
