@@ -19,7 +19,7 @@
 #define NOWIDE_MSVC _MSC_VER
 #endif
 
-#if(defined(__GNUC__) || defined(__MINGW32__) && !defined(__APPLE__))
+#if(defined(__GNUC__) && !defined(__APPLE__) || defined(__MINGW32__))
 #define BOOST_NOWIDE_FTELL64 ftello64
 #define BOOST_NOWIDE_FSEEK64 fseeko64
 #elif(defined(__APPLE__))
