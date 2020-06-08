@@ -138,7 +138,7 @@ namespace nowide {
             file_ = detail::wfopen(s, smode);
             if(!file_)
                 return 0;
-            if(ate && std::fseek(file_, 0, SEEK_END) != 0)
+            if(ate && NOWIDE_FSEEK64(file_, 0, SEEK_END) != 0)
             {
                 close();
                 return 0;
@@ -330,10 +330,10 @@ namespace nowide {
             case std::ios_base::end: whence = SEEK_END; break;
             default: assert(false); return EOF;
             }
-            assert(off <= std::numeric_limits<long>::max());
-            if(std::fseek(file_, static_cast<long>(off), whence) != 0)
+            assert(off <= std::numeric_limits<int64_t>::max());
+            if(NOWIDE_FSEEK64(file_, static_cast<int64_t>(off), whence) != 0)
                 return EOF;
-            return std::ftell(file_);
+            return NOWIDE_FTELL64(file_);
         }
         std::streampos seekpos(std::streampos pos,
                                std::ios_base::openmode m = std::ios_base::in | std::ios_base::out) override
@@ -355,8 +355,8 @@ namespace nowide {
             {
                 const std::streamsize off = gptr() - egptr();
                 setg(0, 0, 0);
-                assert(off <= std::numeric_limits<long>::max());
-                if(off && std::fseek(file_, static_cast<long>(off), SEEK_CUR) != 0)
+                assert(off <= std::numeric_limits<int64_t>::max());
+                if(off && NOWIDE_FSEEK64(file_, static_cast<int64_t>(off), SEEK_CUR) != 0)
                     return false;
             }
             return true;
