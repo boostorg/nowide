@@ -19,6 +19,20 @@
 #define NOWIDE_MSVC _MSC_VER
 #endif
 
+#if defined(__MINGW64__)
+#define BOOST_NOWIDE_FTELL64 ftello64
+#define BOOST_NOWIDE_FSEEK64 fseeko64
+#elif defined(__APPLE__)
+#define BOOST_NOWIDE_FTELL64 ftello
+#define BOOST_NOWIDE_FSEEK64 fseeko
+#elif defined(_MSC_VER)
+#define BOOST_NOWIDE_FTELL64 _ftelli64
+#define BOOST_NOWIDE_FSEEK64 _fseeki64
+#else
+#define BOOST_NOWIDE_FTELL64 ftell
+#define BOOST_NOWIDE_FSEEK64 fseek
+#endif
+
 #ifdef __GNUC__
 #define BOOST_SYMBOL_VISIBLE __attribute__((__visibility__("default")))
 #endif

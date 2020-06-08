@@ -50,6 +50,20 @@
 
 //! @endcond
 
+#if defined(__MINGW64__)
+#define BOOST_NOWIDE_FTELL64 ftello64
+#define BOOST_NOWIDE_FSEEK64 fseeko64
+#elif defined(__APPLE__)
+#define BOOST_NOWIDE_FTELL64 ftello
+#define BOOST_NOWIDE_FSEEK64 fseeko
+#elif defined(_MSC_VER)
+#define BOOST_NOWIDE_FTELL64 _ftelli64
+#define BOOST_NOWIDE_FSEEK64 _fseeki64
+#else
+#define BOOST_NOWIDE_FTELL64 ftell
+#define BOOST_NOWIDE_FSEEK64 fseek
+#endif
+
 /// @def BOOST_NOWIDE_USE_WCHAR_OVERLOADS
 /// @brief Whether to use the wchar_t* overloads in fstream/filebuf
 /// Enabled on Windows and Cygwin as the latter may use wchar_t in filesystem::path
