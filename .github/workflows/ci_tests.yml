@@ -31,6 +31,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/cache@v1
+      id: cache-boost
       with:
         path: ${{env.DEP_DIR}}
         key: ${{matrix.os}}-${{matrix.generator}}-${{env.BOOST_VERSION}}
@@ -38,39 +39,34 @@ jobs:
     - name: Install CMake
       if: runner.os == 'Linux' && matrix.standalone == 'Boost'
       run: wget -qO- https://cmake.org/files/v3.14/cmake-3.14.0-Linux-x86_64.tar.gz | sudo tar --strip-components=1 -xzC /usr/local
-    # Install Boost, no wget on Windows -.-
-    - name: Download Boost
-      shell: cmake -P {0}
+    - name: Set BOOST_ROOT
       if: matrix.standalone == 'Boost'
-      id: downloadBoost
-      run: |
-        string(REPLACE "." "_" filename boost_$ENV{BOOST_VERSION})
-        set(BOOST_ROOT $ENV{DEP_DIR}/${filename})
-        message("::set-env name=BOOST_ROOT::${BOOST_ROOT}")
-        if(EXISTS ${BOOST_ROOT}/include)
-          message("::set-output name=update::0")
-        else()
-          message("::set-output name=update::1")
-          set(boost_url https://sourceforge.net/projects/boost/files/boost/$ENV{BOOST_VERSION}/${filename}.7z/download)
-          set(DEP_BUILD_DIR $ENV{DEP_DIR}/build)
-          file(MAKE_DIRECTORY ${DEP_BUILD_DIR})
-          file(DOWNLOAD "${boost_url}" ${DEP_BUILD_DIR}/boost.7z SHOW_PROGRESS)
-        endif()
+      shell: bash
+      run: echo "::set-env name=BOOST_ROOT::${DEP_DIR//\\/\/}/boost_${BOOST_VERSION//./_}"
+    # Install Boost
+    - uses: actions/checkout@v2
+      if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true'
+      with:
+        repository: boostorg/boost
+        ref: boost-${{env.BOOST_VERSION}}
+        path: __buildBoost
+        fetch-depth: 1
     - name: Build Boost
       shell: bash
-      if: matrix.standalone == 'Boost' && steps.downloadBoost.outputs.update == 1
-      working-directory: ${{env.DEP_DIR}}/build
+      if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true'
       run: |
-        7z x boost.7z > /dev/null
-        cd $(basename "$BOOST_ROOT")
+        cd __buildBoost
+        git submodule update --init tools/boostdep libs/filesystem
+        (cd tools/boostdep && git fetch && git checkout boost-1.73.0 && git checkout boost-1.63.0 -- depinst/exceptions.txt)
+        python tools/boostdep/depinst/depinst.py --include tools --exclude test --git_args '--jobs 3' filesystem
         [[ "${{matrix.os}}" =~ "windows" ]] && toolset=mingw || toolset=gcc
         ./bootstrap.sh --with-toolset="$toolset" --with-libraries=system,filesystem threading=multi || (cat bootstrap.log && false)
         sed -i 's/mingw/gcc/' project-config.jam
         [[ "${{matrix.generator}}" =~ "Visual Studio" ]] && toolset=msvc-14.0 || toolset=gcc
+        ./b2 headers
         ./b2 link=static toolset=$toolset address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install
-        cd "$DEP_DIR"
-        # Workaround for "Device or resource busy" error
-        if ! rm -r build; then sleep 30s; rm -r build || true; fi
+        cd ..
+        rm -r __buildBoost || true
     - name: Create standalone
       if: matrix.standalone == 'Standalone'
       shell: bash
