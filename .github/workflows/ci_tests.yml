@@ -56,7 +56,7 @@ jobs:
       if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true'
       run: |
         cd __buildBoost
-        git submodule update --init tools/boostdep libs/filesystem
+        git submodule update --init --jobs 3 tools/boostdep libs/filesystem tools/inspect libs/wave # Last 2 are required for pre-1.64
         (cd tools/boostdep && git fetch && git checkout boost-1.73.0 && git checkout boost-1.63.0 -- depinst/exceptions.txt)
         python tools/boostdep/depinst/depinst.py --include tools --exclude test --git_args '--jobs 3' filesystem
         [[ "${{matrix.os}}" =~ "windows" ]] && toolset=mingw || toolset=gcc
