@@ -34,13 +34,17 @@ endif()
 
 include(BoostAddOptions)
 include(BoostAddWarnings)
+include(CheckCXXSourceCompiles)
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   include(CTest)
 endif()
 
+file(READ ${CMAKE_CURRENT_SOURCE_DIR}/test/check_lfs_support.cpp lfsSource)
+check_cxx_source_compiles("${lfsSource}" BOOST_NOWIDE_HAS_LFS)
+
 # Using glob here is ok as it is only for headers
 file(GLOB_RECURSE headers include/*.hpp)
-add_library(boost_nowide src/cstdio.cpp src/cstdlib.cpp src/iostream.cpp ${headers})
+add_library(boost_nowide src/cstdio.cpp src/cstdlib.cpp src/filebuf.cpp src/iostream.cpp ${headers})
 add_library(Boost::nowide ALIAS boost_nowide)
 set_target_properties(boost_nowide PROPERTIES
     CXX_VISIBILITY_PRESET hidden
@@ -50,6 +54,9 @@ set_target_properties(boost_nowide PROPERTIES
 )
 if(BUILD_SHARED_LIBS)
   target_compile_definitions(boost_nowide PUBLIC BOOST_NOWIDE_DYN_LINK)
+endif()
+if(NOT BOOST_NOWIDE_HAS_LFS)
+  target_compile_definitions(boost_nowide PRIVATE BOOST_NOWIDE_NO_LFS)
 endif()
 target_compile_definitions(boost_nowide PUBLIC BOOST_NOWIDE_NO_LIB)
 target_include_directories(boost_nowide PUBLIC include)
