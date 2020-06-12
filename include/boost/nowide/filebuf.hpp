@@ -26,6 +26,13 @@
 
 namespace boost {
 namespace nowide {
+    namespace detail {
+        /// Same as std::ftell but potentially with Large File Support
+        BOOST_NOWIDE_DECL std::streampos ftell(FILE* file);
+        /// Same as std::fseek but potentially with Large File Support
+        BOOST_NOWIDE_DECL int fseek(FILE* file, std::streamoff offset, int origin);
+    } // namespace detail
+
 #if !BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT && !defined(BOOST_NOWIDE_DOXYGEN)
     using std::basic_filebuf;
     using std::filebuf;
@@ -139,7 +146,7 @@ namespace nowide {
             file_ = detail::wfopen(s, smode);
             if(!file_)
                 return 0;
-            if(ate && BOOST_NOWIDE_FSEEK64(file_, 0, SEEK_END) != 0)
+            if(ate && detail::fseek(file_, 0, SEEK_END) != 0)
             {
                 close();
                 return 0;
@@ -331,10 +338,9 @@ namespace nowide {
             case std::ios_base::end: whence = SEEK_END; break;
             default: assert(false); return EOF;
             }
-            assert(off <= std::numeric_limits<int64_t>::max());
-            if(BOOST_NOWIDE_FSEEK64(file_, static_cast<int64_t>(off), whence) != 0)
+            if(detail::fseek(file_, off, whence) != 0)
                 return EOF;
-            return BOOST_NOWIDE_FTELL64(file_);
+            return detail::ftell(file_);
         }
         std::streampos seekpos(std::streampos pos,
                                std::ios_base::openmode m = std::ios_base::in | std::ios_base::out) override
@@ -352,15 +358,16 @@ namespace nowide {
         /// Postcondition: gptr() == NULL
         bool stop_reading()
         {
-            if(gptr())
-            {
-                const std::streamsize off = gptr() - egptr();
-                setg(0, 0, 0);
-                assert(off <= std::numeric_limits<int64_t>::max());
-                if(off && BOOST_NOWIDE_FSEEK64(file_, static_cast<int64_t>(off), SEEK_CUR) != 0)
-                    return false;
-            }
-            return true;
+            if(!gptr())
+                return true;
+            const auto off = gptr() - egptr();
+            setg(0, 0, 0);
+            if(!off)
+                return true;
+            // coverity[result_independent_of_operands]
+            if(off > std::numeric_limits<std::streamoff>::max())
+                return false;
+            return detail::fseek(file_, static_cast<std::streamoff>(off), SEEK_CUR) == 0;
         }
 
         /// Stop writing. If any bytes are to be written, writes them to file

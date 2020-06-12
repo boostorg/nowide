@@ -16,6 +16,8 @@ local requirements =
 
 obj cxx11_moveable_fstreams : ../test/check_movable_fstreams.cpp ;
 explicit cxx11_moveable_fstreams ;
+obj lfs_support : ../test/check_lfs_support.cpp ;
+explicit lfs_support ;
 
 project boost/nowide
   : source-location ../src
@@ -26,11 +28,12 @@ project boost/nowide
       cxx11_rvalue_references
       cxx11_static_assert
     ]
-    [ check-target-builds cxx11_moveable_fstreams "std::fstream is moveable and swappable" : : <build>no ] 
+    [ check-target-builds cxx11_moveable_fstreams "std::fstream is moveable and swappable" : : <build>no ]
+    [ check-target-builds lfs_support "Has Large File Support" : : <define>BOOST_NOWIDE_NO_LFS ]
   : usage-requirements $(requirements)
   ;
 
-local SOURCES = cstdio cstdlib iostream ;
+local SOURCES = cstdio cstdlib filebuf iostream ;
 
 lib boost_nowide
   : $(SOURCES).cpp

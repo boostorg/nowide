@@ -13,6 +13,7 @@
 \subsection changelog_11_0_0 Nowide 11.0.0
 
 - Require C++11 compatible compiler and stdlib
+- LFS: Add support for files > 2 GB where the underlying system supports it
 
 \subsection changelog_10_0_2 Nowide 10.0.2
 
