@@ -53,7 +53,11 @@ namespace nowide {
         /// the correct std::basic_[io]stream class and initializing it
         /// \tparam T_StreamType One of StreamType* above.
         ///         Class used instead of value, because openmode::operator| may not be constexpr
-        template<typename CharType, typename Traits, typename T_StreamType>
+        /// \tparam FileBufType Discriminator to force a differing ABI if depending on the contained filebuf
+        template<typename CharType,
+                 typename Traits,
+                 typename T_StreamType,
+                 int FileBufType = BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT>
         class fstream_impl;
 
         template<typename Path, typename Result>
@@ -267,7 +271,7 @@ namespace nowide {
         {
             T buf_;
         };
-        template<typename CharType, typename Traits, typename T_StreamType>
+        template<typename CharType, typename Traits, typename T_StreamType, int>
         class fstream_impl : private buf_holder<basic_filebuf<CharType, Traits> >, // must be first due to init order
                              public T_StreamType::template stream_base<CharType, Traits>::type
         {
