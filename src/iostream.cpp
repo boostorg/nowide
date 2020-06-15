@@ -81,12 +81,12 @@ namespace nowide {
             }
 
         private:
-            typedef detail::utf::utf_traits<char> decoder;
-            typedef detail::utf::utf_traits<wchar_t> encoder;
+            typedef utf::utf_traits<char> decoder;
+            typedef utf::utf_traits<wchar_t> encoder;
 
             int write(const char* p, int n)
             {
-                namespace uf = detail::utf;
+                namespace uf = utf;
                 const char* b = p;
                 const char* e = p + n;
                 DWORD size = 0;
@@ -180,8 +180,8 @@ namespace nowide {
             }
 
         private:
-            typedef detail::utf::utf_traits<wchar_t> decoder;
-            typedef detail::utf::utf_traits<char> encoder;
+            typedef utf::utf_traits<wchar_t> decoder;
+            typedef utf::utf_traits<char> encoder;
 
             size_t read()
             {
@@ -196,14 +196,14 @@ namespace nowide {
                 while(cur_input_ptr != end_input_ptr)
                 {
                     const wchar_t* const prev_input_ptr = cur_input_ptr;
-                    detail::utf::code_point c = decoder::decode(cur_input_ptr, end_input_ptr);
+                    utf::code_point c = decoder::decode(cur_input_ptr, end_input_ptr);
                     // If incomplete restore to beginning of incomplete char to use on next buffer
-                    if(c == detail::utf::incomplete)
+                    if(c == utf::incomplete)
                     {
                         cur_input_ptr = prev_input_ptr;
                         break;
                     }
-                    if(c == detail::utf::illegal)
+                    if(c == utf::illegal)
                         c = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
                     assert(out - buffer_ + encoder::width(c) <= static_cast<int>(buffer_size));
                     // Skip \r chars as std::cin does

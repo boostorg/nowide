@@ -9,8 +9,8 @@
 #ifndef BOOST_NOWIDE_UTF8_CODECVT_HPP_INCLUDED
 #define BOOST_NOWIDE_UTF8_CODECVT_HPP_INCLUDED
 
-#include <boost/nowide/detail/utf.hpp>
 #include <boost/nowide/replacement.hpp>
+#include <boost/nowide/utf/utf.hpp>
 #include <cstdint>
 #include <locale>
 
@@ -104,11 +104,11 @@ namespace nowide {
             while(max > 0 && from < from_end)
             {
                 const char* prev_from = from;
-                std::uint32_t ch = detail::utf::utf_traits<char>::decode(from, from_end);
-                if(ch == detail::utf::illegal)
+                std::uint32_t ch = utf::utf_traits<char>::decode(from, from_end);
+                if(ch == utf::illegal)
                 {
                     ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
-                } else if(ch == detail::utf::incomplete)
+                } else if(ch == utf::incomplete)
                 {
                     from = prev_from;
                     break;
@@ -154,12 +154,12 @@ namespace nowide {
             {
                 const char* from_saved = from;
 
-                uint32_t ch = detail::utf::utf_traits<char>::decode(from, from_end);
+                uint32_t ch = utf::utf_traits<char>::decode(from, from_end);
 
-                if(ch == detail::utf::illegal)
+                if(ch == utf::illegal)
                 {
                     ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
-                } else if(ch == detail::utf::incomplete)
+                } else if(ch == utf::incomplete)
                 {
                     from = from_saved;
                     r = std::codecvt_base::partial;
@@ -263,18 +263,18 @@ namespace nowide {
                         ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
                     }
                 }
-                if(!detail::utf::is_valid_codepoint(ch))
+                if(!utf::is_valid_codepoint(ch))
                 {
                     r = std::codecvt_base::error;
                     break;
                 }
-                int len = detail::utf::utf_traits<char>::width(ch);
+                int len = utf::utf_traits<char>::width(ch);
                 if(to_end - to < len)
                 {
                     r = std::codecvt_base::partial;
                     break;
                 }
-                to = detail::utf::utf_traits<char>::encode(ch, to);
+                to = utf::utf_traits<char>::encode(ch, to);
                 state = 0;
                 from++;
             }
@@ -335,12 +335,12 @@ namespace nowide {
             while(max > 0 && from < from_end)
             {
                 const char* save_from = from;
-                std::uint32_t ch = detail::utf::utf_traits<char>::decode(from, from_end);
-                if(ch == detail::utf::incomplete)
+                std::uint32_t ch = utf::utf_traits<char>::decode(from, from_end);
+                if(ch == utf::incomplete)
                 {
                     from = save_from;
                     break;
-                } else if(ch == detail::utf::illegal)
+                } else if(ch == utf::illegal)
                 {
                     ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
                 }
@@ -367,12 +367,12 @@ namespace nowide {
             {
                 const char* from_saved = from;
 
-                uint32_t ch = detail::utf::utf_traits<char>::decode(from, from_end);
+                uint32_t ch = utf::utf_traits<char>::decode(from, from_end);
 
-                if(ch == detail::utf::illegal)
+                if(ch == utf::illegal)
                 {
                     ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
-                } else if(ch == detail::utf::incomplete)
+                } else if(ch == utf::incomplete)
                 {
                     r = std::codecvt_base::partial;
                     from = from_saved;
@@ -400,17 +400,17 @@ namespace nowide {
             {
                 std::uint32_t ch = 0;
                 ch = *from;
-                if(!detail::utf::is_valid_codepoint(ch))
+                if(!utf::is_valid_codepoint(ch))
                 {
                     ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
                 }
-                int len = detail::utf::utf_traits<char>::width(ch);
+                int len = utf::utf_traits<char>::width(ch);
                 if(to_end - to < len)
                 {
                     r = std::codecvt_base::partial;
                     break;
                 }
-                to = detail::utf::utf_traits<char>::encode(ch, to);
+                to = utf::utf_traits<char>::encode(ch, to);
                 from++;
             }
             from_next = from;
