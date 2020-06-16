@@ -33,7 +33,7 @@ project boost/nowide
   : usage-requirements $(requirements)
   ;
 
-local SOURCES = cstdio cstdlib filebuf iostream ;
+local SOURCES = cstdio cstdlib filebuf iostream stat ;
 
 lib boost_nowide
   : $(SOURCES).cpp
