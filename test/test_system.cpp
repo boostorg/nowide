@@ -12,7 +12,8 @@
 #include <boost/nowide/cstdlib.hpp>
 
 #include <boost/nowide/args.hpp>
-#include <boost/nowide/detail/convert.hpp>
+#include <boost/nowide/utf/convert.hpp>
+#include <boost/nowide/utf/utf.hpp>
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
@@ -35,7 +36,7 @@ bool is_ascii(const std::string& s)
 std::string replace_non_ascii(const std::string& s)
 {
     std::string::const_iterator it = s.begin();
-    namespace utf = boost::nowide::detail::utf;
+    namespace utf = boost::nowide::utf;
     typedef utf::utf_traits<char> utf8;
     std::string result;
     result.reserve(s.size());

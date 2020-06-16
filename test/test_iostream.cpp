@@ -8,7 +8,7 @@
 
 #include <boost/nowide/iostream.hpp>
 
-#include <boost/nowide/detail/utf.hpp>
+#include <boost/nowide/utf/utf.hpp>
 #include <limits>
 #include <string>
 
@@ -16,7 +16,7 @@
 
 bool isValidUTF8(const std::string& s)
 {
-    using namespace boost::nowide::detail::utf;
+    using namespace boost::nowide::utf;
     for(std::string::const_iterator it = s.begin(); it != s.end();)
     {
         code_point c = utf_traits<char>::decode(it, s.end());
