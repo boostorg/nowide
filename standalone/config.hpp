@@ -71,11 +71,16 @@
 #define BOOST_NOWIDE_FALLTHROUGH
 #endif
 
+#if defined __GNUC__
+#define BOOST_LIKELY(x) __builtin_expect(x, 1)
+#define BOOST_UNLIKELY(x) __builtin_expect(x, 0)
+#else
 #if !defined(BOOST_LIKELY)
 #define BOOST_LIKELY(x) x
 #endif
 #if !defined(BOOST_UNLIKELY)
 #define BOOST_UNLIKELY(x) x
+#endif
 #endif
 
 #endif
