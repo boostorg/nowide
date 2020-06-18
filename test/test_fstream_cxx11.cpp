@@ -2,13 +2,11 @@
 //  Copyright (c) 2019 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
-//  accompanying file LICENSE_1_0.txt or copy at
+//  accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
 #include <boost/nowide/config.hpp>
-
-#if BOOST_NOWIDE_CXX11
 
 #include <boost/nowide/fstream.hpp>
 
@@ -188,14 +186,3 @@ void test_main(int, char** argv, char**)
     test_ofstream(exampleFilename);
     test_fstream(exampleFilename);
 }
-
-#else
-
-#include <iostream>
-
-int main()
-{
-    std::cout << "Test skipped as there is no C++11 support by the compiler" << std::endl;
-}
-
-#endif

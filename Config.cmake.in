@@ -4,14 +4,10 @@ set(_boost_nowide_superproject "@BOOST_SUPERPROJECT_SOURCE_DIR@")
 
 include(CMakeFindDependencyMacro)
 if(_boost_nowide_superproject)
-foreach(dep IN ITEMS boost_config boost_smart_ptr boost_static_assert)
+foreach(dep IN ITEMS boost_config)
   find_dependency(${dep})
 endforeach()
 else()
-# Default boost libs are static on windows and dynamic on linux
-if(WIN32 AND "${Boost_USE_STATIC_LIBS}" STREQUAL "")
-  set(Boost_USE_STATIC_LIBS ON)
-endif()
 find_dependency(Boost 1.56)
 endif()
 

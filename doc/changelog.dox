@@ -2,13 +2,20 @@
 //  Copyright (c) 2019-2020 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
-//  accompanying file LICENSE_1_0.txt or copy at
+//  accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
 /*! \page changelog_page Changelog
 
 \section changelog Changelog
+
+\subsection changelog_11_0_0 Nowide 11.0.0
+
+- Require C++11 compatible compiler and stdlib
+- LFS: Add support for files > 2 GB where the underlying system supports it
+- Generic UTF conversion functions are now available in the boost::nowide::utf namespace
+- Add support for stat with UTF-8 paths
 
 \subsection changelog_10_0_2 Nowide 10.0.2
 
