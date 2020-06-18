@@ -8,6 +8,9 @@
 #include <boost/nowide/stat.hpp>
 
 #include <boost/nowide/cstdio.hpp>
+#ifdef BOOST_WINDOWS
+#include <errno.h>
+#endif
 
 #include "test.hpp"
 
@@ -50,5 +53,17 @@ void test_main(int, char** argv, char**)
         TEST(boost::nowide::stat(filename.c_str(), &boostStat) == 0);
         TEST(boostStat.st_size == testDataSize);
     }
+
+#ifdef BOOST_WINDOWS
+    std::cout << " -- stat - invalid struct size" << std::endl;
+    {
+        struct _stat stdStat;
+        // Simulate passing a struct that is 4 bytes smaller, e.g. if it uses 32 bit time field instead of 64 bit
+        // Need to use the detail function directly
+        TEST(boost::nowide::detail::stat(filename.c_str(), &stdStat, sizeof(stdStat) - 4u) == EINVAL);
+        TEST(errno == EINVAL);
+    }
+#endif
+
     boost::nowide::remove(filename.c_str());
 }
