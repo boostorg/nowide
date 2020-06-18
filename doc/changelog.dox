@@ -15,6 +15,7 @@
 - Require C++11 compatible compiler and stdlib
 - LFS: Add support for files > 2 GB where the underlying system supports it
 - Generic UTF conversion functions are now available in the boost::nowide::utf namespace
+- Add support for stat with UTF-8 paths
 
 \subsection changelog_10_0_2 Nowide 10.0.2
 

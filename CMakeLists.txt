@@ -44,7 +44,7 @@ check_cxx_source_compiles("${lfsSource}" BOOST_NOWIDE_HAS_LFS)
 
 # Using glob here is ok as it is only for headers
 file(GLOB_RECURSE headers include/*.hpp)
-add_library(boost_nowide src/cstdio.cpp src/cstdlib.cpp src/filebuf.cpp src/iostream.cpp ${headers})
+add_library(boost_nowide src/cstdio.cpp src/cstdlib.cpp src/filebuf.cpp src/iostream.cpp src/stat.cpp ${headers})
 add_library(Boost::nowide ALIAS boost_nowide)
 set_target_properties(boost_nowide PROPERTIES
     CXX_VISIBILITY_PRESET hidden
