@@ -364,9 +364,16 @@ namespace nowide {
             setg(0, 0, 0);
             if(!off)
                 return true;
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare"
+#endif
             // coverity[result_independent_of_operands]
             if(off > std::numeric_limits<std::streamoff>::max())
                 return false;
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
             return detail::fseek(file_, static_cast<std::streamoff>(off), SEEK_CUR) == 0;
         }
 

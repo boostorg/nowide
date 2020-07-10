@@ -153,7 +153,7 @@ for:
               OpenCppCoverage.exe --quiet --export_type cobertura:cobertura.xml `
               --sources ${env:APPVEYOR_BUILD_FOLDER} --modules "$PWD" `
               --cover_children --working_dir "$PWD" -- ctest -C Debug
-              bash codecov.sh -f cobertura.xml -n Appveyor -e APPVEYOR_BUILD_WORKER_IMAGE -X gcov -X search -Z
+              bash codecov.sh -f cobertura.xml -n Appveyor -e APPVEYOR_BUILD_WORKER_IMAGE -X gcov -X search -Z -U "-s" -A "-s"
             }
       # Build consumer example test
       - cmake --build . --config %configuration% --target install
