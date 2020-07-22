@@ -16,7 +16,7 @@ local requirements =
 
 obj cxx11_moveable_fstreams : ../test/check_movable_fstreams.cpp ;
 explicit cxx11_moveable_fstreams ;
-obj lfs_support : ../test/check_lfs_support.cpp ;
+exe lfs_support : ../test/check_lfs_support.cpp ;
 explicit lfs_support ;
 
 project boost/nowide
