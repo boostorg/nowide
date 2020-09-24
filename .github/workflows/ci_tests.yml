@@ -16,7 +16,8 @@ jobs:
         buildType: [Debug, Release]
         standalone: [Boost, Standalone]
         shared_lib: [ON, OFF]
-        generator: ['Visual Studio 16 2019', 'MinGW Makefiles', 'Unix Makefiles']
+        generator:
+          ["Visual Studio 16 2019", "MinGW Makefiles", "Unix Makefiles"]
         exclude:
           - os: ubuntu-16.04
             generator: MinGW Makefiles
@@ -29,114 +30,115 @@ jobs:
       DEP_DIR: ${{github.workspace}}/dependencies
       BOOST_VERSION: 1.56.0
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/cache@v1
-      id: cache-boost
-      with:
-        path: ${{env.DEP_DIR}}
-        key: ${{matrix.os}}-${{matrix.generator}}-${{env.BOOST_VERSION}}
-    # Install newer CMake to be able to find Boost
-    - name: Install CMake
-      if: runner.os == 'Linux' && matrix.standalone == 'Boost'
-      run: wget -qO- https://cmake.org/files/v3.14/cmake-3.14.0-Linux-x86_64.tar.gz | sudo tar --strip-components=1 -xzC /usr/local
-    - name: Set BOOST_ROOT
-      if: matrix.standalone == 'Boost'
-      shell: bash
-      run: echo "::set-env name=BOOST_ROOT::${DEP_DIR//\\/\/}/boost_${BOOST_VERSION//./_}"
-    # Install Boost
-    - uses: actions/checkout@v2
-      if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true'
-      with:
-        repository: boostorg/boost
-        ref: boost-${{env.BOOST_VERSION}}
-        path: __buildBoost
-        fetch-depth: 1
-    - name: Build Boost
-      shell: bash
-      if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true'
-      run: |
-        cd __buildBoost
-        git submodule update --init --jobs 3 tools/boostdep libs/filesystem tools/inspect libs/wave # Last 2 are required for pre-1.64
-        (cd tools/boostdep && git fetch && git checkout boost-1.73.0 && git checkout boost-1.63.0 -- depinst/exceptions.txt)
-        python tools/boostdep/depinst/depinst.py --include tools --exclude test --git_args '--jobs 3' filesystem
-        [[ "${{matrix.os}}" =~ "windows" ]] && toolset=mingw || toolset=gcc
-        ./bootstrap.sh --with-toolset="$toolset" --with-libraries=system,filesystem threading=multi || (cat bootstrap.log && false)
-        sed -i 's/mingw/gcc/' project-config.jam
-        [[ "${{matrix.generator}}" =~ "Visual Studio" ]] && toolset=msvc-14.0 || toolset=gcc
-        ./b2 headers
-        ./b2 link=static toolset=$toolset address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install
-        cd ..
-        rm -r __buildBoost || true
-    - name: Create standalone
-      if: matrix.standalone == 'Standalone'
-      shell: bash
-      run: |
-        bash tools/create_standalone.sh "$PWD/../nowide_standalone"
-        rm -rf *
-        cp -r ../nowide_standalone/* .
-        mkdir build
-    - run: ls -la config
-    - name: Configure
-      working-directory: build
-      run: cmake .. -DBoost_DEBUG=ON -DCMAKE_BUILD_TYPE=${{matrix.buildType}} -DBUILD_SHARED_LIBS=${{matrix.shared_lib}} -DCMAKE_INSTALL_PREFIX=${{runner.workspace}}/../install -G "${{matrix.generator}}" -DCMAKE_SH="CMAKE_SH-NOTFOUND" -DBoost_NO_BOOST_CMAKE=ON
-    - name: Build & Install
-      run: cmake --build build --config ${{matrix.buildType}} --target install
-    # Run test with both bash and powershell and watch for "Using std::cin" on bash but not on powershell
-    - name: Test
-      working-directory: build
-      shell: bash
-      run: ctest --output-on-failure -C ${{matrix.buildType}} --verbose
-    - name: Test on PowerShell
-      working-directory: build
-      shell: powershell
-      if: runner.os == 'Windows'
-      run: ctest --output-on-failure -C ${{matrix.buildType}} --verbose
-    - name: Test consumption
-      working-directory: build
-      shell: bash
-      run: |
-        rm -r *
-        cmake ../test/exampleProject -DBoost_ARCHITECTURE=-x64 -DCMAKE_PREFIX_PATH="${{runner.workspace}}/../install" -G "${{matrix.generator}}" -DCMAKE_SH="CMAKE_SH-NOTFOUND"
-        cmake --build . --config ${{matrix.buildType}}
-        ctest --output-on-failure -C ${{matrix.buildType}}
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v1
+        id: cache-boost
+        with:
+          path: ${{env.DEP_DIR}}
+          key: ${{matrix.os}}-${{matrix.generator}}-${{env.BOOST_VERSION}}
+      # Install newer CMake to be able to find Boost
+      - name: Install CMake
+        if: runner.os == 'Linux' && matrix.standalone == 'Boost'
+        run: wget -qO- https://cmake.org/files/v3.14/cmake-3.14.0-Linux-x86_64.tar.gz | sudo tar --strip-components=1 -xzC /usr/local
+      - name: Set BOOST_ROOT
+        if: matrix.standalone == 'Boost'
+        shell: bash
+        run: echo "::set-env name=BOOST_ROOT::${DEP_DIR//\\/\/}/boost_${BOOST_VERSION//./_}"
+      # Install Boost
+      - uses: actions/checkout@v2
+        if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true'
+        with:
+          repository: boostorg/boost
+          ref: boost-${{env.BOOST_VERSION}}
+          path: __buildBoost
+          fetch-depth: 1
+      - name: Build Boost
+        shell: bash
+        if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true'
+        run: |
+          cd __buildBoost
+          git submodule update --init --jobs 3 tools/boostdep libs/filesystem tools/inspect libs/wave # Last 2 are required for pre-1.64
+          (cd tools/boostdep && git fetch && git checkout boost-1.73.0 && git checkout boost-1.63.0 -- depinst/exceptions.txt)
+          python tools/boostdep/depinst/depinst.py --include tools --exclude test --git_args '--jobs 3' filesystem
+          [[ "${{matrix.os}}" =~ "windows" ]] && toolset=mingw || toolset=gcc
+          ./bootstrap.sh --with-toolset="$toolset" --with-libraries=system,filesystem threading=multi || (cat bootstrap.log && false)
+          sed -i 's/mingw/gcc/' project-config.jam
+          [[ "${{matrix.generator}}" =~ "Visual Studio" ]] && toolset=msvc-14.0 || toolset=gcc
+          ./b2 headers
+          ./b2 link=static toolset=$toolset address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install
+          cd ..
+          rm -r __buildBoost || true
+      - name: Create standalone
+        if: matrix.standalone == 'Standalone'
+        shell: bash
+        run: |
+          bash tools/create_standalone.sh "$PWD/../nowide_standalone"
+          rm -rf *
+          cp -r ../nowide_standalone/* .
+          mkdir build
+      - run: ls -la
+      - run: ls -la config
+      - name: Configure
+        working-directory: build
+        run: cmake .. -DBoost_DEBUG=ON -DCMAKE_BUILD_TYPE=${{matrix.buildType}} -DBUILD_SHARED_LIBS=${{matrix.shared_lib}} -DCMAKE_INSTALL_PREFIX=${{runner.workspace}}/../install -G "${{matrix.generator}}" -DCMAKE_SH="CMAKE_SH-NOTFOUND" -DBoost_NO_BOOST_CMAKE=ON
+      - name: Build & Install
+        run: cmake --build build --config ${{matrix.buildType}} --target install
+      # Run test with both bash and powershell and watch for "Using std::cin" on bash but not on powershell
+      - name: Test
+        working-directory: build
+        shell: bash
+        run: ctest --output-on-failure -C ${{matrix.buildType}} --verbose
+      - name: Test on PowerShell
+        working-directory: build
+        shell: powershell
+        if: runner.os == 'Windows'
+        run: ctest --output-on-failure -C ${{matrix.buildType}} --verbose
+      - name: Test consumption
+        working-directory: build
+        shell: bash
+        run: |
+          rm -r *
+          cmake ../test/exampleProject -DBoost_ARCHITECTURE=-x64 -DCMAKE_PREFIX_PATH="${{runner.workspace}}/../install" -G "${{matrix.generator}}" -DCMAKE_SH="CMAKE_SH-NOTFOUND"
+          cmake --build . --config ${{matrix.buildType}}
+          ctest --output-on-failure -C ${{matrix.buildType}}
 
   BoostCMakeBuild:
     runs-on: ubuntu-16.04
     # Doesn't work on master yet
     if: "! endsWith(github.ref, '/master') && ! endsWith(github.base_ref, '/master')"
     steps:
-    - name: Get Boost branch
-      id: get_branch
-      run: |
-        ref=${GITHUB_BASE_REF:-$GITHUB_REF}
-        if [[ "${ref##*/}" == "master" ]]; then echo "::set-output name=branch::master"
-        else echo "::set-output name=branch::develop"
-        fi
-    - uses: actions/checkout@v2
-      with:
-        repository: boostorg/boost
-        ref: ${{ steps.get_branch.outputs.branch }}
-    - name: Checkout BoostDep
-      run: git submodule update --init tools/boostdep
-    - uses: actions/checkout@v2
-      with:
-        path: libs/nowide
-    - name: Install deps
-      run: python tools/boostdep/depinst/depinst.py nowide
-    - name: Create build folders
-      run: mkdir __build_static __build_shared
-    - name: Configure static
-      working-directory: __build_static
-      run: cmake .. -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide -DCMAKE_BUILD_TYPE=Debug
-    - name: Build & Test static
-      working-directory: __build_static
-      run: cmake --build . --config Debug && ctest --output-on-failure --build-config Debug
-    - name: Configure shared
-      working-directory: __build_shared
-      run: cmake .. -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON
-    - name: Build & Test shared
-      working-directory: __build_shared
-      run: cmake --build . --config Debug && ctest --output-on-failure --build-config Debug
+      - name: Get Boost branch
+        id: get_branch
+        run: |
+          ref=${GITHUB_BASE_REF:-$GITHUB_REF}
+          if [[ "${ref##*/}" == "master" ]]; then echo "::set-output name=branch::master"
+          else echo "::set-output name=branch::develop"
+          fi
+      - uses: actions/checkout@v2
+        with:
+          repository: boostorg/boost
+          ref: ${{ steps.get_branch.outputs.branch }}
+      - name: Checkout BoostDep
+        run: git submodule update --init tools/boostdep
+      - uses: actions/checkout@v2
+        with:
+          path: libs/nowide
+      - name: Install deps
+        run: python tools/boostdep/depinst/depinst.py nowide
+      - name: Create build folders
+        run: mkdir __build_static __build_shared
+      - name: Configure static
+        working-directory: __build_static
+        run: cmake .. -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide -DCMAKE_BUILD_TYPE=Debug
+      - name: Build & Test static
+        working-directory: __build_static
+        run: cmake --build . --config Debug && ctest --output-on-failure --build-config Debug
+      - name: Configure shared
+        working-directory: __build_shared
+        run: cmake .. -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON
+      - name: Build & Test shared
+        working-directory: __build_shared
+        run: cmake --build . --config Debug && ctest --output-on-failure --build-config Debug
 
   CreateDocuTest:
     runs-on: ubuntu-latest
@@ -144,32 +146,32 @@ jobs:
       - uses: actions/checkout@v1
       - name: Create documentation
         run: |
-            sudo apt-get install -y doxygen
-            bash doc/gendoc.sh
+          sudo apt-get install -y doxygen
+          bash doc/gendoc.sh
 
   CreateBoostDocuTest:
     runs-on: ubuntu-latest
     steps:
-    - name: Get Boost branch
-      id: get_branch
-      run: |
-        ref=${GITHUB_BASE_REF:-$GITHUB_REF}
-        if [[ "${ref##*/}" == "master" ]]; then echo "::set-output name=branch::master"
-        else echo "::set-output name=branch::develop"
-        fi
-    - uses: actions/checkout@v2
-      with:
-        repository: boostorg/boost
-        ref: ${{ steps.get_branch.outputs.branch }}
-    - name: Checkout BoostDep
-      run: git submodule update --init tools/boostdep
-    - uses: actions/checkout@v2
-      with:
-        path: libs/nowide
-    - name: Install deps
-      run: python tools/boostdep/depinst/depinst.py nowide
-    - name: Create documentation
-      run: |
+      - name: Get Boost branch
+        id: get_branch
+        run: |
+          ref=${GITHUB_BASE_REF:-$GITHUB_REF}
+          if [[ "${ref##*/}" == "master" ]]; then echo "::set-output name=branch::master"
+          else echo "::set-output name=branch::develop"
+          fi
+      - uses: actions/checkout@v2
+        with:
+          repository: boostorg/boost
+          ref: ${{ steps.get_branch.outputs.branch }}
+      - name: Checkout BoostDep
+        run: git submodule update --init tools/boostdep
+      - uses: actions/checkout@v2
+        with:
+          path: libs/nowide
+      - name: Install deps
+        run: python tools/boostdep/depinst/depinst.py nowide
+      - name: Create documentation
+        run: |
           sudo apt-get install -y doxygen
           ./bootstrap.sh
           ./b2 libs/nowide/doc
@@ -177,20 +179,20 @@ jobs:
   CheckFormatting:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - uses: DoozyX/clang-format-lint-action@v0.5
-      with:
-        exclude: './doc'
-        clangFormatVersion: 9
-    - name: Check line endings
-      run: |
-        if grep -r -l $'\r' --exclude-dir="\.git" --exclude-dir="html"; then
-            echo "Found files windows style line endings (CRLF). Please fix!"
-            exit 1
-        fi
-    - name: Check for tabs
-      run: |
-        if grep -r -l $'\t' --exclude-dir="\.git" --exclude-dir="html"; then
-            echo "Found files with TABs. Please fix!"
-            exit 1
-        fi
+      - uses: actions/checkout@v1
+      - uses: DoozyX/clang-format-lint-action@v0.5
+        with:
+          exclude: "./doc"
+          clangFormatVersion: 9
+      - name: Check line endings
+        run: |
+          if grep -r -l $'\r' --exclude-dir="\.git" --exclude-dir="html"; then
+              echo "Found files windows style line endings (CRLF). Please fix!"
+              exit 1
+          fi
+      - name: Check for tabs
+        run: |
+          if grep -r -l $'\t' --exclude-dir="\.git" --exclude-dir="html"; then
+              echo "Found files with TABs. Please fix!"
+              exit 1
+          fi
