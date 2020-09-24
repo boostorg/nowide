@@ -39,6 +39,10 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   include(CTest)
 endif()
 
+message(STATUS "FILE: ${CMAKE_CURRENT_SOURCE_DIR}/config/check_lfs_support.cpp")
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config/check_lfs_support.cpp)
+  message(STATUS "OK")
+endif()
 file(READ ${CMAKE_CURRENT_SOURCE_DIR}/config/check_lfs_support.cpp lfsSource)
 check_cxx_source_compiles("${lfsSource}" BOOST_NOWIDE_HAS_LFS)
 

@@ -75,6 +75,7 @@ jobs:
         rm -rf *
         cp -r ../nowide_standalone/* .
         mkdir build
+    - run: ls -la config
     - name: Configure
       working-directory: build
       run: cmake .. -DBoost_DEBUG=ON -DCMAKE_BUILD_TYPE=${{matrix.buildType}} -DBUILD_SHARED_LIBS=${{matrix.shared_lib}} -DCMAKE_INSTALL_PREFIX=${{runner.workspace}}/../install -G "${{matrix.generator}}" -DCMAKE_SH="CMAKE_SH-NOTFOUND" -DBoost_NO_BOOST_CMAKE=ON
