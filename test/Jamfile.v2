@@ -11,9 +11,6 @@
 import testing ;
 import config : requires ;
 
-obj cxx11_moveable_fstreams : check_movable_fstreams.cpp ;
-explicit cxx11_moveable_fstreams ;
-
 rule require-windows ( properties * )
 {
     local result ;
@@ -34,7 +31,7 @@ project : requirements
       cxx11_rvalue_references
       cxx11_static_assert
   ]
-  [ check-target-builds cxx11_moveable_fstreams "std::fstream is moveable and swappable" : : <build>no ] 
+  [ check-target-builds ../config//cxx11_moveable_fstreams "std::fstream is moveable and swappable" : : <build>no ] 
   ;
 
 lib shell32 ;
