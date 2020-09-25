@@ -144,8 +144,8 @@ template<typename FStream>
 perf_data test_io(const char* file)
 {
     namespace chrono = std::chrono;
-    typedef chrono::high_resolution_clock clock;
-    typedef chrono::duration<double, std::milli> milliseconds;
+    using clock = chrono::high_resolution_clock;
+    using milliseconds = chrono::duration<double, std::milli>;
     perf_data results;
     // Use vector to force write to memory and avoid possible reordering
     std::vector<clock::time_point> start_and_end(2);

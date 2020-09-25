@@ -23,7 +23,7 @@ static const char* utf8_name =
 static const std::wstring wide_name_str = boost::nowide::widen(utf8_name);
 static const wchar_t* wide_name = wide_name_str.c_str();
 
-typedef std::codecvt<wchar_t, char, std::mbstate_t> cvt_type;
+using cvt_type = std::codecvt<wchar_t, char, std::mbstate_t>;
 
 void test_codecvt_in_n_m(const cvt_type& cvt, size_t n, size_t m)
 {
