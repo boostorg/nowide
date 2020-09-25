@@ -46,10 +46,6 @@ else()
 endif()
 
 if(NOT BOOST_SUPERPROJECT_SOURCE_DIR)
-  # Default boost libs are static on windows and dynamic on linux
-  if(WIN32 AND NOT DEFINED Boost_USE_STATIC_LIBS)
-    set(Boost_USE_STATIC_LIBS ON)
-  endif()
   find_package(Boost 1.56 REQUIRED COMPONENTS filesystem system)
 endif()
 boost_nowide_add_test(test_fs LIBRARIES Boost::filesystem)
