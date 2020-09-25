@@ -241,8 +241,8 @@ void print_perf_data(const std::map<size_t, double>& stdio_data,
 void test_perf(const char* file)
 {
     perf_data stdio_data = test_io_driver<io_stdio>(file, "stdio");
-    perf_data std_data = test_io_driver<io_fstream<std::fstream> >(file, "std::fstream");
-    perf_data nowide_data = test_io_driver<io_fstream<nw::fstream> >(file, "nowide::fstream");
+    perf_data std_data = test_io_driver<io_fstream<std::fstream>>(file, "std::fstream");
+    perf_data nowide_data = test_io_driver<io_fstream<nw::fstream>>(file, "nowide::fstream");
     std::cout << "================== Read performance ==================" << std::endl;
     print_perf_data(stdio_data.read, std_data.read, nowide_data.read);
     std::cout << "================== Write performance =================" << std::endl;

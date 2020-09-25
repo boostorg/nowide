@@ -68,7 +68,7 @@ namespace nowide {
     ///
     /// \brief Same as std::basic_ifstream<char> but accepts UTF-8 strings under Windows
     ///
-    template<typename CharType, typename Traits = std::char_traits<CharType> >
+    template<typename CharType, typename Traits = std::char_traits<CharType>>
     class basic_ifstream : public detail::fstream_impl<CharType, Traits, detail::StreamTypeIn>
     {
         typedef detail::fstream_impl<CharType, Traits, detail::StreamTypeIn> fstream_impl;
@@ -120,7 +120,7 @@ namespace nowide {
     /// \brief Same as std::basic_ofstream<char> but accepts UTF-8 strings under Windows
     ///
 
-    template<typename CharType, typename Traits = std::char_traits<CharType> >
+    template<typename CharType, typename Traits = std::char_traits<CharType>>
     class basic_ofstream : public detail::fstream_impl<CharType, Traits, detail::StreamTypeOut>
     {
         typedef detail::fstream_impl<CharType, Traits, detail::StreamTypeOut> fstream_impl;
@@ -173,7 +173,7 @@ namespace nowide {
     ///
     /// \brief Same as std::basic_fstream<char> but accepts UTF-8 strings under Windows
     ///
-    template<typename CharType, typename Traits = std::char_traits<CharType> >
+    template<typename CharType, typename Traits = std::char_traits<CharType>>
     class basic_fstream : public detail::fstream_impl<CharType, Traits, detail::StreamTypeInOut>
     {
         typedef detail::fstream_impl<CharType, Traits, detail::StreamTypeInOut> fstream_impl;
@@ -272,7 +272,7 @@ namespace nowide {
             T buf_;
         };
         template<typename CharType, typename Traits, typename T_StreamType, int>
-        class fstream_impl : private buf_holder<basic_filebuf<CharType, Traits> >, // must be first due to init order
+        class fstream_impl : private buf_holder<basic_filebuf<CharType, Traits>>, // must be first due to init order
                              public T_StreamType::template stream_base<CharType, Traits>::type
         {
             typedef basic_filebuf<CharType, Traits> internal_buffer_type;
@@ -292,8 +292,8 @@ namespace nowide {
             fstream_impl& operator=(const fstream_impl&) = delete;
 
             // coverity[exn_spec_violation]
-            fstream_impl(fstream_impl&& other) noexcept : base_buf_holder(std::move(other)),
-                                                          stream_base(std::move(other))
+            fstream_impl(fstream_impl&& other) noexcept :
+                base_buf_holder(std::move(other)), stream_base(std::move(other))
             {
                 this->set_rdbuf(rdbuf());
             }
