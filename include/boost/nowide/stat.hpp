@@ -28,11 +28,11 @@ namespace nowide {
     /// \brief Typedef for the file info structure.
     /// Able to hold 64 bit filesize and timestamps on Windows and usually also on other 64 Bit systems
     /// This allows to write portable code with option LFS support
-    typedef struct ::__stat64 stat_t;
+    using stat_t = struct ::__stat64;
     /// \brief Typedef for the file info structure used in the POSIX stat call
     /// Resolves to `struct _stat` on Windows and `struct stat` otherwise
     /// This allows to write portable code using the default stat function
-    typedef struct ::_stat posix_stat_t;
+    using posix_stat_t = struct ::_stat;
 
     /// \cond INTERNAL
     namespace detail {

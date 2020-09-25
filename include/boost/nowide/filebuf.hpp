@@ -55,7 +55,7 @@ namespace nowide {
     template<>
     class basic_filebuf<char> : public std::basic_streambuf<char>
     {
-        typedef std::char_traits<char> Traits;
+        using Traits = std::char_traits<char>;
 
     public:
 #ifdef BOOST_MSVC
@@ -461,7 +461,7 @@ namespace nowide {
     ///
     /// \brief Convenience typedef
     ///
-    typedef basic_filebuf<char> filebuf;
+    using filebuf = basic_filebuf<char>;
 
 #endif // windows
 
