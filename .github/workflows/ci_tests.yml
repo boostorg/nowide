@@ -177,10 +177,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - uses: DoozyX/clang-format-lint-action@v0.5
+    - uses: DoozyX/clang-format-lint-action@v0.10
       with:
         exclude: './doc'
-        clangFormatVersion: 9
+        clangFormatVersion: 10
     - name: Check line endings
       run: |
         if grep -r -l $'\r' --exclude-dir="\.git" --exclude-dir="html"; then

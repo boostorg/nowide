@@ -64,7 +64,7 @@ namespace nowide {
         {
             std::basic_string<CharOut> result;
             result.reserve(end - begin);
-            typedef std::back_insert_iterator<std::basic_string<CharOut> > inserter_type;
+            typedef std::back_insert_iterator<std::basic_string<CharOut>> inserter_type;
             inserter_type inserter(result);
             code_point c;
             while(begin != end)
