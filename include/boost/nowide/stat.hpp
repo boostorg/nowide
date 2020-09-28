@@ -20,19 +20,22 @@ struct __stat64;
 namespace boost {
 namespace nowide {
 #if !defined(BOOST_WINDOWS) && !defined(BOOST_NOWIDE_DOXYGEN)
-    using stat_t = struct stat;
-    using posix_stat_t = struct stat;
+    // Note: `using x = struct ::stat` causes a bogus warning in GCC < 11
+    // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66159
+
+    typedef struct ::stat stat_t;
+    typedef struct ::stat posix_stat_t;
 
     using ::stat;
 #else
     /// \brief Typedef for the file info structure.
     /// Able to hold 64 bit filesize and timestamps on Windows and usually also on other 64 Bit systems
     /// This allows to write portable code with option LFS support
-    using stat_t = struct ::__stat64;
+    typedef struct ::__stat64 stat_t;
     /// \brief Typedef for the file info structure used in the POSIX stat call
     /// Resolves to `struct _stat` on Windows and `struct stat` otherwise
     /// This allows to write portable code using the default stat function
-    using posix_stat_t = struct ::_stat;
+    typedef struct ::_stat posix_stat_t;
 
     /// \cond INTERNAL
     namespace detail {
