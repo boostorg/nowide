@@ -38,7 +38,7 @@ void test_main(int, char** argv, char**)
     FILE* f = boost::nowide::fopen(filename.c_str(), "wb");
     TEST(f);
     const char testData[] = "Hello World";
-    constexpr size_t testDataSize = sizeof(testData);
+    const size_t testDataSize = sizeof(testData);
     TEST(std::fwrite(testData, sizeof(char), testDataSize, f) == testDataSize);
     std::fclose(f);
     {

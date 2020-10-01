@@ -77,11 +77,12 @@ namespace nowide {
 #endif
         basic_filebuf(const basic_filebuf&) = delete;
         basic_filebuf& operator=(const basic_filebuf&) = delete;
-        basic_filebuf(basic_filebuf&& other) noexcept : basic_filebuf()
+        basic_filebuf(basic_filebuf&& other) BOOST_NOEXCEPT_OR_NOTHROW
+            : basic_filebuf()
         {
             swap(other);
         }
-        basic_filebuf& operator=(basic_filebuf&& other) noexcept
+        basic_filebuf& operator=(basic_filebuf&& other) BOOST_NOEXCEPT_OR_NOTHROW
         {
             swap(other);
             return *this;

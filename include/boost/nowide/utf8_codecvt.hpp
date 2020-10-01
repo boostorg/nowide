@@ -73,15 +73,15 @@ namespace nowide {
             next = from;
             return std::codecvt_base::ok;
         }
-        int do_encoding() const noexcept override
+        int do_encoding() const BOOST_NOEXCEPT_OR_NOTHROW override
         {
             return 0;
         }
-        int do_max_length() const noexcept override
+        int do_max_length() const BOOST_NOEXCEPT_OR_NOTHROW override
         {
             return 4;
         }
-        bool do_always_noconv() const noexcept override
+        bool do_always_noconv() const BOOST_NOEXCEPT_OR_NOTHROW override
         {
             return false;
         }
@@ -304,15 +304,15 @@ namespace nowide {
             next = from;
             return std::codecvt_base::ok;
         }
-        int do_encoding() const noexcept override
+        int do_encoding() const BOOST_NOEXCEPT_OR_NOTHROW override
         {
             return 0;
         }
-        int do_max_length() const noexcept override
+        int do_max_length() const BOOST_NOEXCEPT_OR_NOTHROW override
         {
             return 4;
         }
-        bool do_always_noconv() const noexcept override
+        bool do_always_noconv() const BOOST_NOEXCEPT_OR_NOTHROW override
         {
             return false;
         }

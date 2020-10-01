@@ -43,7 +43,7 @@ namespace nowide {
     namespace detail {
 
         template<typename T, typename U>
-        constexpr bool is_in_range(U value)
+        BOOST_CONSTEXPR bool is_in_range(U value)
         {
             static_assert(std::is_signed<T>::value == std::is_signed<U>::value,
                           "Mixed sign comparison can lead to problems below");
