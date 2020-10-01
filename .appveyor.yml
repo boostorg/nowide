@@ -94,6 +94,11 @@ environment:
 
     # CMake builds
     - CMAKE: true
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
+      GENERATOR: Visual Studio 12 2013 Win64
+      configuration: Debug
+      BOOST_ROOT: C:\Libraries\boost_1_58_0
+    - CMAKE: true
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       GENERATOR: Visual Studio 14 2015 Win64
       configuration: Debug
