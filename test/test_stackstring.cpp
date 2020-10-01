@@ -24,7 +24,12 @@ class test_basic_stackstring : public boost::nowide::basic_stackstring<CharOut, 
 public:
     using parent = boost::nowide::basic_stackstring<CharOut, CharIn, BufferSize>;
 
-    using parent::parent;
+    test_basic_stackstring() : parent()
+    {}
+
+    explicit test_basic_stackstring(const input_char* input) : parent(input)
+    {}
+
     using parent::uses_stack_memory;
     bool uses_heap_memory() const
     {
