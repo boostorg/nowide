@@ -55,13 +55,13 @@ environment:
       B2_CXXSTD: 11,14,17
       B2_TOOLSET: clang-win
 
-    - FLAVOR: Visual Studio 2015, 2013
+    - FLAVOR: Visual Studio 2015
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      B2_TOOLSET: msvc-12.0,msvc-14.0
+      B2_TOOLSET: msvc-14.0
 
-    - FLAVOR: Visual Studio 2008, 2010, 2012
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      B2_TOOLSET: msvc-9.0,msvc-10.0,msvc-11.0
+    - FLAVOR: Visual Studio 2008, 2010, 2012, 2013
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
+      B2_TOOLSET: msvc-9.0,msvc-10.0,msvc-11.0,msvc-12.0
       B2_ADDRESS_MODEL: 32 # No 64bit support
 
     - FLAVOR: cygwin (32-bit)
