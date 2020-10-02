@@ -277,7 +277,31 @@ namespace nowide {
         struct buf_holder
         {
             T buf_;
+
+            buf_holder() = default;
+
+            buf_holder(const buf_holder&) = delete;
+
+            // VS 2013 doesn't generate move ctor/move assignment operator
+            // automatically.
+            buf_holder(buf_holder&& other) BOOST_NOEXCEPT_OR_NOTHROW
+            {
+                swap(other);
+            }
+
+            buf_holder& operator=(buf_holder other) BOOST_NOEXCEPT_OR_NOTHROW
+            {
+                swap(other);
+                return *this;
+            }
+
+            void swap(buf_holder& other) BOOST_NOEXCEPT_OR_NOTHROW
+            {
+                using std::swap;
+                swap(buf_, other.buf_);
+            }
         };
+
         template<typename CharType, typename Traits, typename T_StreamType, int>
         class fstream_impl : private buf_holder<basic_filebuf<CharType, Traits>>, // must be first due to init order
                              public T_StreamType::template stream_base<CharType, Traits>::type
