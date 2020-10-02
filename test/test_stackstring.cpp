@@ -27,7 +27,7 @@ public:
     test_basic_stackstring() : parent()
     {}
 
-    explicit test_basic_stackstring(const input_char* input) : parent(input)
+    explicit test_basic_stackstring(const CharIn* input) : parent(input)
     {}
 
     using parent::uses_stack_memory;
