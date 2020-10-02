@@ -71,6 +71,14 @@
 #define BOOST_NOWIDE_FALLTHROUGH
 #endif
 
+#if defined(_MSC_VER) && _MSC_VER < 1900 // Visual Studio 2015
+#define BOOST_CONSTEXPR
+#define BOOST_NOEXCEPT_OR_NOTHROW throw()
+#else
+#define BOOST_CONSTEXPR constexpr
+#define BOOST_NOEXCEPT_OR_NOTHROW noexcept
+#endif
+
 #if defined __GNUC__
 #define BOOST_LIKELY(x) __builtin_expect(x, 1)
 #define BOOST_UNLIKELY(x) __builtin_expect(x, 0)
