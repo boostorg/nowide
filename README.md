@@ -28,7 +28,7 @@ This is different to the version available prior to the inclusion in Boost.
 ### Requirements (All versions)
 
 * C++11 (or higher) compatible compiler
-    * MSVC 2015 and up work
+    * MSVC 2013 and up work
     * libstdc++ < 5 is unsupported as it is silently lacking C++11 features
 
 ### Requirements (Boost version)
