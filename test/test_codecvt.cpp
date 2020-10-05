@@ -34,7 +34,7 @@ void test_codecvt_in_n_m(const cvt_type& cvt, size_t n, size_t m)
     const char* end = from;
     const char* real_end = utf8_name + u8len;
     const char* from_next = from;
-    std::mbstate_t mb = std::mbstate_t();
+    std::mbstate_t mb{};
     while(from_next < real_end)
     {
         if(from == end)
@@ -90,7 +90,7 @@ void test_codecvt_out_n_m(const cvt_type& cvt, size_t n, size_t m)
     size_t wlen = std::wcslen(wide_name);
     size_t u8len = std::strlen(utf8_name);
 
-    std::mbstate_t mb = std::mbstate_t();
+    std::mbstate_t mb{};
 
     const wchar_t* from_next = wide_name;
     const wchar_t* real_from_end = wide_name + wlen;
@@ -183,7 +183,7 @@ void test_codecvt_err()
             wchar_t* const to = buf;
             wchar_t* const to_end = buf + 4;
             const char* err_utf = "1\xFF\xFF\xd7\xa9";
-            std::mbstate_t mb = std::mbstate_t();
+            std::mbstate_t mb{};
             const char* from = err_utf;
             const char* from_end = from + std::strlen(from);
             const char* from_next = from;
@@ -198,7 +198,7 @@ void test_codecvt_err()
             wchar_t* const to = buf;
             wchar_t* const to_end = buf + 4;
             const char* err_utf = "1\xd7"; // 1 valid, 1 incomplete UTF-8 char
-            std::mbstate_t mb = std::mbstate_t();
+            std::mbstate_t mb{};
             const char* from = err_utf;
             const char* from_end = from + std::strlen(from);
             const char* from_next = from;
@@ -214,7 +214,7 @@ void test_codecvt_err()
             char* const to_end = buf + 4;
             char* to_next = to;
             const wchar_t* err_utf = L"\xD800"; // Trailing UTF-16 surrogate
-            std::mbstate_t mb = std::mbstate_t();
+            std::mbstate_t mb{};
             const wchar_t* from = err_utf;
             const wchar_t* from_end = from + 1;
             const wchar_t* from_next = from;
@@ -248,7 +248,7 @@ void test_codecvt_err()
         wchar_t err_buf[3] = {'1', 0xDC9E, 0}; // second surrogate not works both for UTF-16 and 32
         const wchar_t* err_utf = err_buf;
         {
-            std::mbstate_t mb = std::mbstate_t();
+            std::mbstate_t mb{};
             const wchar_t* from = err_utf;
             const wchar_t* from_end = from + std::wcslen(from);
             const wchar_t* from_next = from;
@@ -266,7 +266,7 @@ std::wstring codecvt_to_wide(const std::string& s)
 
     const cvt_type& cvt = std::use_facet<cvt_type>(l);
 
-    std::mbstate_t mb = std::mbstate_t();
+    std::mbstate_t mb{};
     const char* const from = s.c_str();
     const char* const from_end = from + s.size();
     const char* from_next = from;
@@ -293,7 +293,7 @@ std::string codecvt_to_narrow(const std::wstring& s)
 
     const cvt_type& cvt = std::use_facet<cvt_type>(l);
 
-    std::mbstate_t mb = std::mbstate_t();
+    std::mbstate_t mb{};
     const wchar_t* const from = s.c_str();
     const wchar_t* const from_end = from + s.size();
     const wchar_t* from_next = from;
