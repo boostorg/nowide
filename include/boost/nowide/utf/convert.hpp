@@ -8,6 +8,7 @@
 #ifndef BOOST_NOWIDE_UTF_CONVERT_HPP_INCLUDED
 #define BOOST_NOWIDE_UTF_CONVERT_HPP_INCLUDED
 
+#include <boost/nowide/detail/is_string_container.hpp>
 #include <boost/nowide/replacement.hpp>
 #include <boost/nowide/utf/utf.hpp>
 #include <iterator>
@@ -77,6 +78,13 @@ namespace nowide {
                 utf_traits<CharOut>::encode(c, inserter);
             }
             return result;
+        }
+        template<typename CharOut,
+                 typename StringOrStringView,
+                 typename = detail::requires_string_container<StringOrStringView>>
+        std::basic_string<CharOut> convert_string(const StringOrStringView& input)
+        {
+            return convert_string<CharOut>(input.data(), input.data() + input.size());
         }
 
         /// Return the length of the given string in code units.

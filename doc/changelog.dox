@@ -10,6 +10,10 @@
 
 \section changelog Changelog
 
+\subsection changelog_11_1_0 Nowide 11.1.0
+
+- Add support for string_view to `convert_string`, `narrow` and `widen`
+
 \subsection changelog_11_0_0 Nowide 11.0.0 (Boost 1.74)
 
 - Require C++11 compatible compiler and stdlib

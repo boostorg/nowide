@@ -8,6 +8,7 @@
 #ifndef BOOST_NOWIDE_CONVERT_HPP_INCLUDED
 #define BOOST_NOWIDE_CONVERT_HPP_INCLUDED
 
+#include <boost/nowide/detail/is_string_container.hpp>
 #include <boost/nowide/utf/convert.hpp>
 #include <string>
 
@@ -87,9 +88,12 @@ namespace nowide {
     /// \param s Input string
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
-    inline std::string narrow(const std::wstring& s)
+    template<typename StringOrStringView,
+             typename = detail::requires_string_container<StringOrStringView>,
+             typename = detail::requires_wide_data<StringOrStringView>>
+    inline std::string narrow(const StringOrStringView& s)
     {
-        return narrow(s.c_str(), s.size());
+        return utf::convert_string<char>(s);
     }
 
     ///
@@ -119,9 +123,12 @@ namespace nowide {
     /// \param s Input string
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
-    inline std::wstring widen(const std::string& s)
+    template<typename StringOrStringView,
+             typename = detail::requires_string_container<StringOrStringView>,
+             typename = detail::requires_narrow_data<StringOrStringView>>
+    inline std::wstring widen(const StringOrStringView& s)
     {
-        return widen(s.c_str(), s.size());
+        return utf::convert_string<wchar_t>(s);
     }
 } // namespace nowide
 } // namespace boost

@@ -8,9 +8,15 @@
 
 #include <boost/nowide/convert.hpp>
 #include <iostream>
+#include <string>
 
 #include "test.hpp"
 #include "test_sets.hpp"
+
+#ifdef __cpp_lib_string_view
+#include <string_view>
+#define BOOST_NOWIDE_TEST_STD_STRINGVIEW
+#endif
 
 #if defined(BOOST_MSVC) && BOOST_MSVC < 1700
 #pragma warning(disable : 4428) // universal-character-name encountered in source
@@ -68,6 +74,18 @@ std::string narrow_raw_string_and_size(const std::wstring& s)
     return boost::nowide::narrow(s2.c_str(), s.size());
 }
 
+#ifdef BOOST_NOWIDE_TEST_STD_STRINGVIEW
+std::wstring widen_string_view(const std::string& s)
+{
+    return boost::nowide::widen(std::string_view(s));
+}
+
+std::string narrow_string_view(const std::wstring& s)
+{
+    return boost::nowide::narrow(std::wstring_view(s));
+}
+#endif
+
 void test_main(int, char**, char**)
 {
     std::string hello = "\xd7\xa9\xd7\x9c\xd7\x95\xd7\x9d";
@@ -115,4 +133,8 @@ void test_main(int, char**, char**)
     run_all(widen_raw_string_and_size, narrow_raw_string_and_size);
     std::cout << "- (const std::string&)" << std::endl;
     run_all(boost::nowide::widen, boost::nowide::narrow);
+#ifdef BOOST_NOWIDE_TEST_STD_STRINGVIEW
+    std::cout << "- (std::string_view)" << std::endl;
+    run_all(widen_string_view, narrow_string_view);
+#endif
 }
