@@ -17,7 +17,6 @@
 namespace boost {
 namespace nowide {
     namespace utf {
-        ///
         /// Convert a buffer of UTF sequences in the range [source_begin, source_end)
         /// from \tparam CharIn to \tparam CharOut to the output \a buffer of size \a buffer_size.
         ///
@@ -25,7 +24,6 @@ namespace nowide {
         ///
         /// If there is not enough room in the buffer NULL is returned, and the content of the buffer is undefined.
         /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
-        ///
         template<typename CharOut, typename CharIn>
         CharOut*
         convert_buffer(CharOut* buffer, size_t buffer_size, const CharIn* source_begin, const CharIn* source_end)
@@ -54,12 +52,10 @@ namespace nowide {
             return rv;
         }
 
-        ///
         /// Convert the UTF sequences in range [begin, end) from \tparam CharIn to \tparam CharOut
         /// and return it as a string
         ///
         /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
-        ///
         template<typename CharOut, typename CharIn>
         std::basic_string<CharOut> convert_string(const CharIn* begin, const CharIn* end)
         {
@@ -79,6 +75,11 @@ namespace nowide {
             }
             return result;
         }
+
+        /// Convert the UTF sequences in input (a string or string_view like instance) to \tparam CharOut
+        /// and return it as a string
+        ///
+        /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
         template<typename CharOut,
                  typename StringOrStringView,
                  typename = detail::requires_string_container<StringOrStringView>>
