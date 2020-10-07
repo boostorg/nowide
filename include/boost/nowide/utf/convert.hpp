@@ -1,5 +1,6 @@
 //
 //  Copyright (c) 2012 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2020 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE or copy at
@@ -17,6 +18,19 @@
 namespace boost {
 namespace nowide {
     namespace utf {
+
+        /// Return the length of the given string in code units.
+        /// That is the number of elements of type Char until the first NULL character
+        /// Equivalent to `std::strlen(s)` but can handle wide-strings
+        template<typename Char>
+        size_t strlen(const Char* s)
+        {
+            const Char* end = s;
+            while(*end)
+                end++;
+            return end - s;
+        }
+
         /// Convert a buffer of UTF sequences in the range [source_begin, source_end)
         /// from \tparam CharIn to \tparam CharOut to the output \a buffer of size \a buffer_size.
         ///
@@ -88,16 +102,14 @@ namespace nowide {
             return convert_string<CharOut>(input.data(), input.data() + input.size());
         }
 
-        /// Return the length of the given string in code units.
-        /// That is the number of elements of type Char until the first NULL character
-        /// Equivalent to `std::strlen(s)` but can handle wide-strings
-        template<typename Char>
-        size_t strlen(const Char* s)
+        /// Convert the UTF sequences in the NULL terminated input string to \tparam CharOut
+        /// and return it as a string
+        ///
+        /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+        template<typename CharOut, typename CharIn, typename = detail::requires_char_type<CharIn>>
+        std::basic_string<CharOut> convert_string(const CharIn* input)
         {
-            const Char* end = s;
-            while(*end)
-                end++;
-            return end - s;
+            return convert_string<CharOut>(input, input + strlen(input));
         }
 
     } // namespace utf

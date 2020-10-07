@@ -108,6 +108,10 @@ void test_main(int, char**, char**)
         TEST(buf == whello_3);
         TEST(boost::nowide::widen(buf, 5, b, b) == buf && buf[0] == 0);
         TEST(boost::nowide::widen(buf, 5, b, b + 2) == buf && buf[1] == 0 && buf[0] == whello[0]);
+
+        // Raw literals are also possible
+        TEST(boost::nowide::widen("\xd7\xa9\xd7\x9c\xd7\x95\xd7\x9d") == whello);
+        TEST(boost::nowide::utf::convert_string<wchar_t>("\xd7\xa9\xd7\x9c\xd7\x95\xd7\x9d") == whello);
     }
     std::cout << "- boost::nowide::narrow" << std::endl;
     {
@@ -121,6 +125,10 @@ void test_main(int, char**, char**)
         TEST(boost::nowide::narrow(buf, 8, b, e) == 0);
         TEST(boost::nowide::narrow(buf, 7, b, e - 1) == buf);
         TEST(buf == hello.substr(0, 6));
+
+        // Raw literals are also possible
+        TEST(boost::nowide::narrow(L"\u05e9\u05dc\u05d5\u05dd") == hello);
+        TEST(boost::nowide::utf::convert_string<char>(L"\u05e9\u05dc\u05d5\u05dd") == hello);
     }
 
     std::cout << "- (output_buffer, buffer_size, input_raw_string)" << std::endl;

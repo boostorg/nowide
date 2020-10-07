@@ -1,5 +1,6 @@
 //
 //  Copyright (c) 2012 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2020 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE or copy at
