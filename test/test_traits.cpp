@@ -17,7 +17,8 @@
 #endif
 #endif
 
-#ifdef __cpp_lib_filesystem
+// Exclude apple as support there is target level specific -.-
+#if defined(__cpp_lib_filesystem) && !defined(__APPLE__)
 #include <filesystem>
 #define BOOST_NOWIDE_TEST_SFS_PATH
 #endif
