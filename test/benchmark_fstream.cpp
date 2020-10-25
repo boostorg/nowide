@@ -144,8 +144,8 @@ template<typename FStream>
 perf_data test_io(const char* file)
 {
     namespace chrono = std::chrono;
-    typedef chrono::high_resolution_clock clock;
-    typedef chrono::duration<double, std::milli> milliseconds;
+    using clock = chrono::high_resolution_clock;
+    using milliseconds = chrono::duration<double, std::milli>;
     perf_data results;
     // Use vector to force write to memory and avoid possible reordering
     std::vector<clock::time_point> start_and_end(2);
@@ -241,8 +241,8 @@ void print_perf_data(const std::map<size_t, double>& stdio_data,
 void test_perf(const char* file)
 {
     perf_data stdio_data = test_io_driver<io_stdio>(file, "stdio");
-    perf_data std_data = test_io_driver<io_fstream<std::fstream> >(file, "std::fstream");
-    perf_data nowide_data = test_io_driver<io_fstream<nw::fstream> >(file, "nowide::fstream");
+    perf_data std_data = test_io_driver<io_fstream<std::fstream>>(file, "std::fstream");
+    perf_data nowide_data = test_io_driver<io_fstream<nw::fstream>>(file, "nowide::fstream");
     std::cout << "================== Read performance ==================" << std::endl;
     print_perf_data(stdio_data.read, std_data.read, nowide_data.read);
     std::cout << "================== Write performance =================" << std::endl;

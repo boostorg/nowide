@@ -37,7 +37,7 @@ std::string replace_non_ascii(const std::string& s)
 {
     std::string::const_iterator it = s.begin();
     namespace utf = boost::nowide::utf;
-    typedef utf::utf_traits<char> utf8;
+    using utf8 = utf::utf_traits<char>;
     std::string result;
     result.reserve(s.size());
     while(it != s.end())

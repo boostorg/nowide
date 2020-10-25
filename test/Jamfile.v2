@@ -11,9 +11,6 @@
 import testing ;
 import config : requires ;
 
-obj cxx11_moveable_fstreams : check_movable_fstreams.cpp ;
-explicit cxx11_moveable_fstreams ;
-
 rule require-windows ( properties * )
 {
     local result ;
@@ -34,7 +31,7 @@ project : requirements
       cxx11_rvalue_references
       cxx11_static_assert
   ]
-  [ check-target-builds cxx11_moveable_fstreams "std::fstream is moveable and swappable" : : <build>no ] 
+  [ check-target-builds ../config//cxx11_moveable_fstreams "std::fstream is moveable and swappable" : : <build>no ] 
   ;
 
 lib shell32 ;
@@ -43,7 +40,7 @@ run test_codecvt.cpp ;
 run test_convert.cpp ;
 run test_env.cpp ;
 run test_env.cpp : : : <define>BOOST_NOWIDE_TEST_INCLUDE_WINDOWS=1 : test_env_win ;
-run test_fs.cpp : : : <library>/boost/filesystem//boost_filesystem/<warnings-as-errors>off : ;
+run test_fs.cpp : : : <library>/boost/filesystem//boost_filesystem/<warnings-as-errors>off ;
 run test_fstream.cpp ;
 run test_fstream.cpp : : : <define>BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT=1 <target-os>windows:<build>no : test_internal_fstream ;
 run test_fstream_cxx11.cpp  ;
@@ -54,5 +51,6 @@ run test_stat.cpp ;
 run test_stdio.cpp ;
 run test_system.cpp : : : <define>BOOST_NOWIDE_TEST_USE_NARROW=1 <target-os>windows:<library>shell32 <target-os>darwin,<link>shared:<build>no : test_system_n ;
 run test_system.cpp : : : <define>BOOST_NOWIDE_TEST_USE_NARROW=0 <target-os>windows:<library>shell32 <conditional>@require-windows : test_system_w ;
+run test_traits.cpp : : : <define>BOOST_NOWIDE_TEST_BFS_PATH <library>/boost/filesystem//boost_filesystem/<warnings-as-errors>off ;
 
 compile benchmark_fstream.cpp : <define>BOOST_NOWIDE_USE_WIN_FSTREAM=1 [ requires cxx11_hdr_chrono ] ;

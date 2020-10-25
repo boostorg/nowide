@@ -39,7 +39,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   include(CTest)
 endif()
 
-file(READ ${CMAKE_CURRENT_SOURCE_DIR}/test/check_lfs_support.cpp lfsSource)
+file(READ ${CMAKE_CURRENT_SOURCE_DIR}/config/check_lfs_support.cpp lfsSource)
 check_cxx_source_compiles("${lfsSource}" BOOST_NOWIDE_HAS_LFS)
 
 # Using glob here is ok as it is only for headers
@@ -66,6 +66,10 @@ target_compile_features(boost_nowide PUBLIC cxx_std_11)
 if(BOOST_SUPERPROJECT_SOURCE_DIR)
   target_link_libraries(boost_nowide PUBLIC Boost::config)
 else()
+  # Default boost libs are static on windows and dynamic on linux
+  if(WIN32 AND NOT DEFINED Boost_USE_STATIC_LIBS)
+    set(Boost_USE_STATIC_LIBS ON)
+  endif()
   find_package(Boost 1.56 REQUIRED)
   target_link_libraries(boost_nowide PUBLIC Boost::boost)
 endif()

@@ -22,7 +22,7 @@ template<typename CharOut, typename CharIn, size_t BufferSize>
 class test_basic_stackstring : public boost::nowide::basic_stackstring<CharOut, CharIn, BufferSize>
 {
 public:
-    typedef boost::nowide::basic_stackstring<CharOut, CharIn, BufferSize> parent;
+    using parent = boost::nowide::basic_stackstring<CharOut, CharIn, BufferSize>;
 
     using parent::parent;
     using parent::uses_stack_memory;
@@ -32,8 +32,8 @@ public:
     }
 };
 
-typedef test_basic_stackstring<wchar_t, char, 256> test_wstackstring;
-typedef test_basic_stackstring<char, wchar_t, 256> test_stackstring;
+using test_wstackstring = test_basic_stackstring<wchar_t, char, 256>;
+using test_stackstring = test_basic_stackstring<char, wchar_t, 256>;
 
 std::wstring stackstring_to_wide(const std::string& s)
 {
@@ -150,7 +150,7 @@ void test_main(int, char**, char**)
         TEST(sw.get() == hello);
     }
     {
-        typedef test_basic_stackstring<wchar_t, char, 6> stackstring;
+        using stackstring = test_basic_stackstring<wchar_t, char, 6>;
         const std::wstring heapVal = L"heapValue";
         const std::wstring stackVal = L"stack";
         const stackstring heap(boost::nowide::narrow(heapVal).c_str());
@@ -230,7 +230,7 @@ void test_main(int, char**, char**)
     {
         std::cout << "-- Test putting stackstrings into vector (done by args) class" << std::endl;
         // Use a smallish buffer, to have stack and heap values
-        typedef boost::nowide::basic_stackstring<wchar_t, char, 5> stackstring;
+        using stackstring = boost::nowide::basic_stackstring<wchar_t, char, 5>;
         std::vector<stackstring> strings;
         strings.resize(2);
         TEST(strings[0].convert("1234") == std::wstring(L"1234"));
