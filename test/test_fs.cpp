@@ -15,10 +15,10 @@
 
 #include "test.hpp"
 
-void test_main(int, char**, char**)
+void test_main(int, char** argv, char**)
 {
     boost::nowide::nowide_filesystem();
-    const std::string prefix = boost::filesystem::unique_path("nowide-%%%%-%%%%-").string();
+    const std::string prefix = argv[0];
     const std::string utf8_name =
       prefix + "\xf0\x9d\x92\x9e-\xD0\xBF\xD1\x80\xD0\xB8\xD0\xB2\xD0\xB5\xD1\x82-\xE3\x82\x84\xE3\x81\x82.txt";
 
