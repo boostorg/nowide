@@ -39,8 +39,8 @@ jobs:
 
       - name: Setup config vars
         run: |
-          echo ::set-env name=LIBRARY::${GITHUB_REPOSITORY#*/}
-          echo ::set-env name=B2_COMPILER::${{matrix.compiler}}
+          echo "LIBRARY=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+          echo "B2_COMPILER=${{matrix.compiler}}" >> $GITHUB_ENV
           ${{matrix.compiler}} --version
           if [[ "${{matrix.compiler}}" =~ clang ]]; then
               B2_TOOLSET=clang
@@ -51,13 +51,13 @@ jobs:
               false
           fi
           echo "using $B2_TOOLSET : : ${{matrix.compiler}} ;" > ~/user-config.jam
-          echo ::set-env name=B2_TOOLSET::$B2_TOOLSET
-          echo ::set-env name=B2_CXXSTD::${{matrix.cxxstd}}
+          echo "B2_TOOLSET=$B2_TOOLSET" >> $GITHUB_ENV
+          echo "B2_CXXSTD=${{matrix.cxxstd}}" >> $GITHUB_ENV
           if [[ "${{matrix.sanitize}}" == "yes" ]]; then 
-            echo ::set-env name=B2_ASAN::address-sanitizer=norecover
-            echo ::set-env name=B2_UBSAN::undefined-sanitizer=norecover
+            echo "B2_ASAN=address-sanitizer=norecover" >> $GITHUB_ENV
+            echo "B2_UBSAN=undefined-sanitizer=norecover" >> $GITHUB_ENV
           fi
-          [[ "${{matrix.linkflags}}" == "" ]] || echo ::set-env name=B2_LINKFLAGS::linkflags=${{matrix.linkflags}}
+          [[ "${{matrix.linkflags}}" == "" ]] || echo "B2_LINKFLAGS=linkflags=${{matrix.linkflags}}" >> $GITHUB_ENV
 
       - name: Setup Boost
         run: |

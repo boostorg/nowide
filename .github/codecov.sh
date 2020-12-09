@@ -14,8 +14,8 @@
 set -ex
 
 if [[ "$1" == "setup" ]]; then
-    echo ::set-env name=B2_VARIANT::debug
-    echo ::set-env name=B2_FLAGS::cxxflags=--coverage linkflags=--coverage
+    echo "B2_VARIANT=debug" >> "$GITHUB_ENV"
+    echo "B2_FLAGS=cxxflags=--coverage linkflags=--coverage" >> "$GITHUB_ENV"
 else
     ver=7 # default
     if [ "${B2_COMPILER%%-*}" == "g++" ]; then
