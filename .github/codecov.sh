@@ -5,13 +5,13 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 #      http://www.boost.org/LICENSE_1_0.txt)
 #
-# Bash script to run in travis to perform codecov.io integration
+# Bash script to run on Github Actions to perform codecov.io integration
 #
 
-# assumes cwd is the top level directory of the boost project
-# assumes an environment variable $LIBRARY is the boost project name
+# assumes an environment variable $LIBRARY set to the boost project name
+# and BOOST_ROOT to be set
 
-set -ex
+set -eux
 
 if [[ "$1" == "setup" ]]; then
     echo "B2_VARIANT=debug" >> "$GITHUB_ENV"
@@ -25,11 +25,7 @@ else
     fi
     GCOV=gcov-${ver}
 
-    # lcov after 1.14 needs this
-    # sudo apt install --no-install-recommends -y libperlio-gzip-perl libjson-perl
-
     # install the latest lcov we know works
-    # some older .travis.yml files install the tip which may be unstable
     rm -rf /tmp/lcov
     pushd /tmp
     git clone -b v1.14 https://github.com/linux-test-project/lcov.git
@@ -37,8 +33,6 @@ else
     command -v lcov
     lcov --version
     popd
-
-    BOOST_ROOT="$PWD"
 
     # switch back to the original source code directory
     cd "$GITHUB_WORKSPACE"
