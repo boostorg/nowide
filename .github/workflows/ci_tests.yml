@@ -42,7 +42,7 @@ jobs:
     - name: Set BOOST_ROOT
       if: matrix.standalone == 'Boost'
       shell: bash
-      run: echo "::set-env name=BOOST_ROOT::${DEP_DIR//\\/\/}/boost_${BOOST_VERSION//./_}"
+      run: echo "BOOST_ROOT=${DEP_DIR//\\/\/}/boost_${BOOST_VERSION//./_}" >> $GITHUB_ENV
     # Install Boost
     - uses: actions/checkout@v2
       if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true'
