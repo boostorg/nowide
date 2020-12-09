@@ -69,7 +69,7 @@ jobs:
           echo "using $B2_TOOLSET : : ${{matrix.compiler}} ;" > ~/user-config.jam
           echo "B2_TOOLSET=$B2_TOOLSET" >> $GITHUB_ENV
           echo "B2_CXXSTD=${{matrix.cxxstd}}" >> $GITHUB_ENV
-          if [[ "${{matrix.sanitize}}" == "yes" ]]; then 
+          if [[ "${{matrix.sanitize}}" == "yes" ]]; then
             echo "B2_ASAN=address-sanitizer=norecover" >> $GITHUB_ENV
             echo "B2_UBSAN=undefined-sanitizer=norecover" >> $GITHUB_ENV
           fi
