@@ -19,14 +19,23 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { compiler: g++-4.4,        cxxstd: '98,0x',                         os: ubuntu-16.04, install: g++-4.4 }
-          - { compiler: g++-9,          cxxstd: '03,11,14,17,2a', sanitize: yes, os: ubuntu-20.04, install: g++-9, linkflags: -fuse-ld=gold }
-          - { compiler: clang++-3.5,    cxxstd: '03,11',                         os: ubuntu-16.04, install: clang-3.5 }
-          - { compiler: clang++-10,     cxxstd: '03,11,14,17,2a', sanitize: yes, os: ubuntu-20.04, install: clang-10 }
+          - { compiler: g++-4.4,        cxxstd: '98,0x',                         os: ubuntu-16.04, install: yes }
+          - { compiler: g++-5,          cxxstd: '03,11,14',                      os: ubuntu-16.04, install: yes }
+          - { compiler: g++-6,          cxxstd: '03,11,14,17',                   os: ubuntu-16.04, install: yes }
+          - { compiler: g++-7,          cxxstd: '03,11,14,17',                   os: ubuntu-20.04, install: yes }
+          - { compiler: g++-8,          cxxstd: '03,11,14,17,2a',                os: ubuntu-20.04, install: yes }
+          - { compiler: g++-9,          cxxstd: '03,11,14,17,2a',                os: ubuntu-20.04, install: yes }
+          - { compiler: g++-10,         cxxstd: '03,11,14,17,2a', sanitize: yes, os: ubuntu-20.04, install: yes, linkflags: -fuse-ld=gold }
+          - { compiler: clang++-3.5,    cxxstd: '03,11',                         os: ubuntu-16.04, install: yes }
+          - { compiler: clang++-6.0,    cxxstd: '03,11',                         os: ubuntu-16.04, install: yes }
+          - { compiler: clang++-7,      cxxstd: '03,11',                         os: ubuntu-18.04, install: yes }
+          - { compiler: clang++-8,      cxxstd: '03,11,14',                      os: ubuntu-18.04, install: yes }
+          - { compiler: clang++-9,      cxxstd: '03,11,14',                      os: ubuntu-18.04, install: yes }
+          - { compiler: clang++-10,     cxxstd: '03,11,14,17,2a', sanitize: yes, os: ubuntu-20.04, install: yes }
           - { compiler: clang++-libc++, cxxstd: '03,11,14',                      os: ubuntu-18.04, install: 'libc++-dev libc++-helpers' }
           - { compiler: clang++,        cxxstd: '03,11,14,1z',    sanitize: yes, os: macos-10.15 }
           # Codecov
-          - { compiler: g++-8,          cxxstd: '03,11',          coverage: yes, os: ubuntu-20.04, install: g++-8 }
+          - { compiler: g++-8,          cxxstd: '03,11',          coverage: yes, os: ubuntu-20.04, install: yes }
 
     runs-on: ${{matrix.os}}
 
@@ -35,7 +44,14 @@ jobs:
 
       - name: Install packages
         if: matrix.install
-        run: sudo apt install ${{matrix.install}}
+        run: |
+          if [[ "${{matrix.install}}" == "yes" ]]; then
+            pkgs="${{matrix.compiler}}"
+            pkgs="${pkgs/clang++-/clang-}"
+          else
+            pkgs="${{matrix.install}}"
+          fi
+          sudo apt install $pkgs
 
       - name: Setup config vars
         run: |
