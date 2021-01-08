@@ -91,9 +91,7 @@ namespace nowide {
     /// \param s Input string
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
-    template<typename StringOrStringView,
-             typename = detail::requires_string_container<StringOrStringView>,
-             typename = detail::requires_wide_data<StringOrStringView>>
+    template<typename StringOrStringView, typename = detail::requires_wide_string_container<StringOrStringView>>
     inline std::string narrow(const StringOrStringView& s)
     {
         return utf::convert_string<char>(s.data(), s.data() + s.size());
@@ -128,9 +126,7 @@ namespace nowide {
     /// \param s Input string
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
-    template<typename StringOrStringView,
-             typename = detail::requires_string_container<StringOrStringView>,
-             typename = detail::requires_narrow_data<StringOrStringView>>
+    template<typename StringOrStringView, typename = detail::requires_narrow_string_container<StringOrStringView>>
     inline std::wstring widen(const StringOrStringView& s)
     {
         return utf::convert_string<wchar_t>(s.data(), s.data() + s.size());

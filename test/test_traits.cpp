@@ -35,27 +35,27 @@
 #endif
 
 using boost::nowide::detail::is_string_container;
-static_assert(is_string_container<std::string>::value, "!");
-static_assert(is_string_container<std::wstring>::value, "!");
-static_assert(is_string_container<std::u16string>::value, "!");
-static_assert(is_string_container<std::u32string>::value, "!");
-static_assert(!is_string_container<int>::value, "!");
+static_assert(is_string_container<std::string, true>::value, "!");
+static_assert(is_string_container<std::wstring, false>::value, "!");
+static_assert(is_string_container<std::u16string, false>::value, "!");
+static_assert(is_string_container<std::u32string, false>::value, "!");
+static_assert(!is_string_container<int, true>::value, "!");
+static_assert(!is_string_container<int, false>::value, "!");
 
 using boost::nowide::detail::get_data_width;
 static_assert(get_data_width<std::string>::value == sizeof(char), "!");
 static_assert(get_data_width<std::wstring>::value == sizeof(wchar_t), "!");
 static_assert(get_data_width<std::u16string>::value == sizeof(char16_t), "!");
 static_assert(get_data_width<std::u32string>::value == sizeof(char32_t), "!");
-static_assert(get_data_width<int>::value == 0, "!");
 
 void test_main(int, char**, char**)
 {
 #ifdef BOOST_NOWIDE_TEST_STD_STRINGVIEW
     std::cout << "Testing string_view" << std::endl;
-    static_assert(is_string_container<std::string_view>::value, "!");
-    static_assert(is_string_container<std::wstring_view>::value, "!");
-    static_assert(is_string_container<std::u16string_view>::value, "!");
-    static_assert(is_string_container<std::u32string_view>::value, "!");
+    static_assert(is_string_container<std::string_view, true>::value, "!");
+    static_assert(is_string_container<std::wstring_view, false>::value, "!");
+    static_assert(is_string_container<std::u16string_view, false>::value, "!");
+    static_assert(is_string_container<std::u32string_view, false>::value, "!");
 #endif
 #ifdef BOOST_NOWIDE_TEST_SFS_PATH
     std::cout << "Testing std::filesystem::path" << std::endl;
