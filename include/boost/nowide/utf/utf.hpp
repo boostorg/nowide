@@ -17,7 +17,7 @@ namespace nowide {
     ///
     /// \brief Namespace that holds basic operations on UTF encoded sequences
     ///
-    /// All functions defined in this namespace do not require linking with Boost.Nowide library
+    /// All functions defined in this namespace do not require linking with Boost.Nowide library.
     /// Extracted from Boost.Locale
     ///
     namespace utf {

@@ -20,7 +20,7 @@ namespace nowide {
     namespace utf {
 
         /// Return the length of the given string in code units.
-        /// That is the number of elements of type Char until the first NULL character
+        /// That is the number of elements of type Char until the first NULL character.
         /// Equivalent to `std::strlen(s)` but can handle wide-strings
         template<typename Char>
         size_t strlen(const Char* s)
@@ -32,7 +32,7 @@ namespace nowide {
         }
 
         /// Convert a buffer of UTF sequences in the range [source_begin, source_end)
-        /// from \tparam CharIn to \tparam CharOut to the output \a buffer of size \a buffer_size.
+        /// from \a CharIn to \a CharOut to the output \a buffer of size \a buffer_size.
         ///
         /// \return original buffer containing the NULL terminated string or NULL
         ///
@@ -66,10 +66,11 @@ namespace nowide {
             return rv;
         }
 
-        /// Convert the UTF sequences in range [begin, end) from \tparam CharIn to \tparam CharOut
+        /// Convert the UTF sequences in range [begin, end) from \a CharIn to \a CharOut
         /// and return it as a string
         ///
         /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+        /// \tparam CharOut Output character type
         template<typename CharOut, typename CharIn>
         std::basic_string<CharOut> convert_string(const CharIn* begin, const CharIn* end)
         {
@@ -88,28 +89,6 @@ namespace nowide {
                 utf_traits<CharOut>::encode(c, inserter);
             }
             return result;
-        }
-
-        /// Convert the UTF sequences in input (a string or string_view like instance) to \tparam CharOut
-        /// and return it as a string
-        ///
-        /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
-        template<typename CharOut,
-                 typename StringOrStringView,
-                 typename = detail::requires_string_container<StringOrStringView>>
-        std::basic_string<CharOut> convert_string(const StringOrStringView& input)
-        {
-            return convert_string<CharOut>(input.data(), input.data() + input.size());
-        }
-
-        /// Convert the UTF sequences in the NULL terminated input string to \tparam CharOut
-        /// and return it as a string
-        ///
-        /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
-        template<typename CharOut, typename CharIn, typename = detail::requires_char_type<CharIn>>
-        std::basic_string<CharOut> convert_string(const CharIn* input)
-        {
-            return convert_string<CharOut>(input, input + strlen(input));
         }
 
     } // namespace utf

@@ -43,8 +43,6 @@ namespace nowide {
         struct is_char_type<char8_t> : std::true_type
         {};
 #endif
-        template<typename T>
-        using requires_char_type = typename std::enable_if<is_char_type<T>::value>::type;
 
         template<typename T>
         struct is_c_string : std::false_type
@@ -59,7 +57,7 @@ namespace nowide {
         using size_result = decltype(std::declval<T>().size());
 
         /// Return true if T is a string container, e.g. std::basic_string, std::basic_string_view
-        /// Requires a static value `npos` a member function `size()` returning an integral,
+        /// Requires a static value `npos`, a member function `size()` returning an integral,
         /// and a member function `data()` returning a C string
         template<typename T, typename = void>
         struct is_string_container : std::false_type
@@ -85,6 +83,10 @@ namespace nowide {
         using requires_narrow_data = typename std::enable_if<get_data_width<T>::value == 1>::type;
         template<typename T>
         using requires_wide_data = typename std::enable_if<(get_data_width<T>::value > 1)>::type;
+        template<typename T>
+        using requires_narrow_char = typename std::enable_if<sizeof(T) == 1 && is_char_type<T>::value>::type;
+        template<typename T>
+        using requires_wide_char = typename std::enable_if<(sizeof(T) > 1) && is_char_type<T>::value>::type;
 
     } // namespace detail
 } // namespace nowide

@@ -75,6 +75,31 @@ std::string narrow_raw_string_and_size(const std::wstring& s)
 }
 
 #ifdef BOOST_NOWIDE_TEST_STD_STRINGVIEW
+#define ASSERT_RETURN_TYPE_SV(FUNCTION, CHAR_INPUT, OUTPUT)                                                            \
+    static_assert(std::is_same<decltype(FUNCTION(std::declval<std::basic_string_view<CHAR_INPUT>>())), OUTPUT>::value, \
+                  "Should be " #OUTPUT);
+#else
+#define ASSERT_RETURN_TYPE_SV(FUNCTION, CHAR_INPUT, OUTPUT)
+#endif
+// Check that the functions are callable with various types
+#define ASSERT_RETURN_TYPE(FUNCTION, CHAR_INPUT, OUTPUT)                                                          \
+    ASSERT_RETURN_TYPE_SV(FUNCTION, CHAR_INPUT, OUTPUT)                                                           \
+    static_assert(std::is_same<decltype(FUNCTION(std::declval<const CHAR_INPUT*>())), OUTPUT>::value,             \
+                  "Should be " #OUTPUT);                                                                          \
+    static_assert(std::is_same<decltype(FUNCTION(std::declval<const CHAR_INPUT*>(), size_t{})), OUTPUT>::value,   \
+                  "Should be " #OUTPUT);                                                                          \
+    static_assert(std::is_same<decltype(FUNCTION(std::declval<std::basic_string<CHAR_INPUT>>())), OUTPUT>::value, \
+                  "Should be " #OUTPUT)
+
+ASSERT_RETURN_TYPE(boost::nowide::widen, char, std::wstring);
+#ifdef __cpp_char8_t
+ASSERT_RETURN_TYPE(boost::nowide::widen, char8_t, std::wstring);
+#endif
+ASSERT_RETURN_TYPE(boost::nowide::narrow, wchar_t, std::string);
+ASSERT_RETURN_TYPE(boost::nowide::narrow, char16_t, std::string);
+ASSERT_RETURN_TYPE(boost::nowide::narrow, char32_t, std::string);
+
+#ifdef BOOST_NOWIDE_TEST_STD_STRINGVIEW
 std::wstring widen_string_view(const std::string& s)
 {
     return boost::nowide::widen(std::string_view(s));
@@ -111,7 +136,6 @@ void test_main(int, char**, char**)
 
         // Raw literals are also possible
         TEST(boost::nowide::widen("\xd7\xa9\xd7\x9c\xd7\x95\xd7\x9d") == whello);
-        TEST(boost::nowide::utf::convert_string<wchar_t>("\xd7\xa9\xd7\x9c\xd7\x95\xd7\x9d") == whello);
     }
     std::cout << "- boost::nowide::narrow" << std::endl;
     {
@@ -128,7 +152,6 @@ void test_main(int, char**, char**)
 
         // Raw literals are also possible
         TEST(boost::nowide::narrow(L"\u05e9\u05dc\u05d5\u05dd") == hello);
-        TEST(boost::nowide::utf::convert_string<char>(L"\u05e9\u05dc\u05d5\u05dd") == hello);
     }
 
     std::cout << "- (output_buffer, buffer_size, input_raw_string)" << std::endl;

@@ -69,7 +69,8 @@ namespace nowide {
     /// \param count Number of characters to convert
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
-    inline std::string narrow(const wchar_t* s, size_t count)
+    template<typename T_Char, typename = detail::requires_wide_char<T_Char>>
+    inline std::string narrow(const T_Char* s, size_t count)
     {
         return utf::convert_string<char>(s, s + count);
     }
@@ -79,7 +80,8 @@ namespace nowide {
     /// \param s NULL terminated input string
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
-    inline std::string narrow(const wchar_t* s)
+    template<typename T_Char, typename = detail::requires_wide_char<T_Char>>
+    inline std::string narrow(const T_Char* s)
     {
         return narrow(s, utf::strlen(s));
     }
@@ -94,7 +96,7 @@ namespace nowide {
              typename = detail::requires_wide_data<StringOrStringView>>
     inline std::string narrow(const StringOrStringView& s)
     {
-        return utf::convert_string<char>(s);
+        return utf::convert_string<char>(s.data(), s.data() + s.size());
     }
 
     ///
@@ -104,7 +106,8 @@ namespace nowide {
     /// \param count Number of characters to convert
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
-    inline std::wstring widen(const char* s, size_t count)
+    template<typename T_Char, typename = detail::requires_narrow_char<T_Char>>
+    inline std::wstring widen(const T_Char* s, size_t count)
     {
         return utf::convert_string<wchar_t>(s, s + count);
     }
@@ -114,7 +117,8 @@ namespace nowide {
     /// \param s NULL terminated input string
     /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
     ///
-    inline std::wstring widen(const char* s)
+    template<typename T_Char, typename = detail::requires_narrow_char<T_Char>>
+    inline std::wstring widen(const T_Char* s)
     {
         return widen(s, utf::strlen(s));
     }
@@ -129,7 +133,7 @@ namespace nowide {
              typename = detail::requires_narrow_data<StringOrStringView>>
     inline std::wstring widen(const StringOrStringView& s)
     {
-        return utf::convert_string<wchar_t>(s);
+        return utf::convert_string<wchar_t>(s.data(), s.data() + s.size());
     }
 } // namespace nowide
 } // namespace boost
