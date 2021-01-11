@@ -7,6 +7,7 @@
 //
 
 #include <boost/nowide/convert.hpp>
+#include <array>
 #include <iostream>
 #include <string>
 
@@ -72,6 +73,22 @@ std::string narrow_raw_string_and_size(const std::wstring& s)
     // Remove NULL
     const std::wstring s2 = s + L"DummyData";
     return boost::nowide::narrow(s2.c_str(), s.size());
+}
+
+std::wstring widen_convert_buffer(const std::string& s)
+{
+    std::array<wchar_t, 200> out;
+    const auto* result = boost::nowide::utf::convert_buffer(out.data(), out.size(), s.data(), s.data() + s.size());
+    TEST(result == out.data());
+    return result;
+}
+
+std::string narrow_convert_buffer(const std::wstring& s)
+{
+    std::array<char, 200> out;
+    const auto* result = boost::nowide::utf::convert_buffer(out.data(), out.size(), s.data(), s.data() + s.size());
+    TEST(result == out.data());
+    return result;
 }
 
 #ifdef BOOST_NOWIDE_TEST_STD_STRINGVIEW
@@ -154,6 +171,22 @@ void test_main(int, char**, char**)
         TEST(boost::nowide::narrow(L"\u05e9\u05dc\u05d5\u05dd") == hello);
     }
 
+    std::cout << "- boost::nowide::utf::convert_buffer" << std::endl;
+    {
+        std::array<wchar_t, 6> buf;
+        const char* b = hello.c_str();
+        const char* e = b + hello.size();
+        using boost::nowide::utf::convert_buffer;
+        // Buffer to small (need 5 chars) -> nullptr returned
+        for(size_t len = 0; len <= 4; ++len)
+            TEST(convert_buffer(buf.data(), len, b, e) == nullptr);
+        buf.fill(42);
+        TEST(convert_buffer(buf.data(), buf.size(), b, e) == buf.data());
+        TEST(buf[4] == 0);      // NULL terminator added
+        TEST(buf.back() == 42); // Rest untouched
+        TEST(std::wstring(buf.data()) == whello);
+    }
+
     std::cout << "- (output_buffer, buffer_size, input_raw_string)" << std::endl;
     run_all(widen_buf_ptr, narrow_buf_ptr);
     std::cout << "- (output_buffer, buffer_size, input_raw_string, string_len)" << std::endl;
@@ -168,4 +201,6 @@ void test_main(int, char**, char**)
     std::cout << "- (std::string_view)" << std::endl;
     run_all(widen_string_view, narrow_string_view);
 #endif
+    std::cout << "- (utf::convert_buffer)" << std::endl;
+    run_all(widen_convert_buffer, narrow_convert_buffer);
 }

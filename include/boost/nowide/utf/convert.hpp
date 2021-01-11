@@ -44,7 +44,7 @@ namespace nowide {
         {
             CharOut* rv = buffer;
             if(buffer_size == 0)
-                return 0;
+                return nullptr;
             buffer_size--;
             while(source_begin != source_end)
             {
