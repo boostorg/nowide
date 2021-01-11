@@ -235,14 +235,14 @@ namespace nowide {
                     c = (c << 6) | (tmp & 0x3F);
                 }
 
-                // Check code point validity: no surrogates and
-                // valid range
-                if(BOOST_UNLIKELY(!is_valid_codepoint(c)))
+                // Check code point validity:
+                // - no surrogates and valid range
+                // - most compact representation
+                if(BOOST_UNLIKELY(!is_valid_codepoint(c)) || BOOST_UNLIKELY(width(c) != trail_size + 1))
+                {
+                    p -= trail_size;
                     return illegal;
-
-                // make sure it is the most compact representation
-                if(BOOST_UNLIKELY(width(c) != trail_size + 1))
-                    return illegal;
+                }
 
                 return c;
             }
