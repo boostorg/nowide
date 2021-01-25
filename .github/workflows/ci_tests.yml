@@ -59,10 +59,9 @@ jobs:
         git submodule update --init --jobs 3 tools/boostdep libs/filesystem tools/inspect libs/wave # Last 2 are required for pre-1.64
         (cd tools/boostdep && git fetch && git checkout boost-1.73.0 && git checkout boost-1.63.0 -- depinst/exceptions.txt)
         python tools/boostdep/depinst/depinst.py --include tools --exclude test --git_args '--jobs 3' filesystem
-        [[ "${{matrix.os}}" =~ "windows" ]] && toolset=mingw || toolset=gcc
+        [[ "${{matrix.generator}}" =~ "Visual Studio" ]] && toolset=msvc-14.0 || toolset=gcc
         ./bootstrap.sh --with-toolset="$toolset" --with-libraries=system,filesystem threading=multi || (cat bootstrap.log && false)
         sed -i 's/mingw/gcc/' project-config.jam
-        [[ "${{matrix.generator}}" =~ "Visual Studio" ]] && toolset=msvc-14.0 || toolset=gcc
         ./b2 headers
         ./b2 link=static toolset=$toolset address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install
         cd ..
