@@ -275,7 +275,11 @@ namespace nowide {
                 return EOF;
             if(!stop_writing())
                 return EOF;
-            if(buffer_size_ == 0)
+            // In text mode we cannot use a buffer size of more than 1 (i.e. single char only)
+            // This is due to the need to seek back in case of a sync to "put back" unread chars.
+            // However determining the number of chars to seek back is impossible in case there are newlines
+            // as we cannot know if those were converted.
+            if(buffer_size_ == 0 || !(mode_ & std::ios_base::binary))
             {
                 const int c = std::fgetc(file_);
                 if(c == EOF)
