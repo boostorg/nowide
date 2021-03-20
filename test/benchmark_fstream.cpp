@@ -19,6 +19,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <random>
 #include <stdexcept>
 #include <vector>
 
@@ -38,9 +39,12 @@ template<typename FStream>
 class io_fstream
 {
 public:
-    explicit io_fstream(const char* file, bool read)
+    explicit io_fstream(const char* file, bool binary, bool read)
     {
-        f_.open(file, read ? std::fstream::in : std::fstream::out | std::fstream::trunc);
+        auto mode = read ? std::fstream::in : std::fstream::out | std::fstream::trunc;
+        if(binary)
+            mode |= std::fstream::binary;
+        f_.open(file, mode);
         TEST(f_);
     }
     // coverity[exn_spec_violation]
@@ -70,12 +74,17 @@ private:
     FStream f_;
 };
 
+#include <cerrno>
+
 class io_stdio
 {
 public:
-    io_stdio(const char* file, bool read)
+    io_stdio(const char* file, bool binary, bool read)
     {
-        f_ = nw::fopen(file, read ? "r" : "w+");
+        const char* mode = read ? "r" : "w+";
+        if(binary)
+            mode = read ? "rb" : "wb+";
+        f_ = nw::fopen(file, mode);
         TEST(f_);
     }
     ~io_stdio()
@@ -118,22 +127,22 @@ extern "C" void _ReadWriteBarrier(void);
 #define BOOST_NOWIDE_READ_WRITE_BARRIER() (void)
 #endif
 
+using blocksize_to_performance = std::map<size_t, double>;
+
 struct perf_data
 {
     // Block-size to read/write performance in MB/s
-    std::map<size_t, double> read, write;
+    blocksize_to_performance read, write;
 };
 
-char rand_char()
-{
-    // coverity[dont_call]
-    return static_cast<char>(std::rand());
-}
 
-std::vector<char> get_rand_data(int size)
+std::vector<char> get_rand_data(int size, bool binary)
 {
+    std::mt19937 rng{std::random_device{}()};
+    auto distr = (binary) ? std::uniform_int_distribution<int>(std::numeric_limits<char>::min(), std::numeric_limits<char>::max()) :
+        std::uniform_int_distribution<int>(' ', 'z');
     std::vector<char> data(size);
-    std::generate(data.begin(), data.end(), rand_char);
+    std::generate(data.begin(), data.end(), [&](){ return static_cast<char>(distr(rng)); });
     return data;
 }
 
@@ -141,7 +150,7 @@ static const int MIN_BLOCK_SIZE = 32;
 static const int MAX_BLOCK_SIZE = 8192;
 
 template<typename FStream>
-perf_data test_io(const char* file)
+perf_data test_io(const char* file, bool binary)
 {
     namespace chrono = std::chrono;
     using clock = chrono::high_resolution_clock;
@@ -152,8 +161,8 @@ perf_data test_io(const char* file)
     const int data_size = 64 * 1024 * 1024;
     for(int block_size = MIN_BLOCK_SIZE / 2; block_size <= MAX_BLOCK_SIZE; block_size *= 2)
     {
-        std::vector<char> buf = get_rand_data(block_size);
-        FStream tmp(file, false);
+        std::vector<char> buf = get_rand_data(block_size, binary);
+        FStream tmp(file, binary, false);
         tmp.rewind();
         start_and_end[0] = clock::now();
         BOOST_NOWIDE_READ_WRITE_BARRIER();
@@ -176,8 +185,8 @@ perf_data test_io(const char* file)
     }
     for(int block_size = MIN_BLOCK_SIZE; block_size <= MAX_BLOCK_SIZE; block_size *= 2)
     {
-        std::vector<char> buf = get_rand_data(block_size);
-        FStream tmp(file, true);
+        std::vector<char> buf(block_size);
+        FStream tmp(file, binary, true);
         tmp.rewind();
         start_and_end[0] = clock::now();
         BOOST_NOWIDE_READ_WRITE_BARRIER();
@@ -198,14 +207,14 @@ perf_data test_io(const char* file)
 }
 
 template<typename FStream>
-perf_data test_io_driver(const char* file, const char* type)
+perf_data test_io_driver(const char* file, const char* type, bool binary)
 {
     std::cout << "Testing I/O performance for " << type << std::endl;
     const int repeats = 5;
     std::vector<perf_data> results(repeats);
 
     for(int i = 0; i < repeats; i++)
-        results[i] = test_io<FStream>(file);
+        results[i] = test_io<FStream>(file, binary);
     for(int block_size = MIN_BLOCK_SIZE; block_size <= MAX_BLOCK_SIZE; block_size *= 2)
     {
         double read_speed = 0, write_speed = 0;
@@ -220,9 +229,9 @@ perf_data test_io_driver(const char* file, const char* type)
     return results[0];
 }
 
-void print_perf_data(const std::map<size_t, double>& stdio_data,
-                     const std::map<size_t, double>& std_data,
-                     const std::map<size_t, double>& nowide_data)
+void print_perf_data(const blocksize_to_performance& stdio_data,
+                     const blocksize_to_performance& std_data,
+                     const blocksize_to_performance& nowide_data)
 {
     std::cout << "block size"
               << "     stdio    "
@@ -240,13 +249,23 @@ void print_perf_data(const std::map<size_t, double>& stdio_data,
 
 void test_perf(const char* file)
 {
-    perf_data stdio_data = test_io_driver<io_stdio>(file, "stdio");
-    perf_data std_data = test_io_driver<io_fstream<std::fstream>>(file, "std::fstream");
-    perf_data nowide_data = test_io_driver<io_fstream<nw::fstream>>(file, "nowide::fstream");
-    std::cout << "================== Read performance ==================" << std::endl;
+    perf_data nowide_data_txt2 = test_io_driver<io_fstream<nw::fstream>>(file, "std::fstream", false);
+    /*
+    perf_data stdio_data = test_io_driver<io_stdio>(file, "stdio", true);
+    perf_data std_data = test_io_driver<io_fstream<std::fstream>>(file, "std::fstream", true);
+    perf_data nowide_data = test_io_driver<io_fstream<nw::fstream>>(file, "nowide::fstream", true);
+    perf_data stdio_data_txt = test_io_driver<io_stdio>(file, "stdio", false);
+    perf_data std_data_txt = test_io_driver<io_fstream<std::fstream>>(file, "std::fstream", false);
+    perf_data nowide_data_txt = test_io_driver<io_fstream<nw::fstream>>(file, "nowide::fstream", false);
+    std::cout << "================== Read performance (binary) ==================" << std::endl;
     print_perf_data(stdio_data.read, std_data.read, nowide_data.read);
-    std::cout << "================== Write performance =================" << std::endl;
+    std::cout << "================== Write performance (binary) =================" << std::endl;
     print_perf_data(stdio_data.write, std_data.write, nowide_data.write);
+    std::cout << "================== Read performance (text) ====================" << std::endl;
+    print_perf_data(stdio_data_txt.read, std_data_txt.read, nowide_data_txt.read);
+    std::cout << "================== Write performance (text) ===================" << std::endl;
+    print_perf_data(stdio_data_txt.write, std_data_txt.write, nowide_data_txt.write);
+    */
 }
 
 int main(int argc, char** argv)
