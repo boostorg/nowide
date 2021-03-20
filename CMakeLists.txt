@@ -32,12 +32,26 @@ if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
-include(BoostAddOptions)
 include(BoostAddWarnings)
 include(CheckCXXSourceCompiles)
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   include(CTest)
+  set(def_INSTALL ON)
+  set(def_WERROR ON)
+elseif(BOOST_SUPERPROJECT_SOURCE_DIR)
+  set(def_WERROR ON)
+else()
+  set(def_INSTALL OFF)
+  set(def_WERROR OFF)
 endif()
+
+if(BOOST_SUPERPROJECT_SOURCE_DIR)
+  set(Boost_NOWIDE_INSTALL OFF) # Done by the superproject
+else()
+  option(Boost_NOWIDE_INSTALL "Install library" "${def_INSTALL}")
+endif()
+option(Boost_NOWIDE_WERROR "Treat warnings as errors" "${def_WERROR}")
+
 
 file(READ ${CMAKE_CURRENT_SOURCE_DIR}/config/check_lfs_support.cpp lfsSource)
 check_cxx_source_compiles("${lfsSource}" BOOST_NOWIDE_HAS_LFS)
