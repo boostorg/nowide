@@ -507,9 +507,57 @@ void test_is_open(const char* filename)
     do_test_is_open<nw::fstream>(filename);
 }
 
+// Reproducer for https://github.com/boostorg/nowide/issues/126
+void test_getline_and_tellg(const char* filename)
+{
+    {
+        nw::ofstream f(filename);
+        f << "Line 1" << std::endl;
+        f << "Line 2" << std::endl;
+        f << "Line 3" << std::endl;
+    }
+    remove_file_at_exit _(filename);
+    nw::fstream f;
+    // Open file in text mode, to read
+    f.open(filename, std::ios_base::in);
+    TEST(f);
+    std::string line1, line2, line3;
+    TEST(getline(f, line1));
+    TEST(line1 == "Line 1");
+    const auto tg = f.tellg(); // This may cause issues
+    TEST(tg > 0u);
+    TEST(getline(f, line2));
+    TEST(line2 == "Line 2");
+    TEST(getline(f, line3));
+    TEST(line3 == "Line 3");
+}
+
+// Test that a sync after a peek does not swallow newlines
+// This can happen because peek reads a char which needs to be "unread" on sync which may loose a converted newline
+void test_peek_sync_get(const char* filename)
+{
+    {
+        nw::ofstream f(filename);
+        f << "Line 1" << std::endl;
+        f << "Line 2" << std::endl;
+    }
+    remove_file_at_exit _(filename);
+    nw::ifstream f(filename);
+    TEST(f);
+    while(f)
+    {
+        const int curChar = f.peek();
+        if(curChar == std::char_traits<char>::eof())
+            break;
+        f.sync();
+        TEST(f.get() == char(curChar));
+    }
+}
+
 void test_main(int, char** argv, char**)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
+
     std::cout << "Testing fstream" << std::endl;
     test_ofstream_creates_file(exampleFilename.c_str());
     test_ofstream_write(exampleFilename.c_str());
@@ -527,4 +575,8 @@ void test_main(int, char** argv, char**)
     test_flush<std::ifstream, std::ofstream>(exampleFilename.c_str());
     std::cout << "Flush - Test" << std::endl;
     test_flush<nw::ifstream, nw::ofstream>(exampleFilename.c_str());
+
+    std::cout << "Regression tests" << std::endl;
+    test_getline_and_tellg(exampleFilename.c_str());
+    test_peek_sync_get(exampleFilename.c_str());
 }
