@@ -79,28 +79,34 @@ stages:
           B2_CXXSTD: 03,11
           CXX: g++-4.8
           PACKAGES: g++-4.8
-        Clang_8:
+        Clang_12:
+          B2_TOOLSET: clang
+          B2_CXXSTD: 14,17,20
+          CXX: clang++-12
+          PACKAGES: clang-12
+          LLVM_REPO: llvm-toolchain-xenial-12
+        Clang_9:
           B2_TOOLSET: clang
           B2_CXXSTD: 14,17,2a
-          CXX: clang++-8
-          PACKAGES: clang-8
-          LLVM_REPO: llvm-toolchain-xenial-8
+          CXX: clang++-9
+          PACKAGES: clang-9
+          LLVM_REPO: llvm-toolchain-xenial-9
         Clang_7:
           B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
+          B2_CXXSTD: 14,17
           CXX: clang++-7
           PACKAGES: clang-7
           LLVM_REPO: llvm-toolchain-xenial-7
         Clang_6_libcxx:
           B2_TOOLSET: clang
-          B2_CXXSTD: 03,11,14,17,2a
+          B2_CXXSTD: 03,11,14,17
           B2_STDLIB: libc++
           CXX: clang++-6.0
           PACKAGES: clang-6.0
           LLVM_REPO: llvm-toolchain-xenial-6.0
         Clang_6:
           B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
+          B2_CXXSTD: 14,17
           CXX: clang++-6.0
           PACKAGES: clang-6.0
           LLVM_REPO: llvm-toolchain-xenial-6.0
@@ -121,21 +127,6 @@ stages:
           B2_CXXSTD: 03,11,14
           CXX: clang++-3.9
           PACKAGES: clang-3.9
-        Clang_3_8:
-          B2_TOOLSET: clang
-          CXX: clang++-3.8
-          B2_CXXSTD: 03,11,14
-          PACKAGES: clang-3.8
-        Clang_3_7:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 03,11
-          CXX: clang++-3.7
-          PACKAGES: clang-3.7
-        Clang_3_6:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 03,11
-          CXX: clang++-3.6
-          PACKAGES: clang-3.6
         Clang_3_5:
           B2_TOOLSET: clang
           B2_CXXSTD: 03,11
