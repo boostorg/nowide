@@ -19,6 +19,17 @@
 
 namespace nw = boost::nowide;
 
+struct remove_file_at_exit
+{
+    const char* filename;
+    remove_file_at_exit(const char* filename) : filename(filename)
+    {}
+    ~remove_file_at_exit() noexcept(false)
+    {
+        TEST(nw::remove(filename) == 0);
+    }
+};
+
 void make_empty_file(const char* filepath)
 {
     nw::ofstream f(filepath, std::ios_base::out | std::ios::trunc);
@@ -66,6 +77,8 @@ void test_with_different_buffer_sizes(const char* filepath)
             f.rdbuf()->pubsetbuf((i == 0) ? NULL : buf, i);
         f.open(filepath, std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
         TEST(f);
+        remove_file_at_exit _(filepath);
+
         // Add 'abcdefg'
         TEST(f.put('a'));
         TEST(f.put('b'));
@@ -141,7 +154,6 @@ void test_with_different_buffer_sizes(const char* filepath)
 #endif
         TEST(f.get() == 'B');
         f.close();
-        TEST(nw::remove(filepath) == 0);
     }
 }
 
@@ -203,18 +215,22 @@ void test_ofstream_creates_file(const char* filename)
         nw::ofstream fo(filename);
         TEST(fo);
     }
-    TEST(file_exists(filename));
-    TEST(read_file(filename).empty());
-    TEST(nw::remove(filename) == 0);
+    {
+        TEST(file_exists(filename));
+        remove_file_at_exit _(filename);
+        TEST(read_file(filename).empty());
+    }
     // Open
     {
         nw::ofstream fo;
         fo.open(filename);
         TEST(fo);
     }
-    TEST(file_exists(filename));
-    TEST(read_file(filename).empty());
-    TEST(nw::remove(filename) == 0);
+    {
+        TEST(file_exists(filename));
+        remove_file_at_exit _(filename);
+        TEST(read_file(filename).empty());
+    }
 }
 
 // Create filename file with content "test\n"
@@ -400,6 +416,8 @@ void test_fstream(const char* filename)
         f.open(filename, std::ios::out);
         TEST(f);
     }
+    remove_file_at_exit _(filename);
+
     TEST(read_file(filename).empty());
     // Open
     {
@@ -457,7 +475,6 @@ void test_fstream(const char* filename)
         TEST(tmp == "foo");
     }
     TEST(read_file(filename) == "foo");
-    TEST(nw::remove(filename) == 0);
 }
 
 template<typename T>
@@ -485,9 +502,9 @@ void test_is_open(const char* filename)
 {
     // Note the order: Output before input so file exists
     do_test_is_open<nw::ofstream>(filename);
+    remove_file_at_exit _(filename);
     do_test_is_open<nw::ifstream>(filename);
     do_test_is_open<nw::fstream>(filename);
-    TEST(nw::remove(filename) == 0);
 }
 
 void test_main(int, char** argv, char**)
