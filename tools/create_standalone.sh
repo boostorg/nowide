@@ -58,6 +58,8 @@ sed 's/ OR BOOST_SUPERPROJECT_SOURCE_DIR//' -i $CMLs
 
 sed '/PUBLIC BOOST_NOWIDE_NO_LIB)/d' -i "$targetFolder/CMakeLists.txt"
 sed '/^if(BOOST_SUPERPROJECT_SOURCE_DIR)/,/^endif/d' -i "$targetFolder/CMakeLists.txt"
+sed '/^elseif(BOOST_SUPERPROJECT_SOURCE_DIR)/,/^else/{/^else(/!d}' -i "$targetFolder/CMakeLists.txt"
+sed '/^if(NOT BOOST_SUPERPROJECT_SOURCE_DIR)/,/^endif/{/^if/d;/^endif/d}' -i "$targetFolder/CMakeLists.txt"
 sed 's/NAMESPACE Nowide CONFIG_FILE.*$/NAMESPACE nowide)/' -i "$targetFolder/CMakeLists.txt"
 
 sed '/^if(NOT BOOST_SUPERPROJECT_SOURCE_DIR)/,/^endif/d' -i "$targetFolder/test/CMakeLists.txt"
