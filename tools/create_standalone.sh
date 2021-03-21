@@ -30,7 +30,6 @@ mkdir -p "$targetFolder"/include
 cp -r include/boost/nowide "$targetFolder"/include
 cp -r config src test cmake CMakeLists.txt LICENSE README.md "$targetFolder"
 cp standalone/*.hpp "$targetFolder"/include/nowide
-mv "$targetFolder/cmake/BoostAddOptions.cmake"  "$targetFolder/cmake/NowideAddOptions.cmake"
 mv "$targetFolder/cmake/BoostAddWarnings.cmake" "$targetFolder/cmake/NowideAddWarnings.cmake"
 find "$targetFolder" -name 'Jamfile*' -delete
 
