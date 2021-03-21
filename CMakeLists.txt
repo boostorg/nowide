@@ -39,15 +39,14 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   set(def_INSTALL ON)
   set(def_WERROR ON)
 elseif(BOOST_SUPERPROJECT_SOURCE_DIR)
+  set(Boost_NOWIDE_INSTALL OFF) # Done by the superproject
   set(def_WERROR ON)
 else()
   set(def_INSTALL OFF)
   set(def_WERROR OFF)
 endif()
 
-if(BOOST_SUPERPROJECT_SOURCE_DIR)
-  set(Boost_NOWIDE_INSTALL OFF) # Done by the superproject
-else()
+if(NOT BOOST_SUPERPROJECT_SOURCE_DIR)
   option(Boost_NOWIDE_INSTALL "Install library" "${def_INSTALL}")
 endif()
 option(Boost_NOWIDE_WERROR "Treat warnings as errors" "${def_WERROR}")
