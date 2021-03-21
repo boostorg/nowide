@@ -19,6 +19,17 @@
 
 namespace nw = boost::nowide;
 
+struct remove_file_at_exit
+{
+    const char* filename;
+    remove_file_at_exit(const char* filename) : filename(filename)
+    {}
+    ~remove_file_at_exit() noexcept(false)
+    {
+        TEST(nw::remove(filename) == 0);
+    }
+};
+
 void make_empty_file(const char* filepath)
 {
     nw::ofstream f(filepath, std::ios_base::out | std::ios::trunc);
@@ -66,6 +77,8 @@ void test_with_different_buffer_sizes(const char* filepath)
             f.rdbuf()->pubsetbuf((i == 0) ? NULL : buf, i);
         f.open(filepath, std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
         TEST(f);
+        remove_file_at_exit _(filepath);
+
         // Add 'abcdefg'
         TEST(f.put('a'));
         TEST(f.put('b'));
@@ -141,7 +154,6 @@ void test_with_different_buffer_sizes(const char* filepath)
 #endif
         TEST(f.get() == 'B');
         f.close();
-        TEST(nw::remove(filepath) == 0);
     }
 }
 
@@ -203,18 +215,22 @@ void test_ofstream_creates_file(const char* filename)
         nw::ofstream fo(filename);
         TEST(fo);
     }
-    TEST(file_exists(filename));
-    TEST(read_file(filename).empty());
-    TEST(nw::remove(filename) == 0);
+    {
+        TEST(file_exists(filename));
+        remove_file_at_exit _(filename);
+        TEST(read_file(filename).empty());
+    }
     // Open
     {
         nw::ofstream fo;
         fo.open(filename);
         TEST(fo);
     }
-    TEST(file_exists(filename));
-    TEST(read_file(filename).empty());
-    TEST(nw::remove(filename) == 0);
+    {
+        TEST(file_exists(filename));
+        remove_file_at_exit _(filename);
+        TEST(read_file(filename).empty());
+    }
 }
 
 // Create filename file with content "test\n"
@@ -400,6 +416,8 @@ void test_fstream(const char* filename)
         f.open(filename, std::ios::out);
         TEST(f);
     }
+    remove_file_at_exit _(filename);
+
     TEST(read_file(filename).empty());
     // Open
     {
@@ -457,7 +475,6 @@ void test_fstream(const char* filename)
         TEST(tmp == "foo");
     }
     TEST(read_file(filename) == "foo");
-    TEST(nw::remove(filename) == 0);
 }
 
 template<typename T>
@@ -485,14 +502,94 @@ void test_is_open(const char* filename)
 {
     // Note the order: Output before input so file exists
     do_test_is_open<nw::ofstream>(filename);
+    remove_file_at_exit _(filename);
     do_test_is_open<nw::ifstream>(filename);
     do_test_is_open<nw::fstream>(filename);
-    TEST(nw::remove(filename) == 0);
+}
+
+// Reproducer for https://github.com/boostorg/nowide/issues/126
+void test_getline_and_tellg(const char* filename)
+{
+    {
+        nw::ofstream f(filename);
+        f << "Line 1" << std::endl;
+        f << "Line 2" << std::endl;
+        f << "Line 3" << std::endl;
+    }
+    remove_file_at_exit _(filename);
+    nw::fstream f;
+    // Open file in text mode, to read
+    f.open(filename, std::ios_base::in);
+    TEST(f);
+    std::string line1, line2, line3;
+    TEST(getline(f, line1));
+    TEST(line1 == "Line 1");
+    const auto tg = f.tellg(); // This may cause issues
+    TEST(tg > 0u);
+    TEST(getline(f, line2));
+    TEST(line2 == "Line 2");
+    TEST(getline(f, line3));
+    TEST(line3 == "Line 3");
+}
+
+// Test that a sync after a peek does not swallow newlines
+// This can happen because peek reads a char which needs to be "unread" on sync which may loose a converted newline
+void test_peek_sync_get(const char* filename)
+{
+    {
+        nw::ofstream f(filename);
+        f << "Line 1" << std::endl;
+        f << "Line 2" << std::endl;
+    }
+    remove_file_at_exit _(filename);
+    nw::ifstream f(filename);
+    TEST(f);
+    while(f)
+    {
+        const int curChar = f.peek();
+        if(curChar == std::char_traits<char>::eof())
+            break;
+        f.sync();
+        TEST(f.get() == char(curChar));
+    }
+}
+
+void test_swap(const char* filename, const char* filename2)
+{
+    {
+        nw::ofstream f(filename);
+        f << "02468" << std::endl;
+        f.close();
+        f.open(filename2);
+        f << "13579" << std::endl;
+    }
+    remove_file_at_exit _(filename);
+    remove_file_at_exit _2(filename2);
+
+    nw::ifstream f1(filename);
+    nw::ifstream f2(filename2);
+    TEST(f1);
+    TEST(f2);
+    while(f1 && f2)
+    {
+        const int curChar1 = f1.peek();
+        const int curChar2 = f2.peek();
+        f1.swap(f2);
+        TEST(f1.peek() == curChar2);
+        TEST(f2.peek() == curChar1);
+        if(curChar1 == std::char_traits<char>::eof() || curChar2 == std::char_traits<char>::eof())
+            break;
+        TEST(f1.get() == char(curChar2));
+        f1.swap(f2);
+        TEST(f1.get() == char(curChar1));
+    }
 }
 
 void test_main(int, char** argv, char**)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
+    const std::string exampleFilename2 = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd 2.txt";
+
     std::cout << "Testing fstream" << std::endl;
     test_ofstream_creates_file(exampleFilename.c_str());
     test_ofstream_write(exampleFilename.c_str());
@@ -510,4 +607,9 @@ void test_main(int, char** argv, char**)
     test_flush<std::ifstream, std::ofstream>(exampleFilename.c_str());
     std::cout << "Flush - Test" << std::endl;
     test_flush<nw::ifstream, nw::ofstream>(exampleFilename.c_str());
+
+    std::cout << "Regression tests" << std::endl;
+    test_getline_and_tellg(exampleFilename.c_str());
+    test_peek_sync_get(exampleFilename.c_str());
+    test_swap(exampleFilename.c_str(), exampleFilename2.c_str());
 }

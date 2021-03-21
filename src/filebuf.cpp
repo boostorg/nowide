@@ -12,7 +12,7 @@
 #define BOOST_NOWIDE_FTELL ::ftell
 #define BOOST_NOWIDE_FSEEK ::fseek
 #define BOOST_NOWIDE_OFF_T long
-#elif defined(_WIN32) && !defined(__CYGWIN__)
+#elif defined(_WIN32) && !defined(__CYGWIN__) && !defined(__MINGW32__)
 #define BOOST_NOWIDE_FTELL _ftelli64
 #define BOOST_NOWIDE_FSEEK _fseeki64
 #define BOOST_NOWIDE_OFF_T int64_t
