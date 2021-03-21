@@ -554,9 +554,41 @@ void test_peek_sync_get(const char* filename)
     }
 }
 
+void test_swap(const char* filename, const char* filename2)
+{
+    {
+        nw::ofstream f(filename);
+        f << "02468" << std::endl;
+        f.close();
+        f.open(filename2);
+        f << "13579" << std::endl;
+    }
+    remove_file_at_exit _(filename);
+    remove_file_at_exit _2(filename2);
+
+    nw::ifstream f1(filename);
+    nw::ifstream f2(filename2);
+    TEST(f1);
+    TEST(f2);
+    while(f1 && f2)
+    {
+        const int curChar1 = f1.peek();
+        const int curChar2 = f2.peek();
+        f1.swap(f2);
+        TEST(f1.peek() == curChar2);
+        TEST(f2.peek() == curChar1);
+        if(curChar1 == std::char_traits<char>::eof() || curChar2 == std::char_traits<char>::eof())
+            break;
+        TEST(f1.get() == char(curChar2));
+        f1.swap(f2);
+        TEST(f1.get() == char(curChar1));
+    }
+}
+
 void test_main(int, char** argv, char**)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
+    const std::string exampleFilename2 = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd 2.txt";
 
     std::cout << "Testing fstream" << std::endl;
     test_ofstream_creates_file(exampleFilename.c_str());
@@ -579,4 +611,5 @@ void test_main(int, char** argv, char**)
     std::cout << "Regression tests" << std::endl;
     test_getline_and_tellg(exampleFilename.c_str());
     test_peek_sync_get(exampleFilename.c_str());
+    test_swap(exampleFilename.c_str(), exampleFilename2.c_str());
 }
