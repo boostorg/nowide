@@ -126,13 +126,13 @@ jobs:
       run: mkdir __build_static __build_shared
     - name: Configure static
       working-directory: __build_static
-      run: cmake .. -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide -DCMAKE_BUILD_TYPE=Debug
+      run: cmake .. -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=1
     - name: Build & Test static
       working-directory: __build_static
       run: cmake --build . --config Debug && ctest --output-on-failure --build-config Debug
     - name: Configure shared
       working-directory: __build_shared
-      run: cmake .. -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON
+      run: cmake .. -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=1
     - name: Build & Test shared
       working-directory: __build_shared
       run: cmake --build . --config Debug && ctest --output-on-failure --build-config Debug

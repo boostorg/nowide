@@ -170,14 +170,14 @@ for:
       - ps: |
             cd "$env:BOOST_ROOT"
             mkdir __build_static | cd
-            cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide ..
+            cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBOOST_INCLUDE_LIBRARIES=nowide -DBUILD_TESTING=1 ..
             cmake --build . --config Debug --parallel 4
             ctest --output-on-failure --build-config Debug
             cmake --build . --config Release --parallel 4
             ctest --output-on-failure --build-config Release
             cd ..
             mkdir __build_shared | cd
-            cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBUILD_SHARED_LIBS=ON -DBOOST_INCLUDE_LIBRARIES=nowide ..
+            cmake -DBOOST_ENABLE_CMAKE=1 -DBoost_VERBOSE=1 -DBUILD_SHARED_LIBS=ON -DBOOST_INCLUDE_LIBRARIES=nowide -DBUILD_TESTING=1 ..
             cmake --build . --config Debug --parallel 4
             ctest --output-on-failure --build-config Debug
             cmake --build . --config Release --parallel 4
