@@ -18,6 +18,14 @@ jobs:
       - name: Extract tag name
         id: get_tag
         run: echo "::set-output name=tag::${GITHUB_REF#refs/tags/}"
+      - name: Sanity check version
+        run: |
+          version=${{steps.get_tag.outputs.tag}}
+          if ! grep -q "set(_version ${version#v})" CMakeLists.txt; then
+            echo "Version mismatch."
+            echo "Expected '${version#v}', found '$(grep -E 'set\(_version [0-9]' CMakeLists.txt)'"
+            exit 1
+          fi
       - name: Create documentation
         run: |
           sudo apt-get install doxygen
