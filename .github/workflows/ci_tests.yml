@@ -30,6 +30,8 @@ jobs:
       BOOST_VERSION: 1.56.0
     steps:
     - uses: actions/checkout@v2
+    - name: Sanity check version
+      run: grep -E 'set\(_version [0-9]' CMakeLists.txt
     - uses: actions/cache@v1
       id: cache-boost
       with:

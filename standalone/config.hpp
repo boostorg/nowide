@@ -11,13 +11,6 @@
 
 #include <boost/nowide/replacement.hpp>
 
-// MinGW32 requires a __MSVCRT_VERSION__ defined to make some functions available, e.g. _stat64
-// Hence define this here to target MSVC 7.0 which has the required functions and do it as early as possible
-// as including a system header might default this to 0x0600 which is to low
-#if defined(__MINGW32__) && !defined(__MSVCRT_VERSION__)
-#define __MSVCRT_VERSION__ 0x0700
-#endif
-
 #if(defined(__WIN32) || defined(_WIN32) || defined(WIN32)) && !defined(__CYGWIN__)
 #define NOWIDE_WINDOWS
 #endif
