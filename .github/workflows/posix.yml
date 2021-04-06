@@ -41,6 +41,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        if: '!matrix.coverage'
+      - uses: actions/checkout@v2
+        if: 'matrix.coverage'
+        with:
+          fetch-depth: 0
 
       - name: Install packages
         if: matrix.install
