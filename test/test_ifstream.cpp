@@ -15,77 +15,103 @@
 namespace nw = boost::nowide;
 using namespace boost::nowide::test;
 
-void test_ifstream_open_read(const char* filename)
+template<typename T>
+void test_ctor(const T& filename)
 {
-    // Create test file
+    // Fail on non-existing file
+    ensure_not_exists(filename);
     {
-        nw::ofstream fo(filename);
-        TEST(fo << "test" << std::endl);
+        nw::ifstream f(filename);
+        TEST(!f);
     }
+    TEST(!file_exists(filename));
 
-    // char* Ctor
+    create_file(filename, "test");
+
+    // Default
     {
-        nw::ifstream fi(filename);
-        TEST(fi);
+        nw::ifstream f(filename);
+        TEST(f);
         std::string tmp;
-        TEST(fi >> tmp);
+        TEST(f >> tmp);
         TEST(tmp == "test");
     }
-    // char* open
-    {
-        nw::ifstream fi;
-        fi.open(filename);
-        TEST(fi);
-        std::string tmp;
-        TEST(fi >> tmp);
-        TEST(tmp == "test");
-    }
-    // string ctor
-    {
-        std::string name = filename;
-        nw::ifstream fi(name);
-        TEST(fi);
-        std::string tmp;
-        TEST(fi >> tmp);
-        TEST(tmp == "test");
-    }
-    // string open
-    {
-        nw::ifstream fi;
-        fi.open(std::string(filename));
-        TEST(fi);
-        std::string tmp;
-        TEST(fi >> tmp);
-        TEST(tmp == "test");
-    }
-    // Binary mode
-    {
-        nw::ifstream fi(filename, std::ios::binary);
-        TEST(fi);
-        std::string tmp;
-        TEST(fi >> tmp);
-        TEST(tmp == "test");
-    }
+    TEST(read_file(filename) == "test");
+
     // At end
     {
-        // Need binary file or position check might be throw off by newline conversion
-        {
-            nw::ofstream fo(filename, nw::fstream::binary);
-            TEST(fo << "test");
-        }
-        nw::ifstream fi(filename, nw::fstream::ate | nw::fstream::binary);
-        TEST(fi);
-        TEST(fi.tellg() == std::streampos(4));
-        fi.seekg(-2, std::ios_base::cur);
+        nw::ifstream f(filename, std::ios::ate);
+        TEST(f);
         std::string tmp;
-        TEST(fi >> tmp);
-        TEST(tmp == "st");
+        TEST(!(f >> tmp));
+        TEST(f.eof());
+        f.clear();
+        f.seekg(0, std::ios::beg);
+        TEST(f >> tmp);
+        TEST(tmp == "test");
     }
-    // Fail on non-existing file
-    TEST(nw::remove(filename) == 0);
+    TEST(read_file(filename) == "test");
+
+    create_file(filename, "test\r\n");
+    // Binary mode
     {
-        nw::ifstream fi(filename);
-        TEST(!fi);
+        nw::ifstream f(filename, std::ios::binary);
+        TEST(f);
+        std::string tmp(6, '\0');
+        TEST(f.read(&tmp[0], 6));
+        TEST(tmp == "test\r\n");
+    }
+}
+
+template<typename T>
+void test_open(const T& filename)
+{
+    // Fail on non-existing file
+    ensure_not_exists(filename);
+    {
+        nw::ifstream f;
+        f.open(filename);
+        TEST(!f);
+    }
+    TEST(!file_exists(filename));
+
+    create_file(filename, "test");
+
+    // Default
+    {
+        nw::ifstream f;
+        f.open(filename);
+        TEST(f);
+        std::string tmp;
+        TEST(f >> tmp);
+        TEST(tmp == "test");
+    }
+    TEST(read_file(filename) == "test");
+
+    // At end
+    {
+        nw::ifstream f;
+        f.open(filename, std::ios::ate);
+        TEST(f);
+        std::string tmp;
+        TEST(!(f >> tmp));
+        TEST(f.eof());
+        f.clear();
+        f.seekg(0, std::ios::beg);
+        TEST(f >> tmp);
+        TEST(tmp == "test");
+    }
+    TEST(read_file(filename) == "test");
+
+    create_file(filename, "test\r\n");
+    // Binary mode
+    {
+        nw::ifstream f;
+        f.open(filename, std::ios::binary);
+        TEST(f);
+        std::string tmp(6, '\0');
+        TEST(f.read(&tmp[0], 6));
+        TEST(tmp == "test\r\n");
     }
 }
 
@@ -93,5 +119,8 @@ void test_main(int, char** argv, char**)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
 
-    test_ifstream_open_read(exampleFilename.c_str());
+    test_ctor(exampleFilename.c_str());
+    test_ctor(exampleFilename);
+    test_open(exampleFilename.c_str());
+    test_open(exampleFilename);
 }
