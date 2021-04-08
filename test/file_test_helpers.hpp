@@ -22,9 +22,9 @@ namespace test{
         std::fclose(f);
     }
 
-    void create_txt_file(const std::string& filepath, const std::string& contents)
+    void create_file(const std::string& filepath, const std::string& contents)
     {
-        auto* f = fopen(filepath.c_str(), "w");
+        auto* f = fopen(filepath.c_str(), "wb");
         TEST(f);
         TEST(std::fwrite(contents.data(), 1, contents.size(), f) == contents.size());
         std::fclose(f);

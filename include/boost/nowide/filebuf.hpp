@@ -220,7 +220,7 @@ namespace nowide {
 
         int overflow(int c = EOF) override
         {
-            if(!(mode_ & std::ios_base::out))
+            if(!(mode_ & (std::ios_base::out | std::ios_base::app)))
                 return EOF;
 
             if(!stop_reading())

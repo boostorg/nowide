@@ -41,7 +41,7 @@ void test_ctor(const T& filename)
     TEST(read_file(filename).empty());
 
     // Read+write existing file
-    create_txt_file(filename, "Hello");
+    create_file(filename, "Hello");
     {
         nw::fstream f(filename);
         std::string tmp;
@@ -52,33 +52,48 @@ void test_ctor(const T& filename)
         TEST(f << "World");
     }
     TEST(read_file(filename) == "HelloWorld");
+    create_file(filename, "Hello");
+    {
+        nw::fstream f(filename, std::ios::out | std::ios::in);
+        std::string tmp;
+        TEST(f >> tmp);
+        TEST(f.eof());
+        TEST(tmp == "Hello");
+        f.clear();
+        TEST(f << "World");
+    }
+    TEST(read_file(filename) == "HelloWorld");
 
     // Readonly existing file
-    create_txt_file(filename, "Hello");
+    create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::in);
         std::string tmp;
         TEST(f >> tmp);
         TEST(tmp == "Hello");
+        f.clear();
+        TEST(f);
         TEST(!(f << "World"));
     }
     TEST(read_file(filename) == "Hello");
 
     // Write existing file
-    create_txt_file(filename, "Hello");
+    create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out);
         std::string tmp;
+        TEST(f);
         TEST(!(f >> tmp));
         f.clear();
         TEST(f << "World");
     }
     TEST(read_file(filename) == "World");
     // Write existing file with explicit trunc
-    create_txt_file(filename, "Hello");
+    create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out | std::ios::trunc);
         std::string tmp;
+        TEST(f);
         TEST(!(f >> tmp));
         f.clear();
         TEST(f << "World");
@@ -86,25 +101,25 @@ void test_ctor(const T& filename)
     TEST(read_file(filename) == "World");
 
     // append existing file
-    /*create_txt_file(filename, "Hello");
+    create_file(filename, "Hello");
     {
-        std::fstream f(filename, std::ios::app);
+        nw::fstream f(filename, std::ios::app);
         TEST(f << "World");
     }
     TEST(read_file(filename) == "HelloWorld");
-    create_txt_file(filename, "Hello");
+    create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out | std::ios::app);
         TEST(f << "World");
     }
     TEST(read_file(filename) == "HelloWorld");
-    */
 
     // read+write+truncate existing file
-    create_txt_file(filename, "Hello");
+    create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out | std::ios::in | std::ios::trunc);
         std::string tmp;
+        TEST(f);
         TEST(!(f >> tmp));
         f.clear();
         TEST(f << "World");
@@ -115,9 +130,12 @@ void test_ctor(const T& filename)
     TEST(read_file(filename) == "World");
 
     // read+write+append existing file
-    /*create_txt_file(filename, "Hello");
+    create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out | std::ios::in | std::ios::app);
+        TEST(f);
+        TEST(f.seekg(0)); // It is not defined where the read position is after opening
+        TEST(f.tellg() == std::streampos(0));
         std::string tmp;
         TEST(f >> tmp);
         TEST(tmp == "Hello");
@@ -125,23 +143,25 @@ void test_ctor(const T& filename)
         TEST(f << "World");
     }
     TEST(read_file(filename) == "HelloWorld");
-    create_txt_file(filename, "Hello");
+    create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::in | std::ios::app);
         std::string tmp;
+        TEST(f.seekg(0)); // It is not defined where the read position is after opening
+        TEST(f.tellg() == std::streampos(0));
         TEST(f >> tmp);
         TEST(tmp == "Hello");
         f.seekg(0);
         TEST(f << "World");
     }
     TEST(read_file(filename) == "HelloWorld");
-    */
 
     // Write at end
-    create_txt_file(filename, "Hello");
+    create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out | std::ios::in | std::ios::ate);
         std::string tmp;
+        TEST(f);
         TEST(!(f >> tmp));
         f.clear();
         TEST(f << "World");
@@ -152,7 +172,7 @@ void test_ctor(const T& filename)
     TEST(read_file(filename) == "HelloWorld");
 
     // Trunc & binary
-    create_txt_file(filename, "Hello");
+    create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
         TEST(f);
@@ -163,6 +183,27 @@ void test_ctor(const T& filename)
         TEST(tmp == "test\r\n");
     }
     TEST(read_file(filename, true) == "test\r\n");
+
+    // Invalid modes
+    const std::initializer_list<std::ios::openmode> invalid_modes{
+      // clang-format off
+                                     std::ios::trunc,
+                                     std::ios::trunc | std::ios::app,
+      std::ios::out |                std::ios::trunc | std::ios::app,
+                      std::ios::in | std::ios::trunc,
+                      std::ios::in | std::ios::trunc | std::ios::app,
+      std::ios::out | std::ios::in | std::ios::trunc | std::ios::app
+      // clang-format on
+    };
+    for(const auto mode : invalid_modes)
+    {
+        create_file(filename, "Hello");
+        {
+            nw::fstream f(filename, mode);
+            TEST(!f);
+        }
+        TEST(read_file(filename) == "Hello");
+    }
 }
 
 template<typename T>
@@ -189,7 +230,7 @@ void test_open(const T& filename)
     TEST(read_file(filename).empty());
 
     // Read+write existing file
-    create_txt_file(filename, "Hello");
+    create_file(filename, "Hello");
     {
         nw::fstream f;
         f.open(filename);
@@ -203,13 +244,15 @@ void test_open(const T& filename)
     TEST(read_file(filename) == "HelloWorld");
 
     // Readonly existing file
-    create_txt_file(filename, "Hello");
+    create_file(filename, "Hello");
     {
         nw::fstream f;
         f.open(filename, std::ios::in);
         std::string tmp;
         TEST(f >> tmp);
         TEST(tmp == "Hello");
+        f.clear();
+        TEST(f);
         TEST(!(f << "World"));
     }
     TEST(read_file(filename) == "Hello");
@@ -248,10 +291,10 @@ void test_is_open(const char* filename)
     do_test_is_open<nw::fstream>(filename);
 }
 
-template<typename FStream>
 void test_flush(const char* filepath)
 {
-    FStream fo(filepath, std::ios_base::out | std::ios::trunc);
+    remove_file_at_exit _(filepath);
+    nw::fstream fo(filepath, std::ios_base::out | std::ios::trunc);
     TEST(fo);
     std::string curValue;
     for(int repeat = 0; repeat < 2; repeat++)
@@ -265,7 +308,7 @@ void test_flush(const char* filepath)
             TEST(fo.flush());
             std::string s;
             // Note: Flush on read area is implementation defined, so check whole file instead
-            FStream fi(filepath, std::ios_base::in);
+            nw::fstream fi(filepath, std::ios_base::in);
             TEST(fi >> s);
             // coverity[tainted_data]
             TEST(s == curValue);
@@ -276,17 +319,18 @@ void test_flush(const char* filepath)
 void test_main(int, char** argv, char**)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
-    const std::string exampleFilename2 = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd 2.txt";
 
-    std::cout << "Testing fstream" << std::endl;
+    std::cout << "Ctor" << std::endl;
     test_ctor<const char*>(exampleFilename.c_str());
     test_ctor<std::string>(exampleFilename);
+
+    std::cout << "Open" << std::endl;
     test_open<const char*>(exampleFilename.c_str());
     test_open<std::string>(exampleFilename);
+
+    std::cout << "IsOpen" << std::endl;
     test_is_open(exampleFilename.c_str());
 
-    std::cout << "Flush - Sanity Check" << std::endl;
-    test_flush<std::fstream>(exampleFilename.c_str());
-    std::cout << "Flush - Test" << std::endl;
-    test_flush<nw::fstream>(exampleFilename.c_str());
+    std::cout << "Flush" << std::endl;
+    test_flush(exampleFilename.c_str());
 }
