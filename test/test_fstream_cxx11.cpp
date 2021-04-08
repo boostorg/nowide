@@ -1,12 +1,10 @@
+
+//  Copyright (c) 2019-2021 Alexander Grund
 //
-//  Copyright (c) 2019 Alexander Grund
-//
-//  Distributed under the Boost Software License, Version 1.0. (See
-//  accompanying file LICENSE or copy at
+//  Distributed under the Boost Software License, Version 1.0.
+//  (See accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-
-#include <boost/nowide/config.hpp>
 
 #include <boost/nowide/fstream.hpp>
 
@@ -14,15 +12,11 @@
 #include <iterator>
 #include <utility>
 
+#include "file_test_helpers.hpp"
 #include "test.hpp"
 
 namespace nw = boost::nowide;
-
-void create_file(const std::string& filename, const std::string& contents)
-{
-    nw::ofstream f(filename, std::ios::trunc);
-    TEST(f << contents);
-}
+using namespace boost::nowide::test;
 
 template<typename T>
 std::string get_file_contents(T& stream)
@@ -50,7 +44,7 @@ nw::ifstream make_ifstream(const std::string& filename)
 
 void test_ifstream(const std::string& filename)
 {
-    create_file(filename, "Hello\nWorld");
+    create_txt_file(filename, "Hello\nWorld");
     // Move construct
     {
         nw::ifstream f = make_ifstream(filename);
@@ -135,7 +129,7 @@ void test_ofstream(const std::string& filename)
 
 nw::fstream make_fstream(const std::string& filename)
 {
-    create_file(filename, "");
+    create_txt_file(filename, "");
     nw::fstream f(filename);
     TEST(f << "Hello");
     return f;

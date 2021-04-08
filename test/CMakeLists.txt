@@ -1,4 +1,4 @@
-# Copyright 2019 - 2020 Alexander Grund
+# Copyright 2019 - 2021 Alexander Grund
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE or copy at http://boost.org/LICENSE_1_0.txt)
 
@@ -28,8 +28,12 @@ boost_nowide_add_test(test_codecvt)
 boost_nowide_add_test(test_convert)
 boost_nowide_add_test(test_env)
 boost_nowide_add_test(test_env_win SRC test_env.cpp DEFINITIONS BOOST_NOWIDE_TEST_INCLUDE_WINDOWS)
+boost_nowide_add_test(test_filebuf)
+boost_nowide_add_test(test_ifstream)
+boost_nowide_add_test(test_ofstream)
 boost_nowide_add_test(test_fstream)
 boost_nowide_add_test(test_fstream_cxx11)
+boost_nowide_add_test(test_fstream_special)
 boost_nowide_add_test(test_iostream)
 if(MSVC AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
   set_target_properties(${PROJECT_NAME}-test_iostream PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS -i)
