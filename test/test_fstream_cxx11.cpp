@@ -44,7 +44,7 @@ nw::ifstream make_ifstream(const std::string& filename)
 
 void test_ifstream(const std::string& filename)
 {
-    create_txt_file(filename, "Hello\nWorld");
+    create_file(filename, "Hello\nWorld");
     // Move construct
     {
         nw::ifstream f = make_ifstream(filename);
@@ -129,7 +129,7 @@ void test_ofstream(const std::string& filename)
 
 nw::fstream make_fstream(const std::string& filename)
 {
-    create_txt_file(filename, "");
+    create_file(filename, "");
     nw::fstream f(filename);
     TEST(f << "Hello");
     return f;

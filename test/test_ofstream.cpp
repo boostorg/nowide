@@ -82,7 +82,7 @@ void test_ofstream_write(const char* filename)
         nw::ofstream fo(filename, std::ios::binary);
         TEST(fo << "test" << 2 << std::endl);
     }
-    TEST(read_file(filename, true) == "test2\n");
+    TEST(read_file(filename, data_type::binary) == "test2\n");
     TEST(nw::remove(filename) == 0);
     // At end
     {

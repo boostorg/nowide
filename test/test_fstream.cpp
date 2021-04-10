@@ -182,7 +182,7 @@ void test_ctor(const T& filename)
         TEST(f.read(&tmp[0], 6));
         TEST(tmp == "test\r\n");
     }
-    TEST(read_file(filename, true) == "test\r\n");
+    TEST(read_file(filename, data_type::binary) == "test\r\n");
 
     // Invalid modes
     const std::initializer_list<std::ios::openmode> invalid_modes{

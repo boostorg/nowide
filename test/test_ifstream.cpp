@@ -52,7 +52,7 @@ void test_ctor(const T& filename)
     }
     TEST(read_file(filename) == "test");
 
-    create_file(filename, "test\r\n");
+    create_file(filename, "test\r\n", data_type::binary);
     // Binary mode
     {
         nw::ifstream f(filename, std::ios::binary);
@@ -103,7 +103,7 @@ void test_open(const T& filename)
     }
     TEST(read_file(filename) == "test");
 
-    create_file(filename, "test\r\n");
+    create_file(filename, "test\r\n", data_type::binary);
     // Binary mode
     {
         nw::ifstream f;

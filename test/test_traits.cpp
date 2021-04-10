@@ -9,9 +9,9 @@
 #include <boost/nowide/detail/is_path.hpp>
 #include <boost/nowide/detail/is_string_container.hpp>
 
-#include "test.hpp"
 #include <iostream>
 #include <string>
+#include "test.hpp"
 
 #ifdef __has_include
 #if __has_include(<version>)
