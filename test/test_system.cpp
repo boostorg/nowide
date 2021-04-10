@@ -130,22 +130,19 @@ void run_child(int argc, char** argv, char** env)
 
 void run_parent(const char* exe_path)
 {
+    const std::string command = "\"" + std::string(exe_path) + "\" " + example;
 #if BOOST_NOWIDE_TEST_USE_NARROW
     TEST(boost::nowide::setenv("BOOST_NOWIDE_TEST", example.c_str(), 1) == 0);
     TEST(boost::nowide::setenv("BOOST_NOWIDE_TEST_NONE", example.c_str(), 1) == 0);
     TEST(boost::nowide::unsetenv("BOOST_NOWIDE_TEST_NONE") == 0);
     TEST(boost::nowide::setenv("BOOST_NOWIDE_EMPTY", "", 1) == 0);
     TEST(boost::nowide::getenv("BOOST_NOWIDE_EMPTY"));
-    std::string command = "\"";
-    command += exe_path;
-    command += "\" ";
-    command += example;
     TEST(boost::nowide::system(command.c_str()) == 0);
     std::cout << "Parent ok" << std::endl;
 #else
-    std::wstring envVar = L"BOOST_NOWIDE_TEST=" + boost::nowide::widen(example);
+    const std::wstring envVar = L"BOOST_NOWIDE_TEST=" + boost::nowide::widen(example);
     TEST(_wputenv(envVar.c_str()) == 0);
-    std::wstring wcommand = boost::nowide::widen(exe_path) + L" " + boost::nowide::widen(example);
+    const std::wstring wcommand = boost::nowide::widen(command);
     TEST(_wsystem(wcommand.c_str()) == 0);
     std::cout << "Wide Parent ok" << std::endl;
 #endif
