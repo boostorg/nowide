@@ -14,14 +14,13 @@
 #include <boost/nowide/args.hpp>
 #include <boost/nowide/utf/convert.hpp>
 #include <boost/nowide/utf/utf.hpp>
+#include "test.hpp"
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <string>
 #include <vector>
-
-#include "test.hpp"
 
 bool is_ascii(const std::string& s)
 {

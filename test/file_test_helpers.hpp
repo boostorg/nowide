@@ -8,11 +8,11 @@
 #define BOOST_NOWIDE_FILE_TEST_HELPERS_HPP_INCLUDED
 
 #include <boost/nowide/cstdio.hpp>
+#include "test.hpp"
 #include <limits>
 #include <numeric>
 #include <random>
 #include <string>
-#include "test.hpp"
 
 namespace boost {
 namespace nowide {

@@ -9,10 +9,9 @@
 #include <boost/nowide/iostream.hpp>
 
 #include <boost/nowide/utf/utf.hpp>
+#include "test.hpp"
 #include <limits>
 #include <string>
-
-#include "test.hpp"
 
 bool isValidUTF8(const std::string& s)
 {

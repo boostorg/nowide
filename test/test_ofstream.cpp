@@ -7,10 +7,9 @@
 
 #include <boost/nowide/fstream.hpp>
 
-#include <string>
-
 #include "file_test_helpers.hpp"
 #include "test.hpp"
+#include <string>
 
 namespace nw = boost::nowide;
 using namespace boost::nowide::test;

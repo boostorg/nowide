@@ -7,12 +7,12 @@
 
 #include <boost/nowide/filebuf.hpp>
 
+#include "file_test_helpers.hpp"
+#include "test.hpp"
 #include <cstdint>
 #include <random>
 #include <string>
 #include <type_traits>
-#include "file_test_helpers.hpp"
-#include "test.hpp"
 
 namespace nw = boost::nowide;
 using namespace boost::nowide::test;

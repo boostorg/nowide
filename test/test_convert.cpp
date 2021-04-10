@@ -7,12 +7,11 @@
 //
 
 #include <boost/nowide/convert.hpp>
+#include "test.hpp"
+#include "test_sets.hpp"
 #include <array>
 #include <iostream>
 #include <string>
-
-#include "test.hpp"
-#include "test_sets.hpp"
 
 #ifdef __cpp_lib_string_view
 #include <string_view>

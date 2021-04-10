@@ -9,12 +9,11 @@
 
 #include <boost/nowide/convert.hpp>
 #include <boost/nowide/cstdio.hpp>
+#include "file_test_helpers.hpp"
+#include "test.hpp"
 #include <fstream>
 #include <iostream>
 #include <string>
-
-#include "file_test_helpers.hpp"
-#include "test.hpp"
 
 namespace nw = boost::nowide;
 
