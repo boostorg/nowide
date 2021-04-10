@@ -16,7 +16,6 @@ env:
 jobs:
   CI:
     strategy:
-      fail-fast: false
       matrix:
         include:
           - { compiler: g++-4.4,        cxxstd: '98,0x',                         os: ubuntu-16.04, install: yes }

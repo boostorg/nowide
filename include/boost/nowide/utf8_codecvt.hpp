@@ -104,7 +104,7 @@ namespace nowide {
                     break;
                 }
                 // If we can't write the char, we have to save the low surrogate in state
-                if(BOOST_LIKELY(utf16_traits::width(ch) <= max))
+                if(BOOST_LIKELY(static_cast<size_t>(utf16_traits::width(ch)) <= max))
                 {
                     max -= utf16_traits::width(ch);
                 } else

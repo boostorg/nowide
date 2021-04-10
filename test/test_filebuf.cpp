@@ -51,27 +51,31 @@ void test_open_close(const std::string& filepath)
 
 void test_pubseekpos(const std::string& filepath)
 {
-    const std::string data = random_data(BUFSIZ * 4, data_type::binary);
+    const std::string data = create_random_data(BUFSIZ * 4, data_type::binary);
     create_file(filepath, data, data_type::binary);
     nw::filebuf buf;
     TEST(buf.open(filepath, std::ios_base::in | std::ios_base::binary) == &buf);
 
     // Fuzzy test: Seek to a couple random positions
     std::minstd_rand rng(std::random_device{}());
-    const auto eofPos = nw::filebuf::pos_type(data.size());
-    std::uniform_int_distribution<std::size_t> distr(0, eofPos);
+    using pos_type = nw::filebuf::pos_type;
+    const auto eofPos = pos_type(data.size());
+    std::uniform_int_distribution<size_t> distr(0, static_cast<size_t>(eofPos));
     using traits = nw::filebuf::traits_type;
+
+    const auto getData = [&](pos_type pos) { return traits::to_int_type(data[static_cast<size_t>(pos)]); };
+
     for(int i = 0; i < 100; i++)
     {
-        const nw::filebuf::pos_type pos = distr(rng);
+        const pos_type pos = distr(rng);
         TEST(buf.pubseekpos(pos) == pos);
         if(pos == eofPos)
             TEST(buf.sgetc() == traits::eof());
         else
-            TEST(buf.sgetc() == traits::to_int_type(data[pos]));
+            TEST(buf.sgetc() == getData(pos));
     }
     // Seek to first and last as corner case tests
-    TEST(buf.pubseekpos(0) == 0);
+    TEST(buf.pubseekpos(0) == pos_type(0));
     TEST(buf.sgetc() == traits::to_int_type(data[0]));
     TEST(buf.pubseekpos(eofPos) == eofPos);
     TEST(buf.sgetc() == traits::eof());
@@ -79,7 +83,7 @@ void test_pubseekpos(const std::string& filepath)
 
 void test_pubseekoff(const std::string& filepath)
 {
-    const std::string data = random_data(BUFSIZ * 4, data_type::binary);
+    const std::string data = create_random_data(BUFSIZ * 4, data_type::binary);
     create_file(filepath, data, data_type::binary);
     nw::filebuf buf;
     TEST(buf.open(filepath, std::ios_base::in | std::ios_base::binary) == &buf);
@@ -89,9 +93,10 @@ void test_pubseekoff(const std::string& filepath)
     using pos_type = nw::filebuf::pos_type;
     using off_type = nw::filebuf::off_type;
     const auto eofPos = pos_type(data.size());
-    std::uniform_int_distribution<std::size_t> distr(0, eofPos);
+    std::uniform_int_distribution<size_t> distr(0, static_cast<size_t>(eofPos));
     using traits = nw::filebuf::traits_type;
 
+    const auto getData = [&](pos_type pos) { return traits::to_int_type(data[static_cast<size_t>(pos)]); };
     // tellg/tellp function as called by basic_[io]fstream
     const auto tellg = [&]() { return buf.pubseekoff(0, std::ios_base::cur); };
 
@@ -104,7 +109,7 @@ void test_pubseekoff(const std::string& filepath)
         if(pos == eofPos)
             TEST(buf.sgetc() == traits::eof());
         else
-            TEST(buf.sgetc() == traits::to_int_type(data[pos]));
+            TEST(buf.sgetc() == getData(pos));
         // cur
         off_type diff = static_cast<pos_type>(distr(rng)) - pos;
         pos += diff;
@@ -113,7 +118,7 @@ void test_pubseekoff(const std::string& filepath)
         if(pos == eofPos)
             TEST(buf.sgetc() == traits::eof());
         else
-            TEST(buf.sgetc() == traits::to_int_type(data[pos]));
+            TEST(buf.sgetc() == getData(pos));
         // end
         diff = static_cast<pos_type>(distr(rng)) - eofPos;
         pos = eofPos + diff;
@@ -122,10 +127,10 @@ void test_pubseekoff(const std::string& filepath)
         if(pos == eofPos)
             TEST(buf.sgetc() == traits::eof());
         else
-            TEST(buf.sgetc() == traits::to_int_type(data[pos]));
+            TEST(buf.sgetc() == getData(pos));
     }
     // Seek to first and last as corner case tests
-    TEST(buf.pubseekoff(0, std::ios_base::beg) == 0);
+    TEST(buf.pubseekoff(0, std::ios_base::beg) == pos_type(0));
     TEST(tellg() == pos_type(0));
     TEST(buf.sgetc() == traits::to_int_type(data[0]));
     TEST(buf.pubseekoff(0, std::ios_base::end) == eofPos);

@@ -8,7 +8,6 @@
 
 #include <boost/nowide/fstream.hpp>
 
-#include <boost/nowide/cstdio.hpp>
 #include "file_test_helpers.hpp"
 #include "test.hpp"
 #include <iterator>
@@ -44,6 +43,7 @@ nw::ifstream make_ifstream(const std::string& filename)
 void test_ifstream(const std::string& filename)
 {
     create_file(filename, "Hello\nWorld");
+    remove_file_at_exit _(filename);
     // Move construct
     {
         nw::ifstream f = make_ifstream(filename);
@@ -77,7 +77,6 @@ void test_ifstream(const std::string& filename)
         TEST(f >> s);
         TEST(s == "World");
     }
-    TEST(nw::remove(filename.c_str()) == 0);
 }
 
 nw::ofstream make_ofstream(const std::string& filename)
@@ -90,6 +89,7 @@ nw::ofstream make_ofstream(const std::string& filename)
 
 void test_ofstream(const std::string& filename)
 {
+    remove_file_at_exit _(filename);
     // Move construct
     {
         nw::ofstream f = make_ofstream(filename);
@@ -123,7 +123,6 @@ void test_ofstream(const std::string& filename)
         f.close();
         TEST(get_file_contents(filename) == "Hello world");
     }
-    TEST(nw::remove(filename.c_str()) == 0);
 }
 
 nw::fstream make_fstream(const std::string& filename)
@@ -136,6 +135,7 @@ nw::fstream make_fstream(const std::string& filename)
 
 void test_fstream(const std::string& filename)
 {
+    remove_file_at_exit _(filename);
     // Move construct
     {
         nw::fstream f = make_fstream(filename);
@@ -169,7 +169,6 @@ void test_fstream(const std::string& filename)
         f.seekg(0);
         TEST(get_file_contents(f) == "Hello world");
     }
-    TEST(nw::remove(filename.c_str()) == 0);
 }
 
 void test_main(int, char** argv, char**)

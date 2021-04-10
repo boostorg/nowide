@@ -7,6 +7,7 @@
 
 #include <boost/nowide/fstream.hpp>
 
+#include <boost/nowide/cstdio.hpp>
 #include "file_test_helpers.hpp"
 #include "test.hpp"
 #include <string>
@@ -16,8 +17,7 @@ using namespace boost::nowide::test;
 
 void test_ofstream_creates_file(const char* filename)
 {
-    TEST(!file_exists(filename) || nw::remove(filename) == 0);
-    TEST(!file_exists(filename));
+    ensure_not_exists(filename);
     // Ctor
     {
         nw::ofstream fo(filename);
