@@ -55,7 +55,7 @@ void test_ctor(const T& filename)
 template<typename T>
 void test_open(const T& filename)
 {
-        // Create file if not exist
+    // Create file if not exist
     ensure_not_exists(filename);
     {
         nw::ofstream f;
@@ -93,6 +93,73 @@ void test_open(const T& filename)
     TEST(read_file(filename, data_type::binary) == "test\r\n");
 }
 
+void test_move_and_swap(const std::string& filename)
+{
+    const std::string filename2 = filename + ".2";
+    remove_file_at_exit _(filename);
+    remove_file_at_exit _2(filename);
+
+    // Move construct
+    {
+        nw::ofstream f_old(filename);
+        TEST(f_old << "Hello ");
+
+        nw::ofstream f_new(std::move(f_old));
+        // old can be reused
+        TEST(!f_old.is_open());
+        f_old.open(filename2);
+        TEST(f_old << "Foo");
+
+        // new starts where the old was left of
+        TEST(f_new);
+        TEST(f_new << "World");
+    }
+    TEST(read_file(filename) == "Hello World");
+    TEST(read_file(filename2) == "Foo");
+
+    // Move assign
+    {
+        nw::ofstream f_new(filename2);
+        TEST(f_new << "DiscardThis");
+        {
+            nw::ofstream f_old(filename);
+            TEST(f_old << "Hello ");
+
+            f_new = std::move(f_old);
+            // old can be reused
+            TEST(!f_old.is_open());
+            f_old.open(filename2);
+            TEST(f_old << "Foo");
+        }
+        // new starts where the old was left of
+        TEST(f_new);
+        TEST(f_new << "World");
+    }
+    TEST(read_file(filename) == "Hello World");
+    TEST(read_file(filename2) == "Foo");
+
+    // Swap
+    {
+        nw::ofstream f_old(filename);
+        TEST(f_old << "Hello ");
+
+        nw::ofstream f_new(filename2);
+        TEST(f_new << "Foo ");
+
+        // After swapping both are valid and where they left
+        f_new.swap(f_old);
+        TEST(f_old << "Bar");
+        TEST(f_new << "World");
+
+        f_new.close();
+        swap(f_new, f_old);
+        TEST(!f_old.is_open());
+        TEST(f_new.is_open());
+    }
+    TEST(read_file(filename) == "Hello World");
+    TEST(read_file(filename2) == "Foo Bar");
+}
+
 void test_main(int, char** argv, char**)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
@@ -101,4 +168,5 @@ void test_main(int, char** argv, char**)
     test_ctor(exampleFilename);
     test_open(exampleFilename.c_str());
     test_open(exampleFilename);
+    test_move_and_swap(exampleFilename);
 }

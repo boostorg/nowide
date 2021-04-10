@@ -83,6 +83,7 @@ namespace nowide {
         }
         basic_filebuf& operator=(basic_filebuf&& other) noexcept
         {
+            close();
             swap(other);
             return *this;
         }
@@ -470,6 +471,13 @@ namespace nowide {
     /// \brief Convenience typedef
     ///
     using filebuf = basic_filebuf<char>;
+
+    /// Swap the basic_filebuf instances
+    template<typename CharType, typename Traits>
+    void swap(basic_filebuf<CharType, Traits>& lhs, basic_filebuf<CharType, Traits>& rhs)
+    {
+        lhs.swap(rhs);
+    }
 
 #endif // windows
 

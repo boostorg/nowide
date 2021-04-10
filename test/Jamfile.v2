@@ -50,8 +50,6 @@ run test_ofstream.cpp file_test_helpers ;
 run test_ofstream.cpp file_test_helpers : : : <define>BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT=1 <target-os>windows:<build>no : test_ofstream_internal ;
 run test_fstream.cpp file_test_helpers ;
 run test_fstream.cpp file_test_helpers : : : <define>BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT=1 <target-os>windows:<build>no : test_fstream_internal ;
-run test_fstream_cxx11.cpp file_test_helpers ;
-run test_fstream_cxx11.cpp file_test_helpers : : : <define>BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT=1 <target-os>windows:<build>no : test_fstream_cxx11_internal ;
 run test_fstream_special.cpp file_test_helpers ;
 run test_fstream_special.cpp file_test_helpers : : : <define>BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT=1 <target-os>windows:<build>no : test_fstream_special_internal ;
 run test_iostream.cpp ;

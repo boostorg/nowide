@@ -114,6 +114,81 @@ void test_open(const T& filename)
     }
 }
 
+void test_move_and_swap(const std::string& filename)
+{
+    const std::string filename2 = filename + ".2";
+    create_file(filename, "Hello\nWorld");
+    create_file(filename2, "Foo\nBar");
+    remove_file_at_exit _(filename);
+    remove_file_at_exit _2(filename);
+
+    // Move construct
+    {
+        nw::ifstream f_old(filename);
+        std::string s;
+        TEST(f_old >> s && s == "Hello");
+
+        nw::ifstream f_new(std::move(f_old));
+        // old can be reused
+        TEST(!f_old.is_open());
+        f_old.open(filename2);
+        TEST(f_old);
+        TEST(f_old >> s);
+        TEST(s == "Foo");
+        TEST(f_old >> s && s == "Bar");
+
+        // new starts where the old was left of
+        TEST(f_new);
+        TEST(f_new >> s);
+        TEST(s == "World");
+    }
+    // Move assign
+    {
+        nw::ifstream f_new(filename2);
+        std::string s;
+        TEST(f_new >> s && s == "Foo");
+        {
+            nw::ifstream f_old(filename);
+            TEST(f_old >> s && s == "Hello");
+
+            f_new = std::move(f_old);
+            // old can be reused
+            TEST(!f_old.is_open());
+            f_old.open(filename2);
+            TEST(f_old);
+            TEST(f_old >> s);
+            TEST(s == "Foo");
+            TEST(f_old >> s && s == "Bar");
+        }
+        // new starts where the old was left of
+        TEST(f_new);
+        TEST(f_new >> s);
+        TEST(s == "World");
+    }
+    // Swap
+    {
+        nw::ifstream f_old(filename);
+        std::string s;
+        TEST(f_old >> s && s == "Hello");
+
+        nw::ifstream f_new(filename2);
+        TEST(f_new >> s && s == "Foo");
+
+        // After swapping both are valid and where they left
+        f_new.swap(f_old);
+        TEST(f_old >> s);
+        TEST(s == "Bar");
+
+        TEST(f_new >> s);
+        TEST(s == "World");
+
+        f_new.close();
+        swap(f_new, f_old);
+        TEST(!f_old.is_open());
+        TEST(f_new.is_open());
+    }
+}
+
 void test_main(int, char** argv, char**)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
@@ -122,4 +197,5 @@ void test_main(int, char** argv, char**)
     test_ctor(exampleFilename);
     test_open(exampleFilename.c_str());
     test_open(exampleFilename);
+    test_move_and_swap(exampleFilename);
 }

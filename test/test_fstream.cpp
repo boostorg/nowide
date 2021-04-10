@@ -268,7 +268,7 @@ bool is_open(T& stream)
 }
 
 template<typename T>
-void do_test_is_open(const char* filename)
+void do_test_is_open(const std::string& filename)
 {
     T f;
     TEST(!is_open(f));
@@ -281,7 +281,7 @@ void do_test_is_open(const char* filename)
 }
 
 /// Test is_open for all 3 fstream classes
-void test_is_open(const char* filename)
+void test_is_open(const std::string& filename)
 {
     // Note the order: Output before input so file exists
     do_test_is_open<nw::ofstream>(filename);
@@ -290,7 +290,84 @@ void test_is_open(const char* filename)
     do_test_is_open<nw::fstream>(filename);
 }
 
-void test_flush(const char* filepath)
+void test_move_and_swap(const std::string& filename)
+{
+    const std::string filename2 = filename + ".2";
+    create_file(filename2, "Foo Bar");
+    remove_file_at_exit _(filename);
+    remove_file_at_exit _2(filename);
+
+    // Move construct
+    {
+        nw::fstream f_old(filename, std::ios::out);
+        TEST(f_old << "Hello ");
+
+        nw::fstream f_new(std::move(f_old));
+        // old can be reused
+        TEST(!f_old.is_open());
+        f_old.open(filename2, std::ios::in);
+        std::string s;
+        TEST(f_old);
+        TEST(f_old >> s);
+        TEST(s == "Foo");
+
+        // new starts where the old was left of
+        TEST(f_new);
+        TEST(f_new << "World");
+    }
+    TEST(read_file(filename) == "Hello World");
+    TEST(read_file(filename2) == "Foo Bar");
+
+    // Move assign
+    {
+        nw::fstream f_new(filename2);
+        TEST(f_new << "ReadThis");
+        {
+            nw::fstream f_old(filename, std::ios::out);
+            TEST(f_old << "Hello ");
+
+            f_new = std::move(f_old);
+            // old can be reused
+            TEST(!f_old.is_open());
+            f_old.open(filename2, std::ios::in);
+            std::string s;
+            TEST(f_old >> s);
+            TEST(s == "ReadThis");
+        }
+        // new starts where the old was left of
+        TEST(f_new);
+        TEST(f_new << "World");
+    }
+    TEST(read_file(filename) == "Hello World");
+    TEST(read_file(filename2) == "ReadThis");
+
+    create_file(filename2, "Foo Bar");
+    // Swap
+    {
+        nw::fstream f_old(filename, std::ios::out);
+        TEST(f_old << "Hello ");
+
+        nw::fstream f_new(filename2, std::ios::in);
+        std::string s;
+        TEST(f_new >> s);
+        TEST(s == "Foo");
+
+        // After swapping both are valid and where they left
+        f_new.swap(f_old);
+        TEST(f_old >> s);
+        TEST(s == "Bar");
+        TEST(f_new << "World");
+
+        f_new.close();
+        swap(f_new, f_old);
+        TEST(!f_old.is_open());
+        TEST(f_new.is_open());
+    }
+    TEST(read_file(filename) == "Hello World");
+    TEST(read_file(filename2) == "Foo Bar");
+}
+
+void test_flush(const std::string& filepath)
 {
     remove_file_at_exit _(filepath);
     nw::fstream fo(filepath, std::ios_base::out | std::ios::trunc);
@@ -328,8 +405,11 @@ void test_main(int, char** argv, char**)
     test_open<std::string>(exampleFilename);
 
     std::cout << "IsOpen" << std::endl;
-    test_is_open(exampleFilename.c_str());
+    test_is_open(exampleFilename);
+
+    std::cout << "Move and swap" << std::endl;
+    test_move_and_swap(exampleFilename);
 
     std::cout << "Flush" << std::endl;
-    test_flush(exampleFilename.c_str());
+    test_flush(exampleFilename);
 }
