@@ -174,6 +174,135 @@ void test_64_bit_seek(const std::string& filepath)
     }
 }
 
+void test_swap(const std::string& filepath)
+{
+    const std::string filepath2 = filepath + ".2";
+    remove_file_at_exit _(filepath);
+    remove_file_at_exit _2(filepath2);
+
+    const auto eof = nw::filebuf::traits_type::eof();
+    // Note: Make sure to have en uneven number of swaps so the destructor runs on the others data
+
+    // Check: FILE*, buffer, buffer_size
+    {
+        nw::filebuf buf1, buf2;
+        char buffer1[3]{}, buffer2[5]{};
+        buf1.pubsetbuf(buffer1, sizeof(buffer1));
+        buf2.pubsetbuf(buffer2, sizeof(buffer2));
+        TEST(buf1.open(filepath, std::ios_base::out) == &buf1);
+        buf1.swap(buf2);
+        TEST(!buf1.is_open());
+        TEST(buf2.is_open());
+        TEST(buf1.open(filepath2, std::ios_base::out | std::ios_base::binary) == &buf1);
+
+        // Write "FooBar" to filepath and "HelloWorld" to filepath2
+        buf1.sputc('H');
+        buf1.sputn("ello", 4);
+        buf2.sputc('F');
+        buf2.sputn("oo", 2);
+        buf2.swap(buf1);
+        buf1.sputc('B');
+        buf1.sputn("ar", 2);
+        buf2.sputc('W');
+        buf2.sputn("orld", 4);
+
+        buf1.close();
+        TEST(!buf1.is_open());
+        TEST(buf2.is_open());
+        buf1.swap(buf2);
+        TEST(buf1.is_open());
+        TEST(!buf2.is_open());
+        buf1.close();
+        TEST(!buf1.is_open());
+        TEST(!buf2.is_open());
+        TEST(read_file(filepath) == "FooBar");
+        TEST(read_file(filepath2) == "HelloWorld");
+    }
+    // Check: mode, owns_buffer
+    {
+        nw::filebuf buf1, buf2;
+        char buffer[3]{};
+        buf1.pubsetbuf(buffer, sizeof(buffer));
+        TEST(buf1.open(filepath, std::ios_base::out) == &buf1);
+        TEST(buf2.open(filepath2, std::ios_base::in) == &buf2);
+        TEST(buf1.sputc('B') == 'B');
+        TEST(buf2.sbumpc() == 'H');
+        buf1.swap(buf2);
+        TEST(buf1.sputc('x') == eof);
+        TEST(buf2.sbumpc() == eof);
+        TEST(buf1.sbumpc() == 'e');
+        TEST(buf2.sputc('a') == 'a');
+        buf2.swap(buf1);
+        TEST(buf2.sputc('x') == eof);
+        TEST(buf1.sbumpc() == eof);
+        TEST(buf2.sbumpc() == 'l');
+        TEST(buf1.sputn("zXYZ", 4) == 4);
+        swap(buf2, buf1);
+        buf1.close();
+        buf2.close();
+        TEST(read_file(filepath) == "BazXYZ");
+        TEST(read_file(filepath2) == "HelloWorld");
+    }
+    // Check: last_char, gptr, eback
+    {
+        nw::filebuf buf1, buf2;
+        // Need to disable buffering to use last_char, but only for 1 to detect wrong conditions
+        buf1.pubsetbuf(0, 0);
+        TEST(buf1.open(filepath, std::ios_base::in) == &buf1);
+        TEST(buf2.open(filepath2, std::ios_base::in) == &buf2);
+        // Peek
+        TEST(buf1.sgetc() == 'B');
+        TEST(buf2.sgetc() == 'H');
+        swap(buf1, buf2);
+        TEST(buf2.sgetc() == 'B');
+        TEST(buf1.sgetc() == 'H');
+        // Advance
+        TEST(buf2.sbumpc() == 'B');
+        TEST(buf1.sbumpc() == 'H');
+        TEST(buf2.sbumpc() == 'a');
+        TEST(buf1.sbumpc() == 'e');
+        swap(buf1, buf2);
+        TEST(buf1.sbumpc() == 'z');
+        TEST(buf2.sbumpc() == 'l');
+        swap(buf1, buf2);
+        TEST(buf2.sgetc() == 'X');
+        TEST(buf1.sgetc() == 'l');
+    }
+    // Check: pptr, epptr
+    {
+        nw::filebuf buf1, buf2;
+        // Need to disable buffering to use last_char, but only for 1 to detect wrong conditions
+        buf1.pubsetbuf(0, 0);
+        TEST(buf1.open(filepath, std::ios_base::out) == &buf1);
+        TEST(buf2.open(filepath2, std::ios_base::out) == &buf2);
+        TEST(buf1.sputc('1') == '1');
+        TEST(buf2.sputc('a') == 'a');
+        swap(buf1, buf2);
+        // buf1: filepath2, buf2: filepath
+        TEST(buf1.sputc('b') == 'b');
+        TEST(buf2.sputc('2') == '2');
+        // Sync and check if file was written
+        TEST(buf1.pubsync() == 0);
+        TEST(read_file(filepath2) == "ab");
+        TEST(buf2.pubsync() == 0);
+        TEST(read_file(filepath) == "12");
+        swap(buf1, buf2);
+        // buf1: filepath, buf2: filepath2
+        TEST(buf1.pubsync() == 0);
+        TEST(read_file(filepath) == "12");
+        TEST(buf2.pubsync() == 0);
+        TEST(read_file(filepath2) == "ab");
+        TEST(buf1.sputc('3') == '3');
+        TEST(buf2.sputc('c') == 'c');
+        swap(buf1, buf2);
+        // buf1: filepath2, buf2: filepath
+        TEST(buf1.pubsync() == 0);
+        TEST(read_file(filepath2) == "abc");
+        TEST(buf2.pubsync() == 0);
+        TEST(read_file(filepath) == "123");
+    }
+}
+
 void test_main(int, char** argv, char**)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
@@ -182,4 +311,5 @@ void test_main(int, char** argv, char**)
     test_pubseekpos(exampleFilename);
     test_pubseekoff(exampleFilename);
     test_64_bit_seek(exampleFilename);
+    test_swap(exampleFilename);
 }
