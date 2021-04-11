@@ -59,7 +59,8 @@ jobs:
 
       - name: Setup config vars
         run: |
-          echo "LIBRARY=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+          LIBRARY=${GITHUB_REPOSITORY#*/}
+          echo "LIBRARY=$LIBRARY" >> $GITHUB_ENV
           echo "B2_COMPILER=${{matrix.compiler}}" >> $GITHUB_ENV
           ${{matrix.compiler}} --version
           if [[ "${{matrix.compiler}}" =~ clang ]]; then
@@ -75,7 +76,7 @@ jobs:
           echo "B2_CXXSTD=${{matrix.cxxstd}}" >> $GITHUB_ENV
           if [[ "${{matrix.sanitize}}" == "yes" ]]; then
             echo "B2_ASAN=address-sanitizer=norecover" >> $GITHUB_ENV
-            echo "B2_UBSAN=undefined-sanitizer=norecover" >> $GITHUB_ENV
+            echo "B2_UBSAN=undefined-sanitizer=norecover cxxflags=-fsanitize-blacklist=libs/$LIBRARY/ubsan-blacklist" >> $GITHUB_ENV
           fi
           [[ "${{matrix.linkflags}}" == "" ]] || echo "B2_LINKFLAGS=linkflags=${{matrix.linkflags}}" >> $GITHUB_ENV
 
