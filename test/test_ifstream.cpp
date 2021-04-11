@@ -129,9 +129,14 @@ void test_move_and_swap(const std::string& filename)
         TEST(f_old >> s && s == "Hello");
 
         nw::ifstream f_new(std::move(f_old));
-        // old can be reused
+        // old is closed
         TEST(!f_old.is_open());
+        // It is unclear if the std streams can be reused after move-from
+#if BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
         f_old.open(filename2);
+#else
+        f_old = nw::ifstream(filename2);
+#endif
         TEST(f_old);
         TEST(f_old >> s);
         TEST(s == "Foo");
@@ -152,9 +157,14 @@ void test_move_and_swap(const std::string& filename)
             TEST(f_old >> s && s == "Hello");
 
             f_new = std::move(f_old);
-            // old can be reused
+            // old is closed
             TEST(!f_old.is_open());
+            // It is unclear if the std streams can be reused after move-from
+#if BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
             f_old.open(filename2);
+#else
+            f_old = nw::ifstream(filename2);
+#endif
             TEST(f_old);
             TEST(f_old >> s);
             TEST(s == "Foo");
