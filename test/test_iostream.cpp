@@ -218,6 +218,9 @@ void test_main(int argc, char** argv, char**)
         // LCOV_EXCL_STOP
     } else if(arg == "passthrough")
     {
+        // This is used for the passthrough test, so check that input and output are not using the nowide filebufs
+        TEST(!usesNowideRdBufIn);
+        TEST(!usesNowideRdBufOut);
         std::string s;
         TEST(std::getline(nw::cin, s));
         TEST(nw::cout << s);
