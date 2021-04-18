@@ -22,6 +22,7 @@ namespace nowide {
 #else
 
 #include <boost/nowide/detail/console_buffer.hpp>
+#include <cassert>
 #include <iostream>
 
 #ifndef NOMINMAX
@@ -98,6 +99,7 @@ namespace nowide {
             } else
             {
                 std::ostream::rdbuf(fd == 1 ? std::cout.rdbuf() : std::cerr.rdbuf());
+                assert(rdbuf());
             }
             if(tieStream)
             {
@@ -124,6 +126,7 @@ namespace nowide {
             } else
             {
                 std::istream::rdbuf(std::cin.rdbuf());
+                assert(rdbuf());
             }
             if(tieStream)
                 tie(tieStream);

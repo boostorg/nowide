@@ -81,6 +81,7 @@ void test_putback_and_get()
 
 void test_cout()
 {
+    TEST(nw::cout);
     TEST(nw::cout << outputString << std::endl);
 }
 
@@ -93,6 +94,7 @@ void test_cout_single_char()
 
 void test_cerr()
 {
+    TEST(nw::cerr);
     TEST(nw::cerr << outputString << std::endl);
 }
 
