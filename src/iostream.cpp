@@ -21,7 +21,7 @@ namespace nowide {
 
 #else
 
-#include <boost/nowide/detail/console_buffer.hpp>
+#include "console_buffer.hpp"
 #include <cassert>
 #include <iostream>
 

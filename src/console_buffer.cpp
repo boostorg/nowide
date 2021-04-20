@@ -6,7 +6,7 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 
 #define BOOST_NOWIDE_SOURCE
-#include <boost/nowide/detail/console_buffer.hpp>
+#include "console_buffer.hpp"
 #include <cassert>
 #include <cstring>
 
