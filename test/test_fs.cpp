@@ -11,9 +11,8 @@
 #include <boost/nowide/convert.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/nowide/fstream.hpp>
-#include <boost/filesystem/operations.hpp>
-
 #include "test.hpp"
+#include <boost/filesystem/operations.hpp>
 
 void test_main(int, char** argv, char**)
 {

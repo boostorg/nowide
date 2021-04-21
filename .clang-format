@@ -73,8 +73,11 @@ IncludeCategories:
   - Regex:           '<boost/nowide'
     Priority:        49
     SortPriority:    0
-  - Regex:           '<boost/'
+  - Regex:           '^"'
     Priority:        50
+    SortPriority:    0
+  - Regex:           '<boost/'
+    Priority:        75
     SortPriority:    0
   - Regex:           '^<'
     Priority:        100

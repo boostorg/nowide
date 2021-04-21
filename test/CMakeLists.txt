@@ -1,9 +1,13 @@
-# Copyright 2019 - 2020 Alexander Grund
+# Copyright 2019 - 2021 Alexander Grund
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE or copy at http://boost.org/LICENSE_1_0.txt)
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag(-Wsuggest-override _BOOST_NOWIDE_SUGGEST_OVERRIDE_SUPPORTED)
+
+add_library(boost_nowide_file_test_helpers STATIC file_test_helpers.cpp)
+target_link_libraries(boost_nowide_file_test_helpers PRIVATE PRIVATE Boost::nowide)
+target_compile_definitions(boost_nowide_file_test_helpers PRIVATE BOOST_ALL_NO_LIB)
 
 function(boost_nowide_add_test name)
   cmake_parse_arguments(PARSE_ARGV 1 ARG "COMPILE_ONLY" "SRC" "LIBRARIES;DEFINITIONS;ARGS")
@@ -28,8 +32,11 @@ boost_nowide_add_test(test_codecvt)
 boost_nowide_add_test(test_convert)
 boost_nowide_add_test(test_env)
 boost_nowide_add_test(test_env_win SRC test_env.cpp DEFINITIONS BOOST_NOWIDE_TEST_INCLUDE_WINDOWS)
-boost_nowide_add_test(test_fstream)
-boost_nowide_add_test(test_fstream_cxx11)
+boost_nowide_add_test(test_filebuf LIBRARIES boost_nowide_file_test_helpers)
+boost_nowide_add_test(test_ifstream LIBRARIES boost_nowide_file_test_helpers)
+boost_nowide_add_test(test_ofstream LIBRARIES boost_nowide_file_test_helpers)
+boost_nowide_add_test(test_fstream LIBRARIES boost_nowide_file_test_helpers)
+boost_nowide_add_test(test_fstream_special LIBRARIES boost_nowide_file_test_helpers)
 boost_nowide_add_test(test_iostream)
 if(MSVC AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
   set_target_properties(${PROJECT_NAME}-test_iostream PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS -i)
@@ -41,8 +48,9 @@ boost_nowide_add_test(test_system_n SRC test_system.cpp DEFINITIONS BOOST_NOWIDE
 if(WIN32)
   boost_nowide_add_test(test_system_w SRC test_system.cpp DEFINITIONS BOOST_NOWIDE_TEST_USE_NARROW=0)
 else()
-  boost_nowide_add_test(test_internal_fstream SRC test_fstream.cpp DEFINITIONS BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT=1)
-  boost_nowide_add_test(test_internal_fstream_cxx11 SRC test_fstream_cxx11.cpp DEFINITIONS BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT=1)
+  foreach(test test_filebuf test_ifstream test_ofstream test_fstream test_fstream_special)
+    boost_nowide_add_test(${test}_internal SRC ${test}.cpp DEFINITIONS BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT=1 LIBRARIES boost_nowide_file_test_helpers)
+  endforeach()
 endif()
 boost_nowide_add_test(test_traits)
 

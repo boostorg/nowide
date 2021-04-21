@@ -10,11 +10,10 @@
 #include <boost/nowide/cstdio.hpp>
 
 #include <boost/nowide/convert.hpp>
+#include "test.hpp"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-
-#include "test.hpp"
 
 bool file_exists(const std::string& filename)
 {

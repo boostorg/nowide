@@ -9,14 +9,13 @@
 #include <boost/nowide/utf8_codecvt.hpp>
 
 #include <boost/nowide/convert.hpp>
+#include "test.hpp"
+#include "test_sets.hpp"
 #include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <locale>
 #include <vector>
-
-#include "test.hpp"
-#include "test_sets.hpp"
 
 static const char* utf8_name =
   "\xf0\x9d\x92\x9e-\xD0\xBF\xD1\x80\xD0\xB8\xD0\xB2\xD0\xB5\xD1\x82-\xE3\x82\x84\xE3\x81\x82.txt";
@@ -31,17 +30,17 @@ void test_codecvt_in_n_m(const cvt_type& cvt, size_t n, size_t m)
     size_t wlen = std::wcslen(wide_name);
     size_t u8len = std::strlen(utf8_name);
     const char* from = utf8_name;
-    const char* end = from;
+    const char* from_end = from;
     const char* real_end = utf8_name + u8len;
     const char* from_next = from;
     std::mbstate_t mb{};
     while(from_next < real_end)
     {
-        if(from == end)
+        if(from == from_end)
         {
-            end = from + n;
-            if(end > real_end)
-                end = real_end;
+            from_end = from + n;
+            if(from_end > real_end)
+                from_end = real_end;
         }
 
         wchar_t buf[128];
@@ -50,25 +49,17 @@ void test_codecvt_in_n_m(const cvt_type& cvt, size_t n, size_t m)
         wchar_t* to_next = to;
 
         std::mbstate_t mb2 = mb;
-        std::codecvt_base::result r = cvt.in(mb, from, end, from_next, to, to_end, to_next);
+        std::codecvt_base::result r = cvt.in(mb, from, from_end, from_next, to, to_end, to_next);
 
-        int count = cvt.length(mb2, from, end, to_end - to);
-#ifndef BOOST_NOWIDE_DO_LENGTH_MBSTATE_CONST
+        int count = cvt.length(mb2, from, from_end, to_end - to);
         TEST(std::memcmp(&mb, &mb2, sizeof(mb)) == 0);
-        if(count != from_next - from)
-        {
-            std::cout << count << " " << from_next - from << std::endl;
-        }
         TEST(count == from_next - from);
-#else
-        TEST(count == to_next - to);
-#endif
 
         if(r == cvt_type::partial)
         {
-            end += n;
-            if(end > real_end)
-                end = real_end;
+            from_end += n;
+            if(from_end > real_end)
+                from_end = real_end;
         } else
             TEST(r == cvt_type::ok);
         while(to != to_next)
