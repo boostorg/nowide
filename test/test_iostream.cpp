@@ -27,6 +27,7 @@ bool isValidUTF8(const std::string& s)
 
 namespace nw = boost::nowide;
 
+// coverity [root_function]
 void test_main(int argc, char** argv, char**)
 {
     const char* example = "Basic letters: \xd7\xa9-\xd0\xbc-\xce\xbd\n"
@@ -97,7 +98,8 @@ void test_main(int argc, char** argv, char**)
         // And check getline not getting the CR
         TEST(std::getline(nw::cin, v1));
         TEST(!v1.empty());
-        TEST(v1[v1.size() - 1u] != '\r');
+        // coverity[tainted_data]
+        TEST(v1.back() != '\r');
         nw::cout << "Value:  " << v1 << std::endl;
 
         nw::cout << "Press ENTER to exit";

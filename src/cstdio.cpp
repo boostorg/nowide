@@ -25,6 +25,7 @@ namespace nowide {
         FILE* wfopen(const wchar_t* filename, const wchar_t* mode)
         {
 #ifdef BOOST_WINDOWS
+            // coverity[var_deref_model]
             return ::_wfopen(filename, mode);
 #else
             const stackstring name(filename);
@@ -51,7 +52,7 @@ namespace nowide {
     {
         const wstackstring wname(file_name);
         const wshort_stackstring wmode(mode);
-        return _wfopen(wname.get(), wmode.get());
+        return detail::wfopen(wname.get(), wmode.get());
     }
     ///
     /// \brief Same as rename but old_name and new_name are UTF-8 strings

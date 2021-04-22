@@ -47,6 +47,7 @@ static_assert(get_data_width<std::wstring>::value == sizeof(wchar_t), "!");
 static_assert(get_data_width<std::u16string>::value == sizeof(char16_t), "!");
 static_assert(get_data_width<std::u32string>::value == sizeof(char32_t), "!");
 
+// coverity [root_function]
 void test_main(int, char**, char**)
 {
 #ifdef BOOST_NOWIDE_TEST_STD_STRINGVIEW

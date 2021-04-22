@@ -14,6 +14,7 @@
 #include "test.hpp"
 #include <boost/filesystem/operations.hpp>
 
+// coverity [root_function]
 void test_main(int, char** argv, char**)
 {
     boost::nowide::nowide_filesystem();
