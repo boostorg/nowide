@@ -13,13 +13,15 @@
 #include <streambuf>
 #include <vector>
 
+#include <boost/config/abi_prefix.hpp> // must be the last #include
+
 // Internal header, not meant to be used outside of the implementation
 namespace boost {
 namespace nowide {
     namespace detail {
 
         /// \cond INTERNAL
-        class console_output_buffer_base : public std::streambuf
+        class BOOST_NOWIDE_DECL console_output_buffer_base : public std::streambuf
         {
         protected:
             int sync() override;
@@ -39,7 +41,12 @@ namespace nowide {
             wchar_t wbuffer_[wbuffer_size];
         };
 
-        class console_input_buffer_base : public std::streambuf
+#ifdef BOOST_MSVC
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
+
+        class BOOST_NOWIDE_DECL console_input_buffer_base : public std::streambuf
         {
         protected:
             int sync() override;
@@ -61,10 +68,17 @@ namespace nowide {
             std::vector<char> pback_buffer_;
             bool was_newline_ = true;
         };
+
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
+
         /// \endcond
 
     } // namespace detail
 } // namespace nowide
 } // namespace boost
+
+#include <boost/config/abi_suffix.hpp> // pops abi_prefix.hpp pragmas
 
 #endif
