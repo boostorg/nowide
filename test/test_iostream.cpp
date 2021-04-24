@@ -5,6 +5,10 @@
 //  (See accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 
+#ifndef _SCL_SECURE_NO_WARNINGS
+// Call to 'std::copy_n' with parameters that may be unsafe
+#define _SCL_SECURE_NO_WARNINGS
+#endif
 #include <boost/nowide/iostream.hpp>
 
 #include <boost/nowide/convert.hpp>
