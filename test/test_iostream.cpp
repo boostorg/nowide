@@ -257,13 +257,13 @@ void test_cin()
     TEST(nw::cin >> v1);
     nw::cin.sync();
     nw::cout << "The 2nd string should have been ignored. Input 1 more + [ENTER]" << std::endl;
-    RUN_MOCKED(mock_buf.inputs.push(L"Third_\u20A1_String" + lineBreak));
+    RUN_MOCKED(mock_buf.inputs.push(L"Third_\xDC01_String" + lineBreak)); // Note: Invalid UTF-16
     TEST(nw::cin >> v2);
     TEST(!v2.empty());
     nw::cout << "First:  " << v1 << std::endl;
     nw::cout << "Second:  " << v2 << std::endl;
     TEST_MOCKED(v1 == "First_String\xc3\xb1");
-    TEST_MOCKED(v2 == "Third_\xe2\x82\xa1_String");
+    TEST_MOCKED(v2 == "Third_\xEF\xBF\xBD_String");
 }
 
 void test_cin_getline()
