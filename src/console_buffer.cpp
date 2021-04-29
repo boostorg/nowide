@@ -20,7 +20,7 @@ namespace nowide {
 
         int console_output_buffer_base::overflow(int c)
         {
-            int n = static_cast<int>(pptr() - pbase());
+            const auto n = static_cast<int>(pptr() - pbase());
             int r = 0;
 
             if(n > 0 && (r = write(pbase(), n)) < 0)
@@ -38,8 +38,9 @@ namespace nowide {
         {
             const char* b = p;
             const char* e = p + n;
+            // Should be impossible unless someone messes with the pointers
             if(n > buffer_size)
-                return -1;
+                return -1; // LCOV_EXCL_LINE
             wchar_t* out = wbuffer_;
             utf::code_point c;
             size_t decoded = 0;
@@ -80,22 +81,14 @@ namespace nowide {
                 return 0;
             }
 
-            char* pnext;
             if(pback_buffer_.empty())
-            {
-                pback_buffer_.resize(4);
-                pnext = &pback_buffer_.back();
-            } else
-            {
-                const size_t n = pback_buffer_.size();
-                pback_buffer_.insert(pback_buffer_.begin(), n, 0);
-                pnext = pback_buffer_.data() + n - 1;
-            }
+                pback_buffer_.push_back(traits_type::to_char_type(c));
+            else
+                pback_buffer_.insert(pback_buffer_.begin(), traits_type::to_char_type(c));
 
             char* pFirst = pback_buffer_.data();
             char* pLast = pFirst + pback_buffer_.size();
-            setg(pFirst, pnext, pLast);
-            *gptr() = traits_type::to_char_type(c);
+            setg(pFirst, pFirst, pLast);
 
             return 0;
         }

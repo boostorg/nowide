@@ -41,13 +41,19 @@ class mock_output_buffer final : public nw::detail::console_output_buffer_base
 {
 public:
     std::wstring output;
+    bool succeed = true;
 
 protected:
     bool do_write(const wchar_t* buffer, std::size_t num_chars_to_write, std::size_t& num_chars_written) override
     {
-        output.insert(output.end(), buffer, buffer + num_chars_to_write);
-        num_chars_written = num_chars_to_write;
+        if(succeed){
+            output.insert(output.end(), buffer, buffer + num_chars_to_write);
+            num_chars_written = num_chars_to_write;
         return true;
+        }else{
+            num_chars_written = 0;
+            return false;
+        }
     }
 };
 
@@ -135,14 +141,25 @@ void test_putback_and_get()
         // Finally test a large value
         for(const int num_putback_chars : {1, 2, 3, 4, 5, 7, 8, 9, 15, 16, 17, 1000})
         {
+            const auto getChar = [&](int i){ return (i + num_putback_chars) % 96 + ' '; };
             for(int i = 0; i < num_putback_chars; i++)
             {
-                char c = i % 96 + ' ';
+                const char c = static_cast<char>(getChar(i));
                 TEST(nw::cin.putback(c));
             }
             for(int i = num_putback_chars - 1; i >= 0; i--)
             {
-                int c = i % 96 + ' ';
+                const int c = getChar(i);
+                TEST(nw::cin.get() == c);
+            }
+            // Check unget (all chars)
+            for(int i = 0; i < num_putback_chars; i++)
+                TEST(nw::cin.unget());
+            TEST(!nw::cin.unget());
+            nw::cin.clear();
+            for(int i = num_putback_chars - 1; i >= 0; i--)
+            {
+                const int c = getChar(i);
                 TEST(nw::cin.get() == c);
             }
         }
@@ -166,6 +183,13 @@ void test_cout()
     TEST(nw::cout);
     TEST(nw::cout << outputString << std::endl);
     TEST_MOCKED(mock_buf.output == nw::widen(outputString + "\n"));
+#ifndef BOOST_NOWIDE_TEST_INTERACTIVE
+    // Pretend the actual write to console fails
+    mock_buf.output.clear();
+    mock_buf.succeed = false;
+    TEST(!(nw::cout << "Fail this" << std::endl));
+    TEST(mock_buf.output.empty());
+#endif
 }
 
 void test_cout_single_char()
