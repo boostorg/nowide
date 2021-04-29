@@ -46,11 +46,13 @@ public:
 protected:
     bool do_write(const wchar_t* buffer, std::size_t num_chars_to_write, std::size_t& num_chars_written) override
     {
-        if(succeed){
+        if(succeed)
+        {
             output.insert(output.end(), buffer, buffer + num_chars_to_write);
             num_chars_written = num_chars_to_write;
-        return true;
-        }else{
+            return true;
+        } else
+        {
             num_chars_written = 0;
             return false;
         }
@@ -141,7 +143,7 @@ void test_putback_and_get()
         // Finally test a large value
         for(const int num_putback_chars : {1, 2, 3, 4, 5, 7, 8, 9, 15, 16, 17, 1000})
         {
-            const auto getChar = [&](int i){ return (i + num_putback_chars) % 96 + ' '; };
+            const auto getChar = [&](int i) { return (i + num_putback_chars) % 96 + ' '; };
             for(int i = 0; i < num_putback_chars; i++)
             {
                 const char c = static_cast<char>(getChar(i));
@@ -163,6 +165,14 @@ void test_putback_and_get()
                 TEST(nw::cin.get() == c);
             }
         }
+#ifndef BOOST_NOWIDE_TEST_INTERACTIVE
+        // Putback 1 char, then get the rest from "real" input
+        nw::cin.putback('T');
+        mock_buf.inputs.push(L"est\r\n");
+        std::string test;
+        TEST(nw::cin >> test);
+        TEST(test == "Test");
+#endif
     } else
     {
         // If we are using the standard rdbuf we can only put back 1 char
