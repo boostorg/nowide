@@ -284,15 +284,17 @@ void test_cin_getline()
         nw::cout << "Input a line of text or simply press ENTER to exit, e.g. 'Hello World to you!<ENTER>'"
                  << std::endl;
         // Add a longish string which eventually exceeds the buffer size of the console_buffer
-        RUN_MOCKED(const std::string expected = create_random_one_line_string(i * 211 + 13));
+        RUN_MOCKED(const std::string expected = (i == 9) ? "" : create_random_one_line_string(i * 211 + 13));
         // Convert to wstring and push (we can do this as the chars are ASCII)
         RUN_MOCKED(mock_buf.inputs.push(std::wstring(expected.begin(), expected.end()) + L"\r\n"));
         TEST(std::getline(nw::cin, value));
         if(value.empty())
         {
+            TEST_MOCKED(i == 9);
             nw::cout << "END\n";
             break;
         }
+        TEST_MOCKED(i != 9);
         // It should not include the CR
         TEST(value.back() != '\r');
         nw::cout << i << ": " << value << std::endl;
