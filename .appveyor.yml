@@ -151,7 +151,7 @@ for:
             # Should show "Using Nowide input/output" and run the tests
             &$iostream_exe
             # Will use the std stream bufs due to redirect so should show: "NOT using Nowide input/output"
-            $result = echo "Hello Boost Nowide"| &$iostream_exe passthrough
+            echo "Hello Boost Nowide"| &$iostream_exe passthrough | tee -Variable result
             if($result -notcontains "Hello Boost Nowide") { echo "Failed to find output"; exit 1 }
       - ps: |
             If ($env:COVERAGE -eq "true") {

@@ -363,13 +363,13 @@ void test_ctrl_z_is_eof()
 void test_main(int argc, char** argv, char**)
 {
     if(usesNowideRdBufIn)
-        nw::cerr << "Using Nowide input buffer\n";
+        nw::cout << "Using Nowide input buffer\n";
     else
-        nw::cerr << "NOT using Nowide input buffer\n";
+        nw::cout << "NOT using Nowide input buffer\n";
     if(usesNowideRdBufOut)
-        nw::cerr << "Using Nowide output buffer\n";
+        nw::cout << "Using Nowide output buffer\n";
     else
-        nw::cerr << "NOT using Nowide output buffer\n";
+        nw::cout << "NOT using Nowide output buffer\n";
 
     const std::string arg = (argc == 1) ? "" : argv[1];
     if(arg == "passthrough") // Read string from cin and write to cout
