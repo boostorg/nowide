@@ -106,7 +106,7 @@ struct scoped_rdbuf_change
 /// Assert the given condition/code only when compiling as non-interactive
 #define TEST_MOCKED(what) RUN_MOCKED(TEST(what))
 
-bool isValidUTF8(const std::string& s)
+bool is_valid_UTF8(const std::string& s)
 {
     using namespace boost::nowide::utf;
     for(std::string::const_iterator it = s.begin(); it != s.end();)
@@ -124,6 +124,15 @@ std::string create_random_one_line_string(std::size_t num_chars)
     // Make sure it is a single line
     std::replace(result.begin(), result.end(), '\n', 'a');
     return result;
+}
+
+void test_is_valid_UTF8()
+{
+    // Sanity check of the test function
+    TEST(is_valid_UTF8(""));                                 // Empty string is valid by definition
+    TEST(is_valid_UTF8(create_random_one_line_string(100))); // ASCII string is valid
+    TEST(is_valid_UTF8(roundtrip_tests[5].utf8));            //  UTF-8 string is valid
+    TEST(!is_valid_UTF8(invalid_utf8_tests[0].utf8));        // Detect invalid
 }
 
 void test_tie()
@@ -244,8 +253,8 @@ void test_cin()
     std::string v1, v2;
     nw::cin >> v1 >> v2;
     TEST(nw::cin);
-    TEST(isValidUTF8(v1));
-    TEST(isValidUTF8(v2));
+    TEST(is_valid_UTF8(v1));
+    TEST(is_valid_UTF8(v2));
     TEST(nw::cout << "First:  " << v1 << std::endl);
     TEST(nw::cout << "Second: " << v2 << std::endl);
     TEST_MOCKED(v1 == roundtrip_tests[6].utf8);
@@ -394,6 +403,7 @@ void test_main(int argc, char** argv, char**)
     test_ctrl_z_is_eof();
     // LCOV_EXCL_STOP
 #else
+    test_is_valid_UTF8();
     test_tie();
     test_putback_and_get();
     test_cout();

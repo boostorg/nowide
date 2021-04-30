@@ -12,10 +12,12 @@
 
 namespace boost {
 namespace nowide {
+    // LCOV_EXCL_START
     /// Avoid empty compilation unit warnings
     /// \internal
     BOOST_NOWIDE_DECL void dummy_exported_function()
     {}
+    // LCOV_EXCL_STOP
 } // namespace nowide
 } // namespace boost
 
@@ -37,12 +39,8 @@ namespace nowide {
         namespace {
             bool is_atty_handle(HANDLE h)
             {
-                if(h)
-                {
-                    DWORD dummy;
-                    return GetConsoleMode(h, &dummy) != FALSE;
-                }
-                return false;
+                DWORD dummy;
+                return h && GetConsoleMode(h, &dummy) != FALSE;
             }
         } // namespace
 
@@ -75,6 +73,8 @@ namespace nowide {
             {}
 
         protected:
+            // Can't test this on CI so exclude
+            // LCOV_EXCL_START
             bool do_read(wchar_t* buffer, std::size_t num_chars_to_read, std::size_t& num_chars_read) override
             {
                 DWORD size = 0;
@@ -82,6 +82,7 @@ namespace nowide {
                 num_chars_read = size;
                 return result;
             }
+            // LCOV_EXCL_STOP
         };
 
         winconsole_ostream::winconsole_ostream(int fd, winconsole_ostream* tieStream) : std::ostream(0)
@@ -113,7 +114,7 @@ namespace nowide {
             {
                 flush();
             } catch(...)
-            {}
+            {} // LCOV_EXCL_LINE
         }
 
         winconsole_istream::winconsole_istream(winconsole_ostream* tieStream) : std::istream(0)
