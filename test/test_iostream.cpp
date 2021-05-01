@@ -145,6 +145,17 @@ void test_tie()
 
 void test_putback_and_get()
 {
+    // If we are using the standard rdbuf we can only put back 1 char
+    // This should always work
+    int maxval = 15000;
+    for(int i = 0; i < maxval; i++)
+    {
+        char c = i % 96 + ' ';
+        TEST(nw::cin.putback(c));
+        int ci = i % 96 + ' ';
+        TEST(nw::cin.get() == ci);
+    }
+
     INSTALL_MOCK_BUF(cin, mock_input_buffer);
     if(usesNowideRdBufIn RUN_MOCKED(|| true))
     {
@@ -182,17 +193,6 @@ void test_putback_and_get()
         TEST(nw::cin >> test);
         TEST(test == "Test");
 #endif
-    } else
-    {
-        // If we are using the standard rdbuf we can only put back 1 char
-        int maxval = 15000;
-        for(int i = 0; i < maxval; i++)
-        {
-            char c = i % 96 + ' ';
-            TEST(nw::cin.putback(c));
-            int ci = i % 96 + ' ';
-            TEST(nw::cin.get() == ci);
-        }
     }
 }
 
