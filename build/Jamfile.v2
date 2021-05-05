@@ -25,10 +25,11 @@ project boost/nowide
     ]
     [ check-target-builds ../config//cxx11_moveable_fstreams "std::fstream is moveable and swappable" : : <build>no ]
     [ check-target-builds ../config//lfs_support "Has Large File Support" : : <define>BOOST_NOWIDE_NO_LFS ]
+    [ check-target-builds ../config//attribute_init_priority "Has attribute init_priority" : <define>BOOST_NOWIDE_HAS_INIT_PRIORITY ]
   : usage-requirements $(requirements)
   ;
 
-local SOURCES = cstdio cstdlib filebuf iostream stat ;
+local SOURCES = console_buffer cstdio cstdlib filebuf iostream stat ;
 
 lib boost_nowide
   : $(SOURCES).cpp

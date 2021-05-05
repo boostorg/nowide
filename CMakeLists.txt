@@ -54,10 +54,12 @@ option(Boost_NOWIDE_WERROR "Treat warnings as errors" "${def_WERROR}")
 
 file(READ ${CMAKE_CURRENT_SOURCE_DIR}/config/check_lfs_support.cpp lfsSource)
 check_cxx_source_compiles("${lfsSource}" BOOST_NOWIDE_HAS_LFS)
+file(READ ${CMAKE_CURRENT_SOURCE_DIR}/config/check_attribute_init_priority.cpp attributeInitPrioritySource)
+check_cxx_source_compiles("${attributeInitPrioritySource}" BOOST_NOWIDE_HAS_INIT_PRIORITY)
 
 # Using glob here is ok as it is only for headers
 file(GLOB_RECURSE headers include/*.hpp)
-add_library(boost_nowide src/cstdio.cpp src/cstdlib.cpp src/filebuf.cpp src/iostream.cpp src/stat.cpp ${headers})
+add_library(boost_nowide src/console_buffer.cpp src/cstdio.cpp src/cstdlib.cpp src/filebuf.cpp src/iostream.cpp src/stat.cpp ${headers})
 add_library(Boost::nowide ALIAS boost_nowide)
 set_target_properties(boost_nowide PROPERTIES
     CXX_VISIBILITY_PRESET hidden
@@ -70,6 +72,9 @@ if(BUILD_SHARED_LIBS)
 endif()
 if(NOT BOOST_NOWIDE_HAS_LFS)
   target_compile_definitions(boost_nowide PRIVATE BOOST_NOWIDE_NO_LFS)
+endif()
+if(BOOST_NOWIDE_HAS_INIT_PRIORITY)
+  target_compile_definitions(boost_nowide PRIVATE BOOST_NOWIDE_HAS_INIT_PRIORITY)
 endif()
 target_compile_definitions(boost_nowide PUBLIC BOOST_NOWIDE_NO_LIB)
 target_include_directories(boost_nowide PUBLIC include)

@@ -37,10 +37,8 @@ boost_nowide_add_test(test_ifstream LIBRARIES boost_nowide_file_test_helpers)
 boost_nowide_add_test(test_ofstream LIBRARIES boost_nowide_file_test_helpers)
 boost_nowide_add_test(test_fstream LIBRARIES boost_nowide_file_test_helpers)
 boost_nowide_add_test(test_fstream_special LIBRARIES boost_nowide_file_test_helpers)
-boost_nowide_add_test(test_iostream)
-if(MSVC AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-  set_target_properties(${PROJECT_NAME}-test_iostream PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS -i)
-endif()
+boost_nowide_add_test(test_iostream LIBRARIES boost_nowide_file_test_helpers)
+boost_nowide_add_test(test_iostream_interactive COMPILE_ONLY SRC test_iostream.cpp DEFINITIONS BOOST_NOWIDE_TEST_INTERACTIVE LIBRARIES boost_nowide_file_test_helpers)
 boost_nowide_add_test(test_stackstring)
 boost_nowide_add_test(test_stat)
 boost_nowide_add_test(test_stdio)
@@ -53,6 +51,15 @@ else()
   endforeach()
 endif()
 boost_nowide_add_test(test_traits)
+
+# Test that passthrough writes everything from stdin to stdout
+# Needs to be done with CMake as the test driver to write any input to stdin and check output
+add_test(
+  NAME ${PROJECT_NAME}-"test_iostream_passthrough"
+  COMMAND ${CMAKE_COMMAND}
+    -D TEST_BINARY=$<TARGET_FILE:${PROJECT_NAME}-test_iostream>
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/test_iostream_passthrough.cmake
+)
 
 if(NOT BOOST_SUPERPROJECT_SOURCE_DIR)
   find_package(Boost 1.56 REQUIRED COMPONENTS filesystem system)
