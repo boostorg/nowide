@@ -55,7 +55,7 @@ boost_nowide_add_test(test_traits)
 # Test that passthrough writes everything from stdin to stdout
 # Needs to be done with CMake as the test driver to write any input to stdin and check output
 add_test(
-  NAME ${PROJECT_NAME}-"test_iostream_passthrough"
+  NAME ${PROJECT_NAME}-test_iostream_passthrough
   COMMAND ${CMAKE_COMMAND}
     -D TEST_BINARY=$<TARGET_FILE:${PROJECT_NAME}-test_iostream>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/test_iostream_passthrough.cmake
