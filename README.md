@@ -77,7 +77,8 @@ See the [Documentation](https://www.boost.org/doc/libs/master/libs/nowide/index.
 
 Compile and install the Boost super project the usual way via `./b2`.
 The headers and library will then be available together with all other Boost libraries.
-From within CMake you can then use `find_package(boost_nowide)` and link against `Boost::nowide`.
+From within CMake you can then use `find_package(Boost COMPONENTS nowide)` and link against `Boost::nowide`.
+Note that `find_package(boost_nowide)` will find the package too, but the above is the canonical way.
 
 ## With CMake
 
