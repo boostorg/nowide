@@ -7,13 +7,12 @@
 //
 
 #include <boost/nowide/cstdlib.hpp>
+#include "test.hpp"
 #include <cstring>
 
 #if defined(BOOST_NOWIDE_TEST_INCLUDE_WINDOWS) && defined(BOOST_WINDOWS)
 #include <windows.h>
 #endif
-
-#include "test.hpp"
 
 // "Safe" strcpy version with NULL termination to make MSVC runtime happy
 // which warns when using strncpy
@@ -27,6 +26,7 @@ void strcpy_safe(char (&dest)[size], const char* src)
     dest[len] = 0;
 }
 
+// coverity [root_function]
 void test_main(int, char**, char**)
 {
     std::string example = "\xd7\xa9-\xd0\xbc-\xce\xbd";

@@ -135,14 +135,14 @@ struct perf_data
     blocksize_to_performance read, write;
 };
 
-
 std::vector<char> get_rand_data(int size, bool binary)
 {
     std::mt19937 rng{std::random_device{}()};
-    auto distr = (binary) ? std::uniform_int_distribution<int>(std::numeric_limits<char>::min(), std::numeric_limits<char>::max()) :
-        std::uniform_int_distribution<int>(' ', 'z');
+    auto distr = (binary) ? std::uniform_int_distribution<int>(std::numeric_limits<char>::min(),
+                                                               std::numeric_limits<char>::max()) :
+                            std::uniform_int_distribution<int>(' ', 'z');
     std::vector<char> data(size);
-    std::generate(data.begin(), data.end(), [&](){ return static_cast<char>(distr(rng)); });
+    std::generate(data.begin(), data.end(), [&]() { return static_cast<char>(distr(rng)); });
     return data;
 }
 

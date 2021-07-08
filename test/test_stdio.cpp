@@ -10,11 +10,10 @@
 #include <boost/nowide/cstdio.hpp>
 
 #include <boost/nowide/convert.hpp>
+#include "test.hpp"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-
-#include "test.hpp"
 
 bool file_exists(const std::string& filename)
 {
@@ -50,6 +49,7 @@ void noop_invalid_param_handler(const wchar_t*, const wchar_t*, const wchar_t*, 
 {}
 #endif
 
+// coverity [root_function]
 void test_main(int, char** argv, char**)
 {
     const std::string prefix = argv[0];

@@ -11,10 +11,10 @@
 #include <boost/nowide/convert.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/nowide/fstream.hpp>
+#include "test.hpp"
 #include <boost/filesystem/operations.hpp>
 
-#include "test.hpp"
-
+// coverity [root_function]
 void test_main(int, char** argv, char**)
 {
     boost::nowide::nowide_filesystem();

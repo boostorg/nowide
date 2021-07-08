@@ -82,6 +82,7 @@ jobs:
       run: cmake .. -DBoost_DEBUG=ON -DCMAKE_BUILD_TYPE=${{matrix.buildType}} -DBUILD_SHARED_LIBS=${{matrix.shared_lib}} -DCMAKE_INSTALL_PREFIX=${{runner.workspace}}/../install -G "${{matrix.generator}}" -DCMAKE_SH="CMAKE_SH-NOTFOUND" -DBoost_NO_BOOST_CMAKE=ON
     - name: Build & Install
       run: cmake --build build --config ${{matrix.buildType}} --target install
+
     # Run test with both bash and powershell and watch for "Using std::cin" on bash but not on powershell
     - name: Test
       working-directory: build
@@ -179,7 +180,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - uses: DoozyX/clang-format-lint-action@v0.10
+    - uses: DoozyX/clang-format-lint-action@v0.11
       with:
         exclude: './doc'
         clangFormatVersion: 10

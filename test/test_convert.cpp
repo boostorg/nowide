@@ -7,12 +7,11 @@
 //
 
 #include <boost/nowide/convert.hpp>
+#include "test.hpp"
+#include "test_sets.hpp"
 #include <array>
 #include <iostream>
 #include <string>
-
-#include "test.hpp"
-#include "test_sets.hpp"
 
 #ifdef __cpp_lib_string_view
 #include <string_view>
@@ -128,6 +127,7 @@ std::string narrow_string_view(const std::wstring& s)
 }
 #endif
 
+// coverity [root_function]
 void test_main(int, char**, char**)
 {
     std::string hello = "\xd7\xa9\xd7\x9c\xd7\x95\xd7\x9d";

@@ -8,12 +8,12 @@
 #include <boost/nowide/stat.hpp>
 
 #include <boost/nowide/cstdio.hpp>
+#include "test.hpp"
 #ifdef BOOST_WINDOWS
 #include <errno.h>
 #endif
 
-#include "test.hpp"
-
+// coverity [root_function]
 void test_main(int, char** argv, char**)
 {
     const std::string prefix = argv[0];

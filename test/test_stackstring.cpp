@@ -8,11 +8,10 @@
 //
 
 #include <boost/nowide/stackstring.hpp>
-#include <iostream>
-#include <vector>
-
 #include "test.hpp"
 #include "test_sets.hpp"
+#include <iostream>
+#include <vector>
 
 #if defined(BOOST_MSVC) && BOOST_MSVC < 1700
 #pragma warning(disable : 4428) // universal-character-name encountered in source
@@ -63,6 +62,7 @@ std::string heap_stackstring_to_narrow(const std::wstring& s)
     return ss.get();
 }
 
+// coverity [root_function]
 void test_main(int, char**, char**)
 {
     std::string hello = "\xd7\xa9\xd7\x9c\xd7\x95\xd7\x9d";
