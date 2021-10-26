@@ -7,6 +7,9 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#if defined(__GNUC__) && __GNUC__ >= 7
+#pragma GCC diagnostic ignored "-Wattributes"
+#endif
 #include <boost/nowide/filesystem.hpp>
 
 #include <boost/nowide/convert.hpp>
