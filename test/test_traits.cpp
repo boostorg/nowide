@@ -30,6 +30,9 @@
 #endif
 
 #ifdef BOOST_NOWIDE_TEST_BFS_PATH
+#if defined(_MSC_VER)
+#pragma warning(disable : 4714) // function marked as __forceinline not inlined
+#endif
 #include <boost/filesystem/path.hpp>
 #endif
 

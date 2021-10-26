@@ -1,5 +1,6 @@
 //
 //  Copyright (c) 2015 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2021 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE or copy at
@@ -12,6 +13,9 @@
 #include <boost/nowide/cstdio.hpp>
 #include <boost/nowide/fstream.hpp>
 #include "test.hpp"
+#if defined(_MSC_VER)
+#pragma warning(disable : 4714) // function marked as __forceinline not inlined
+#endif
 #include <boost/filesystem/operations.hpp>
 
 // coverity [root_function]
