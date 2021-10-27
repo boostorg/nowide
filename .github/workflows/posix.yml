@@ -15,19 +15,23 @@ env:
 
 jobs:
   CI:
+    defaults:
+      run:
+        shell: bash
+
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { compiler: g++-4.4,        cxxstd: '98,0x',                         os: ubuntu-16.04, install: yes }
-          - { compiler: g++-5,          cxxstd: '03,11,14',                      os: ubuntu-16.04, install: yes }
-          - { compiler: g++-6,          cxxstd: '03,11,14,17',                   os: ubuntu-16.04, install: yes }
+          - { compiler: g++-4.4,        cxxstd: '98,0x',                         os: ubuntu-20.04, container: 'ubuntu:16.04', install: yes }
+          - { compiler: g++-5,          cxxstd: '03,11,14',                      os: ubuntu-18.04, install: yes }
+          - { compiler: g++-6,          cxxstd: '03,11,14,17',                   os: ubuntu-18.04, install: yes }
           - { compiler: g++-7,          cxxstd: '03,11,14,17',                   os: ubuntu-20.04, install: yes }
           - { compiler: g++-8,          cxxstd: '03,11,14,17,2a',                os: ubuntu-20.04, install: yes }
           - { compiler: g++-9,          cxxstd: '03,11,14,17,2a',                os: ubuntu-20.04, install: yes }
           - { compiler: g++-10,         cxxstd: '03,11,14,17,2a', sanitize: yes, os: ubuntu-20.04, install: yes, linkflags: -fuse-ld=gold }
-          - { compiler: clang++-3.5,    cxxstd: '03,11',                         os: ubuntu-16.04, install: yes }
-          - { compiler: clang++-6.0,    cxxstd: '03,11',                         os: ubuntu-16.04, install: yes }
+          - { compiler: clang++-3.5,    cxxstd: '03,11',                         os: ubuntu-20.04, container: 'ubuntu:16.04', install: yes }
+          - { compiler: clang++-6.0,    cxxstd: '03,11',                         os: ubuntu-18.04, install: yes }
           - { compiler: clang++-7,      cxxstd: '03,11',                         os: ubuntu-18.04, install: yes }
           - { compiler: clang++-8,      cxxstd: '03,11,14',                      os: ubuntu-18.04, install: yes }
           - { compiler: clang++-9,      cxxstd: '03,11,14',                      os: ubuntu-18.04, install: yes }
@@ -38,6 +42,7 @@ jobs:
           - { compiler: g++-8,          cxxstd: '03,11',          coverage: yes, os: ubuntu-20.04, install: yes }
 
     runs-on: ${{matrix.os}}
+    container: ${{matrix.container}}
 
     steps:
       - uses: actions/checkout@v2
