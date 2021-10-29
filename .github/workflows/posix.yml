@@ -9,6 +9,7 @@ on:
       - feature/**
 
 env:
+  NET_RETRY_COUNT: 5
   UBSAN_OPTIONS: print_stacktrace=1
   B2_VARIANT: debug,release
   B2_LINK: shared,static
@@ -61,7 +62,8 @@ jobs:
           else
             pkgs="${{matrix.install}}"
           fi
-          sudo apt install $pkgs
+          sudo apt-get -o Acquire::Retries=$NET_RETRY_COUNT update
+          sudo apt-get -o Acquire::Retries=$NET_RETRY_COUNT install $pkgs
 
       - name: Setup config vars
         run: |
