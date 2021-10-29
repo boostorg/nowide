@@ -56,14 +56,27 @@ jobs:
       - name: Install packages
         if: matrix.install
         run: |
+          if [ -f "/etc/debian_version" ]; then
+              echo "DEBIAN_FRONTEND=noninteractive" >> $GITHUB_ENV
+              export DEBIAN_FRONTEND=noninteractive
+          fi
+          # Install required stuff when using containers
+          if [ -n "${{matrix.container}}" ]; then
+              if [ -f "/etc/debian_version" ]; then
+                  apt-get -o Acquire::Retries=$NET_RETRY_COUNT update
+                  apt-get -o Acquire::Retries=$NET_RETRY_COUNT install -y sudo software-properties-common build-essential g++ python
+                  add-apt-repository ppa:git-core/ppa # Need newer git
+              fi
+          fi
           if [[ "${{matrix.install}}" == "yes" ]]; then
             pkgs="${{matrix.compiler}}"
             pkgs="${pkgs/clang++-/clang-}"
           else
             pkgs="${{matrix.install}}"
           fi
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
           sudo apt-get -o Acquire::Retries=$NET_RETRY_COUNT update
-          sudo apt-get -o Acquire::Retries=$NET_RETRY_COUNT install $pkgs
+          sudo apt-get -o Acquire::Retries=$NET_RETRY_COUNT install -y git $pkgs
 
       - name: Setup config vars
         run: |
