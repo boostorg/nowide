@@ -13,6 +13,7 @@ env:
   UBSAN_OPTIONS: print_stacktrace=1
   B2_VARIANT: debug,release
   B2_LINK: shared,static
+  LCOV_BRANCH_COVERAGE: 0
 
 jobs:
   CI:
