@@ -102,7 +102,7 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       GENERATOR: Visual Studio 16 2019
       configuration: Debug
-      BOOST_ROOT: C:\Libraries\boost_1_71_0
+      BOOST_ROOT: C:\Libraries\boost_1_73_0
       COVERAGE: true
       # Work around for https://community.codecov.io/t/bash-script-does-not-detect-appveyor/1094
       APPVEYOR: true
@@ -137,6 +137,7 @@ for:
       only: [CMAKE: true]
     install: true
     before_build:
+      - dir C:\Libraries
       - if exist build\ (rmdir /S /Q build)
       - set "INSTALL_DIR=%APPVEYOR_BUILD_FOLDER%\installed"
       - if exist %INSTALL_DIR%\ (rmdir /S /Q %INSTALL_DIR%)
