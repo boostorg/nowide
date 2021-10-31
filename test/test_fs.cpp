@@ -1,17 +1,24 @@
 //
 //  Copyright (c) 2015 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2021 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#if defined(__GNUC__) && __GNUC__ >= 7
+#pragma GCC diagnostic ignored "-Wattributes"
+#endif
 #include <boost/nowide/filesystem.hpp>
 
 #include <boost/nowide/convert.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/nowide/fstream.hpp>
 #include "test.hpp"
+#if defined(_MSC_VER)
+#pragma warning(disable : 4714) // function marked as __forceinline not inlined
+#endif
 #include <boost/filesystem/operations.hpp>
 
 // coverity [root_function]

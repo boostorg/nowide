@@ -12,17 +12,17 @@ jobs:
   UnitTests:
     strategy:
       matrix:
-        os: [ubuntu-16.04, windows-latest]
+        os: [ubuntu-18.04, windows-latest]
         buildType: [Debug, Release]
         standalone: [Boost, Standalone]
         shared_lib: [ON, OFF]
         generator: ['Visual Studio 16 2019', 'MinGW Makefiles', 'Unix Makefiles']
         exclude:
-          - os: ubuntu-16.04
+          - os: ubuntu-18.04
             generator: MinGW Makefiles
-          - os: ubuntu-16.04
+          - os: ubuntu-18.04
             generator: Visual Studio 16 2019
-          - os: ubuntu-16.04
+          - os: ubuntu-18.04
             buildType: Debug
     runs-on: ${{matrix.os}}
     env:
@@ -103,7 +103,7 @@ jobs:
         ctest --output-on-failure -C ${{matrix.buildType}}
 
   BoostCMakeBuild:
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-18.04
     # Doesn't work on master yet
     if: "! endsWith(github.ref, '/master') && ! endsWith(github.base_ref, '/master')"
     steps:
