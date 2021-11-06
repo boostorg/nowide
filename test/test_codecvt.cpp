@@ -314,7 +314,9 @@ std::wstring codecvt_to_wide(const std::string& s)
     wchar_t* const to_end = to + buf.size();
     wchar_t* to_next = to;
 
+    const auto expected_consumed = cvt.length(mb, from, from_end, buf.size());
     cvt_type::result res = cvt.in(mb, from, from_end, from_next, to, to_end, to_next);
+    TEST(expected_consumed == from_next - from);
     if(res == cvt_type::partial)
     {
         TEST(to_next < to_end);
