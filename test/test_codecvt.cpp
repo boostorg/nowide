@@ -23,6 +23,53 @@ static const std::wstring wide_name_str = boost::nowide::widen(utf8_name);
 static const wchar_t* wide_name = wide_name_str.c_str();
 
 using cvt_type = std::codecvt<wchar_t, char, std::mbstate_t>;
+using cvt_type16 = std::codecvt<char16_t, char, std::mbstate_t>;
+using cvt_type32 = std::codecvt<char32_t, char, std::mbstate_t>;
+using utf8_utf16_codecvt = boost::nowide::utf8_codecvt<char16_t>;
+using utf8_utf32_codecvt = boost::nowide::utf8_codecvt<char32_t>;
+
+void test_codecvt_basic()
+{
+    // UTF-16
+    {
+        std::locale l(std::locale::classic(), new utf8_utf16_codecvt());
+        const cvt_type16& cvt = std::use_facet<cvt_type16>(l);
+        TEST(cvt.encoding() == 0);   // Characters have a variable width
+        TEST(cvt.max_length() == 4); // At most 4 UTF-8 code units are one internal char (one or two UTF-16 code units)
+        TEST(!cvt.always_noconv());  // Always convert
+    }
+    // UTF-32
+    {
+        std::locale l(std::locale::classic(), new utf8_utf32_codecvt());
+        const cvt_type32& cvt = std::use_facet<cvt_type32>(l);
+        TEST(cvt.encoding() == 0);   // Characters have a variable width
+        TEST(cvt.max_length() == 4); // At most 4 UTF-8 code units are one internal char (one UTF-32 code unit)
+        TEST(!cvt.always_noconv());  // Always convert
+    }
+}
+
+void test_codecvt_unshift()
+{
+    char buf[256];
+    const auto name16 = boost::nowide::utf::convert_string<char16_t>(utf8_name, utf8_name + std::strlen(utf8_name));
+
+    utf8_utf16_codecvt cvt16;
+    {
+        const cvt_type16& cvt = cvt16;
+        // Unshift on initial state does nothing
+        std::mbstate_t mb{};
+        char* to_next;
+        TEST(cvt.unshift(mb, buf, std::end(buf), to_next) == cvt_type16::ok);
+        TEST(to_next == buf);
+        const char16_t* from_next;
+        // Convert into a to small buffer
+        TEST(cvt.out(mb, &name16.front(), &name16.back(), from_next, buf, buf + 1, to_next) == cvt_type16::partial);
+        TEST(from_next == &name16[1]);
+        TEST(to_next == buf);
+        // Unshift on non-default state is not possible
+        TEST(cvt.unshift(mb, buf, std::end(buf), to_next) == cvt_type16::error);
+    }
+}
 
 void test_codecvt_in_n_m(const cvt_type& cvt, size_t n, size_t m)
 {
@@ -314,6 +361,8 @@ void test_codecvt_subst()
 // coverity [root_function]
 void test_main(int, char**, char**)
 {
+    test_codecvt_basic();
+    test_codecvt_unshift();
     test_codecvt_conv();
     test_codecvt_err();
     test_codecvt_subst();
