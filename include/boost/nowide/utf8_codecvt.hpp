@@ -296,7 +296,7 @@ namespace nowide {
                 }
                 max--;
             }
-            return from - start_from;
+            return static_cast<int>(from - start_from);
         }
 
         std::codecvt_base::result do_in(std::mbstate_t& /*state*/,
