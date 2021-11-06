@@ -13,10 +13,29 @@
 #include "test.hpp"
 #include <fstream>
 #include <iostream>
+#include <locale>
 #include <string>
 
 namespace nw = boost::nowide;
 using namespace boost::nowide::test;
+
+class dummyCvtConverting : public std::codecvt<char, char, std::mbstate_t>
+{
+protected:
+    bool do_always_noconv() const noexcept override
+    {
+        return false;
+    }
+};
+
+class dummyCvtNonConverting : public std::codecvt<char, char, std::mbstate_t>
+{
+protected:
+    bool do_always_noconv() const noexcept override
+    {
+        return true;
+    }
+};
 
 template<class T>
 void test_ctor(const T& filename)
@@ -43,6 +62,7 @@ void test_ctor(const T& filename)
     create_file(filename, "Hello");
     {
         nw::fstream f(filename);
+        TEST(f);
         std::string tmp;
         TEST(f >> tmp);
         TEST(f.eof());
@@ -54,6 +74,7 @@ void test_ctor(const T& filename)
     create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out | std::ios::in);
+        TEST(f);
         std::string tmp;
         TEST(f >> tmp);
         TEST(f.eof());
@@ -67,6 +88,7 @@ void test_ctor(const T& filename)
     create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::in);
+        TEST(f);
         std::string tmp;
         TEST(f >> tmp);
         TEST(tmp == "Hello");
@@ -80,8 +102,8 @@ void test_ctor(const T& filename)
     create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out);
-        std::string tmp;
         TEST(f);
+        std::string tmp;
         TEST(!(f >> tmp));
         f.clear();
         TEST(f << "World");
@@ -91,8 +113,8 @@ void test_ctor(const T& filename)
     create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out | std::ios::trunc);
-        std::string tmp;
         TEST(f);
+        std::string tmp;
         TEST(!(f >> tmp));
         f.clear();
         TEST(f << "World");
@@ -103,12 +125,14 @@ void test_ctor(const T& filename)
     create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::app);
+        TEST(f);
         TEST(f << "World");
     }
     TEST(read_file(filename) == "HelloWorld");
     create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out | std::ios::app);
+        TEST(f);
         TEST(f << "World");
     }
     TEST(read_file(filename) == "HelloWorld");
@@ -117,8 +141,8 @@ void test_ctor(const T& filename)
     create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out | std::ios::in | std::ios::trunc);
-        std::string tmp;
         TEST(f);
+        std::string tmp;
         TEST(!(f >> tmp));
         f.clear();
         TEST(f << "World");
@@ -145,6 +169,7 @@ void test_ctor(const T& filename)
     create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::in | std::ios::app);
+        TEST(f);
         std::string tmp;
         TEST(f.seekg(0)); // It is not defined where the read position is after opening
         TEST(f.tellg() == std::streampos(0));
@@ -159,8 +184,8 @@ void test_ctor(const T& filename)
     create_file(filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out | std::ios::in | std::ios::ate);
-        std::string tmp;
         TEST(f);
+        std::string tmp;
         TEST(!(f >> tmp));
         f.clear();
         TEST(f << "World");
@@ -170,18 +195,96 @@ void test_ctor(const T& filename)
     }
     TEST(read_file(filename) == "HelloWorld");
 
+    // binary append existing file
+    create_file(filename, "Hello");
+    {
+        nw::fstream f(filename, std::ios::binary | std::ios::out | std::ios::app);
+        TEST(f);
+        TEST(f << "World");
+        TEST(f.seekp(0));
+        TEST(f.seekg(0));
+        TEST(f << "World\n");
+    }
+    TEST(read_file(filename, data_type::binary) == "HelloWorldWorld\n");
+    create_file(filename, "Hello");
+    {
+        nw::fstream f(filename, std::ios::binary | std::ios::app);
+        TEST(f);
+        TEST(f << "World");
+        TEST(f.seekp(0));
+        TEST(f.seekg(0));
+        TEST(f << "World\n");
+    }
+    TEST(read_file(filename, data_type::binary) == "HelloWorldWorld\n");
+
+    // binary out & trunc
+    create_file(filename, "Hello");
+    {
+        nw::fstream f(filename, std::ios::binary | std::ios::out | std::ios::trunc);
+        TEST(f);
+        TEST(f << "Hello\n");
+        TEST(f << "World");
+    }
+    TEST(read_file(filename, data_type::binary) == "Hello\nWorld");
+
+    // Binary in&out
+    create_file(filename, "Hello");
+    {
+        nw::fstream f(filename, std::ios::binary | std::ios::out | std::ios::in);
+        TEST(f);
+        std::string tmp;
+        TEST(f >> tmp);
+        TEST(f.eof());
+        TEST(tmp == "Hello");
+        f.clear();
+        TEST(f << "World\n");
+    }
+    TEST(read_file(filename, data_type::binary) == "HelloWorld\n");
+
     // Trunc & binary
     create_file(filename, "Hello");
     {
-        nw::fstream f(filename, std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
+        nw::fstream f(filename, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
         TEST(f);
-        TEST(f << "test\r\n");
-        std::string tmp(6, '\0');
+        TEST(f << "test\n");
+        std::string tmp(5, '\0');
         TEST(f.seekg(0));
-        TEST(f.read(&tmp[0], 6));
-        TEST(tmp == "test\r\n");
+        TEST(f.read(&tmp[0], 5));
+        TEST(tmp == "test\n");
     }
-    TEST(read_file(filename, data_type::binary) == "test\r\n");
+    TEST(read_file(filename, data_type::binary) == "test\n");
+
+    // Binary in&out append
+    create_file(filename, "Hello");
+    {
+        nw::fstream f(filename, std::ios::binary | std::ios::in | std::ios::out | std::ios::app);
+        TEST(f);
+        TEST(f.seekg(0)); // It is not defined where the read position is after opening
+        std::string tmp;
+        TEST(f >> tmp);
+        TEST(f.eof());
+        TEST(tmp == "Hello");
+        f.clear();
+        f.seekg(0);
+        f.seekp(0);
+        TEST(f << "World\n");
+    }
+    TEST(read_file(filename, data_type::binary) == "HelloWorld\n");
+    create_file(filename, "Hello");
+    {
+        nw::fstream f(filename, std::ios::binary | std::ios::in | std::ios::app);
+        TEST(f);
+        TEST(f.seekg(0)); // It is not defined where the read position is after opening
+        std::string tmp;
+        TEST(f >> tmp);
+        TEST(f.eof());
+        TEST(tmp == "Hello");
+        f.clear();
+        f.seekg(0);
+        f.seekp(0);
+        TEST(f << "World\n");
+    }
+    TEST(read_file(filename, data_type::binary) == "HelloWorld\n");
 
     // Invalid modes
     const std::initializer_list<std::ios::openmode> invalid_modes{
@@ -203,6 +306,24 @@ void test_ctor(const T& filename)
         }
         TEST(read_file(filename) == "Hello");
     }
+}
+
+void test_imbue()
+{
+    boost::nowide::fstream f;
+#if BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
+    std::locale convLocale(std::locale::classic(), new dummyCvtConverting);
+    try
+    {
+        f.imbue(convLocale);
+        TEST(!"Should have thrown an error");
+    } catch(const std::runtime_error&)
+    {
+        /* OK */
+    }
+#endif
+    std::locale nonconvLocale(std::locale::classic(), new dummyCvtNonConverting);
+    f.imbue(nonconvLocale); // No exception, do nothing
 }
 
 template<typename T>
@@ -400,6 +521,9 @@ void test_flush(const std::string& filepath)
             TEST(s == curValue);
         }
     }
+    fo.close();
+    TEST(fo.flush());   // Should also work on closed stream
+    TEST(!fo.seekg(0)); // Does not work on closed stream
 }
 
 // coverity [root_function]
@@ -417,6 +541,9 @@ void test_main(int, char** argv, char**)
 
     std::cout << "IsOpen" << std::endl;
     test_is_open(exampleFilename);
+
+    std::cout << "imbue" << std::endl;
+    test_imbue();
 
     std::cout << "Move and swap" << std::endl;
     test_move_and_swap(exampleFilename);

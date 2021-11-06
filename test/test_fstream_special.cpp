@@ -93,7 +93,13 @@ void test_with_different_buffer_sizes(const char* filepath)
         TEST(f.putback('d'));
         TEST(f.get() == 'd');
         TEST(f.get() == 'e');
+        TEST(f << std::flush);
+        TEST(f.unget());
+        TEST(f.get() == 'e');
 #endif
+        // Put back different char
+        TEST(f.putback('x'));
+        TEST(f.get() == 'x');
         // Rest of sequence
         TEST(f.get() == 'f');
         TEST(f.get() == 'g');
@@ -206,11 +212,38 @@ void test_swap(const char* filename, const char* filename2)
     }
 }
 
+void testPutback(const char* filename)
+{
+    nw::test::create_file(filename, "abc");
+    // Does work for ifstreams
+    {
+        nw::ifstream f(filename);
+        const int c = f.get();
+        TEST(f.putback(static_cast<char>(c)));
+        TEST(f.get() == c);
+    }
+    // Does work for io fstreams
+    {
+        nw::fstream f(filename);
+        const int c = f.get();
+        TEST(f.putback(static_cast<char>(c)));
+        TEST(f.get() == c);
+    }
+    // Doesn't work for output fstreams
+    {
+        nw::fstream f(filename, std::ios::out);
+        TEST(!f.putback('x'));
+    }
+}
+
 // coverity [root_function]
 void test_main(int, char** argv, char**)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
     const std::string exampleFilename2 = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd 2.txt";
+
+    std::cout << "Putback" << std::endl;
+    testPutback(exampleFilename.c_str());
 
     std::cout << "Complex IO" << std::endl;
     test_with_different_buffer_sizes(exampleFilename.c_str());
