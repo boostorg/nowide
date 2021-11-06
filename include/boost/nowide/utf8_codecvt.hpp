@@ -11,6 +11,7 @@
 
 #include <boost/nowide/replacement.hpp>
 #include <boost/nowide/utf/utf.hpp>
+#include <cassert>
 #include <cstdint>
 #include <locale>
 
@@ -225,11 +226,7 @@ namespace nowide {
                         ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
                     }
                 }
-                if(!utf::is_valid_codepoint(ch))
-                {
-                    r = std::codecvt_base::error;
-                    break;
-                }
+                assert(utf::is_valid_codepoint(ch)); // Any valid UTF16 sequence is a valid codepoint
                 int len = utf::utf_traits<char>::width(ch);
                 if(to_end - to < len)
                 {
