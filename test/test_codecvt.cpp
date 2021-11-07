@@ -23,8 +23,15 @@ static const std::wstring wide_name_str = boost::nowide::widen(utf8_name);
 static const wchar_t* wide_name = wide_name_str.c_str();
 
 using cvt_type = std::codecvt<wchar_t, char, std::mbstate_t>;
+#ifdef BOOST_MSVC
+#pragma warning(push)
+#pragma warning(disable : 4996) // Disable deprecation warning for std::codecvt<char16/32_t, char, ...>
+#endif
 using cvt_type16 = std::codecvt<char16_t, char, std::mbstate_t>;
 using cvt_type32 = std::codecvt<char32_t, char, std::mbstate_t>;
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
 using utf8_utf16_codecvt = boost::nowide::utf8_codecvt<char16_t>;
 using utf8_utf32_codecvt = boost::nowide::utf8_codecvt<char32_t>;
 
@@ -32,16 +39,30 @@ void test_codecvt_basic()
 {
     // UTF-16
     {
+#ifdef BOOST_MSVC
+#pragma warning(push)
+#pragma warning(disable : 4996) // Disable deprecation warning for std::codecvt<char16, char, ...>
+#endif
         std::locale l(std::locale::classic(), new utf8_utf16_codecvt());
         const cvt_type16& cvt = std::use_facet<cvt_type16>(l);
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
         TEST(cvt.encoding() == 0);   // Characters have a variable width
         TEST(cvt.max_length() == 4); // At most 4 UTF-8 code units are one internal char (one or two UTF-16 code units)
         TEST(!cvt.always_noconv());  // Always convert
     }
     // UTF-32
     {
+#ifdef BOOST_MSVC
+#pragma warning(push)
+#pragma warning(disable : 4996) // Disable deprecation warning for std::codecvt<char32, char, ...>
+#endif
         std::locale l(std::locale::classic(), new utf8_utf32_codecvt());
         const cvt_type32& cvt = std::use_facet<cvt_type32>(l);
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
         TEST(cvt.encoding() == 0);   // Characters have a variable width
         TEST(cvt.max_length() == 4); // At most 4 UTF-8 code units are one internal char (one UTF-32 code unit)
         TEST(!cvt.always_noconv());  // Always convert
@@ -59,6 +80,10 @@ void test_codecvt_unshift()
         // Unshift on initial state does nothing
         std::mbstate_t mb{};
         char* to_next;
+#ifdef BOOST_MSVC
+#pragma warning(push)
+#pragma warning(disable : 4996) // Disable deprecation warning for std::codecvt<char16, char, ...>
+#endif
         TEST(cvt.unshift(mb, buf, std::end(buf), to_next) == cvt_type16::ok);
         TEST(to_next == buf);
         const char16_t* from_next;
@@ -68,6 +93,9 @@ void test_codecvt_unshift()
         TEST(to_next == buf);
         // Unshift on non-default state is not possible
         TEST(cvt.unshift(mb, buf, std::end(buf), to_next) == cvt_type16::error);
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
     }
 }
 
