@@ -100,6 +100,9 @@ int main(int argc, char** argv, char** env)
     } catch(const std::exception& e)
     {
         std::cerr << "Failed " << e.what() << std::endl;
+#ifdef _MSC_VER
+        std::cerr << "MSVC version " << _MSC_VER << std::endl;
+#endif
         return 1;
     }
     return 0;
