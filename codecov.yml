@@ -8,3 +8,4 @@ comment:
   layout: "diff, files"
 ignore:
   - "test/test.hpp"
+  - "test/file_test_helpers.cpp"

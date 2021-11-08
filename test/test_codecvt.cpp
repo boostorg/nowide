@@ -210,8 +210,7 @@ void test_codecvt_out_n_m(const cvt_type& cvt, size_t n, size_t m)
             {
                 TEST(to_end - to_next < cvt.max_length());
                 to_end += n;
-                if(to_end > real_to_end)
-                    to_end = real_to_end;
+                TEST(to_end <= real_to_end); // Should always be big enough
             }
         } else
         {
@@ -251,8 +250,10 @@ void test_codecvt_conv()
                 test_codecvt_out_n_m(cvt, i, j);
             } catch(...)
             {
+                // LCOV_EXCL_START
                 std::cerr << "Wlen=" << j << " Nlen=" << i << std::endl;
                 throw;
+                // LCOV_EXCL_STOP
             }
         }
     }
