@@ -123,6 +123,27 @@ void test_with_different_buffer_sizes(const char* filepath)
     }
 }
 
+void test_switch_to_custom_buffer(const std::string& filename)
+{
+    // Switching the buffer after file stream was used is not always defined. So only test custom stream
+#if BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
+    nw::test::create_file(filename, "HelloWorld");
+    nw::ifstream f(filename, std::ios::binary);
+    std::string s(5, '\0');
+    TEST(f.read(&s.front(), s.size()));
+    TEST_EQ(s, "Hello");
+    // Switch buffer
+    std::string buffer(10, '\0');
+    TEST_EQ(f.sync(), 0);
+    TEST(f.rdbuf()->pubsetbuf(&buffer.front(), buffer.size()) == f.rdbuf());
+    TEST(f >> s);
+    TEST_EQ(s, "World");
+    TEST_EQ(s, buffer.c_str()); // same should be in buffer and some trailing NULL bytes
+#else
+    (void)filename; // Suppress unused warning
+#endif
+}
+
 // Reproducer for https://github.com/boostorg/nowide/issues/126
 void test_getline_and_tellg(const char* filename)
 {
@@ -247,6 +268,7 @@ void test_main(int, char** argv, char**)
 
     std::cout << "Complex IO" << std::endl;
     test_with_different_buffer_sizes(exampleFilename.c_str());
+    test_switch_to_custom_buffer(exampleFilename.c_str());
 
     std::cout << "Regression tests" << std::endl;
     test_getline_and_tellg(exampleFilename.c_str());
