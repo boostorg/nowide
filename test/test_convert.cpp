@@ -187,6 +187,13 @@ void test_main(int, char**, char**)
         TEST(std::wstring(buf.data()) == whello);
     }
 
+    namespace utf = boost::nowide::utf;
+    // Decode of empty range yields incomplete
+    auto helloIt = hello.begin();
+    TEST_EQ(utf::utf_traits<char>::decode(helloIt, helloIt), utf::incomplete);
+    TEST_EQ(utf::utf_traits<char16_t>::decode(helloIt, helloIt), utf::incomplete);
+    TEST_EQ(utf::utf_traits<char32_t>::decode(helloIt, helloIt), utf::incomplete);
+
     std::cout << "- (output_buffer, buffer_size, input_raw_string)" << std::endl;
     run_all(widen_buf_ptr, narrow_buf_ptr);
     std::cout << "- (output_buffer, buffer_size, input_raw_string, string_len)" << std::endl;
