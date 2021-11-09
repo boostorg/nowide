@@ -39,7 +39,7 @@ void test_main(int, char** argv, char**)
     TEST(f);
     const char testData[] = "Hello World";
     constexpr size_t testDataSize = sizeof(testData);
-    TEST(std::fwrite(testData, sizeof(char), testDataSize, f) == testDataSize);
+    TEST_EQ(std::fwrite(testData, sizeof(char), testDataSize, f), testDataSize);
     std::fclose(f);
     {
 #ifdef BOOST_WINDOWS
@@ -47,11 +47,11 @@ void test_main(int, char** argv, char**)
 #else
         struct stat stdStat;
 #endif /*  */
-        TEST(boost::nowide::stat(filename.c_str(), &stdStat) == 0);
-        TEST(stdStat.st_size == testDataSize);
+        TEST_EQ(boost::nowide::stat(filename.c_str(), &stdStat), 0);
+        TEST_EQ(static_cast<size_t>(stdStat.st_size), testDataSize);
         boost::nowide::stat_t boostStat;
-        TEST(boost::nowide::stat(filename.c_str(), &boostStat) == 0);
-        TEST(boostStat.st_size == testDataSize);
+        TEST_EQ(boost::nowide::stat(filename.c_str(), &boostStat), 0);
+        TEST_EQ(static_cast<size_t>(boostStat.st_size), testDataSize);
     }
 
 #ifdef BOOST_WINDOWS
@@ -60,8 +60,8 @@ void test_main(int, char** argv, char**)
         struct _stat stdStat;
         // Simulate passing a struct that is 4 bytes smaller, e.g. if it uses 32 bit time field instead of 64 bit
         // Need to use the detail function directly
-        TEST(boost::nowide::detail::stat(filename.c_str(), &stdStat, sizeof(stdStat) - 4u) == EINVAL);
-        TEST(errno == EINVAL);
+        TEST_EQ(boost::nowide::detail::stat(filename.c_str(), &stdStat, sizeof(stdStat) - 4u), EINVAL);
+        TEST_EQ(errno, EINVAL);
     }
 #endif
 

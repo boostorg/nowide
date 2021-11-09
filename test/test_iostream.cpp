@@ -153,7 +153,7 @@ void test_putback_and_get()
         char c = i % 96 + ' ';
         TEST(nw::cin.putback(c));
         int ci = i % 96 + ' ';
-        TEST(nw::cin.get() == ci);
+        TEST_EQ(nw::cin.get(), ci);
     }
 
     INSTALL_MOCK_BUF(cin, mock_input_buffer);
@@ -172,7 +172,7 @@ void test_putback_and_get()
             for(int i = num_putback_chars - 1; i >= 0; i--)
             {
                 const int c = getChar(i);
-                TEST(nw::cin.get() == c);
+                TEST_EQ(nw::cin.get(), c);
             }
             // Check unget (all chars)
             for(int i = 0; i < num_putback_chars; i++)
@@ -182,7 +182,7 @@ void test_putback_and_get()
             for(int i = num_putback_chars - 1; i >= 0; i--)
             {
                 const int c = getChar(i);
-                TEST(nw::cin.get() == c);
+                TEST_EQ(nw::cin.get(), c);
             }
         }
 #ifndef BOOST_NOWIDE_TEST_INTERACTIVE
@@ -191,7 +191,7 @@ void test_putback_and_get()
         mock_buf.inputs.push(L"est\r\n");
         std::string test;
         TEST(nw::cin >> test);
-        TEST(test == "Test");
+        TEST_EQ(test, "Test");
 #endif
     }
 }
@@ -319,7 +319,7 @@ void test_cin_getline()
         input.append(L"\U0010FFFF");
     mock_buf.inputs.push(input + L"\r\n");
     TEST(std::getline(nw::cin, value));
-    TEST(value == nw::narrow(input));
+    TEST_EQ(value, nw::narrow(input));
 #endif
 }
 
@@ -354,7 +354,7 @@ void test_ctrl_z_is_eof()
         const std::string expected = create_random_one_line_string(i) + "\x1a";
         mock_buf.inputs.push(std::wstring(expected.begin(), expected.end()) + L"\r\n");
         TEST(std::getline(nw::cin, value));
-        TEST(value == expected);
+        TEST_EQ(value, expected);
     }
 #endif
 }

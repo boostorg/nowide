@@ -165,10 +165,10 @@ void test_main(int, char**, char**)
         TEST(buf[9] == 1);
         TEST(boost::nowide::narrow(buf, 8, b, e) == 0);
         TEST(boost::nowide::narrow(buf, 7, b, e - 1) == buf);
-        TEST(buf == hello.substr(0, 6));
+        TEST_EQ(buf, hello.substr(0, 6));
 
         // Raw literals are also possible
-        TEST(boost::nowide::narrow(L"\u05e9\u05dc\u05d5\u05dd") == hello);
+        TEST_EQ(boost::nowide::narrow(L"\u05e9\u05dc\u05d5\u05dd"), hello);
     }
 
     std::cout << "- boost::nowide::utf::convert_buffer" << std::endl;
