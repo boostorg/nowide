@@ -91,8 +91,10 @@ namespace nowide {
             return false;
         }
 
+        // LCOV_EXCL_START
         int do_length(std::mbstate_t& std_state, const char* from, const char* from_end, size_t max) const override
         {
+            // LCOV_EXCL_STOP
             using utf16_traits = utf::utf_traits<uchar, 2>;
             std::uint16_t state = detail::read_state(std_state);
             const char* save_from = from;
