@@ -60,7 +60,7 @@ void test_pubseekpos(const std::string& filepath)
     std::minstd_rand rng(std::random_device{}());
     using pos_type = nw::filebuf::pos_type;
     const auto eofPos = pos_type(data.size());
-    std::uniform_int_distribution<size_t> distr(0, static_cast<size_t>(eofPos));
+    std::uniform_int_distribution<size_t> distr(0, static_cast<size_t>(eofPos) - 1);
     using traits = nw::filebuf::traits_type;
 
     const auto getData = [&](pos_type pos) { return traits::to_int_type(data[static_cast<size_t>(pos)]); };
@@ -69,10 +69,7 @@ void test_pubseekpos(const std::string& filepath)
     {
         const pos_type pos = distr(rng);
         TEST(buf.pubseekpos(pos) == pos);
-        if(pos == eofPos)
-            TEST(buf.sgetc() == traits::eof());
-        else
-            TEST(buf.sgetc() == getData(pos));
+        TEST(buf.sgetc() == getData(pos));
     }
     // Seek to first and last as corner case tests
     TEST(buf.pubseekpos(0) == pos_type(0));
@@ -93,7 +90,7 @@ void test_pubseekoff(const std::string& filepath)
     using pos_type = nw::filebuf::pos_type;
     using off_type = nw::filebuf::off_type;
     const auto eofPos = pos_type(data.size());
-    std::uniform_int_distribution<size_t> distr(0, static_cast<size_t>(eofPos));
+    std::uniform_int_distribution<size_t> distr(0, static_cast<size_t>(eofPos) - 1);
     using traits = nw::filebuf::traits_type;
 
     const auto getData = [&](pos_type pos) { return traits::to_int_type(data[static_cast<size_t>(pos)]); };
@@ -106,28 +103,19 @@ void test_pubseekoff(const std::string& filepath)
         pos_type pos = distr(rng);
         TEST(buf.pubseekoff(pos, std::ios_base::beg) == pos);
         TEST(tellg() == pos);
-        if(pos == eofPos)
-            TEST(buf.sgetc() == traits::eof());
-        else
-            TEST(buf.sgetc() == getData(pos));
+        TEST(buf.sgetc() == getData(pos));
         // cur
         off_type diff = static_cast<pos_type>(distr(rng)) - pos;
         pos += diff;
         TEST(buf.pubseekoff(diff, std::ios_base::cur) == pos);
         TEST(tellg() == pos);
-        if(pos == eofPos)
-            TEST(buf.sgetc() == traits::eof());
-        else
-            TEST(buf.sgetc() == getData(pos));
+        TEST(buf.sgetc() == getData(pos));
         // end
         diff = static_cast<pos_type>(distr(rng)) - eofPos;
         pos = eofPos + diff;
         TEST(buf.pubseekoff(diff, std::ios_base::end) == pos);
         TEST(tellg() == pos);
-        if(pos == eofPos)
-            TEST(buf.sgetc() == traits::eof());
-        else
-            TEST(buf.sgetc() == getData(pos));
+        TEST(buf.sgetc() == getData(pos));
     }
     // Seek to first and last as corner case tests
     TEST(buf.pubseekoff(0, std::ios_base::beg) == pos_type(0));
@@ -149,10 +137,10 @@ void test_64_bit_seek(const std::string& filepath)
 #pragma warning(push)
 #pragma warning(disable : 4127)
 #endif
-    // if we can't use 64 bit offsets throught the API, don't test anything
+    // if we can't use 64 bit offsets through the API, don't test anything
     // coverity[result_independent_of_operands]
     if(offset == nw::filebuf::off_type(0))
-        return; // coverity[dead_error_line]
+        return; // LCOV_EXCL_LINE coverity[dead_error_line]
 #ifdef BOOST_MSVC
 #pragma warning(pop)
 #endif
@@ -167,7 +155,7 @@ void test_64_bit_seek(const std::string& filepath)
     const std::streampos newPos = buf.pubseekoff(offset, std::ios_base::cur);
     // On 32 bit mode or when seek beyond EOF is not allowed, the current position should be unchanged
     if(newPos == std::streampos(-1))
-        TEST(buf.pubseekoff(0, std::ios_base::cur) == knownPos);
+        TEST(buf.pubseekoff(0, std::ios_base::cur) == knownPos); // LCOV_EXCL_LINE
     else
     {
 #if !BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
