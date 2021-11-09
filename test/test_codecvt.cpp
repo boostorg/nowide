@@ -250,10 +250,10 @@ void test_codecvt_conv()
                 test_codecvt_out_n_m(cvt, i, j);
             } catch(...)
             {
-                //LCOV_EXCL_START
+                // LCOV_EXCL_START
                 std::cerr << "Wlen=" << j << " Nlen=" << i << std::endl;
                 throw;
-                //LCOV_EXCL_STOP
+                // LCOV_EXCL_STOP
             }
         }
     }
