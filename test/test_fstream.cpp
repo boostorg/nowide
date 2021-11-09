@@ -409,7 +409,7 @@ void test_move_and_swap(const std::string& filename)
     const std::string filename2 = filename + ".2";
     create_file(filename2, "Foo Bar");
     remove_file_at_exit _(filename);
-    remove_file_at_exit _2(filename);
+    remove_file_at_exit _2(filename2);
 
     // Move construct
     {
