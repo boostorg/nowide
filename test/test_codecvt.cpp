@@ -71,9 +71,9 @@ void test_codecvt_basic()
 #if BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION
 #pragma warning(pop)
 #endif
-        TEST(cvt.encoding() == 0);   // Characters have a variable width
-        TEST(cvt.max_length() == 4); // At most 4 UTF-8 code units are one internal char (one or two UTF-16 code units)
-        TEST(!cvt.always_noconv());  // Always convert
+        TEST_EQ(cvt.encoding(), 0);   // Characters have a variable width
+        TEST_EQ(cvt.max_length(), 4); // At most 4 UTF-8 code units are one internal char (one or two UTF-16 code units)
+        TEST(!cvt.always_noconv());   // Always convert
     }
     // UTF-32
     {
@@ -86,9 +86,9 @@ void test_codecvt_basic()
 #if BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION
 #pragma warning(pop)
 #endif
-        TEST(cvt.encoding() == 0);   // Characters have a variable width
-        TEST(cvt.max_length() == 4); // At most 4 UTF-8 code units are one internal char (one UTF-32 code unit)
-        TEST(!cvt.always_noconv());  // Always convert
+        TEST_EQ(cvt.encoding(), 0);   // Characters have a variable width
+        TEST_EQ(cvt.max_length(), 4); // At most 4 UTF-8 code units are one internal char (one UTF-32 code unit)
+        TEST(!cvt.always_noconv());   // Always convert
     }
 }
 
@@ -107,15 +107,15 @@ void test_codecvt_unshift()
 #pragma warning(push)
 #pragma warning(disable : 4996) // Disable deprecation warning for std::codecvt<char16, char, ...>
 #endif
-        TEST(cvt.unshift(mb, buf, std::end(buf), to_next) == cvt_type16::ok);
+        TEST_EQ(cvt.unshift(mb, buf, std::end(buf), to_next), cvt_type16::ok);
         TEST(to_next == buf);
         const utf16_char_t* from_next;
         // Convert into a to small buffer
-        TEST(cvt.out(mb, &name16.front(), &name16.back(), from_next, buf, buf + 1, to_next) == cvt_type16::partial);
+        TEST_EQ(cvt.out(mb, &name16.front(), &name16.back(), from_next, buf, buf + 1, to_next), cvt_type16::partial);
         TEST(from_next == &name16[1]);
         TEST(to_next == buf);
         // Unshift on non-default state is not possible
-        TEST(cvt.unshift(mb, buf, std::end(buf), to_next) == cvt_type16::error);
+        TEST_EQ(cvt.unshift(mb, buf, std::end(buf), to_next), cvt_type16::error);
 #if BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION
 #pragma warning(pop)
 #endif
@@ -150,8 +150,8 @@ void test_codecvt_in_n_m(const cvt_type& cvt, size_t n, size_t m)
         std::codecvt_base::result r = cvt.in(mb, from, from_end, from_next, to, to_end, to_next);
 
         int count = cvt.length(mb2, from, from_end, to_end - to);
-        TEST(std::memcmp(&mb, &mb2, sizeof(mb)) == 0);
-        TEST(count == from_next - from);
+        TEST_EQ(std::memcmp(&mb, &mb2, sizeof(mb)), 0);
+        TEST_EQ(count, from_next - from);
 
         if(r == cvt_type::partial)
         {
@@ -159,7 +159,7 @@ void test_codecvt_in_n_m(const cvt_type& cvt, size_t n, size_t m)
             if(from_end > real_end)
                 from_end = real_end;
         } else
-            TEST(r == cvt_type::ok);
+            TEST_EQ(r, cvt_type::ok);
         while(to != to_next)
         {
             TEST(*wptr == *to);
@@ -214,12 +214,12 @@ void test_codecvt_out_n_m(const cvt_type& cvt, size_t n, size_t m)
             }
         } else
         {
-            TEST(r == cvt_type::ok);
+            TEST_EQ(r, cvt_type::ok);
         }
 
         while(to != to_next)
         {
-            TEST(*nptr == *to);
+            TEST_EQ(*nptr, *to);
             nptr++;
             to++;
         }
@@ -227,7 +227,7 @@ void test_codecvt_out_n_m(const cvt_type& cvt, size_t n, size_t m)
     }
     TEST(nptr == utf8_name + u8len);
     TEST(from_next == real_from_end);
-    TEST(cvt.unshift(mb, to, to + n, to_next) == cvt_type::ok);
+    TEST_EQ(cvt.unshift(mb, to, to + n, to_next), cvt_type::ok);
     TEST(to_next == to);
 }
 
@@ -278,7 +278,7 @@ void test_codecvt_err()
             const char* from_end = from + std::strlen(from);
             const char* from_next = from;
             wchar_t* to_next = to;
-            TEST(cvt.in(mb, from, from_end, from_next, to, to_end, to_next) == cvt_type::ok);
+            TEST_EQ(cvt.in(mb, from, from_end, from_next, to, to_end, to_next), cvt_type::ok);
             TEST(from_next == from + 5);
             TEST(to_next == to + 4);
             TEST(std::wstring(to, to_end) == boost::nowide::widen(err_utf));
@@ -293,7 +293,7 @@ void test_codecvt_err()
             const char* from_end = from + std::strlen(from);
             const char* from_next = from;
             wchar_t* to_next = to;
-            TEST(cvt.in(mb, from, from_end, from_next, to, to_end, to_next) == cvt_type::partial);
+            TEST_EQ(cvt.in(mb, from, from_end, from_next, to, to_end, to_next), cvt_type::partial);
             TEST(from_next == from + 1);
             TEST(to_next == to + 1);
             TEST(std::wstring(to, to_next) == std::wstring(L"1"));
@@ -314,17 +314,17 @@ void test_codecvt_err()
 #endif
             if(sizeof(wchar_t) == 2)
             {
-                TEST(res == cvt_type::partial);
+                TEST_EQ(res, cvt_type::partial);
                 TEST(from_next == from_end);
                 TEST(to_next == to);
-                TEST(buf[0] == 0);
+                TEST_EQ(buf[0], 0);
             } else
             {
-                TEST(res == cvt_type::ok);
+                TEST_EQ(res, cvt_type::ok);
                 TEST(from_next == from_end);
                 TEST(to_next == to + 3);
                 // surrogate is invalid
-                TEST(std::string(to, to_next) == boost::nowide::narrow(wreplacement_str));
+                TEST_EQ(std::string(to, to_next), boost::nowide::narrow(wreplacement_str));
             }
         }
     }
@@ -342,10 +342,10 @@ void test_codecvt_err()
             const wchar_t* from = err_utf;
             const wchar_t* from_end = from + std::wcslen(from);
             const wchar_t* from_next = from;
-            TEST(cvt.out(mb, from, from_end, from_next, to, to_end, to_next) == cvt_type::ok);
+            TEST_EQ(cvt.out(mb, from, from_end, from_next, to, to_end, to_next), cvt_type::ok);
             TEST(from_next == from + 2);
             TEST(to_next == to + 4);
-            TEST(std::string(to, to_next) == "1" + boost::nowide::narrow(wreplacement_str));
+            TEST_EQ(std::string(to, to_next), "1" + boost::nowide::narrow(wreplacement_str));
         }
     }
 }
@@ -368,13 +368,13 @@ std::wstring codecvt_to_wide(const std::string& s)
 
     const auto expected_consumed = cvt.length(mb, from, from_end, buf.size());
     cvt_type::result res = cvt.in(mb, from, from_end, from_next, to, to_end, to_next);
-    TEST(expected_consumed == from_next - from);
+    TEST_EQ(expected_consumed, from_next - from);
     if(res == cvt_type::partial)
     {
         TEST(to_next < to_end);
         *(to_next++) = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
     } else
-        TEST(res == cvt_type::ok);
+        TEST_EQ(res, cvt_type::ok);
 
     return std::wstring(to, to_next);
 }
@@ -401,7 +401,7 @@ std::string codecvt_to_narrow(const std::wstring& s)
         TEST(to_next < to_end);
         return std::string(to, to_next) + boost::nowide::narrow(wreplacement_str);
     } else
-        TEST(res == cvt_type::ok);
+        TEST_EQ(res, cvt_type::ok);
 
     return std::string(to, to_next);
 }

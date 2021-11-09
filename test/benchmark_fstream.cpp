@@ -94,11 +94,11 @@ public:
     }
     void write(const char* buf, int size)
     {
-        TEST(std::fwrite(buf, 1, size, f_) == static_cast<size_t>(size));
+        TEST_EQ(std::fwrite(buf, 1, size, f_), static_cast<size_t>(size));
     }
     void read(char* buf, int size)
     {
-        TEST(std::fread(buf, 1, size, f_) == static_cast<size_t>(size));
+        TEST_EQ(std::fread(buf, 1, size, f_), static_cast<size_t>(size));
     }
     void rewind()
     {
@@ -202,7 +202,7 @@ perf_data test_io(const char* file, bool binary)
         std::cout << "  read block size " << std::setw(8) << block_size << " " << std::fixed << std::setprecision(3)
                   << speed << " MB/s" << std::endl;
     }
-    TEST(std::remove(file) == 0);
+    TEST_EQ(std::remove(file), 0);
     return results;
 }
 
