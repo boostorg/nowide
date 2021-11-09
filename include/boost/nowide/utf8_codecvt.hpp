@@ -91,8 +91,10 @@ namespace nowide {
             return false;
         }
 
+        // LCOV_EXCL_START
         int do_length(std::mbstate_t& std_state, const char* from, const char* from_end, size_t max) const override
         {
+            // LCOV_EXCL_STOP
             using utf16_traits = utf::utf_traits<uchar, 2>;
             std::uint16_t state = detail::read_state(std_state);
             const char* save_from = from;
@@ -130,7 +132,7 @@ namespace nowide {
             return static_cast<int>(from - save_from);
         }
 
-        std::codecvt_base::result do_in(std::mbstate_t& std_state,
+        std::codecvt_base::result do_in(std::mbstate_t& std_state, // LCOV_EXCL_LINE
                                         const char* from,
                                         const char* from_end,
                                         const char*& from_next,
@@ -228,7 +230,7 @@ namespace nowide {
                         // Store into state and continue at next character
                         state = w1;
                         continue;
-                    } else
+                    } else // LCOV_EXCL_LINE
                     {
                         // Neither a single codepoint nor a high surrogate so must be low surrogate.
                         // This is an error -> Replace character

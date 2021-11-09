@@ -248,7 +248,7 @@ void test_codecvt_conv()
             {
                 test_codecvt_in_n_m(cvt, i, j);
                 test_codecvt_out_n_m(cvt, i, j);
-            } catch(...)
+            } catch(...) // LCOV_EXCL_LINE
             {
                 // LCOV_EXCL_START
                 std::cerr << "Wlen=" << j << " Nlen=" << i << std::endl;
@@ -400,7 +400,7 @@ std::string codecvt_to_narrow(const std::wstring& s)
     {
         TEST(to_next < to_end);
         return std::string(to, to_next) + boost::nowide::narrow(wreplacement_str);
-    } else
+    } else // LCOV_EXCL_LINE
         TEST_EQ(res, cvt_type::ok);
 
     return std::string(to, to_next);
