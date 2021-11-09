@@ -120,7 +120,7 @@ void test_move_and_swap(const std::string& filename)
     create_file(filename, "Hello\nWorld");
     create_file(filename2, "Foo\nBar");
     remove_file_at_exit _(filename);
-    remove_file_at_exit _2(filename);
+    remove_file_at_exit _2(filename2);
 
     // Move construct
     {
