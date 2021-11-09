@@ -313,14 +313,7 @@ void test_imbue()
     boost::nowide::fstream f;
 #if BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
     std::locale convLocale(std::locale::classic(), new dummyCvtConverting);
-    try
-    {
-        f.imbue(convLocale);
-        TEST(!"Should have thrown an error");
-    } catch(const std::runtime_error&)
-    {
-        /* OK */
-    }
+    TEST_THROW(f.imbue(convLocale), std::runtime_error);
 #endif
     std::locale nonconvLocale(std::locale::classic(), new dummyCvtNonConverting);
     f.imbue(nonconvLocale); // No exception, do nothing

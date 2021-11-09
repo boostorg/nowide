@@ -88,6 +88,21 @@ inline void test_equal_impl(const T& lhs, const U& rhs, const char* file, const 
         DISABLE_CONST_EXPR_DETECTED                                      \
     } while(0) DISABLE_CONST_EXPR_DETECTED_POP
 
+#define TEST_THROW(expr, error)                                                  \
+    do                                                                           \
+    {                                                                            \
+        test_mon();                                                              \
+        try                                                                      \
+        {                                                                        \
+            expr;                                                                \
+            test_failed(#error " not thrown", __FILE__, __LINE__, __FUNCTION__); \
+        } catch(const error&)                                                    \
+        { /* OK */                                                               \
+        }                                                                        \
+        break;                                                                   \
+        DISABLE_CONST_EXPR_DETECTED                                              \
+    } while(0) DISABLE_CONST_EXPR_DETECTED_POP
+
 #ifndef BOOST_NOWIDE_TEST_NO_MAIN
 // Tests should implement this
 void test_main(int argc, char** argv, char** env);
