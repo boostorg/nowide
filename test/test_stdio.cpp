@@ -46,7 +46,7 @@ void create_test_file(const std::string& filename)
 #if BOOST_MSVC
 #include <crtdbg.h> // For _CrtSetReportMode
 void noop_invalid_param_handler(const wchar_t*, const wchar_t*, const wchar_t*, unsigned, uintptr_t)
-{}
+{} // LCOV_EXCL_LINE
 #endif
 
 // coverity [root_function]

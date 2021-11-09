@@ -362,6 +362,7 @@ void test_ctrl_z_is_eof()
 // coverity [root_function]
 void test_main(int argc, char** argv, char**)
 {
+    // LCOV_EXCL_START
     if(usesNowideRdBufIn)
         nw::cout << "Using Nowide input buffer\n";
     else
@@ -370,6 +371,7 @@ void test_main(int argc, char** argv, char**)
         nw::cout << "Using Nowide output buffer\n";
     else
         nw::cout << "NOT using Nowide output buffer\n";
+    // LCOV_EXCL_STOP
 
     const std::string arg = (argc == 1) ? "" : argv[1];
     if(arg == "passthrough") // Read string from cin and write to cout
