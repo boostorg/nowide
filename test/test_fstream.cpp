@@ -37,29 +37,39 @@ protected:
     }
 };
 
+std::string get_narrow_name(const std::string& name)
+{
+    return name;
+}
+std::string get_narrow_name(const std::wstring& name) // LCOV_EXCL_LINE
+{
+    return boost::nowide::narrow(name);
+}
+
 template<class T>
 void test_ctor(const T& filename)
 {
-    remove_file_at_exit _(filename);
+    const std::string narrow_filename = get_narrow_name(filename);
+    remove_file_at_exit _(narrow_filename);
 
     // Fail on non-existing file
     {
-        ensure_not_exists(filename);
+        ensure_not_exists(narrow_filename);
         nw::fstream f(filename);
         TEST(!f);
     }
-    TEST(!file_exists(filename));
+    TEST(!file_exists(narrow_filename));
 
     // Create empty file
     {
-        ensure_not_exists(filename);
+        ensure_not_exists(narrow_filename);
         nw::fstream f(filename, std::ios::out);
         TEST(f);
     }
-    TEST(read_file(filename).empty());
+    TEST(read_file(narrow_filename).empty());
 
     // Read+write existing file
-    create_file(filename, "Hello");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename);
         TEST(f);
@@ -70,8 +80,8 @@ void test_ctor(const T& filename)
         f.clear();
         TEST(f << "World");
     }
-    TEST_EQ(read_file(filename), "HelloWorld");
-    create_file(filename, "Hello");
+    TEST_EQ(read_file(narrow_filename), "HelloWorld");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out | std::ios::in);
         TEST(f);
@@ -82,10 +92,10 @@ void test_ctor(const T& filename)
         f.clear();
         TEST(f << "World");
     }
-    TEST_EQ(read_file(filename), "HelloWorld");
+    TEST_EQ(read_file(narrow_filename), "HelloWorld");
 
     // Readonly existing file
-    create_file(filename, "Hello");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::in);
         TEST(f);
@@ -96,10 +106,10 @@ void test_ctor(const T& filename)
         TEST(f);
         TEST(!(f << "World"));
     }
-    TEST_EQ(read_file(filename), "Hello");
+    TEST_EQ(read_file(narrow_filename), "Hello");
 
     // Write existing file
-    create_file(filename, "Hello");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out);
         TEST(f);
@@ -108,9 +118,9 @@ void test_ctor(const T& filename)
         f.clear();
         TEST(f << "World");
     }
-    TEST_EQ(read_file(filename), "World");
+    TEST_EQ(read_file(narrow_filename), "World");
     // Write existing file with explicit trunc
-    create_file(filename, "Hello");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out | std::ios::trunc);
         TEST(f);
@@ -119,26 +129,26 @@ void test_ctor(const T& filename)
         f.clear();
         TEST(f << "World");
     }
-    TEST_EQ(read_file(filename), "World");
+    TEST_EQ(read_file(narrow_filename), "World");
 
     // append existing file
-    create_file(filename, "Hello");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::app);
         TEST(f);
         TEST(f << "World");
     }
-    TEST_EQ(read_file(filename), "HelloWorld");
-    create_file(filename, "Hello");
+    TEST_EQ(read_file(narrow_filename), "HelloWorld");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out | std::ios::app);
         TEST(f);
         TEST(f << "World");
     }
-    TEST_EQ(read_file(filename), "HelloWorld");
+    TEST_EQ(read_file(narrow_filename), "HelloWorld");
 
     // read+write+truncate existing file
-    create_file(filename, "Hello");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out | std::ios::in | std::ios::trunc);
         TEST(f);
@@ -150,10 +160,10 @@ void test_ctor(const T& filename)
         TEST(f >> tmp);
         TEST_EQ(tmp, "World");
     }
-    TEST_EQ(read_file(filename), "World");
+    TEST_EQ(read_file(narrow_filename), "World");
 
     // read+write+append existing file
-    create_file(filename, "Hello");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out | std::ios::in | std::ios::app);
         TEST(f);
@@ -165,8 +175,8 @@ void test_ctor(const T& filename)
         f.seekg(0);
         TEST(f << "World");
     }
-    TEST_EQ(read_file(filename), "HelloWorld");
-    create_file(filename, "Hello");
+    TEST_EQ(read_file(narrow_filename), "HelloWorld");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::in | std::ios::app);
         TEST(f);
@@ -178,10 +188,10 @@ void test_ctor(const T& filename)
         f.seekg(0);
         TEST(f << "World");
     }
-    TEST_EQ(read_file(filename), "HelloWorld");
+    TEST_EQ(read_file(narrow_filename), "HelloWorld");
 
     // Write at end
-    create_file(filename, "Hello");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::out | std::ios::in | std::ios::ate);
         TEST(f);
@@ -193,10 +203,10 @@ void test_ctor(const T& filename)
         TEST(f >> tmp);
         TEST_EQ(tmp, "HelloWorld");
     }
-    TEST_EQ(read_file(filename), "HelloWorld");
+    TEST_EQ(read_file(narrow_filename), "HelloWorld");
 
     // binary append existing file
-    create_file(filename, "Hello");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::binary | std::ios::out | std::ios::app);
         TEST(f);
@@ -205,8 +215,8 @@ void test_ctor(const T& filename)
         TEST(f.seekg(0));
         TEST(f << "World\n");
     }
-    TEST_EQ(read_file(filename, data_type::binary), "HelloWorldWorld\n");
-    create_file(filename, "Hello");
+    TEST_EQ(read_file(narrow_filename, data_type::binary), "HelloWorldWorld\n");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::binary | std::ios::app);
         TEST(f);
@@ -215,20 +225,20 @@ void test_ctor(const T& filename)
         TEST(f.seekg(0));
         TEST(f << "World\n");
     }
-    TEST_EQ(read_file(filename, data_type::binary), "HelloWorldWorld\n");
+    TEST_EQ(read_file(narrow_filename, data_type::binary), "HelloWorldWorld\n");
 
     // binary out & trunc
-    create_file(filename, "Hello");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::binary | std::ios::out | std::ios::trunc);
         TEST(f);
         TEST(f << "Hello\n");
         TEST(f << "World");
     }
-    TEST_EQ(read_file(filename, data_type::binary), "Hello\nWorld");
+    TEST_EQ(read_file(narrow_filename, data_type::binary), "Hello\nWorld");
 
     // Binary in&out
-    create_file(filename, "Hello");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::binary | std::ios::out | std::ios::in);
         TEST(f);
@@ -239,10 +249,10 @@ void test_ctor(const T& filename)
         f.clear();
         TEST(f << "World\n");
     }
-    TEST_EQ(read_file(filename, data_type::binary), "HelloWorld\n");
+    TEST_EQ(read_file(narrow_filename, data_type::binary), "HelloWorld\n");
 
     // Trunc & binary
-    create_file(filename, "Hello");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
         TEST(f);
@@ -252,10 +262,10 @@ void test_ctor(const T& filename)
         TEST(f.read(&tmp[0], 5));
         TEST_EQ(tmp, "test\n");
     }
-    TEST_EQ(read_file(filename, data_type::binary), "test\n");
+    TEST_EQ(read_file(narrow_filename, data_type::binary), "test\n");
 
     // Binary in&out append
-    create_file(filename, "Hello");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::binary | std::ios::in | std::ios::out | std::ios::app);
         TEST(f);
@@ -269,8 +279,8 @@ void test_ctor(const T& filename)
         f.seekp(0);
         TEST(f << "World\n");
     }
-    TEST_EQ(read_file(filename, data_type::binary), "HelloWorld\n");
-    create_file(filename, "Hello");
+    TEST_EQ(read_file(narrow_filename, data_type::binary), "HelloWorld\n");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f(filename, std::ios::binary | std::ios::in | std::ios::app);
         TEST(f);
@@ -284,7 +294,7 @@ void test_ctor(const T& filename)
         f.seekp(0);
         TEST(f << "World\n");
     }
-    TEST_EQ(read_file(filename, data_type::binary), "HelloWorld\n");
+    TEST_EQ(read_file(narrow_filename, data_type::binary), "HelloWorld\n");
 
     // Invalid modes
     const std::initializer_list<std::ios::openmode> invalid_modes{
@@ -299,12 +309,12 @@ void test_ctor(const T& filename)
     };
     for(const auto mode : invalid_modes)
     {
-        create_file(filename, "Hello");
+        create_file(narrow_filename, "Hello");
         {
             nw::fstream f(filename, mode);
             TEST(!f);
         }
-        TEST_EQ(read_file(filename), "Hello");
+        TEST_EQ(read_file(narrow_filename), "Hello");
     }
 }
 
@@ -322,28 +332,29 @@ void test_imbue()
 template<typename T>
 void test_open(const T& filename)
 {
-    remove_file_at_exit _(filename);
+    const std::string narrow_filename = get_narrow_name(filename);
+    remove_file_at_exit _(narrow_filename);
 
     // Fail on non-existing file
     {
-        ensure_not_exists(filename);
+        ensure_not_exists(narrow_filename);
         nw::fstream f;
         f.open(filename);
         TEST(!f);
     }
-    TEST(!file_exists(filename));
+    TEST(!file_exists(narrow_filename));
 
     // Create empty file
     {
-        ensure_not_exists(filename);
+        ensure_not_exists(narrow_filename);
         nw::fstream f;
         f.open(filename, std::ios::out);
         TEST(f);
     }
-    TEST(read_file(filename).empty());
+    TEST(read_file(narrow_filename).empty());
 
     // Read+write existing file
-    create_file(filename, "Hello");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f;
         f.open(filename);
@@ -354,10 +365,10 @@ void test_open(const T& filename)
         f.clear();
         TEST(f << "World");
     }
-    TEST_EQ(read_file(filename), "HelloWorld");
+    TEST_EQ(read_file(narrow_filename), "HelloWorld");
 
     // Readonly existing file
-    create_file(filename, "Hello");
+    create_file(narrow_filename, "Hello");
     {
         nw::fstream f;
         f.open(filename, std::ios::in);
@@ -368,7 +379,7 @@ void test_open(const T& filename)
         TEST(f);
         TEST(!(f << "World"));
     }
-    TEST_EQ(read_file(filename), "Hello");
+    TEST_EQ(read_file(narrow_filename), "Hello");
 
     // remaining mode cases skipped as they are already tested by the ctor tests
 }
@@ -392,6 +403,9 @@ void do_test_is_open(const std::string& filename)
     f.close();
     TEST(f);
     TEST(!is_open(f));
+    // Closing again fails
+    f.close();
+    TEST(!f);
 }
 
 /// Test is_open for all 3 fstream classes
@@ -527,10 +541,16 @@ void test_main(int, char** argv, char**)
     std::cout << "Ctor" << std::endl;
     test_ctor<const char*>(exampleFilename.c_str());
     test_ctor<std::string>(exampleFilename);
+#if BOOST_NOWIDE_USE_WCHAR_OVERLOADS
+    test_ctor<const wchar_t*>(boost::nowide::widen(exampleFilename).c_str());
+#endif
 
     std::cout << "Open" << std::endl;
     test_open<const char*>(exampleFilename.c_str());
     test_open<std::string>(exampleFilename);
+#if BOOST_NOWIDE_USE_WCHAR_OVERLOADS
+    test_open<const wchar_t*>(boost::nowide::widen(exampleFilename).c_str());
+#endif
 
     std::cout << "IsOpen" << std::endl;
     test_is_open(exampleFilename);
