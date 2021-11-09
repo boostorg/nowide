@@ -16,6 +16,7 @@
 #include <boost/nowide/utf/utf.hpp>
 #include "test.hpp"
 #include <algorithm>
+#include <cassert>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -24,12 +25,8 @@
 
 bool is_ascii(const std::string& s)
 {
-    for(std::string::const_iterator it = s.begin(); it != s.end(); ++it)
-    {
-        if(static_cast<unsigned char>(*it) > 0x7F)
-            return false;
-    }
-    return true;
+    return std::find_if(s.begin(), s.end(), [](const char c) { return static_cast<unsigned char>(c) > 0x7F; })
+           == s.end();
 }
 
 std::string replace_non_ascii(const std::string& s)
@@ -84,15 +81,11 @@ void compare_getenv(char** env)
         std::string key = std::string(key_begin, key_end);
         const char* std_value = std::getenv(key.c_str());
         const char* bnw_value = boost::nowide::getenv(key.c_str());
-        // If std_value is set, bnw value must be too and be equal, else bnw value must be unset too
-        if(std_value)
-        {
-            TEST(bnw_value);
-            // Compare only if ascii
-            if(is_ascii(std_value) && std::string(std_value) != std::string(bnw_value))
-                TEST_EQ(std_value, replace_non_ascii(bnw_value));
-        } else
-            TEST(!bnw_value);
+        assert(std_value);
+        TEST(bnw_value);
+        // Compare only if ascii
+        if(is_ascii(std_value) && std::string(std_value) != std::string(bnw_value))
+            TEST_EQ(std_value, replace_non_ascii(bnw_value));
     }
 }
 
@@ -130,6 +123,7 @@ void run_child(int argc, char** argv, char** env)
 
 void run_parent(const char* exe_path)
 {
+    TEST(boost::nowide::system(nullptr) != 0);
     const std::string command = "\"" + std::string(exe_path) + "\" " + example;
 #if BOOST_NOWIDE_TEST_USE_NARROW
     TEST(boost::nowide::setenv("BOOST_NOWIDE_TEST", example.c_str(), 1) == 0);
