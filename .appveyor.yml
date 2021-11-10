@@ -167,7 +167,7 @@ for:
       # Build consumer example test
       - cmake --build . --config %configuration% --target install
       - del /F /S /Q *
-      - cmake ../test/exampleProject -G "%GENERATOR%" -DCMAKE_PREFIX_PATH=%APPVEYOR_BUILD_FOLDER%\installed
+      - cmake -DBOOST_NOWIDE_INSTALL_TEST=ON -G "%GENERATOR%" -DCMAKE_PREFIX_PATH=%APPVEYOR_BUILD_FOLDER%\installed ../test/cmake_test
       - cmake --build . --config %configuration%
       - ctest --output-on-failure -C %configuration% --parallel 4
   # Superproject CMake build
