@@ -132,7 +132,7 @@ namespace nowide {
             return static_cast<int>(from - save_from);
         }
 
-        std::codecvt_base::result do_in(std::mbstate_t& std_state, // LCOV_EXCL_LINE
+        std::codecvt_base::result do_in(std::mbstate_t& std_state,
                                         const char* from,
                                         const char* from_end,
                                         const char*& from_next,
@@ -230,7 +230,7 @@ namespace nowide {
                         // Store into state and continue at next character
                         state = w1;
                         continue;
-                    } else // LCOV_EXCL_LINE
+                    } else
                     {
                         // Neither a single codepoint nor a high surrogate so must be low surrogate.
                         // This is an error -> Replace character

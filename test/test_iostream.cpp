@@ -51,7 +51,7 @@ protected:
             output.insert(output.end(), buffer, buffer + num_chars_to_write);
             num_chars_written = num_chars_to_write;
             return true;
-        } else // LCOV_EXCL_LINE
+        } else
         {
             num_chars_written = 0;
             return false;

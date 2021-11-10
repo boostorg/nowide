@@ -400,7 +400,7 @@ std::string codecvt_to_narrow(const std::wstring& s)
     {
         TEST(to_next < to_end);
         return std::string(to, to_next) + boost::nowide::narrow(wreplacement_str);
-    } else // LCOV_EXCL_LINE
+    } else
         TEST_EQ(res, cvt_type::ok);
 
     return std::string(to, to_next);
