@@ -97,7 +97,7 @@ namespace nowide {
             {
                 d.reset(new console_output_buffer(h));
                 std::ostream::rdbuf(d.get());
-            } else // LCOV_EXCL_LINE
+            } else
             {
                 std::ostream::rdbuf(fd == 1 ? std::cout.rdbuf() : std::cerr.rdbuf());
                 assert(rdbuf());

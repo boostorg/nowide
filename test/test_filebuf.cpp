@@ -155,7 +155,7 @@ void test_64_bit_seek(const std::string& filepath)
     const std::streampos newPos = buf.pubseekoff(offset, std::ios_base::cur);
     // On 32 bit mode or when seek beyond EOF is not allowed, the current position should be unchanged
     if(newPos == std::streampos(-1))
-        TEST_EQ(buf.pubseekoff(0, std::ios_base::cur), knownPos); // LCOV_EXCL_LINE
+        TEST_EQ(buf.pubseekoff(0, std::ios_base::cur), knownPos);
     else
     {
 #if !BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT

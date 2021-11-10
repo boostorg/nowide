@@ -41,7 +41,7 @@ std::string get_narrow_name(const std::string& name)
 {
     return name;
 }
-std::string get_narrow_name(const std::wstring& name) // LCOV_EXCL_LINE
+std::string get_narrow_name(const std::wstring& name)
 {
     return boost::nowide::narrow(name);
 }

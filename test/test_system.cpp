@@ -29,7 +29,7 @@ bool is_ascii(const std::string& s)
            == s.end();
 }
 
-std::string replace_non_ascii(const std::string& s) // LCOV_EXCL_LINE
+std::string replace_non_ascii(const std::string& s)
 {
     std::string::const_iterator it = s.begin();
     namespace utf = boost::nowide::utf;

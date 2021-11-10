@@ -15,7 +15,7 @@ set -eux
 
 if [[ "$1" == "setup" ]]; then
     echo "B2_VARIANT=debug" >> "$GITHUB_ENV"
-    echo "B2_FLAGS=cxxflags=--coverage linkflags=--coverage" >> "$GITHUB_ENV"
+    echo 'B2_FLAGS=cxxflags="-fkeep-inline-functions -fkeep-static-functions --coverage" linkflags=--coverage' >> "$GITHUB_ENV"
 else
     ver=7 # default
     if [ "${B2_COMPILER%%-*}" == "g++" ]; then
