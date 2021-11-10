@@ -62,7 +62,7 @@ jobs:
           tar -xf "${{github.workspace}}/nowide.tar.gz"
           src_dir="$PWD/nowide_${{steps.get_tag.outputs.tag}}"
           mkdir build && cd build
-          cmake "$src_dir" -DBoost_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=${{runner.workspace}}/../install
+          cmake -DBoost_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=${{runner.workspace}}/../install "$src_dir"
           cmake --build . --config Debug --target install
           ctest --output-on-failure -C Debug --verbose
       - name: Create Release

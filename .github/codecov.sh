@@ -8,19 +8,20 @@
 # Bash script to run on Github Actions to perform codecov.io integration
 #
 
-# assumes an environment variable $LIBRARY set to the boost project name
+# assumes an environment variable $SELF set to the boost project name
 # and BOOST_ROOT to be set
 
 set -eux
 
 if [[ "$1" == "setup" ]]; then
     echo "B2_VARIANT=debug" >> "$GITHUB_ENV"
-    echo 'B2_FLAGS=cxxflags="-fkeep-inline-functions -fkeep-static-functions --coverage" linkflags=--coverage' >> "$GITHUB_ENV"
+    echo "B2_CXXFLAGS=${B2_CXXFLAGS:+$B2_CXXFLAGS }-fkeep-inline-functions -fkeep-static-functions --coverage" >> "$GITHUB_ENV"
+    echo "B2_LINKFLAGS=${B2_LINKFLAGS:+$B2_LINKFLAGS }--coverage" >> "$GITHUB_ENV"
 else
     ver=7 # default
-    if [ "${B2_COMPILER%%-*}" == "g++" ]; then
-        if [[ "$B2_COMPILER" =~ g\+\+- ]]; then
-            ver="${B2_COMPILER##*g++-}"
+    if [ "${B2_TOOLSET%%-*}" == "gcc" ]; then
+        if [[ "$B2_TOOLSET" =~ gcc- ]]; then
+            ver="${B2_TOOLSET##*gcc-}"
         fi
     fi
     GCOV=gcov-${ver}
@@ -38,7 +39,7 @@ else
     cd "$GITHUB_WORKSPACE"
     : "${LCOV_BRANCH_COVERAGE:=1}" # Set default
 
-    lcov --gcov-tool="$GCOV" --rc lcov_branch_coverage=${LCOV_BRANCH_COVERAGE} --base-directory "$BOOST_ROOT/libs/$LIBRARY" --directory "$BOOST_ROOT" --capture --output-file all.info
+    lcov --gcov-tool="$GCOV" --rc lcov_branch_coverage=${LCOV_BRANCH_COVERAGE} --base-directory "$BOOST_ROOT/libs/$SELF" --directory "$BOOST_ROOT" --capture --output-file all.info
     # dump a summary on the console
     lcov --gcov-tool="$GCOV" --rc lcov_branch_coverage=${LCOV_BRANCH_COVERAGE} --list all.info
 
@@ -47,7 +48,7 @@ else
     for f in $(for f2 in include/boost/*; do echo "$f2"; done | cut -f2- -d/); do echo "*/$f*"; done > /tmp/interesting
     echo headers that matter:
     cat /tmp/interesting
-    xargs -L 999999 -a /tmp/interesting lcov --gcov-tool="$GCOV" --rc lcov_branch_coverage=${LCOV_BRANCH_COVERAGE} --extract all.info {} "*/libs/$LIBRARY/*" --output-file coverage.info
+    xargs -L 999999 -a /tmp/interesting lcov --gcov-tool="$GCOV" --rc lcov_branch_coverage=${LCOV_BRANCH_COVERAGE} --extract all.info {} "*/libs/$SELF/*" --output-file coverage.info
 
     # dump a summary on the console - helps us identify problems in pathing
     lcov --gcov-tool="$GCOV" --rc lcov_branch_coverage=${LCOV_BRANCH_COVERAGE} --list coverage.info

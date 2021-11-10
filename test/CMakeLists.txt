@@ -9,6 +9,10 @@ add_library(boost_nowide_file_test_helpers STATIC file_test_helpers.cpp)
 target_link_libraries(boost_nowide_file_test_helpers PRIVATE PRIVATE Boost::nowide)
 target_compile_definitions(boost_nowide_file_test_helpers PRIVATE BOOST_ALL_NO_LIB)
 
+if(NOT TARGET tests)
+  add_custom_target(tests)
+endif()
+  
 function(boost_nowide_add_test name)
   cmake_parse_arguments(PARSE_ARGV 1 ARG "COMPILE_ONLY" "SRC" "LIBRARIES;DEFINITIONS;ARGS")
   if(NOT ARG_SRC)
@@ -17,6 +21,7 @@ function(boost_nowide_add_test name)
   set(name ${PROJECT_NAME}-${name})
   
   add_executable(${name} ${ARG_SRC})
+  add_dependencies(tests ${name})
   target_link_libraries(${name} PRIVATE Boost::nowide ${ARG_LIBRARIES})
   boost_add_warnings(${name} pedantic ${Boost_NOWIDE_WERROR})
   if(_BOOST_NOWIDE_SUGGEST_OVERRIDE_SUPPORTED)
