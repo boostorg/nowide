@@ -124,6 +124,11 @@ jobs:
         working-directory: ${{env.BOOST_ROOT}}
         run: ./b2 -j3 libs/$LIBRARY/test toolset=$B2_TOOLSET cxxstd=$B2_CXXSTD variant=$B2_VARIANT link=$B2_LINK $B2_ASAN $B2_UBSAN $B2_LINKFLAGS $B2_FLAGS
 
+      - name: Run tests with simulated no LFS support
+        if: matrix.coverage
+        working-directory: ${{env.BOOST_ROOT}}
+        run: ./b2 -j3 libs/$LIBRARY/test toolset=$B2_TOOLSET cxxstd=$B2_CXXSTD variant=$B2_VARIANT link=$B2_LINK $B2_ASAN $B2_UBSAN $B2_LINKFLAGS $B2_FLAGS define=BOOST_NOWIDE_NO_LFS
+
       - name: Collect coverage
         if: matrix.coverage
         run: ${{github.workspace}}/.github/codecov.sh collect
