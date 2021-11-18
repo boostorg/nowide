@@ -170,7 +170,7 @@ jobs:
 
       - name: Run tests with simulated no LFS support
         env:
-          B2_DEFINES: BOOST_NOWIDE_NO_LFS
+          B2_FLAGS: boost.nowide.lfs=no
         run: ci/build.sh
 
       - name: Upload coverage
