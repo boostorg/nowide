@@ -39,13 +39,15 @@ else
     : "${LCOV_BRANCH_COVERAGE:=1}" # Set default
 
     lcov --gcov-tool="$GCOV" --rc lcov_branch_coverage=${LCOV_BRANCH_COVERAGE} --base-directory "$BOOST_ROOT/libs/$LIBRARY" --directory "$BOOST_ROOT" --capture --output-file all.info
+    # dump a summary on the console
+    lcov --gcov-tool="$GCOV" --rc lcov_branch_coverage=${LCOV_BRANCH_COVERAGE} --list all.info
 
     # all.info contains all the coverage info for all projects - limit to ours
     # first we extract the interesting headers for our project then we use that list to extract the right things
     for f in $(for f2 in include/boost/*; do echo "$f2"; done | cut -f2- -d/); do echo "*/$f*"; done > /tmp/interesting
     echo headers that matter:
     cat /tmp/interesting
-    xargs -L 999999 -a /tmp/interesting lcov --gcov-tool="$GCOV" --rc lcov_branch_coverage=${LCOV_BRANCH_COVERAGE} --extract all.info {} "*/libs/$LIBRARY/src/*" --output-file coverage.info
+    xargs -L 999999 -a /tmp/interesting lcov --gcov-tool="$GCOV" --rc lcov_branch_coverage=${LCOV_BRANCH_COVERAGE} --extract all.info {} "*/libs/$LIBRARY/*" --output-file coverage.info
 
     # dump a summary on the console - helps us identify problems in pathing
     lcov --gcov-tool="$GCOV" --rc lcov_branch_coverage=${LCOV_BRANCH_COVERAGE} --list coverage.info

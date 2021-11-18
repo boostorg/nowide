@@ -18,13 +18,6 @@ namespace boost {
 namespace nowide {
     namespace test {
 
-        void create_empty_file(const std::string& filepath)
-        {
-            auto* f = fopen(filepath.c_str(), "w");
-            TEST(f);
-            std::fclose(f);
-        }
-
         void create_file(const std::string& filepath, const std::string& contents, data_type type /*= data_type::text*/)
         {
             auto* f = fopen(filepath.c_str(), (type == data_type::binary) ? "wb" : "w");

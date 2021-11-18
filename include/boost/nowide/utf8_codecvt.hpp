@@ -11,6 +11,7 @@
 
 #include <boost/nowide/replacement.hpp>
 #include <boost/nowide/utf/utf.hpp>
+#include <cassert>
 #include <cstdint>
 #include <locale>
 
@@ -48,6 +49,11 @@ namespace nowide {
     template<typename CharType, int CharSize = sizeof(CharType)>
     class utf8_codecvt;
 
+#ifdef BOOST_MSVC
+#pragma warning(push)
+#pragma warning(disable : 4996) // Disable deprecation warning for std::codecvt<char16_t, char, ...>
+#endif
+
     /// Specialization for the UTF-8 <-> UTF-16 variant of the std::codecvt implementation
     template<typename CharType>
     class BOOST_SYMBOL_VISIBLE utf8_codecvt<CharType, 2> : public std::codecvt<CharType, char, std::mbstate_t>
@@ -57,6 +63,10 @@ namespace nowide {
 
         utf8_codecvt(size_t refs = 0) : std::codecvt<CharType, char, std::mbstate_t>(refs)
         {}
+
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
 
     protected:
         using uchar = CharType;
@@ -81,8 +91,10 @@ namespace nowide {
             return false;
         }
 
+        // LCOV_EXCL_START
         int do_length(std::mbstate_t& std_state, const char* from, const char* from_end, size_t max) const override
         {
+            // LCOV_EXCL_STOP
             using utf16_traits = utf::utf_traits<uchar, 2>;
             std::uint16_t state = detail::read_state(std_state);
             const char* save_from = from;
@@ -225,11 +237,7 @@ namespace nowide {
                         ch = BOOST_NOWIDE_REPLACEMENT_CHARACTER;
                     }
                 }
-                if(!utf::is_valid_codepoint(ch))
-                {
-                    r = std::codecvt_base::error;
-                    break;
-                }
+                assert(utf::is_valid_codepoint(ch)); // Any valid UTF16 sequence is a valid codepoint
                 int len = utf::utf_traits<char>::width(ch);
                 if(to_end - to < len)
                 {
@@ -248,6 +256,11 @@ namespace nowide {
         }
     };
 
+#ifdef BOOST_MSVC
+#pragma warning(push)
+#pragma warning(disable : 4996) // Disable deprecation warning for std::codecvt<char32_t, char, ...>
+#endif
+
     /// Specialization for the UTF-8 <-> UTF-32 variant of the std::codecvt implementation
     template<typename CharType>
     class BOOST_SYMBOL_VISIBLE utf8_codecvt<CharType, 4> : public std::codecvt<CharType, char, std::mbstate_t>
@@ -255,6 +268,10 @@ namespace nowide {
     public:
         utf8_codecvt(size_t refs = 0) : std::codecvt<CharType, char, std::mbstate_t>(refs)
         {}
+
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
 
     protected:
         using uchar = CharType;
@@ -296,7 +313,7 @@ namespace nowide {
                 }
                 max--;
             }
-            return from - start_from;
+            return static_cast<int>(from - start_from);
         }
 
         std::codecvt_base::result do_in(std::mbstate_t& /*state*/,

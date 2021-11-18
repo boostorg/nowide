@@ -60,7 +60,7 @@ void test_pubseekpos(const std::string& filepath)
     std::minstd_rand rng(std::random_device{}());
     using pos_type = nw::filebuf::pos_type;
     const auto eofPos = pos_type(data.size());
-    std::uniform_int_distribution<size_t> distr(0, static_cast<size_t>(eofPos));
+    std::uniform_int_distribution<size_t> distr(0, static_cast<size_t>(eofPos) - 1);
     using traits = nw::filebuf::traits_type;
 
     const auto getData = [&](pos_type pos) { return traits::to_int_type(data[static_cast<size_t>(pos)]); };
@@ -68,17 +68,14 @@ void test_pubseekpos(const std::string& filepath)
     for(int i = 0; i < 100; i++)
     {
         const pos_type pos = distr(rng);
-        TEST(buf.pubseekpos(pos) == pos);
-        if(pos == eofPos)
-            TEST(buf.sgetc() == traits::eof());
-        else
-            TEST(buf.sgetc() == getData(pos));
+        TEST_EQ(buf.pubseekpos(pos), pos);
+        TEST_EQ(buf.sgetc(), getData(pos));
     }
     // Seek to first and last as corner case tests
-    TEST(buf.pubseekpos(0) == pos_type(0));
-    TEST(buf.sgetc() == traits::to_int_type(data[0]));
-    TEST(buf.pubseekpos(eofPos) == eofPos);
-    TEST(buf.sgetc() == traits::eof());
+    TEST_EQ(buf.pubseekpos(0), pos_type(0));
+    TEST_EQ(buf.sgetc(), traits::to_int_type(data[0]));
+    TEST_EQ(buf.pubseekpos(eofPos), eofPos);
+    TEST_EQ(buf.sgetc(), traits::eof());
 }
 
 void test_pubseekoff(const std::string& filepath)
@@ -93,7 +90,7 @@ void test_pubseekoff(const std::string& filepath)
     using pos_type = nw::filebuf::pos_type;
     using off_type = nw::filebuf::off_type;
     const auto eofPos = pos_type(data.size());
-    std::uniform_int_distribution<size_t> distr(0, static_cast<size_t>(eofPos));
+    std::uniform_int_distribution<size_t> distr(0, static_cast<size_t>(eofPos) - 1);
     using traits = nw::filebuf::traits_type;
 
     const auto getData = [&](pos_type pos) { return traits::to_int_type(data[static_cast<size_t>(pos)]); };
@@ -104,38 +101,29 @@ void test_pubseekoff(const std::string& filepath)
     {
         // beg
         pos_type pos = distr(rng);
-        TEST(buf.pubseekoff(pos, std::ios_base::beg) == pos);
-        TEST(tellg() == pos);
-        if(pos == eofPos)
-            TEST(buf.sgetc() == traits::eof());
-        else
-            TEST(buf.sgetc() == getData(pos));
+        TEST_EQ(buf.pubseekoff(pos, std::ios_base::beg), pos);
+        TEST_EQ(tellg(), pos);
+        TEST_EQ(buf.sgetc(), getData(pos));
         // cur
         off_type diff = static_cast<pos_type>(distr(rng)) - pos;
         pos += diff;
-        TEST(buf.pubseekoff(diff, std::ios_base::cur) == pos);
-        TEST(tellg() == pos);
-        if(pos == eofPos)
-            TEST(buf.sgetc() == traits::eof());
-        else
-            TEST(buf.sgetc() == getData(pos));
+        TEST_EQ(buf.pubseekoff(diff, std::ios_base::cur), pos);
+        TEST_EQ(tellg(), pos);
+        TEST_EQ(buf.sgetc(), getData(pos));
         // end
         diff = static_cast<pos_type>(distr(rng)) - eofPos;
         pos = eofPos + diff;
-        TEST(buf.pubseekoff(diff, std::ios_base::end) == pos);
-        TEST(tellg() == pos);
-        if(pos == eofPos)
-            TEST(buf.sgetc() == traits::eof());
-        else
-            TEST(buf.sgetc() == getData(pos));
+        TEST_EQ(buf.pubseekoff(diff, std::ios_base::end), pos);
+        TEST_EQ(tellg(), pos);
+        TEST_EQ(buf.sgetc(), getData(pos));
     }
     // Seek to first and last as corner case tests
-    TEST(buf.pubseekoff(0, std::ios_base::beg) == pos_type(0));
-    TEST(tellg() == pos_type(0));
-    TEST(buf.sgetc() == traits::to_int_type(data[0]));
-    TEST(buf.pubseekoff(0, std::ios_base::end) == eofPos);
-    TEST(tellg() == eofPos);
-    TEST(buf.sgetc() == traits::eof());
+    TEST_EQ(buf.pubseekoff(0, std::ios_base::beg), pos_type(0));
+    TEST_EQ(tellg(), pos_type(0));
+    TEST_EQ(buf.sgetc(), traits::to_int_type(data[0]));
+    TEST_EQ(buf.pubseekoff(0, std::ios_base::end), eofPos);
+    TEST_EQ(tellg(), eofPos);
+    TEST_EQ(buf.sgetc(), traits::eof());
 }
 
 void test_64_bit_seek(const std::string& filepath)
@@ -149,10 +137,10 @@ void test_64_bit_seek(const std::string& filepath)
 #pragma warning(push)
 #pragma warning(disable : 4127)
 #endif
-    // if we can't use 64 bit offsets throught the API, don't test anything
+    // if we can't use 64 bit offsets through the API, don't test anything
     // coverity[result_independent_of_operands]
     if(offset == nw::filebuf::off_type(0))
-        return; // coverity[dead_error_line]
+        return; // LCOV_EXCL_LINE coverity[dead_error_line]
 #ifdef BOOST_MSVC
 #pragma warning(pop)
 #endif
@@ -163,11 +151,11 @@ void test_64_bit_seek(const std::string& filepath)
     nw::filebuf buf;
     TEST(buf.open(filepath, std::ios_base::in | std::ios_base::binary) == &buf);
     const std::streampos knownPos = 2;
-    TEST(buf.pubseekpos(knownPos) == knownPos); // Just to make sure we know where we are
+    TEST_EQ(buf.pubseekpos(knownPos), knownPos); // Just to make sure we know where we are
     const std::streampos newPos = buf.pubseekoff(offset, std::ios_base::cur);
     // On 32 bit mode or when seek beyond EOF is not allowed, the current position should be unchanged
     if(newPos == std::streampos(-1))
-        TEST(buf.pubseekoff(0, std::ios_base::cur) == knownPos);
+        TEST_EQ(buf.pubseekoff(0, std::ios_base::cur), knownPos);
     else
     {
 #if !BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
@@ -175,8 +163,8 @@ void test_64_bit_seek(const std::string& filepath)
         if(newPos == knownPos)
             offset = 0; // LCOV_EXCL_LINE
 #endif
-        TEST(newPos == offset + knownPos);
-        TEST(buf.pubseekoff(0, std::ios_base::cur) == newPos);
+        TEST_EQ(newPos, offset + knownPos);
+        TEST_EQ(buf.pubseekoff(0, std::ios_base::cur), newPos);
     }
 }
 
@@ -221,8 +209,8 @@ void test_swap(const std::string& filepath)
         buf1.close();
         TEST(!buf1.is_open());
         TEST(!buf2.is_open());
-        TEST(read_file(filepath) == "FooBar");
-        TEST(read_file(filepath2) == "HelloWorld");
+        TEST_EQ(read_file(filepath), "FooBar");
+        TEST_EQ(read_file(filepath2), "HelloWorld");
     }
     // Check: mode, owns_buffer
     {
@@ -231,24 +219,24 @@ void test_swap(const std::string& filepath)
         buf1.pubsetbuf(buffer, sizeof(buffer));
         TEST(buf1.open(filepath, std::ios_base::out) == &buf1);
         TEST(buf2.open(filepath2, std::ios_base::in) == &buf2);
-        TEST(buf1.sputc('B') == 'B');
-        TEST(buf2.sbumpc() == 'H');
+        TEST_EQ(buf1.sputc('B'), 'B');
+        TEST_EQ(buf2.sbumpc(), 'H');
         buf1.swap(buf2);
         // Trying to read in write mode or other way round should fail
-        TEST(buf1.sputc('x') == eof);
-        TEST(buf2.sbumpc() == eof);
-        TEST(buf1.sbumpc() == 'e');
-        TEST(buf2.sputc('a') == 'a');
+        TEST_EQ(buf1.sputc('x'), eof);
+        TEST_EQ(buf2.sbumpc(), eof);
+        TEST_EQ(buf1.sbumpc(), 'e');
+        TEST_EQ(buf2.sputc('a'), 'a');
         buf2.swap(buf1);
-        TEST(buf2.sputc('x') == eof);
-        TEST(buf1.sbumpc() == eof);
-        TEST(buf2.sbumpc() == 'l');
-        TEST(buf1.sputn("zXYZ", 4) == 4);
+        TEST_EQ(buf2.sputc('x'), eof);
+        TEST_EQ(buf1.sbumpc(), eof);
+        TEST_EQ(buf2.sbumpc(), 'l');
+        TEST_EQ(buf1.sputn("zXYZ", 4), 4);
         swap(buf2, buf1);
         buf1.close();
         buf2.close();
-        TEST(read_file(filepath) == "BazXYZ");
-        TEST(read_file(filepath2) == "HelloWorld");
+        TEST_EQ(read_file(filepath), "BazXYZ");
+        TEST_EQ(read_file(filepath2), "HelloWorld");
     }
     // Check: last_char, gptr, eback
     {
@@ -258,22 +246,22 @@ void test_swap(const std::string& filepath)
         TEST(buf1.open(filepath, std::ios_base::in) == &buf1);
         TEST(buf2.open(filepath2, std::ios_base::in) == &buf2);
         // Peek
-        TEST(buf1.sgetc() == 'B');
-        TEST(buf2.sgetc() == 'H');
+        TEST_EQ(buf1.sgetc(), 'B');
+        TEST_EQ(buf2.sgetc(), 'H');
         swap(buf1, buf2);
-        TEST(buf2.sgetc() == 'B');
-        TEST(buf1.sgetc() == 'H');
+        TEST_EQ(buf2.sgetc(), 'B');
+        TEST_EQ(buf1.sgetc(), 'H');
         // Advance
-        TEST(buf2.sbumpc() == 'B');
-        TEST(buf1.sbumpc() == 'H');
-        TEST(buf2.sbumpc() == 'a');
-        TEST(buf1.sbumpc() == 'e');
+        TEST_EQ(buf2.sbumpc(), 'B');
+        TEST_EQ(buf1.sbumpc(), 'H');
+        TEST_EQ(buf2.sbumpc(), 'a');
+        TEST_EQ(buf1.sbumpc(), 'e');
         swap(buf1, buf2);
-        TEST(buf1.sbumpc() == 'z');
-        TEST(buf2.sbumpc() == 'l');
+        TEST_EQ(buf1.sbumpc(), 'z');
+        TEST_EQ(buf2.sbumpc(), 'l');
         swap(buf1, buf2);
-        TEST(buf2.sgetc() == 'X');
-        TEST(buf1.sgetc() == 'l');
+        TEST_EQ(buf2.sgetc(), 'X');
+        TEST_EQ(buf1.sgetc(), 'l');
     }
     // Check: pptr, epptr
     {
@@ -282,31 +270,31 @@ void test_swap(const std::string& filepath)
         buf1.pubsetbuf(0, 0);
         TEST(buf1.open(filepath, std::ios_base::out) == &buf1);
         TEST(buf2.open(filepath2, std::ios_base::out) == &buf2);
-        TEST(buf1.sputc('1') == '1');
-        TEST(buf2.sputc('a') == 'a');
+        TEST_EQ(buf1.sputc('1'), '1');
+        TEST_EQ(buf2.sputc('a'), 'a');
         swap(buf1, buf2);
         // buf1: filepath2, buf2: filepath
-        TEST(buf1.sputc('b') == 'b');
-        TEST(buf2.sputc('2') == '2');
+        TEST_EQ(buf1.sputc('b'), 'b');
+        TEST_EQ(buf2.sputc('2'), '2');
         // Sync and check if file was written
-        TEST(buf1.pubsync() == 0);
-        TEST(read_file(filepath2) == "ab");
-        TEST(buf2.pubsync() == 0);
-        TEST(read_file(filepath) == "12");
+        TEST_EQ(buf1.pubsync(), 0);
+        TEST_EQ(read_file(filepath2), "ab");
+        TEST_EQ(buf2.pubsync(), 0);
+        TEST_EQ(read_file(filepath), "12");
         swap(buf1, buf2);
         // buf1: filepath, buf2: filepath2
-        TEST(buf1.pubsync() == 0);
-        TEST(read_file(filepath) == "12");
-        TEST(buf2.pubsync() == 0);
-        TEST(read_file(filepath2) == "ab");
-        TEST(buf1.sputc('3') == '3');
-        TEST(buf2.sputc('c') == 'c');
+        TEST_EQ(buf1.pubsync(), 0);
+        TEST_EQ(read_file(filepath), "12");
+        TEST_EQ(buf2.pubsync(), 0);
+        TEST_EQ(read_file(filepath2), "ab");
+        TEST_EQ(buf1.sputc('3'), '3');
+        TEST_EQ(buf2.sputc('c'), 'c');
         swap(buf1, buf2);
         // buf1: filepath2, buf2: filepath
-        TEST(buf1.pubsync() == 0);
-        TEST(read_file(filepath2) == "abc");
-        TEST(buf2.pubsync() == 0);
-        TEST(read_file(filepath) == "123");
+        TEST_EQ(buf1.pubsync(), 0);
+        TEST_EQ(read_file(filepath2), "abc");
+        TEST_EQ(buf2.pubsync(), 0);
+        TEST_EQ(read_file(filepath), "123");
     }
 }
 

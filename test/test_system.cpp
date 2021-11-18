@@ -16,6 +16,7 @@
 #include <boost/nowide/utf/utf.hpp>
 #include "test.hpp"
 #include <algorithm>
+#include <cassert>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -24,15 +25,11 @@
 
 bool is_ascii(const std::string& s)
 {
-    for(std::string::const_iterator it = s.begin(); it != s.end(); ++it)
-    {
-        if(static_cast<unsigned char>(*it) > 0x7F)
-            return false;
-    }
-    return true;
+    return std::find_if(s.begin(), s.end(), [](const char c) { return static_cast<unsigned char>(c) > 0x7F; })
+           == s.end();
 }
 
-std::string replace_non_ascii(const std::string& s)
+std::string replace_non_ascii(const std::string& s) // LCOV_EXCL_LINE
 {
     std::string::const_iterator it = s.begin();
     namespace utf = boost::nowide::utf;
@@ -84,15 +81,11 @@ void compare_getenv(char** env)
         std::string key = std::string(key_begin, key_end);
         const char* std_value = std::getenv(key.c_str());
         const char* bnw_value = boost::nowide::getenv(key.c_str());
-        // If std_value is set, bnw value must be too and be equal, else bnw value must be unset too
-        if(std_value)
-        {
-            TEST(bnw_value);
-            // Compare only if ascii
-            if(is_ascii(std_value) && std::string(std_value) != std::string(bnw_value))
-                TEST_EQ(std_value, replace_non_ascii(bnw_value));
-        } else
-            TEST(!bnw_value);
+        assert(std_value);
+        TEST(bnw_value);
+        // Compare only if ascii
+        if(is_ascii(std_value) && std::string(std_value) != std::string(bnw_value))
+            TEST_EQ(std_value, replace_non_ascii(bnw_value));
     }
 }
 
@@ -101,14 +94,14 @@ const std::string example = "\xd7\xa9-\xd0\xbc-\xce\xbd";
 void run_child(int argc, char** argv, char** env)
 {
     // Test arguments
-    TEST(argc == 2);
+    TEST_EQ(argc, 2);
     TEST_EQ(argv[1], example);
-    TEST(argv[2] == 0);
+    TEST(argv[2] == NULL);
 
     // Test getenv
     TEST(boost::nowide::getenv("BOOST_NOWIDE_TEST"));
     TEST_EQ(boost::nowide::getenv("BOOST_NOWIDE_TEST"), example);
-    TEST(boost::nowide::getenv("BOOST_NOWIDE_TEST_NONE") == 0);
+    TEST(boost::nowide::getenv("BOOST_NOWIDE_TEST_NONE") == NULL);
     // Empty variables are unreliable on windows, hence skip. E.g. using "set FOO=" unsets FOO
 #ifndef BOOST_WINDOWS
     TEST(boost::nowide::getenv("BOOST_NOWIDE_EMPTY"));
@@ -130,20 +123,21 @@ void run_child(int argc, char** argv, char** env)
 
 void run_parent(const char* exe_path)
 {
+    TEST(boost::nowide::system(nullptr) != 0);
     const std::string command = "\"" + std::string(exe_path) + "\" " + example;
 #if BOOST_NOWIDE_TEST_USE_NARROW
-    TEST(boost::nowide::setenv("BOOST_NOWIDE_TEST", example.c_str(), 1) == 0);
-    TEST(boost::nowide::setenv("BOOST_NOWIDE_TEST_NONE", example.c_str(), 1) == 0);
-    TEST(boost::nowide::unsetenv("BOOST_NOWIDE_TEST_NONE") == 0);
-    TEST(boost::nowide::setenv("BOOST_NOWIDE_EMPTY", "", 1) == 0);
+    TEST_EQ(boost::nowide::setenv("BOOST_NOWIDE_TEST", example.c_str(), 1), 0);
+    TEST_EQ(boost::nowide::setenv("BOOST_NOWIDE_TEST_NONE", example.c_str(), 1), 0);
+    TEST_EQ(boost::nowide::unsetenv("BOOST_NOWIDE_TEST_NONE"), 0);
+    TEST_EQ(boost::nowide::setenv("BOOST_NOWIDE_EMPTY", "", 1), 0);
     TEST(boost::nowide::getenv("BOOST_NOWIDE_EMPTY"));
-    TEST(boost::nowide::system(command.c_str()) == 0);
+    TEST_EQ(boost::nowide::system(command.c_str()), 0);
     std::cout << "Parent ok" << std::endl;
 #else
     const std::wstring envVar = L"BOOST_NOWIDE_TEST=" + boost::nowide::widen(example);
-    TEST(_wputenv(envVar.c_str()) == 0);
+    TEST_EQ(_wputenv(envVar.c_str()), 0);
     const std::wstring wcommand = boost::nowide::widen(command);
-    TEST(_wsystem(wcommand.c_str()) == 0);
+    TEST_EQ(_wsystem(wcommand.c_str()), 0);
     std::cout << "Wide Parent ok" << std::endl;
 #endif
 }
@@ -156,7 +150,7 @@ void test_main(int argc, char** argv, char** env)
     char** old_env = env;
     {
         boost::nowide::args _(argc, argv, env);
-        TEST(argc == old_argc);
+        TEST_EQ(argc, old_argc);
         std::cout << "Checking arguments" << std::endl;
         compare_string_arrays(old_argv, argv, false);
         std::cout << "Checking env" << std::endl;
@@ -164,7 +158,7 @@ void test_main(int argc, char** argv, char** env)
         compare_getenv(env);
     }
     // When `args` is destructed the old values must be restored
-    TEST(argc == old_argc);
+    TEST_EQ(argc, old_argc);
     TEST(argv == old_argv);
     TEST(env == old_env);
 

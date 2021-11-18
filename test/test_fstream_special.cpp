@@ -49,41 +49,41 @@ void test_with_different_buffer_sizes(const char* filepath)
         TEST(f.put('g'));
         // Read first char
         TEST(f.seekg(0));
-        TEST(f.get() == 'a');
-        TEST(f.gcount() == 1u);
+        TEST_EQ(f.get(), 'a');
+        TEST_EQ(f.gcount(), std::streamsize(1));
         // Skip next char
         TEST(f.seekg(1, std::ios::cur));
-        TEST(f.get() == 'c');
-        TEST(f.gcount() == 1u);
+        TEST_EQ(f.get(), 'c');
+        TEST_EQ(f.gcount(), std::streamsize(1));
         // Go back 1 char
         TEST(f.seekg(-1, std::ios::cur));
-        TEST(f.get() == 'c');
-        TEST(f.gcount() == 1u);
+        TEST_EQ(f.get(), 'c');
+        TEST_EQ(f.gcount(), std::streamsize(1));
 
         // Test switching between read->write->read
         // case 1) overwrite, flush, read
         TEST(f.seekg(1));
         TEST(f.put('B'));
         TEST(f.flush()); // Flush when changing out->in
-        TEST(f.get() == 'c');
-        TEST(f.gcount() == 1u);
+        TEST_EQ(f.get(), 'c');
+        TEST_EQ(f.gcount(), std::streamsize(1));
         TEST(f.seekg(1));
-        TEST(f.get() == 'B');
-        TEST(f.gcount() == 1u);
+        TEST_EQ(f.get(), 'B');
+        TEST_EQ(f.gcount(), std::streamsize(1));
         // case 2) overwrite, seek, read
         TEST(f.seekg(2));
         TEST(f.put('C'));
         TEST(f.seekg(3)); // Seek when changing out->in
-        TEST(f.get() == 'd');
-        TEST(f.gcount() == 1u);
+        TEST_EQ(f.get(), 'd');
+        TEST_EQ(f.gcount(), std::streamsize(1));
 
         // Check that sequence from start equals expected
         TEST(f.seekg(0));
-        TEST(f.get() == 'a');
-        TEST(f.get() == 'B');
-        TEST(f.get() == 'C');
-        TEST(f.get() == 'd');
-        TEST(f.get() == 'e');
+        TEST_EQ(f.get(), 'a');
+        TEST_EQ(f.get(), 'B');
+        TEST_EQ(f.get(), 'C');
+        TEST_EQ(f.get(), 'd');
+        TEST_EQ(f.get(), 'e');
 
         // Putback after flush is implementation defined
         // Boost.Nowide: Works
@@ -91,18 +91,24 @@ void test_with_different_buffer_sizes(const char* filepath)
         TEST(f << std::flush);
         TEST(f.putback('e'));
         TEST(f.putback('d'));
-        TEST(f.get() == 'd');
-        TEST(f.get() == 'e');
+        TEST_EQ(f.get(), 'd');
+        TEST_EQ(f.get(), 'e');
+        TEST(f << std::flush);
+        TEST(f.unget());
+        TEST_EQ(f.get(), 'e');
 #endif
+        // Put back different char
+        TEST(f.putback('x'));
+        TEST_EQ(f.get(), 'x');
         // Rest of sequence
-        TEST(f.get() == 'f');
-        TEST(f.get() == 'g');
-        TEST(f.get() == EOF);
+        TEST_EQ(f.get(), 'f');
+        TEST_EQ(f.get(), 'g');
+        TEST_EQ(f.get(), EOF);
 
         // Put back until front of file is reached
         f.clear();
         TEST(f.seekg(1));
-        TEST(f.get() == 'B');
+        TEST_EQ(f.get(), 'B');
         TEST(f.putback('B'));
         // Putting back multiple chars is not possible on all implementations after a seek/flush
 #if BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
@@ -110,11 +116,32 @@ void test_with_different_buffer_sizes(const char* filepath)
         TEST(!f.putback('x')); // At beginning of file -> No putback possible
         // Get characters that were putback to avoid MSVC bug https://github.com/microsoft/STL/issues/342
         f.clear();
-        TEST(f.get() == 'a');
+        TEST_EQ(f.get(), 'a');
 #endif
-        TEST(f.get() == 'B');
+        TEST_EQ(f.get(), 'B');
         f.close();
     }
+}
+
+void test_switch_to_custom_buffer(const std::string& filename)
+{
+    // Switching the buffer after file stream was used is not always defined. So only test custom stream
+#if BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
+    nw::test::create_file(filename, "HelloWorld");
+    nw::ifstream f(filename, std::ios::binary);
+    std::string s(5, '\0');
+    TEST(f.read(&s.front(), s.size()));
+    TEST_EQ(s, "Hello");
+    // Switch buffer
+    std::string buffer(10, '\0');
+    TEST_EQ(f.sync(), 0);
+    TEST(f.rdbuf()->pubsetbuf(&buffer.front(), buffer.size()) == f.rdbuf());
+    TEST(f >> s);
+    TEST_EQ(s, "World");
+    TEST_EQ(s, buffer.c_str()); // same should be in buffer and some trailing NULL bytes
+#else
+    (void)filename; // Suppress unused warning
+#endif
 }
 
 // Reproducer for https://github.com/boostorg/nowide/issues/126
@@ -133,13 +160,13 @@ void test_getline_and_tellg(const char* filename)
     TEST(f);
     std::string line1, line2, line3;
     TEST(getline(f, line1));
-    TEST(line1 == "Line 1");
+    TEST_EQ(line1, "Line 1");
     const auto tg = f.tellg(); // This may cause issues
     TEST(tg > 0u);
     TEST(getline(f, line2));
-    TEST(line2 == "Line 2");
+    TEST_EQ(line2, "Line 2");
     TEST(getline(f, line3));
-    TEST(line3 == "Line 3");
+    TEST_EQ(line3, "Line 3");
 }
 
 // Test that a sync after a peek does not swallow newlines
@@ -160,7 +187,7 @@ void test_peek_sync_get(const char* filename)
         if(curChar == std::char_traits<char>::eof())
             break;
         f.sync();
-        TEST(f.get() == char(curChar));
+        TEST_EQ(f.get(), char(curChar));
     }
 }
 
@@ -193,16 +220,40 @@ void test_swap(const char* filename, const char* filename2)
         else if(ctr % 15 == 0)
             TEST(f2.seekg(f2.tellg()));
         f1.swap(f2);
-        TEST(f1.peek() == curChar2);
-        TEST(f2.peek() == curChar1);
+        TEST_EQ(f1.peek(), curChar2);
+        TEST_EQ(f2.peek(), curChar1);
         if(ctr % 10 == 4)
             TEST(f1.seekg(f1.tellg()));
         else if(ctr % 15 == 4)
             TEST(f2.seekg(f2.tellg()));
-        TEST(f1.get() == char(curChar2));
+        TEST_EQ(f1.get(), char(curChar2));
         f1.swap(f2);
-        TEST(f1.get() == char(curChar1));
+        TEST_EQ(f1.get(), char(curChar1));
         ++ctr;
+    }
+}
+
+void testPutback(const char* filename)
+{
+    nw::test::create_file(filename, "abc");
+    // Does work for ifstreams
+    {
+        nw::ifstream f(filename);
+        const int c = f.get();
+        TEST(f.putback(static_cast<char>(c)));
+        TEST_EQ(f.get(), c);
+    }
+    // Does work for io fstreams
+    {
+        nw::fstream f(filename);
+        const int c = f.get();
+        TEST(f.putback(static_cast<char>(c)));
+        TEST_EQ(f.get(), c);
+    }
+    // Doesn't work for output fstreams
+    {
+        nw::fstream f(filename, std::ios::out);
+        TEST(!f.putback('x'));
     }
 }
 
@@ -212,8 +263,12 @@ void test_main(int, char** argv, char**)
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
     const std::string exampleFilename2 = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd 2.txt";
 
+    std::cout << "Putback" << std::endl;
+    testPutback(exampleFilename.c_str());
+
     std::cout << "Complex IO" << std::endl;
     test_with_different_buffer_sizes(exampleFilename.c_str());
+    test_switch_to_custom_buffer(exampleFilename.c_str());
 
     std::cout << "Regression tests" << std::endl;
     test_getline_and_tellg(exampleFilename.c_str());

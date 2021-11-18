@@ -33,9 +33,9 @@ void test_ctor(const T& filename)
         TEST(f);
         std::string tmp;
         TEST(f >> tmp);
-        TEST(tmp == "test");
+        TEST_EQ(tmp, "test");
     }
-    TEST(read_file(filename) == "test");
+    TEST_EQ(read_file(filename), "test");
 
     // At end
     {
@@ -47,9 +47,9 @@ void test_ctor(const T& filename)
         f.clear();
         f.seekg(0, std::ios::beg);
         TEST(f >> tmp);
-        TEST(tmp == "test");
+        TEST_EQ(tmp, "test");
     }
-    TEST(read_file(filename) == "test");
+    TEST_EQ(read_file(filename), "test");
 
     create_file(filename, "test\r\n", data_type::binary);
     // Binary mode
@@ -58,7 +58,7 @@ void test_ctor(const T& filename)
         TEST(f);
         std::string tmp(6, '\0');
         TEST(f.read(&tmp[0], 6));
-        TEST(tmp == "test\r\n");
+        TEST_EQ(tmp, "test\r\n");
     }
 }
 
@@ -83,9 +83,9 @@ void test_open(const T& filename)
         TEST(f);
         std::string tmp;
         TEST(f >> tmp);
-        TEST(tmp == "test");
+        TEST_EQ(tmp, "test");
     }
-    TEST(read_file(filename) == "test");
+    TEST_EQ(read_file(filename), "test");
 
     // At end
     {
@@ -98,9 +98,9 @@ void test_open(const T& filename)
         f.clear();
         f.seekg(0, std::ios::beg);
         TEST(f >> tmp);
-        TEST(tmp == "test");
+        TEST_EQ(tmp, "test");
     }
-    TEST(read_file(filename) == "test");
+    TEST_EQ(read_file(filename), "test");
 
     create_file(filename, "test\r\n", data_type::binary);
     // Binary mode
@@ -110,7 +110,7 @@ void test_open(const T& filename)
         TEST(f);
         std::string tmp(6, '\0');
         TEST(f.read(&tmp[0], 6));
-        TEST(tmp == "test\r\n");
+        TEST_EQ(tmp, "test\r\n");
     }
 }
 
@@ -120,7 +120,7 @@ void test_move_and_swap(const std::string& filename)
     create_file(filename, "Hello\nWorld");
     create_file(filename2, "Foo\nBar");
     remove_file_at_exit _(filename);
-    remove_file_at_exit _2(filename);
+    remove_file_at_exit _2(filename2);
 
     // Move construct
     {
@@ -139,13 +139,13 @@ void test_move_and_swap(const std::string& filename)
 #endif
         TEST(f_old);
         TEST(f_old >> s);
-        TEST(s == "Foo");
+        TEST_EQ(s, "Foo");
         TEST(f_old >> s && s == "Bar");
 
         // new starts where the old was left of
         TEST(f_new);
         TEST(f_new >> s);
-        TEST(s == "World");
+        TEST_EQ(s, "World");
     }
     // Move assign
     {
@@ -167,13 +167,13 @@ void test_move_and_swap(const std::string& filename)
 #endif
             TEST(f_old);
             TEST(f_old >> s);
-            TEST(s == "Foo");
+            TEST_EQ(s, "Foo");
             TEST(f_old >> s && s == "Bar");
         }
         // new starts where the old was left of
         TEST(f_new);
         TEST(f_new >> s);
-        TEST(s == "World");
+        TEST_EQ(s, "World");
     }
     // Swap
     {
@@ -187,10 +187,10 @@ void test_move_and_swap(const std::string& filename)
         // After swapping both are valid and where they left
         f_new.swap(f_old);
         TEST(f_old >> s);
-        TEST(s == "Bar");
+        TEST_EQ(s, "Bar");
 
         TEST(f_new >> s);
-        TEST(s == "World");
+        TEST_EQ(s, "World");
 
         f_new.close();
         swap(f_new, f_old);
