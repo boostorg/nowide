@@ -170,8 +170,7 @@ void test_move_and_swap(const std::string& filename)
     TEST_EQ(read_file(filename2), "Foo Bar");
 }
 
-// coverity [root_function]
-void test_main(int, char** argv, char**)
+void test_main(int, char** argv, char**) // coverity [root_function]
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
 

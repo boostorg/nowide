@@ -14,8 +14,7 @@
 #include <windows.h>
 #endif
 
-// coverity [root_function]
-void test_main(int, char**, char**)
+void test_main(int, char**, char**) // coverity [root_function]
 {
     std::string example = "\xd7\xa9-\xd0\xbc-\xce\xbd";
     std::string envVar = "BOOST_TEST2=" + example + "x";

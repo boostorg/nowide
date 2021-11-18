@@ -533,8 +533,7 @@ void test_flush(const std::string& filepath)
     TEST(!fo.seekg(0)); // Does not work on closed stream
 }
 
-// coverity [root_function]
-void test_main(int, char** argv, char**)
+void test_main(int, char** argv, char**) // coverity [root_function]
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
 

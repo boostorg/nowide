@@ -359,8 +359,7 @@ void test_ctrl_z_is_eof()
 #endif
 }
 
-// coverity [root_function]
-void test_main(int argc, char** argv, char**)
+void test_main(int argc, char** argv, char**) // coverity [root_function]
 {
     // LCOV_EXCL_START
     if(usesNowideRdBufIn)

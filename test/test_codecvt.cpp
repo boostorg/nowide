@@ -412,8 +412,7 @@ void test_codecvt_subst()
     run_all(codecvt_to_wide, codecvt_to_narrow);
 }
 
-// coverity [root_function]
-void test_main(int, char**, char**)
+void test_main(int, char**, char**) // coverity [root_function]
 {
     test_codecvt_basic();
     test_codecvt_unshift();

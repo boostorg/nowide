@@ -138,9 +138,13 @@ void test_64_bit_seek(const std::string& filepath)
 #pragma warning(disable : 4127)
 #endif
     // if we can't use 64 bit offsets through the API, don't test anything
+    // LCOV_EXCL_START
     // coverity[result_independent_of_operands]
     if(offset == nw::filebuf::off_type(0))
-        return; // LCOV_EXCL_LINE coverity[dead_error_line]
+    {
+        return; // coverity[dead_error_line]
+    }
+    // LCOV_EXCL_STOP
 #ifdef BOOST_MSVC
 #pragma warning(pop)
 #endif
@@ -298,8 +302,7 @@ void test_swap(const std::string& filepath)
     }
 }
 
-// coverity [root_function]
-void test_main(int, char** argv, char**)
+void test_main(int, char** argv, char**) // coverity [root_function]
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
 

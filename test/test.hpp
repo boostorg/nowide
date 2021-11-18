@@ -111,13 +111,13 @@ int main(int argc, char** argv, char** env)
 {
     try
     {
+#ifdef _MSC_VER
+        std::cout << "MSVC version " << _MSC_VER << std::endl;
+#endif
         test_main(argc, argv, env);
     } catch(const std::exception& e)
     {
         std::cerr << "Failed " << e.what() << std::endl;
-#ifdef _MSC_VER
-        std::cerr << "MSVC version " << _MSC_VER << std::endl;
-#endif
         return 1;
     }
     return 0;
