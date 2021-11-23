@@ -26,22 +26,13 @@
 #define BOOST_NOWIDE_REQUIRE_UTF_CHAR_WORKAROUND 0
 #endif
 
-#if defined(_MSC_VER) && !BOOST_NOWIDE_REQUIRE_UTF_CHAR_WORKAROUND
-#define BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION 1
-#else
-#define BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION 0
-#endif
-
 static const char* utf8_name =
   "\xf0\x9d\x92\x9e-\xD0\xBF\xD1\x80\xD0\xB8\xD0\xB2\xD0\xB5\xD1\x82-\xE3\x82\x84\xE3\x81\x82.txt";
 static const std::wstring wide_name_str = boost::nowide::widen(utf8_name);
 static const wchar_t* wide_name = wide_name_str.c_str();
 
 using cvt_type = std::codecvt<wchar_t, char, std::mbstate_t>;
-#if BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION
-#pragma warning(push)
-#pragma warning(disable : 4996) // Disable deprecation warning for std::codecvt<char16/32_t, char, ...>
-#endif
+
 #if BOOST_NOWIDE_REQUIRE_UTF_CHAR_WORKAROUND
 using utf16_char_t = int16_t;
 using utf32_char_t = int32_t;
@@ -50,42 +41,31 @@ using utf16_char_t = char16_t;
 using utf32_char_t = char32_t;
 #endif
 
+BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_BEGIN
 using cvt_type16 = std::codecvt<utf16_char_t, char, std::mbstate_t>;
 using cvt_type32 = std::codecvt<utf32_char_t, char, std::mbstate_t>;
-#if BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION
-#pragma warning(pop)
-#endif
 using utf8_utf16_codecvt = boost::nowide::utf8_codecvt<utf16_char_t>;
 using utf8_utf32_codecvt = boost::nowide::utf8_codecvt<utf32_char_t>;
+BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_END
 
 void test_codecvt_basic()
 {
     // UTF-16
     {
-#if BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION
-#pragma warning(push)
-#pragma warning(disable : 4996) // Disable deprecation warning for std::codecvt<char16, char, ...>
-#endif
+        BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_BEGIN
         std::locale l(std::locale::classic(), new utf8_utf16_codecvt());
         const cvt_type16& cvt = std::use_facet<cvt_type16>(l);
-#if BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION
-#pragma warning(pop)
-#endif
+        BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_END
         TEST_EQ(cvt.encoding(), 0);   // Characters have a variable width
         TEST_EQ(cvt.max_length(), 4); // At most 4 UTF-8 code units are one internal char (one or two UTF-16 code units)
         TEST(!cvt.always_noconv());   // Always convert
     }
     // UTF-32
     {
-#if BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION
-#pragma warning(push)
-#pragma warning(disable : 4996) // Disable deprecation warning for std::codecvt<char32, char, ...>
-#endif
+        BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_BEGIN
         std::locale l(std::locale::classic(), new utf8_utf32_codecvt());
         const cvt_type32& cvt = std::use_facet<cvt_type32>(l);
-#if BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION
-#pragma warning(pop)
-#endif
+        BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_END
         TEST_EQ(cvt.encoding(), 0);   // Characters have a variable width
         TEST_EQ(cvt.max_length(), 4); // At most 4 UTF-8 code units are one internal char (one UTF-32 code unit)
         TEST(!cvt.always_noconv());   // Always convert
@@ -99,14 +79,13 @@ void test_codecvt_unshift()
 
     utf8_utf16_codecvt cvt16;
     {
+        BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_BEGIN
         const cvt_type16& cvt = cvt16;
+        BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_END
         // Unshift on initial state does nothing
         std::mbstate_t mb{};
         char* to_next;
-#if BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION
-#pragma warning(push)
-#pragma warning(disable : 4996) // Disable deprecation warning for std::codecvt<char16, char, ...>
-#endif
+        BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_BEGIN
         TEST_EQ(cvt.unshift(mb, buf, std::end(buf), to_next), cvt_type16::ok);
         TEST(to_next == buf);
         const utf16_char_t* from_next;
@@ -116,9 +95,7 @@ void test_codecvt_unshift()
         TEST(to_next == buf);
         // Unshift on non-default state is not possible
         TEST_EQ(cvt.unshift(mb, buf, std::end(buf), to_next), cvt_type16::error);
-#if BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION
-#pragma warning(pop)
-#endif
+        BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_END
     }
 }
 
