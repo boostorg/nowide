@@ -6,6 +6,8 @@
 
 version: 1.0.{build}-{branch}
 
+shallow_clone: false
+
 branches:
   only:
     - master
@@ -17,10 +19,14 @@ branches:
 
 matrix:
   fast_finish: false
+  # Adding MAYFAIL to any matrix job allows it to fail but the build stays green:
+  allow_failures:
+    - MAYFAIL: true
 
 environment:
   global:
     B2_CI_VERSION: 1
+    GIT_FETCH_JOBS: 4
     # see: http://www.boost.org/build/doc/html/bbv2/overview/invocation.html#bbv2.overview.invocation.properties
     # to use the default for a given environment, comment it out; recommend you build debug and release however:
     # on Windows it is important to exercise all the possibilities, especially shared vs static, however most
@@ -123,8 +129,9 @@ environment:
         secure: Qq4PZ3QlpYtg3HEyn9r2Og==
 
 install:
-  - git clone https://github.com/boostorg/boost-ci.git C:\boost-ci-cloned
-  - xcopy /s /e /q /i /y C:\boost-ci-cloned\ci .\ci
+  - git clone --depth 1 https://github.com/boostorg/boost-ci.git C:\boost-ci-cloned
+  # Copy ci folder if not testing Boost.CI
+  - if NOT "%APPVEYOR_PROJECT_NAME%" == "boost-ci" xcopy /s /e /q /i /y C:\boost-ci-cloned\ci .\ci
   - rmdir /s /q C:\boost-ci-cloned
   - ci\appveyor\install.bat
 
