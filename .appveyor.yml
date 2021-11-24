@@ -37,6 +37,7 @@ environment:
     B2_VARIANT: release,debug
     # Include OpenCppCoverage and git bash (avoid WSL bash)
     PATH: 'C:\Program Files\OpenCppCoverage;C:\Program Files\Git\bin;%PATH%'
+    # CODECOV_TOKEN: { secure: BUWmc1TLOFKpwqt5vE27s8j5nZKbEhq2s4BAUx2oap4dBrHEUPwdNScqfYBecLxm }
   matrix:
     - FLAVOR: Visual Studio 2019
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
@@ -110,9 +111,6 @@ environment:
       configuration: Debug
       BOOST_ROOT: C:\Libraries\boost_1_73_0
       COVERAGE: true
-      # Work around for https://community.codecov.io/t/bash-script-does-not-detect-appveyor/1094
-      APPVEYOR: true
-      CI: true
     # Superproject CMake build
     - FLAVOR: Superproject CMake build - VS 2019
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
@@ -161,15 +159,11 @@ for:
       - ps: |
             If ($env:COVERAGE -eq "true") {
               choco install opencppcoverage
-              Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile codecov.sh
+              Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe -Outfile codecov.exe
               OpenCppCoverage.exe --quiet --export_type cobertura:cobertura.xml `
                 --sources ${env:APPVEYOR_BUILD_FOLDER} --modules "$PWD" `
                 --cover_children --working_dir "$PWD" -- ctest -C Debug
-              $commit = if ($env:APPVEYOR_PULL_REQUEST_HEAD_COMMIT) { $env:APPVEYOR_PULL_REQUEST_HEAD_COMMIT } else { $env:APPVEYOR_REPO_COMMIT }
-              bash codecov.sh -f cobertura.xml -n Appveyor -e APPVEYOR_BUILD_WORKER_IMAGE `
-                -C $commit `
-                -X gcov -X search -Z `
-                -U "-s" -A "-s"
+              ./codecov.exe -n Appveyor -e APPVEYOR_BUILD_WORKER_IMAGE
             }
       # Build consumer example test
       - cmake --build . --config %configuration% --target install
