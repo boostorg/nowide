@@ -162,6 +162,10 @@ for:
               Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe -Outfile codecov.exe
               OpenCppCoverage.exe --quiet --export_type cobertura:cobertura.xml `
                 --sources ${env:APPVEYOR_BUILD_FOLDER} --modules "$PWD" `
+                --excluded_line_regex '.*// LCOV_EXCL_LINE' `
+                --excluded_line_regex '.*// coverity\[dead_error_line\]' `
+                --excluded_line_regex '\s*[{}]*\s*' `
+                --excluded_line_regex '\s*(\} )?else( \{)?\s*' `
                 --cover_children --working_dir "$PWD" -- ctest -C Debug
               ./codecov.exe -n Appveyor -e APPVEYOR_BUILD_WORKER_IMAGE
             }

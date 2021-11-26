@@ -367,7 +367,7 @@ void test_main(int argc, char** argv, char**) // coverity [root_function]
     else
         nw::cout << "NOT using Nowide input buffer\n";
     if(usesNowideRdBufOut)
-        nw::cout << "Using Nowide output buffer\n";
+        nw::cout << "Using Nowide output buffer\n"; // LCOV_EXCL_LINE
     else
         nw::cout << "NOT using Nowide output buffer\n";
     // LCOV_EXCL_STOP

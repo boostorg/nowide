@@ -125,7 +125,7 @@ namespace nowide {
             return static_cast<int>(from - save_from);
         }
 
-        std::codecvt_base::result do_in(std::mbstate_t& std_state,
+        std::codecvt_base::result do_in(std::mbstate_t& std_state, // LCOV_EXCL_LINE
                                         const char* from,
                                         const char* from_end,
                                         const char*& from_next,
