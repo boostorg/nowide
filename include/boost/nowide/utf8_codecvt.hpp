@@ -266,7 +266,7 @@ namespace nowide {
         do_unshift(std::mbstate_t& /*s*/, char* from, char* /*to*/, char*& next) const override
         {
             next = from;
-            return std::codecvt_base::ok;
+            return std::codecvt_base::noconv;
         }
         int do_encoding() const noexcept override
         {

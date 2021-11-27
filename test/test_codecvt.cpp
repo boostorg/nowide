@@ -75,17 +75,17 @@ void test_codecvt_basic()
 void test_codecvt_unshift()
 {
     char buf[256];
-    const auto name16 = boost::nowide::utf::convert_string<utf16_char_t>(utf8_name, utf8_name + std::strlen(utf8_name));
-
-    utf8_utf16_codecvt cvt16;
+    // UTF-16
     {
-        BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_BEGIN
-        const cvt_type16& cvt = cvt16;
-        BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_END
+        const auto name16 =
+          boost::nowide::utf::convert_string<utf16_char_t>(utf8_name, utf8_name + std::strlen(utf8_name));
+
+        utf8_utf16_codecvt cvt16;
         // Unshift on initial state does nothing
         std::mbstate_t mb{};
         char* to_next;
         BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_BEGIN
+        const cvt_type16& cvt = cvt16;
         TEST_EQ(cvt.unshift(mb, buf, std::end(buf), to_next), cvt_type16::ok);
         TEST(to_next == buf);
         const utf16_char_t* from_next;
@@ -95,6 +95,29 @@ void test_codecvt_unshift()
         TEST(to_next == buf);
         // Unshift on non-default state is not possible
         TEST_EQ(cvt.unshift(mb, buf, std::end(buf), to_next), cvt_type16::error);
+        BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_END
+    }
+    // UTF-32
+    {
+        const auto name32 =
+          boost::nowide::utf::convert_string<utf32_char_t>(utf8_name, utf8_name + std::strlen(utf8_name));
+
+        utf8_utf32_codecvt cvt32;
+        // Unshift on initial state does nothing
+        std::mbstate_t mb{};
+        char* to_next;
+        BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_BEGIN
+        const cvt_type32& cvt = cvt32;
+        TEST_EQ(cvt.unshift(mb, buf, std::end(buf), to_next), cvt_type32::noconv);
+        TEST(to_next == buf);
+        const utf32_char_t* from_next;
+        // Convert into a too small buffer
+        TEST_EQ(cvt.out(mb, &name32.front(), &name32.back(), from_next, buf, buf + 1, to_next), cvt_type32::partial);
+        TEST(from_next == &name32.front()); // Noting consumed
+        TEST(to_next == buf);
+        TEST(std::mbsinit(&mb) != 0); // State unchanged --> Unshift does nothing
+        TEST_EQ(cvt.unshift(mb, buf, std::end(buf), to_next), cvt_type32::noconv);
+        TEST(to_next == buf);
         BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_END
     }
 }
@@ -204,7 +227,8 @@ void test_codecvt_out_n_m(const cvt_type& cvt, size_t n, size_t m)
     }
     TEST(nptr == utf8_name + u8len);
     TEST(from_next == real_from_end);
-    TEST_EQ(cvt.unshift(mb, to, to + n, to_next), cvt_type::ok);
+    const auto expected = (sizeof(wchar_t) == 2) ? cvt_type::ok : cvt_type::noconv; // UTF-32 is not state-dependent
+    TEST_EQ(cvt.unshift(mb, to, to + n, to_next), expected);
     TEST(to_next == to);
 }
 
