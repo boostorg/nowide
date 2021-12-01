@@ -49,11 +49,7 @@ namespace nowide {
     template<typename CharType, int CharSize = sizeof(CharType)>
     class utf8_codecvt;
 
-#ifdef BOOST_MSVC
-#pragma warning(push)
-#pragma warning(disable : 4996) // Disable deprecation warning for std::codecvt<char16_t, char, ...>
-#endif
-
+    BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_BEGIN
     /// Specialization for the UTF-8 <-> UTF-16 variant of the std::codecvt implementation
     template<typename CharType>
     class BOOST_SYMBOL_VISIBLE utf8_codecvt<CharType, 2> : public std::codecvt<CharType, char, std::mbstate_t>
@@ -63,10 +59,7 @@ namespace nowide {
 
         utf8_codecvt(size_t refs = 0) : std::codecvt<CharType, char, std::mbstate_t>(refs)
         {}
-
-#ifdef BOOST_MSVC
-#pragma warning(pop)
-#endif
+        BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_END
 
     protected:
         using uchar = CharType;
@@ -132,7 +125,7 @@ namespace nowide {
             return static_cast<int>(from - save_from);
         }
 
-        std::codecvt_base::result do_in(std::mbstate_t& std_state,
+        std::codecvt_base::result do_in(std::mbstate_t& std_state, // LCOV_EXCL_LINE
                                         const char* from,
                                         const char* from_end,
                                         const char*& from_next,
@@ -256,11 +249,7 @@ namespace nowide {
         }
     };
 
-#ifdef BOOST_MSVC
-#pragma warning(push)
-#pragma warning(disable : 4996) // Disable deprecation warning for std::codecvt<char32_t, char, ...>
-#endif
-
+    BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_BEGIN
     /// Specialization for the UTF-8 <-> UTF-32 variant of the std::codecvt implementation
     template<typename CharType>
     class BOOST_SYMBOL_VISIBLE utf8_codecvt<CharType, 4> : public std::codecvt<CharType, char, std::mbstate_t>
@@ -268,10 +257,7 @@ namespace nowide {
     public:
         utf8_codecvt(size_t refs = 0) : std::codecvt<CharType, char, std::mbstate_t>(refs)
         {}
-
-#ifdef BOOST_MSVC
-#pragma warning(pop)
-#endif
+        BOOST_NOWIDE_SUPPRESS_UTF_CODECVT_DEPRECATION_END
 
     protected:
         using uchar = CharType;
@@ -280,7 +266,7 @@ namespace nowide {
         do_unshift(std::mbstate_t& /*s*/, char* from, char* /*to*/, char*& next) const override
         {
             next = from;
-            return std::codecvt_base::ok;
+            return std::codecvt_base::noconv;
         }
         int do_encoding() const noexcept override
         {

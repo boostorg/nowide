@@ -77,10 +77,11 @@ namespace nowide {
             // LCOV_EXCL_START
             bool do_read(wchar_t* buffer, std::size_t num_chars_to_read, std::size_t& num_chars_read) override
             {
-                DWORD size = 0;
-                const bool result = ReadConsoleW(handle_, buffer, static_cast<DWORD>(num_chars_to_read), &size, 0) != 0;
-                num_chars_read = size;
-                return result;
+                DWORD size = 0;                                                                 // LCOV_EXCL_LINE
+                const auto to_read_size = static_cast<DWORD>(num_chars_to_read);                // LCOV_EXCL_LINE
+                const bool result = ReadConsoleW(handle_, buffer, to_read_size, &size, 0) != 0; // LCOV_EXCL_LINE
+                num_chars_read = size;                                                          // LCOV_EXCL_LINE
+                return result;                                                                  // LCOV_EXCL_LINE
             }
             // LCOV_EXCL_STOP
         };
