@@ -62,8 +62,7 @@ std::string heap_stackstring_to_narrow(const std::wstring& s)
     return ss.get();
 }
 
-// coverity [root_function]
-void test_main(int, char**, char**)
+void test_main(int, char**, char**) // coverity [root_function]
 {
     std::string hello = "\xd7\xa9\xd7\x9c\xd7\x95\xd7\x9d";
     std::wstring whello = boost::nowide::widen(hello);

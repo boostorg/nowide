@@ -81,16 +81,18 @@ target_include_directories(boost_nowide PUBLIC include)
 boost_add_warnings(boost_nowide pedantic ${Boost_NOWIDE_WERROR})
 target_compile_features(boost_nowide PUBLIC cxx_std_11)
 
-if(BOOST_SUPERPROJECT_SOURCE_DIR)
+if(BOOST_SUPERPROJECT_SOURCE_DIR OR TARGET Boost::config)
   target_link_libraries(boost_nowide PUBLIC
     Boost::config
   )
 else()
-  # Default boost libs are static on windows and dynamic on linux
-  if(WIN32 AND NOT DEFINED Boost_USE_STATIC_LIBS)
-    set(Boost_USE_STATIC_LIBS ON)
+  if(NOT TARGET Boost::boost)
+    # Default boost libs are static on windows and dynamic on linux
+    if(WIN32 AND NOT DEFINED Boost_USE_STATIC_LIBS)
+      set(Boost_USE_STATIC_LIBS ON)
+    endif()
+    find_package(Boost 1.56 REQUIRED)
   endif()
-  find_package(Boost 1.56 REQUIRED)
   target_link_libraries(boost_nowide PUBLIC Boost::boost)
 endif()
 

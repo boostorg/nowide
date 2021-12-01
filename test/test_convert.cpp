@@ -127,8 +127,7 @@ std::string narrow_string_view(const std::wstring& s)
 }
 #endif
 
-// coverity [root_function]
-void test_main(int, char**, char**)
+void test_main(int, char**, char**) // coverity [root_function]
 {
     std::string hello = "\xd7\xa9\xd7\x9c\xd7\x95\xd7\x9d";
     std::wstring whello = L"\u05e9\u05dc\u05d5\u05dd";
@@ -165,10 +164,10 @@ void test_main(int, char**, char**)
         TEST(buf[9] == 1);
         TEST(boost::nowide::narrow(buf, 8, b, e) == 0);
         TEST(boost::nowide::narrow(buf, 7, b, e - 1) == buf);
-        TEST(buf == hello.substr(0, 6));
+        TEST_EQ(buf, hello.substr(0, 6));
 
         // Raw literals are also possible
-        TEST(boost::nowide::narrow(L"\u05e9\u05dc\u05d5\u05dd") == hello);
+        TEST_EQ(boost::nowide::narrow(L"\u05e9\u05dc\u05d5\u05dd"), hello);
     }
 
     std::cout << "- boost::nowide::utf::convert_buffer" << std::endl;
@@ -186,6 +185,13 @@ void test_main(int, char**, char**)
         TEST(buf.back() == 42); // Rest untouched
         TEST(std::wstring(buf.data()) == whello);
     }
+
+    namespace utf = boost::nowide::utf;
+    // Decode of empty range yields incomplete
+    auto helloIt = hello.begin();
+    TEST_EQ(utf::utf_traits<char>::decode(helloIt, helloIt), utf::incomplete);
+    TEST_EQ(utf::utf_traits<char16_t>::decode(helloIt, helloIt), utf::incomplete);
+    TEST_EQ(utf::utf_traits<char32_t>::decode(helloIt, helloIt), utf::incomplete);
 
     std::cout << "- (output_buffer, buffer_size, input_raw_string)" << std::endl;
     run_all(widen_buf_ptr, narrow_buf_ptr);

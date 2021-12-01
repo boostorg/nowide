@@ -10,6 +10,11 @@
 
 \section changelog Changelog
 
+\subsection changelog_next Next release
+
+- Fix possible double-free when setting a custom buffer (`setbuf`) after filebuf already allocated an internal buffer
+- Handle some warnings (mostly on MSVC)
+
 \subsection changelog_11_1_3 Nowide 11.1.3
 
 - Fix missing config file in release

@@ -25,7 +25,7 @@ void test_ctor(const T& filename)
         TEST(f);
     }
     TEST(file_exists(filename));
-    TEST(read_file(filename) == "");
+    TEST_EQ(read_file(filename), "");
 
     // Clear file if exists
     create_file(filename, "test");
@@ -34,14 +34,14 @@ void test_ctor(const T& filename)
         nw::ofstream f(filename);
         TEST(f);
     }
-    TEST(read_file(filename) == "");
+    TEST_EQ(read_file(filename), "");
 
     // At end
     {
         nw::ofstream f(filename, std::ios::ate);
         TEST(f);
     }
-    TEST(read_file(filename) == "");
+    TEST_EQ(read_file(filename), "");
 
     // Binary mode
     {
@@ -49,7 +49,7 @@ void test_ctor(const T& filename)
         TEST(f);
         TEST(f << "test\r\n");
     }
-    TEST(read_file(filename, data_type::binary) == "test\r\n");
+    TEST_EQ(read_file(filename, data_type::binary), "test\r\n");
 }
 
 template<typename T>
@@ -63,7 +63,7 @@ void test_open(const T& filename)
         TEST(f);
     }
     TEST(file_exists(filename));
-    TEST(read_file(filename) == "");
+    TEST_EQ(read_file(filename), "");
 
     // Clear file if exists
     create_file(filename, "test");
@@ -73,7 +73,7 @@ void test_open(const T& filename)
         f.open(filename);
         TEST(f);
     }
-    TEST(read_file(filename) == "");
+    TEST_EQ(read_file(filename), "");
 
     // At end
     {
@@ -81,7 +81,7 @@ void test_open(const T& filename)
         f.open(filename, std::ios::ate);
         TEST(f);
     }
-    TEST(read_file(filename) == "");
+    TEST_EQ(read_file(filename), "");
 
     // Binary mode
     {
@@ -90,14 +90,14 @@ void test_open(const T& filename)
         TEST(f);
         TEST(f << "test\r\n");
     }
-    TEST(read_file(filename, data_type::binary) == "test\r\n");
+    TEST_EQ(read_file(filename, data_type::binary), "test\r\n");
 }
 
 void test_move_and_swap(const std::string& filename)
 {
     const std::string filename2 = filename + ".2";
     remove_file_at_exit _(filename);
-    remove_file_at_exit _2(filename);
+    remove_file_at_exit _2(filename2);
 
     // Move construct
     {
@@ -119,8 +119,8 @@ void test_move_and_swap(const std::string& filename)
         TEST(f_new);
         TEST(f_new << "World");
     }
-    TEST(read_file(filename) == "Hello World");
-    TEST(read_file(filename2) == "Foo");
+    TEST_EQ(read_file(filename), "Hello World");
+    TEST_EQ(read_file(filename2), "Foo");
 
     // Move assign
     {
@@ -145,8 +145,8 @@ void test_move_and_swap(const std::string& filename)
         TEST(f_new);
         TEST(f_new << "World");
     }
-    TEST(read_file(filename) == "Hello World");
-    TEST(read_file(filename2) == "Foo");
+    TEST_EQ(read_file(filename), "Hello World");
+    TEST_EQ(read_file(filename2), "Foo");
 
     // Swap
     {
@@ -166,12 +166,11 @@ void test_move_and_swap(const std::string& filename)
         TEST(!f_old.is_open());
         TEST(f_new.is_open());
     }
-    TEST(read_file(filename) == "Hello World");
-    TEST(read_file(filename2) == "Foo Bar");
+    TEST_EQ(read_file(filename), "Hello World");
+    TEST_EQ(read_file(filename2), "Foo Bar");
 }
 
-// coverity [root_function]
-void test_main(int, char** argv, char**)
+void test_main(int, char** argv, char**) // coverity [root_function]
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
 
