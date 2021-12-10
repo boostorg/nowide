@@ -20,7 +20,9 @@
 // IMPORTANT: Have these defines BEFORE any #includes
 //            and make sure changes by those macros don't leak into the public interface
 // Make LFS functions available
+#ifndef _LARGEFILE_SOURCE
 #define _LARGEFILE_SOURCE
+#endif
 // Make off_t 64 bits if the macro isn't set
 #ifndef _FILE_OFFSET_BITS
 #define _FILE_OFFSET_BITS 64
