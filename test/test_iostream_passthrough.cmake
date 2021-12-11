@@ -2,8 +2,13 @@
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE or copy at http://boost.org/LICENSE_1_0.txt)
 
-if(NOT TEST_BINARY)
-  message(FATAL_ERROR "You need to define TEST_BINARY with the path to the binary")
+if(NOT DEFINED TEST_BINARY)
+  if(CMAKE_ARGC GREATER 3)
+    # cmake(0) -P(1) <script>(2) <first arg>(3)
+    set(TEST_BINARY ${CMAKE_ARGV3})
+  else()
+    message(FATAL_ERROR "You need to define TEST_BINARY with the path to the binary")
+  endif()
 endif()
 
 set(msg "Hello Boost Nowide")
