@@ -92,7 +92,7 @@ struct scoped_rdbuf_change
     }
 };
 
-// Macros to be used to avoid litering the code with #ifndef checks
+// Macros to be used to avoid littering the code with #ifndef checks
 /// Install a mock buffer into the given stream, when compiling as non-interactive
 #define INSTALL_MOCK_BUF(STREAM, BUF_TYPE) \
     BUF_TYPE mock_buf;                     \
@@ -186,7 +186,7 @@ void test_putback_and_get()
             }
         }
 #ifndef BOOST_NOWIDE_TEST_INTERACTIVE
-        // Putback 1 char, then get the rest from "real" input
+        // Put back 1 char, then get the rest from "real" input
         nw::cin.putback('T');
         mock_buf.inputs.push(L"est\r\n");
         std::string test;
@@ -359,6 +359,132 @@ void test_ctrl_z_is_eof()
 #endif
 }
 
+#ifndef BOOST_NOWIDE_TEST_INTERACTIVE
+#ifdef BOOST_WINDOWS
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+
+class RedirectStdio
+{
+    DWORD handleType;
+    HANDLE h, oldHandle;
+
+public:
+    RedirectStdio(DWORD handleType) : handleType(handleType), oldHandle(GetStdHandle(handleType))
+    {
+        if(handleType == STD_INPUT_HANDLE)
+        {
+            h = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+        } else
+        {
+            h = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
+                                          FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                          nullptr,
+                                          CONSOLE_TEXTMODE_BUFFER,
+                                          nullptr);
+        }
+        TEST(h != INVALID_HANDLE_VALUE);
+        TEST(SetStdHandle(handleType, h));
+    }
+    ~RedirectStdio()
+    {
+        SetStdHandle(handleType, oldHandle);
+        CloseHandle(h);
+    }
+
+    std::wstring getBufferData()
+    {
+        CONSOLE_SCREEN_BUFFER_INFO info;
+        if(!GetConsoleScreenBufferInfo(h, &info) || info.dwSize.X == 0 || info.dwSize.Y == 0)
+            return {};
+
+        std::wstring result;
+        std::vector<wchar_t> buffer(info.dwSize.X);
+        const auto isSpace = [](const wchar_t c) { return c != L' '; };
+        for(COORD readPos{}; readPos.Y < info.dwSize.Y; ++readPos.Y)
+        {
+            DWORD dwRead, bufferSize = static_cast<DWORD>(buffer.size());
+            TEST(ReadConsoleOutputCharacterW(h, buffer.data(), bufferSize, readPos, &dwRead));
+            const auto itEnd = std::find_if(buffer.rbegin() + (buffer.size() - dwRead), buffer.rend(), isSpace);
+            if(itEnd == buffer.rend())
+                break;
+            result.append(buffer.begin(), itEnd.base());
+            result.push_back('\n');
+        }
+        return result;
+    }
+
+    void setBufferData(std::wstring data, int)
+    {
+        std::vector<INPUT_RECORD> buffer;
+        buffer.reserve(data.size() * 2 + 2);
+        for(const auto c : data)
+        {
+            INPUT_RECORD ev;
+            ev.EventType = KEY_EVENT;
+            ev.Event.KeyEvent.bKeyDown = TRUE;
+            ev.Event.KeyEvent.dwControlKeyState = 0;
+            ev.Event.KeyEvent.wRepeatCount = 1;
+            if(c == '\n')
+            {
+                ev.Event.KeyEvent.uChar.UnicodeChar = '\r';
+                ev.Event.KeyEvent.wVirtualKeyCode = VK_RETURN;
+            } else
+            {
+                ev.Event.KeyEvent.uChar.UnicodeChar = c;
+                ev.Event.KeyEvent.wVirtualKeyCode = VkKeyScanW(c);
+            }
+            ev.Event.KeyEvent.wVirtualScanCode =
+              static_cast<WORD>(MapVirtualKeyW(ev.Event.KeyEvent.wVirtualKeyCode, MAPVK_VK_TO_VSC));
+            buffer.push_back(ev);
+            ev.Event.KeyEvent.bKeyDown = FALSE;
+            buffer.push_back(ev);
+        }
+        DWORD dwWritten;
+        TEST(WriteConsoleInputW(h, buffer.data(), static_cast<DWORD>(buffer.size()), &dwWritten));
+        TEST(dwWritten == static_cast<DWORD>(buffer.size()));
+    }
+};
+
+void test_console()
+{
+    RedirectStdio stdinHandle(STD_INPUT_HANDLE);
+    RedirectStdio stdoutHandle(STD_OUTPUT_HANDLE);
+    RedirectStdio stderrHandle(STD_ERROR_HANDLE);
+
+    // Recreate to react on redirected streams
+    decltype(boost::nowide::cin) cin(nullptr);
+    decltype(boost::nowide::cout) cout(1, nullptr);
+    decltype(boost::nowide::cerr) cerr(2, nullptr);
+
+    const std::string testStringIn1 = "Hello std in ";
+    const std::string testStringIn2 = "\xc3\xa4 - \xc3\xb6 - \xc3\xbc - \xd0\xbc - \xce\xbd";
+    stdinHandle.setBufferData(boost::nowide::widen(testStringIn1 + "\n" + testStringIn2 + "\n"), 0);
+
+    const std::string testStringOut = "Hello std out\n\xc3\xa4-\xc3\xb6-\xc3\xbc-\xd0\xbc-\xce\xbd\n";
+    const std::string testStringErr = "Hello std err\n\xc3\xa4-\xc3\xb6-\xc3\xbc-\xd0\xbc-\xce\xbd\n";
+    cout << testStringOut << std::flush;
+    cerr << testStringErr << std::flush;
+
+    std::string line;
+    TEST(std::getline(cin, line));
+    TEST(line == testStringIn1);
+    TEST(std::getline(cin, line));
+    TEST(line == testStringIn2);
+
+    auto data = stdoutHandle.getBufferData();
+    TEST(data == boost::nowide::widen(testStringOut));
+    data = stderrHandle.getBufferData();
+    TEST(data == boost::nowide::widen(testStringErr));
+}
+#else
+void test_console()
+{}
+#endif
+#endif
+
 void test_main(int argc, char** argv, char**) // coverity [root_function]
 {
     // LCOV_EXCL_START
@@ -416,5 +542,6 @@ void test_main(int argc, char** argv, char**) // coverity [root_function]
     test_cin();
     test_cin_getline();
     test_ctrl_z_is_eof();
+    test_console();
 #endif // BOOST_NOWIDE_TEST_INTERACTIVE
 }

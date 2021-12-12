@@ -73,17 +73,14 @@ namespace nowide {
             {}
 
         protected:
-            // Can't test this on CI so exclude
-            // LCOV_EXCL_START
             bool do_read(wchar_t* buffer, std::size_t num_chars_to_read, std::size_t& num_chars_read) override
             {
-                DWORD size = 0;                                                                 // LCOV_EXCL_LINE
-                const auto to_read_size = static_cast<DWORD>(num_chars_to_read);                // LCOV_EXCL_LINE
-                const bool result = ReadConsoleW(handle_, buffer, to_read_size, &size, 0) != 0; // LCOV_EXCL_LINE
-                num_chars_read = size;                                                          // LCOV_EXCL_LINE
-                return result;                                                                  // LCOV_EXCL_LINE
+                DWORD size = 0;
+                const auto to_read_size = static_cast<DWORD>(num_chars_to_read);
+                const bool result = ReadConsoleW(handle_, buffer, to_read_size, &size, 0) != 0;
+                num_chars_read = size;
+                return result;
             }
-            // LCOV_EXCL_STOP
         };
 
         winconsole_ostream::winconsole_ostream(int fd, winconsole_ostream* tieStream) : std::ostream(0)
