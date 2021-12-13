@@ -83,21 +83,20 @@ namespace nowide {
             }
         };
 
-        winconsole_ostream::winconsole_ostream(int fd, winconsole_ostream* tieStream) : std::ostream(0)
+        winconsole_ostream::winconsole_ostream(const bool isBuffered, winconsole_ostream* tieStream) : std::ostream(0)
         {
-            HANDLE h = 0;
-            switch(fd)
-            {
-            case 1: h = GetStdHandle(STD_OUTPUT_HANDLE); break;
-            case 2: h = GetStdHandle(STD_ERROR_HANDLE); break;
-            }
+            HANDLE h;
+            if(isBuffered)
+                h = GetStdHandle(STD_OUTPUT_HANDLE);
+            else
+                h = GetStdHandle(STD_ERROR_HANDLE);
             if(is_atty_handle(h))
             {
                 d.reset(new console_output_buffer(h));
                 std::ostream::rdbuf(d.get());
             } else
             {
-                std::ostream::rdbuf(fd == 1 ? std::cout.rdbuf() : std::cerr.rdbuf());
+                std::ostream::rdbuf(isBuffered ? std::cout.rdbuf() : std::cerr.rdbuf());
                 assert(rdbuf());
             }
             if(tieStream)
@@ -146,10 +145,10 @@ namespace nowide {
 #else
 #define BOOST_NOWIDE_INIT_PRIORITY
 #endif
-    detail::winconsole_ostream cout BOOST_NOWIDE_INIT_PRIORITY(1, nullptr);
+    detail::winconsole_ostream cout BOOST_NOWIDE_INIT_PRIORITY(true, nullptr);
     detail::winconsole_istream cin BOOST_NOWIDE_INIT_PRIORITY(&cout);
-    detail::winconsole_ostream cerr BOOST_NOWIDE_INIT_PRIORITY(2, &cout);
-    detail::winconsole_ostream clog BOOST_NOWIDE_INIT_PRIORITY(2, nullptr);
+    detail::winconsole_ostream cerr BOOST_NOWIDE_INIT_PRIORITY(false, &cout);
+    detail::winconsole_ostream clog BOOST_NOWIDE_INIT_PRIORITY(false, nullptr);
 } // namespace nowide
 } // namespace boost
 
