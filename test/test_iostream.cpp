@@ -397,8 +397,9 @@ public:
     std::wstring getBufferData()
     {
         CONSOLE_SCREEN_BUFFER_INFO info;
-        if(!GetConsoleScreenBufferInfo(h, &info) || info.dwSize.X == 0 || info.dwSize.Y == 0)
-            return {};
+        TEST(GetConsoleScreenBufferInfo(h, &info));
+        TEST(info.dwSize.X > 0 && info.dwSize.Y > 0);
+        nw::cout << "Mock console buffer size: " << info.dwSize.X << "x" << info.dwSize.Y << "\n";
 
         std::wstring result;
         std::vector<wchar_t> buffer(info.dwSize.X);
@@ -444,7 +445,7 @@ public:
         }
         DWORD dwWritten;
         TEST(WriteConsoleInputW(h, buffer.data(), static_cast<DWORD>(buffer.size()), &dwWritten));
-        TEST(dwWritten == static_cast<DWORD>(buffer.size()));
+        TEST_EQ(dwWritten, static_cast<DWORD>(buffer.size()));
     }
 };
 
@@ -455,29 +456,32 @@ void test_console()
     RedirectStdio stderrHandle(STD_ERROR_HANDLE);
 
     // Recreate to react on redirected streams
-    decltype(boost::nowide::cin) cin(nullptr);
-    decltype(boost::nowide::cout) cout(1, nullptr);
-    decltype(boost::nowide::cerr) cerr(2, nullptr);
+    decltype(nw::cin) cin(nullptr);
+    TEST(cin.rdbuf() != std::cin.rdbuf());
+    decltype(nw::cout) cout(true, nullptr);
+    TEST(cout.rdbuf() != std::cout.rdbuf());
+    decltype(nw::cerr) cerr(false, nullptr);
+    TEST(cerr.rdbuf() != std::cerr.rdbuf());
 
     const std::string testStringIn1 = "Hello std in ";
     const std::string testStringIn2 = "\xc3\xa4 - \xc3\xb6 - \xc3\xbc - \xd0\xbc - \xce\xbd";
-    stdinHandle.setBufferData(boost::nowide::widen(testStringIn1 + "\n" + testStringIn2 + "\n"), 0);
+    stdinHandle.setBufferData(nw::widen(testStringIn1 + "\n" + testStringIn2 + "\n"), 0);
 
-    const std::string testStringOut = "Hello std out\n\xc3\xa4-\xc3\xb6-\xc3\xbc-\xd0\xbc-\xce\xbd\n";
-    const std::string testStringErr = "Hello std err\n\xc3\xa4-\xc3\xb6-\xc3\xbc-\xd0\xbc-\xce\xbd\n";
+    const std::string testStringOut = "Hello std out\n\xc3\xa4-\xc3\xb6-\xc3\xbc\n";
+    const std::string testStringErr = "Hello std err\n\xc3\xa4-\xc3\xb6-\xc3\xbc\n";
     cout << testStringOut << std::flush;
     cerr << testStringErr << std::flush;
 
     std::string line;
     TEST(std::getline(cin, line));
-    TEST(line == testStringIn1);
+    TEST_EQ(line, testStringIn1);
     TEST(std::getline(cin, line));
-    TEST(line == testStringIn2);
+    TEST_EQ(line, testStringIn2);
 
     auto data = stdoutHandle.getBufferData();
-    TEST(data == boost::nowide::widen(testStringOut));
+    TEST_EQ(data, nw::widen(testStringOut));
     data = stderrHandle.getBufferData();
-    TEST(data == boost::nowide::widen(testStringErr));
+    TEST_EQ(data, nw::widen(testStringErr));
 }
 #else
 void test_console()
