@@ -366,6 +366,8 @@ void test_ctrl_z_is_eof()
 #endif
 #include <windows.h>
 
+/// Test class swapping the original in/out handles for a buffer which
+/// can be filled (for stdin) or read (for stdout/stderr)
 class RedirectStdio
 {
     DWORD handleType;
@@ -387,10 +389,14 @@ public:
         }
         TEST(h != INVALID_HANDLE_VALUE);
         TEST(SetStdHandle(handleType, h));
+        if(handleType != STD_INPUT_HANDLE)
+            TEST(SetConsoleActiveScreenBuffer(h));
     }
     ~RedirectStdio()
     {
         SetStdHandle(handleType, oldHandle);
+        if(handleType != STD_INPUT_HANDLE)
+            SetConsoleActiveScreenBuffer(oldHandle);
         CloseHandle(h);
     }
 
@@ -451,38 +457,48 @@ public:
 
 void test_console()
 {
-    RedirectStdio stdinHandle(STD_INPUT_HANDLE);
-    RedirectStdio stdoutHandle(STD_OUTPUT_HANDLE);
-    RedirectStdio stderrHandle(STD_ERROR_HANDLE);
+    // cin
+    {
+        RedirectStdio stdinHandle(STD_INPUT_HANDLE);
+        // Recreate to react on redirected streams
+        decltype(nw::cin) cin(nullptr);
+        TEST(cin.rdbuf() != std::cin.rdbuf());
+        const std::string testStringIn1 = "Hello std in ";
+        const std::string testStringIn2 = "\xc3\xa4 - \xc3\xb6 - \xc3\xbc - \xd0\xbc - \xce\xbd";
+        stdinHandle.setBufferData(nw::widen(testStringIn1 + "\n" + testStringIn2 + "\n"), 0);
+        std::string line;
+        TEST(std::getline(cin, line));
+        TEST_EQ(line, testStringIn1);
+        TEST(std::getline(cin, line));
+        TEST_EQ(line, testStringIn2);
+    }
+    // cout
+    {
+        RedirectStdio stdoutHandle(STD_OUTPUT_HANDLE);
+        decltype(nw::cout) cout(true, nullptr);
+        TEST(cout.rdbuf() != std::cout.rdbuf());
 
-    // Recreate to react on redirected streams
-    decltype(nw::cin) cin(nullptr);
-    TEST(cin.rdbuf() != std::cin.rdbuf());
-    decltype(nw::cout) cout(true, nullptr);
-    TEST(cout.rdbuf() != std::cout.rdbuf());
-    decltype(nw::cerr) cerr(false, nullptr);
-    TEST(cerr.rdbuf() != std::cerr.rdbuf());
+        const std::string testString = "Hello std out\n\xc3\xa4-\xc3\xb6-\xc3\xbc\n";
+        cout << testString << std::flush;
 
-    const std::string testStringIn1 = "Hello std in ";
-    const std::string testStringIn2 = "\xc3\xa4 - \xc3\xb6 - \xc3\xbc - \xd0\xbc - \xce\xbd";
-    stdinHandle.setBufferData(nw::widen(testStringIn1 + "\n" + testStringIn2 + "\n"), 0);
+        const auto data = stdoutHandle.getBufferData();
+        TEST_EQ(data, nw::widen(testString));
+    }
+    // cerr
+    {
+        RedirectStdio stderrHandle(STD_ERROR_HANDLE);
 
-    const std::string testStringOut = "Hello std out\n\xc3\xa4-\xc3\xb6-\xc3\xbc\n";
-    const std::string testStringErr = "Hello std err\n\xc3\xa4-\xc3\xb6-\xc3\xbc\n";
-    cout << testStringOut << std::flush;
-    cerr << testStringErr << std::flush;
+        decltype(nw::cerr) cerr(false, nullptr);
+        TEST(cerr.rdbuf() != std::cerr.rdbuf());
 
-    std::string line;
-    TEST(std::getline(cin, line));
-    TEST_EQ(line, testStringIn1);
-    TEST(std::getline(cin, line));
-    TEST_EQ(line, testStringIn2);
+        const std::string testString = "Hello std err\n\xc3\xa4-\xc3\xb6-\xc3\xbc\n";
+        cerr << testString << std::flush;
 
-    auto data = stdoutHandle.getBufferData();
-    TEST_EQ(data, nw::widen(testStringOut));
-    data = stderrHandle.getBufferData();
-    TEST_EQ(data, nw::widen(testStringErr));
+        const auto data = stderrHandle.getBufferData();
+        TEST_EQ(data, nw::widen(testString));
+    }
 }
+
 #else
 void test_console()
 {}
