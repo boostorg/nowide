@@ -531,26 +531,25 @@ void test_main(int argc, char** argv, char**) // coverity [root_function]
     }
 
 #ifdef BOOST_NOWIDE_TEST_INTERACTIVE
-    // LCOV_EXCL_START
-    nw::cout << "Output different chars:" << std::endl;
-    test_cout();
-    nw::cout << "Same again:" << std::endl;
-    test_cout_single_char();
+    nw::cout << "Output different chars:" << std::endl; // LCOV_EXCL_LINE
+    test_cout();                                        // LCOV_EXCL_LINE
+    nw::cout << "Same again:" << std::endl;             // LCOV_EXCL_LINE
+    test_cout_single_char();                            // LCOV_EXCL_LINE
 
-    nw::cout << "Same 2 outputs but to stderr:" << std::endl;
-    test_cerr();
-    test_cerr_single_char();
+    nw::cout << "Same 2 outputs but to stderr:" << std::endl; // LCOV_EXCL_LINE
+    test_cerr();                                              // LCOV_EXCL_LINE
+    test_cerr_single_char();                                  // LCOV_EXCL_LINE
 
-    nw::cout << "Basic cin tests:" << std::endl;
-    test_cin();
+    nw::cout << "Basic cin tests:" << std::endl; // LCOV_EXCL_LINE
+    test_cin();                                  // LCOV_EXCL_LINE
 
-    nw::cout << "getline test:" << std::endl;
-    nw::cin.ignore(std::numeric_limits<int>::max(), '\n'); // Clear newline from last test
-    test_cin_getline();
+    nw::cout << "getline test:" << std::endl; // LCOV_EXCL_LINE
+    // Clear newline from last test
+    nw::cin.ignore(std::numeric_limits<int>::max(), '\n'); // LCOV_EXCL_LINE
+    test_cin_getline();                                    // LCOV_EXCL_LINE
 
-    nw::cout << "CTRL+Z test:" << std::endl;
-    test_ctrl_z_is_eof();
-    // LCOV_EXCL_STOP
+    nw::cout << "CTRL+Z test:" << std::endl; // LCOV_EXCL_LINE
+    test_ctrl_z_is_eof();                    // LCOV_EXCL_LINE
 #else
     test_is_valid_UTF8();
     test_tie();
