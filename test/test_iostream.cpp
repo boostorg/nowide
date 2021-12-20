@@ -92,7 +92,7 @@ struct scoped_rdbuf_change
     }
 };
 
-// Macros to be used to avoid litering the code with #ifndef checks
+// Macros to be used to avoid littering the code with #ifndef checks
 /// Install a mock buffer into the given stream, when compiling as non-interactive
 #define INSTALL_MOCK_BUF(STREAM, BUF_TYPE) \
     BUF_TYPE mock_buf;                     \
@@ -186,7 +186,7 @@ void test_putback_and_get()
             }
         }
 #ifndef BOOST_NOWIDE_TEST_INTERACTIVE
-        // Putback 1 char, then get the rest from "real" input
+        // Put back 1 char, then get the rest from "real" input
         nw::cin.putback('T');
         mock_buf.inputs.push(L"est\r\n");
         std::string test;
@@ -359,6 +359,152 @@ void test_ctrl_z_is_eof()
 #endif
 }
 
+#ifndef BOOST_NOWIDE_TEST_INTERACTIVE
+#ifdef BOOST_WINDOWS
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+
+/// Test class swapping the original in/out handles for a buffer which
+/// can be filled (for stdin) or read (for stdout/stderr)
+class RedirectStdio
+{
+    DWORD handleType;
+    HANDLE h, oldHandle;
+
+public:
+    RedirectStdio(DWORD handleType) : handleType(handleType), oldHandle(GetStdHandle(handleType))
+    {
+        if(handleType == STD_INPUT_HANDLE)
+        {
+            h = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+        } else
+        {
+            h = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
+                                          FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                          nullptr,
+                                          CONSOLE_TEXTMODE_BUFFER,
+                                          nullptr);
+        }
+        TEST(h != INVALID_HANDLE_VALUE);
+        TEST(SetStdHandle(handleType, h));
+        if(handleType != STD_INPUT_HANDLE)
+            TEST(SetConsoleActiveScreenBuffer(h));
+    }
+    ~RedirectStdio()
+    {
+        SetStdHandle(handleType, oldHandle);
+        if(handleType != STD_INPUT_HANDLE)
+            SetConsoleActiveScreenBuffer(oldHandle);
+        CloseHandle(h);
+    }
+
+    std::wstring getBufferData()
+    {
+        CONSOLE_SCREEN_BUFFER_INFO info;
+        TEST(GetConsoleScreenBufferInfo(h, &info));
+        TEST(info.dwSize.X > 0 && info.dwSize.Y > 0);
+        nw::cout << "Mock console buffer size: " << info.dwSize.X << "x" << info.dwSize.Y << "\n";
+
+        std::wstring result;
+        std::vector<wchar_t> buffer(info.dwSize.X);
+        const auto isSpace = [](const wchar_t c) { return c != L' '; };
+        for(COORD readPos{}; readPos.Y < info.dwSize.Y; ++readPos.Y)
+        {
+            DWORD dwRead, bufferSize = static_cast<DWORD>(buffer.size());
+            TEST(ReadConsoleOutputCharacterW(h, buffer.data(), bufferSize, readPos, &dwRead));
+            const auto itEnd = std::find_if(buffer.rbegin() + (buffer.size() - dwRead), buffer.rend(), isSpace);
+            if(itEnd == buffer.rend())
+                break;
+            result.append(buffer.begin(), itEnd.base());
+            result.push_back('\n');
+        }
+        return result;
+    }
+
+    void setBufferData(std::wstring data, int)
+    {
+        std::vector<INPUT_RECORD> buffer;
+        buffer.reserve(data.size() * 2 + 2);
+        for(const auto c : data)
+        {
+            INPUT_RECORD ev;
+            ev.EventType = KEY_EVENT;
+            ev.Event.KeyEvent.bKeyDown = TRUE;
+            ev.Event.KeyEvent.dwControlKeyState = 0;
+            ev.Event.KeyEvent.wRepeatCount = 1;
+            if(c == '\n')
+            {
+                ev.Event.KeyEvent.uChar.UnicodeChar = '\r';
+                ev.Event.KeyEvent.wVirtualKeyCode = VK_RETURN;
+            } else
+            {
+                ev.Event.KeyEvent.uChar.UnicodeChar = c;
+                ev.Event.KeyEvent.wVirtualKeyCode = VkKeyScanW(c);
+            }
+            ev.Event.KeyEvent.wVirtualScanCode =
+              static_cast<WORD>(MapVirtualKeyW(ev.Event.KeyEvent.wVirtualKeyCode, MAPVK_VK_TO_VSC));
+            buffer.push_back(ev);
+            ev.Event.KeyEvent.bKeyDown = FALSE;
+            buffer.push_back(ev);
+        }
+        DWORD dwWritten;
+        TEST(WriteConsoleInputW(h, buffer.data(), static_cast<DWORD>(buffer.size()), &dwWritten));
+        TEST_EQ(dwWritten, static_cast<DWORD>(buffer.size()));
+    }
+};
+
+void test_console()
+{
+    // cin
+    {
+        RedirectStdio stdinHandle(STD_INPUT_HANDLE);
+        // Recreate to react on redirected streams
+        decltype(nw::cin) cin(nullptr);
+        TEST(cin.rdbuf() != std::cin.rdbuf());
+        const std::string testStringIn1 = "Hello std in ";
+        const std::string testStringIn2 = "\xc3\xa4 - \xc3\xb6 - \xc3\xbc - \xd0\xbc - \xce\xbd";
+        stdinHandle.setBufferData(nw::widen(testStringIn1 + "\n" + testStringIn2 + "\n"), 0);
+        std::string line;
+        TEST(std::getline(cin, line));
+        TEST_EQ(line, testStringIn1);
+        TEST(std::getline(cin, line));
+        TEST_EQ(line, testStringIn2);
+    }
+    // cout
+    {
+        RedirectStdio stdoutHandle(STD_OUTPUT_HANDLE);
+        decltype(nw::cout) cout(true, nullptr);
+        TEST(cout.rdbuf() != std::cout.rdbuf());
+
+        const std::string testString = "Hello std out\n\xc3\xa4-\xc3\xb6-\xc3\xbc\n";
+        cout << testString << std::flush;
+
+        const auto data = stdoutHandle.getBufferData();
+        TEST_EQ(data, nw::widen(testString));
+    }
+    // cerr
+    {
+        RedirectStdio stderrHandle(STD_ERROR_HANDLE);
+
+        decltype(nw::cerr) cerr(false, nullptr);
+        TEST(cerr.rdbuf() != std::cerr.rdbuf());
+
+        const std::string testString = "Hello std err\n\xc3\xa4-\xc3\xb6-\xc3\xbc\n";
+        cerr << testString << std::flush;
+
+        const auto data = stderrHandle.getBufferData();
+        TEST_EQ(data, nw::widen(testString));
+    }
+}
+
+#else
+void test_console()
+{}
+#endif
+#endif
+
 void test_main(int argc, char** argv, char**) // coverity [root_function]
 {
     // LCOV_EXCL_START
@@ -385,26 +531,25 @@ void test_main(int argc, char** argv, char**) // coverity [root_function]
     }
 
 #ifdef BOOST_NOWIDE_TEST_INTERACTIVE
-    // LCOV_EXCL_START
-    nw::cout << "Output different chars:" << std::endl;
-    test_cout();
-    nw::cout << "Same again:" << std::endl;
-    test_cout_single_char();
+    nw::cout << "Output different chars:" << std::endl; // LCOV_EXCL_LINE
+    test_cout();                                        // LCOV_EXCL_LINE
+    nw::cout << "Same again:" << std::endl;             // LCOV_EXCL_LINE
+    test_cout_single_char();                            // LCOV_EXCL_LINE
 
-    nw::cout << "Same 2 outputs but to stderr:" << std::endl;
-    test_cerr();
-    test_cerr_single_char();
+    nw::cout << "Same 2 outputs but to stderr:" << std::endl; // LCOV_EXCL_LINE
+    test_cerr();                                              // LCOV_EXCL_LINE
+    test_cerr_single_char();                                  // LCOV_EXCL_LINE
 
-    nw::cout << "Basic cin tests:" << std::endl;
-    test_cin();
+    nw::cout << "Basic cin tests:" << std::endl; // LCOV_EXCL_LINE
+    test_cin();                                  // LCOV_EXCL_LINE
 
-    nw::cout << "getline test:" << std::endl;
-    nw::cin.ignore(std::numeric_limits<int>::max(), '\n'); // Clear newline from last test
-    test_cin_getline();
+    nw::cout << "getline test:" << std::endl; // LCOV_EXCL_LINE
+    // Clear newline from last test
+    nw::cin.ignore(std::numeric_limits<int>::max(), '\n'); // LCOV_EXCL_LINE
+    test_cin_getline();                                    // LCOV_EXCL_LINE
 
-    nw::cout << "CTRL+Z test:" << std::endl;
-    test_ctrl_z_is_eof();
-    // LCOV_EXCL_STOP
+    nw::cout << "CTRL+Z test:" << std::endl; // LCOV_EXCL_LINE
+    test_ctrl_z_is_eof();                    // LCOV_EXCL_LINE
 #else
     test_is_valid_UTF8();
     test_tie();
@@ -416,5 +561,6 @@ void test_main(int argc, char** argv, char**) // coverity [root_function]
     test_cin();
     test_cin_getline();
     test_ctrl_z_is_eof();
+    test_console();
 #endif // BOOST_NOWIDE_TEST_INTERACTIVE
 }

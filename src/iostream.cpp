@@ -73,34 +73,30 @@ namespace nowide {
             {}
 
         protected:
-            // Can't test this on CI so exclude
-            // LCOV_EXCL_START
             bool do_read(wchar_t* buffer, std::size_t num_chars_to_read, std::size_t& num_chars_read) override
             {
-                DWORD size = 0;                                                                 // LCOV_EXCL_LINE
-                const auto to_read_size = static_cast<DWORD>(num_chars_to_read);                // LCOV_EXCL_LINE
-                const bool result = ReadConsoleW(handle_, buffer, to_read_size, &size, 0) != 0; // LCOV_EXCL_LINE
-                num_chars_read = size;                                                          // LCOV_EXCL_LINE
-                return result;                                                                  // LCOV_EXCL_LINE
+                DWORD size = 0;
+                const auto to_read_size = static_cast<DWORD>(num_chars_to_read);
+                const bool result = ReadConsoleW(handle_, buffer, to_read_size, &size, 0) != 0;
+                num_chars_read = size;
+                return result;
             }
-            // LCOV_EXCL_STOP
         };
 
-        winconsole_ostream::winconsole_ostream(int fd, winconsole_ostream* tieStream) : std::ostream(0)
+        winconsole_ostream::winconsole_ostream(const bool isBuffered, winconsole_ostream* tieStream) : std::ostream(0)
         {
-            HANDLE h = 0;
-            switch(fd)
-            {
-            case 1: h = GetStdHandle(STD_OUTPUT_HANDLE); break;
-            case 2: h = GetStdHandle(STD_ERROR_HANDLE); break;
-            }
+            HANDLE h;
+            if(isBuffered)
+                h = GetStdHandle(STD_OUTPUT_HANDLE);
+            else
+                h = GetStdHandle(STD_ERROR_HANDLE);
             if(is_atty_handle(h))
             {
                 d.reset(new console_output_buffer(h));
                 std::ostream::rdbuf(d.get());
             } else
             {
-                std::ostream::rdbuf(fd == 1 ? std::cout.rdbuf() : std::cerr.rdbuf());
+                std::ostream::rdbuf(isBuffered ? std::cout.rdbuf() : std::cerr.rdbuf());
                 assert(rdbuf());
             }
             if(tieStream)
@@ -149,10 +145,10 @@ namespace nowide {
 #else
 #define BOOST_NOWIDE_INIT_PRIORITY
 #endif
-    detail::winconsole_ostream cout BOOST_NOWIDE_INIT_PRIORITY(1, nullptr);
+    detail::winconsole_ostream cout BOOST_NOWIDE_INIT_PRIORITY(true, nullptr);
     detail::winconsole_istream cin BOOST_NOWIDE_INIT_PRIORITY(&cout);
-    detail::winconsole_ostream cerr BOOST_NOWIDE_INIT_PRIORITY(2, &cout);
-    detail::winconsole_ostream clog BOOST_NOWIDE_INIT_PRIORITY(2, nullptr);
+    detail::winconsole_ostream cerr BOOST_NOWIDE_INIT_PRIORITY(false, &cout);
+    detail::winconsole_ostream clog BOOST_NOWIDE_INIT_PRIORITY(false, nullptr);
 } // namespace nowide
 } // namespace boost
 

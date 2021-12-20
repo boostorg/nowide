@@ -102,6 +102,7 @@ jobs:
                 apt-get -o Acquire::Retries=$NET_RETRY_COUNT install -y g++ python libpython-dev git
             fi
             git config --global pack.threads 0
+            ! command -v cmake &> /dev/null || echo "B2_FLAGS=--nowide-enable-cmake" >> $GITHUB_ENV
 
       - uses: actions/checkout@v2
         if: '!matrix.coverage'

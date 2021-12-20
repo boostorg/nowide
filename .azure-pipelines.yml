@@ -44,6 +44,7 @@ parameters:
   - name: jobs
     type: object
     default:
+      - { compiler: gcc-11,    cxxstd: '14,17,20', os: ubuntu-20.04 }
       - { compiler: gcc-10,    cxxstd: '14,17,20', os: ubuntu-20.04 }
       - { compiler: gcc-9,     cxxstd: '14,17,2a', os: ubuntu-20.04 }
       - { compiler: gcc-8,     cxxstd: '14,17,2a', os: ubuntu-20.04 }
@@ -58,9 +59,9 @@ parameters:
       - { compiler: clang-9,   cxxstd: '14,17,2a', os: ubuntu-20.04 }
       - { compiler: clang-8,   cxxstd: '14,17',    os: ubuntu-18.04, install: 'clang-8 libc6-dbg libc++-dev libstdc++-8-dev' }
       - { compiler: clang-7,   cxxstd: '14,17',    os: ubuntu-18.04, install: 'clang-7 libc6-dbg libc++-dev libstdc++-8-dev' }
-      - { compiler: clang-6.0, cxxstd: '11,14,17', os: ubuntu-18.04, install: 'clang-6.0 libc6-dbg libc++-dev libc++abi-dev libstdc++-8-dev', env: {B2_STDLIB: libc++ } }
+      - { compiler: clang-6.0, cxxstd: '11,14,17', os: ubuntu-18.04, install: 'clang-6.0 libc6-dbg libc++-dev libc++abi-dev libstdc++-8-dev' }
       - { name: Linux_clang_6_libcxx,
-          compiler: clang-6.0, cxxstd: '11,14,17', os: ubuntu-18.04, install: 'clang-6.0 libc6-dbg libc++-dev libc++abi-dev libstdc++-8-dev' }
+          compiler: clang-6.0, cxxstd: '11,14,17', os: ubuntu-18.04, install: 'clang-6.0 libc6-dbg libc++-dev libc++abi-dev libstdc++-8-dev', env: {B2_STDLIB: libc++ } }
       - { compiler: clang-5.0, cxxstd: '11,14,17', os: ubuntu-18.04 }
       - { compiler: clang-4.0, cxxstd: '11,14',    os: ubuntu-18.04 }
       - { compiler: clang-3.9, cxxstd: '11,14',    os: ubuntu-18.04 }
@@ -69,15 +70,18 @@ parameters:
       - { compiler: clang-3.6, cxxstd: '11',       os: ubuntu-18.04, container: 'ubuntu:16.04' }
       - { compiler: clang-3.5, cxxstd: '11',       os: ubuntu-18.04, container: 'ubuntu:16.04' }
       # OSX
-      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.14, xcode: 11.3.1 }
-      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.14, xcode: 11.2.1 }
-      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.14, xcode: 11.3 }
-      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.14, xcode: 11.1 }
-      - { compiler: clang, cxxstd: '11,14,17,2a', os: macOS-10.14, xcode: 10.3 }
-      - { compiler: clang, cxxstd: '11,14,17,2a', os: macOS-10.14, xcode: 10.2.1 }
-      - { compiler: clang, cxxstd: '11,14,17,2a', os: macOS-10.14, xcode: 10.2 }
-      - { compiler: clang, cxxstd: '11,14,17,2a', os: macOS-10.14, xcode: 10.1 }
-      - { compiler: clang, cxxstd: '11,14,17,2a', os: macOS-10.14, xcode: 10.0 }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 12.4 }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 12.3 }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 12.2 }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 12.1.1 }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 12.0.1 }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 11.7 }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 11.6 }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 11.5 }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 11.4.1 }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 11.3.1 }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 11.2.1 }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 11.3 }
 
 stages:
   - stage: Test
@@ -147,30 +151,31 @@ stages:
               displayName: 'Build'
 
       - job: 'Windows'
+        timeoutInMinutes: 120
         strategy:
           matrix:
+            VS_2022:
+              B2_TOOLSET: msvc-14.3
+              B2_CXXSTD: 14,17,20
+              B2_ADDRESS_MODEL: 32,64
+              VM_IMAGE: 'windows-2022'
+            VS_2022_strict:
+              B2_TOOLSET: msvc-14.3
+              B2_CXXSTD: 14,17,20
+              B2_CXXFLAGS: -permissive-
+              B2_ADDRESS_MODEL: 32,64
+              VM_IMAGE: 'windows-2022'
             VS_2019:
               B2_TOOLSET: msvc-14.2
               B2_CXXSTD: 14,17,20
-              B2_CXXFLAGS: -permissive-
-              B2_ADDRESS_MODEL: 64
+              B2_ADDRESS_MODEL: 32,64
               VM_IMAGE: 'windows-2019'
-            VS_2017_cxx2a_strict:
-              B2_TOOLSET: msvc-14.1
-              B2_CXXSTD: latest  # 2a
+            VS_2019_strict:
+              B2_TOOLSET: msvc-14.2
+              B2_CXXSTD: 14,17,20
               B2_CXXFLAGS: -permissive-
-              B2_ADDRESS_MODEL: 64
-              VM_IMAGE: 'vs2017-win2016'
-            VS_2017_cxx17:
-              B2_TOOLSET: msvc-14.1
-              B2_CXXSTD: 17
-              B2_ADDRESS_MODEL: 64,32
-              VM_IMAGE: 'vs2017-win2016'
-            VS_2017_cxx14:
-              B2_TOOLSET: msvc-14.1
-              # B2_CXXSTD: 14  # default
-              B2_ADDRESS_MODEL: 64,32
-              VM_IMAGE: 'vs2017-win2016'
+              B2_ADDRESS_MODEL: 32,64
+              VM_IMAGE: 'windows-2019'
 
         pool:
           vmImage: $(VM_IMAGE)
