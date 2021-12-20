@@ -21,7 +21,8 @@
 #endif
 #include <boost/filesystem/operations.hpp>
 
-void test_main(int, char** argv, char**) // coverity [root_function]
+// coverity [root_function]
+void test_main(int, char** argv, char**)
 {
     boost::nowide::nowide_filesystem();
     const std::string prefix = argv[0];

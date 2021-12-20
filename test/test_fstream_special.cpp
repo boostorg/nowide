@@ -257,7 +257,8 @@ void testPutback(const char* filename)
     }
 }
 
-void test_main(int, char** argv, char**) // coverity [root_function]
+// coverity [root_function]
+void test_main(int, char** argv, char**)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
     const std::string exampleFilename2 = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd 2.txt";
