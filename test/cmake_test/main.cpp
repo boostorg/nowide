@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2019 Alexander Grund
+//  Copyright (c) 2019-2021 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE or copy at

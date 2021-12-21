@@ -15,7 +15,7 @@
 
 cmake_minimum_required(VERSION 3.9)
 # Version number starts at 10 to avoid conflicts with Nowide version
-set(_version 11.0.0)
+set(_version 11.1.3)
 project(nowide VERSION ${_version} LANGUAGES CXX)
 
 if(POLICY CMP0074)
@@ -29,15 +29,29 @@ if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
-include(NowideAddOptions)
 include(NowideAddWarnings)
+include(CheckCXXSourceCompiles)
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   include(CTest)
+  set(def_INSTALL ON)
+  set(def_WERROR ON)
+else()
+  set(def_INSTALL OFF)
+  set(def_WERROR OFF)
 endif()
+
+  option(NOWIDE_INSTALL "Install library" "${def_INSTALL}")
+option(NOWIDE_WERROR "Treat warnings as errors" "${def_WERROR}")
+
+
+file(READ ${CMAKE_CURRENT_SOURCE_DIR}/config/check_lfs_support.cpp lfsSource)
+check_cxx_source_compiles("${lfsSource}" NOWIDE_HAS_LFS)
+file(READ ${CMAKE_CURRENT_SOURCE_DIR}/config/check_attribute_init_priority.cpp attributeInitPrioritySource)
+check_cxx_source_compiles("${attributeInitPrioritySource}" NOWIDE_HAS_INIT_PRIORITY)
 
 # Using glob here is ok as it is only for headers
 file(GLOB_RECURSE headers include/*.hpp)
-add_library(nowide src/cstdio.cpp src/cstdlib.cpp src/iostream.cpp ${headers})
+add_library(nowide src/console_buffer.cpp src/cstdio.cpp src/cstdlib.cpp src/filebuf.cpp src/iostream.cpp src/stat.cpp ${headers})
 add_library(nowide::nowide ALIAS nowide)
 set_target_properties(nowide PROPERTIES
     CXX_VISIBILITY_PRESET hidden
@@ -47,6 +61,12 @@ set_target_properties(nowide PROPERTIES
 )
 if(BUILD_SHARED_LIBS)
   target_compile_definitions(nowide PUBLIC NOWIDE_DYN_LINK)
+endif()
+if(NOT NOWIDE_HAS_LFS)
+  target_compile_definitions(nowide PRIVATE NOWIDE_NO_LFS)
+endif()
+if(NOWIDE_HAS_INIT_PRIORITY)
+  target_compile_definitions(nowide PRIVATE NOWIDE_HAS_INIT_PRIORITY)
 endif()
 target_compile_definitions(nowide PUBLIC NOWIDE_NO_LIB)
 target_include_directories(nowide PUBLIC include)

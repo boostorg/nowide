@@ -9,6 +9,7 @@
 #define NOWIDE_STACKSTRING_HPP_INCLUDED
 
 #include <nowide/convert.hpp>
+#include <nowide/utf/utf.hpp>
 #include <cassert>
 #include <cstring>
 
@@ -33,9 +34,9 @@ namespace nowide {
         /// Size of the stack buffer
         static const size_t buffer_size = BufferSize;
         /// Type of the output character (converted to)
-        typedef CharOut output_char;
+        using output_char = CharOut;
         /// Type of the input character (converted from)
-        typedef CharIn input_char;
+        using input_char = CharIn;
 
         /// Creates a NULL stackstring
         basic_stackstring() : data_(NULL)
@@ -90,7 +91,7 @@ namespace nowide {
         output_char* convert(const input_char* input)
         {
             if(input)
-                return convert(input, input + detail::strlen(input));
+                return convert(input, input + utf::strlen(input));
             clear();
             return get();
         }
@@ -106,15 +107,15 @@ namespace nowide {
                 // Minimum size required: 1 output char per input char + trailing NULL
                 const size_t min_output_size = input_len + 1;
                 // If there is a chance the converted string fits on stack, try it
-                if(min_output_size <= buffer_size && detail::convert_buffer(buffer_, buffer_size, begin, end))
+                if(min_output_size <= buffer_size && utf::convert_buffer(buffer_, buffer_size, begin, end))
                     data_ = buffer_;
                 else
                 {
                     // Fallback: Allocate a buffer that is surely large enough on heap
                     // Max size: Every input char is transcoded to the output char with maximum with + trailing NULL
-                    const size_t max_output_size = input_len * detail::utf::utf_traits<output_char>::max_width + 1;
+                    const size_t max_output_size = input_len * utf::utf_traits<output_char>::max_width + 1;
                     data_ = new output_char[max_output_size];
-                    const bool success = detail::convert_buffer(data_, max_output_size, begin, end) == data_;
+                    const bool success = utf::convert_buffer(data_, max_output_size, begin, end) == data_;
                     assert(success);
                     (void)success;
                 }
@@ -190,19 +191,19 @@ namespace nowide {
     ///
     /// Convenience typedef
     ///
-    typedef basic_stackstring<wchar_t, char, 256> wstackstring;
+    using wstackstring = basic_stackstring<wchar_t, char, 256>;
     ///
     /// Convenience typedef
     ///
-    typedef basic_stackstring<char, wchar_t, 256> stackstring;
+    using stackstring = basic_stackstring<char, wchar_t, 256>;
     ///
     /// Convenience typedef
     ///
-    typedef basic_stackstring<wchar_t, char, 16> wshort_stackstring;
+    using wshort_stackstring = basic_stackstring<wchar_t, char, 16>;
     ///
     /// Convenience typedef
     ///
-    typedef basic_stackstring<char, wchar_t, 16> short_stackstring;
+    using short_stackstring = basic_stackstring<char, wchar_t, 16>;
 
 } // namespace nowide
 

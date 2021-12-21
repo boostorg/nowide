@@ -8,11 +8,9 @@
 #ifndef NOWIDE_INTEGRATION_FILESYSTEM_HPP_INCLUDED
 #define NOWIDE_INTEGRATION_FILESYSTEM_HPP_INCLUDED
 
-#if(defined(__GNUC__) && __GNUC__ < 5)
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#endif
 #include <nowide/utf8_codecvt.hpp>
 #include <boost/filesystem/path.hpp>
+
 namespace nowide {
     ///
     /// Install utf8_codecvt facet into  boost::filesystem::path such all char strings are interpreted as utf-8 strings

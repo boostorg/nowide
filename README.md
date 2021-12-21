@@ -1,11 +1,13 @@
 # Boost.Nowide
 
-Branch      | Travis | Appveyor | Github | codecov.io | Documentation
-------------|--------|----------|--------|------------|--------------
-[master](https://github.com/boostorg/nowide/tree/master)   | [![Build Status](https://travis-ci.com/boostorg/nowide.svg?branch=master)](https://travis-ci.com/boostorg/nowide)  | [![Build status](https://ci.appveyor.com/api/projects/status/w5sywrekwd66say4/branch/master?svg=true)](https://ci.appveyor.com/project/Flamefire/nowide-fr98b/branch/master)   | ![](https://github.com/boostorg/nowide/workflows/CI%20Tests/badge.svg?branch=master)  | [![codecov](https://codecov.io/gh/boostorg/nowide/branch/master/graph/badge.svg)](https://codecov.io/gh/boostorg/nowide/branch/master)   | [![Documentation](https://img.shields.io/badge/documentation-master-brightgreen.svg)](https://www.boost.org/doc/libs/master/libs/nowide/index.html)
-[develop](https://github.com/boostorg/nowide/tree/develop) | [![Build Status](https://travis-ci.com/boostorg/nowide.svg?branch=develop)](https://travis-ci.com/boostorg/nowide) | [![Build status](https://ci.appveyor.com/api/projects/status/w5sywrekwd66say4/branch/develop?svg=true)](https://ci.appveyor.com/project/Flamefire/nowide-fr98b/branch/develop) | ![](https://github.com/boostorg/nowide/workflows/CI%20Tests/badge.svg?branch=develop) | [![codecov](https://codecov.io/gh/boostorg/nowide/branch/develop/graph/badge.svg)](https://codecov.io/gh/boostorg/nowide/branch/develop) | [![Documentation](https://img.shields.io/badge/documentation-develop-brightgreen.svg)](https://www.boost.org/doc/libs/develop/libs/nowide/index.html)
+Branch      | Appveyor | Github | codecov.io | Documentation
+------------|----------|--------|------------|--------------
+[master](https://github.com/boostorg/nowide/tree/master)   | [![Build status](https://ci.appveyor.com/api/projects/status/w5sywrekwd66say4/branch/master?svg=true)](https://ci.appveyor.com/project/Flamefire/nowide-fr98b/branch/master)   | ![](https://github.com/boostorg/nowide/workflows/CI%20Tests/badge.svg?branch=master) ![](https://github.com/boostorg/nowide/workflows/POSIX/badge.svg?branch=master)  | [![codecov](https://codecov.io/gh/boostorg/nowide/branch/master/graph/badge.svg)](https://codecov.io/gh/boostorg/nowide/branch/master)   | [![Documentation](https://img.shields.io/badge/documentation-master-brightgreen.svg)](https://www.boost.org/doc/libs/master/libs/nowide/index.html)
+[develop](https://github.com/boostorg/nowide/tree/develop) | [![Build status](https://ci.appveyor.com/api/projects/status/w5sywrekwd66say4/branch/develop?svg=true)](https://ci.appveyor.com/project/Flamefire/nowide-fr98b/branch/develop) | ![](https://github.com/boostorg/nowide/workflows/CI%20Tests/badge.svg?branch=develop) ![](https://github.com/boostorg/nowide/workflows/POSIX/badge.svg?branch=develop) | [![codecov](https://codecov.io/gh/boostorg/nowide/branch/develop/graph/badge.svg)](https://codecov.io/gh/boostorg/nowide/branch/develop) | [![Documentation](https://img.shields.io/badge/documentation-develop-brightgreen.svg)](https://www.boost.org/doc/libs/develop/libs/nowide/index.html)
 
-Coverity Scan: [![Coverity Scan Build Status](https://scan.coverity.com/projects/20464/badge.svg)](https://scan.coverity.com/projects/boostorg-nowide)
+Quality checks:
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/20464/badge.svg)](https://scan.coverity.com/projects/boostorg-nowide)
+[![CodeFactor](https://www.codefactor.io/repository/github/boostorg/nowide/badge)](https://www.codefactor.io/repository/github/boostorg/nowide)
 
 Library for cross-platform, unicode aware programming.
 
@@ -75,7 +77,8 @@ See the [Documentation](https://www.boost.org/doc/libs/master/libs/nowide/index.
 
 Compile and install the Boost super project the usual way via `./b2`.
 The headers and library will then be available together with all other Boost libraries.
-From within CMake you can then use `find_package(boost_nowide)` and link against `Boost::nowide`.
+From within CMake you can then use `find_package(Boost COMPONENTS nowide)` and link against `Boost::nowide`.
+Note that `find_package(boost_nowide)` will find the package too, but the above is the canonical way.
 
 ## With CMake
 

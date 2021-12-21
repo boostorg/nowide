@@ -25,6 +25,13 @@
 #endif
 
 namespace nowide {
+    namespace detail {
+        /// Same as std::ftell but potentially with Large File Support
+        NOWIDE_DECL std::streampos ftell(FILE* file);
+        /// Same as std::fseek but potentially with Large File Support
+        NOWIDE_DECL int fseek(FILE* file, std::streamoff offset, int origin);
+    } // namespace detail
+
 #if !NOWIDE_USE_FILEBUF_REPLACEMENT && !defined(NOWIDE_DOXYGEN)
     using std::basic_filebuf;
     using std::filebuf;
@@ -35,7 +42,7 @@ namespace nowide {
     /// it is implemented and specialized for CharType = char, it
     /// implements std::filebuf over standard C I/O
     ///
-    template<typename CharType, typename Traits = std::char_traits<CharType> >
+    template<typename CharType, typename Traits = std::char_traits<CharType>>
     class basic_filebuf;
 
     ///
@@ -47,7 +54,7 @@ namespace nowide {
     template<>
     class basic_filebuf<char> : public std::basic_streambuf<char>
     {
-        typedef std::char_traits<char> Traits;
+        using Traits = std::char_traits<char>;
 
     public:
 #ifdef NOWIDE_MSVC
@@ -75,6 +82,7 @@ namespace nowide {
         }
         basic_filebuf& operator=(basic_filebuf&& other) noexcept
         {
+            close();
             swap(other);
             return *this;
         }
@@ -88,17 +96,19 @@ namespace nowide {
             swap(owns_buffer_, rhs.owns_buffer_);
             swap(last_char_[0], rhs.last_char_[0]);
             swap(mode_, rhs.mode_);
+
             // Fixup last_char references
-            if(epptr() == rhs.last_char_)
-                setp(last_char_, last_char_);
-            if(egptr() == rhs.last_char_)
-                rhs.setg(last_char_, gptr() == rhs.last_char_ ? last_char_ : last_char_ + 1, last_char_ + 1);
-            if(rhs.epptr() == last_char_)
-                setp(rhs.last_char_, rhs.last_char_);
-            if(rhs.egptr() == rhs.last_char_)
+            if(pbase() == rhs.last_char_)
+                setp(last_char_, (pptr() == epptr()) ? last_char_ : last_char_ + 1);
+            if(eback() == rhs.last_char_)
+                setg(last_char_, (gptr() == rhs.last_char_) ? last_char_ : last_char_ + 1, last_char_ + 1);
+
+            if(rhs.pbase() == last_char_)
+                rhs.setp(rhs.last_char_, (rhs.pptr() == rhs.epptr()) ? rhs.last_char_ : rhs.last_char_ + 1);
+            if(rhs.eback() == last_char_)
             {
                 rhs.setg(rhs.last_char_,
-                         rhs.gptr() == last_char_ ? rhs.last_char_ : rhs.last_char_ + 1,
+                         (rhs.gptr() == last_char_) ? rhs.last_char_ : rhs.last_char_ + 1,
                          rhs.last_char_ + 1);
             }
         }
@@ -138,7 +148,7 @@ namespace nowide {
             file_ = detail::wfopen(s, smode);
             if(!file_)
                 return 0;
-            if(ate && NOWIDE_FSEEK64(file_, 0, SEEK_END) != 0)
+            if(ate && detail::fseek(file_, 0, SEEK_END) != 0)
             {
                 close();
                 return 0;
@@ -164,6 +174,8 @@ namespace nowide {
                 buffer_ = NULL;
                 owns_buffer_ = false;
             }
+            setg(0, 0, 0);
+            setp(0, 0);
             return res ? this : NULL;
         }
         ///
@@ -187,7 +199,7 @@ namespace nowide {
         }
         void validate_cvt(const std::locale& loc)
         {
-            if(!std::use_facet<std::codecvt<char, char, std::mbstate_t> >(loc).always_noconv())
+            if(!std::use_facet<std::codecvt<char, char, std::mbstate_t>>(loc).always_noconv())
                 throw std::runtime_error("Converting codecvts are not supported");
         }
 
@@ -200,7 +212,10 @@ namespace nowide {
             setg(NULL, NULL, NULL);
             setp(NULL, NULL);
             if(owns_buffer_)
+            {
                 delete[] buffer_;
+                owns_buffer_ = false;
+            }
             buffer_ = s;
             buffer_size_ = (n >= 0) ? static_cast<size_t>(n) : 0;
             return this;
@@ -208,7 +223,7 @@ namespace nowide {
 
         int overflow(int c = EOF) override
         {
-            if(!(mode_ & std::ios_base::out))
+            if(!(mode_ & (std::ios_base::out | std::ios_base::app)))
                 return EOF;
 
             if(!stop_reading())
@@ -218,7 +233,7 @@ namespace nowide {
             if(n > 0)
             {
                 if(std::fwrite(pbase(), 1, n, file_) != n)
-                    return -1;
+                    return EOF;
                 setp(buffer_, buffer_ + buffer_size_);
                 if(c != EOF)
                 {
@@ -267,7 +282,11 @@ namespace nowide {
                 return EOF;
             if(!stop_writing())
                 return EOF;
-            if(buffer_size_ == 0)
+            // In text mode we cannot use a buffer size of more than 1 (i.e. single char only)
+            // This is due to the need to seek back in case of a sync to "put back" unread chars.
+            // However determining the number of chars to seek back is impossible in case there are newlines
+            // as we cannot know if those were converted.
+            if(buffer_size_ == 0 || !(mode_ & std::ios_base::binary))
             {
                 const int c = std::fgetc(file_);
                 if(c == EOF)
@@ -330,10 +349,9 @@ namespace nowide {
             case std::ios_base::end: whence = SEEK_END; break;
             default: assert(false); return EOF;
             }
-            assert(off <= std::numeric_limits<int64_t>::max());
-            if(NOWIDE_FSEEK64(file_, static_cast<int64_t>(off), whence) != 0)
+            if(detail::fseek(file_, off, whence) != 0)
                 return EOF;
-            return NOWIDE_FTELL64(file_);
+            return detail::ftell(file_);
         }
         std::streampos seekpos(std::streampos pos,
                                std::ios_base::openmode m = std::ios_base::in | std::ios_base::out) override
@@ -351,15 +369,23 @@ namespace nowide {
         /// Postcondition: gptr() == NULL
         bool stop_reading()
         {
-            if(gptr())
-            {
-                const std::streamsize off = gptr() - egptr();
-                setg(0, 0, 0);
-                assert(off <= std::numeric_limits<int64_t>::max());
-                if(off && NOWIDE_FSEEK64(file_, static_cast<int64_t>(off), SEEK_CUR) != 0)
-                    return false;
-            }
-            return true;
+            if(!gptr())
+                return true;
+            const auto off = gptr() - egptr();
+            setg(0, 0, 0);
+            if(!off)
+                return true;
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare"
+#endif
+            // coverity[result_independent_of_operands]
+            if(off > std::numeric_limits<std::streamoff>::max())
+                return false;
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
+            return detail::fseek(file_, static_cast<std::streamoff>(off), SEEK_CUR) == 0;
         }
 
         /// Stop writing. If any bytes are to be written, writes them to file
@@ -446,7 +472,14 @@ namespace nowide {
     ///
     /// \brief Convenience typedef
     ///
-    typedef basic_filebuf<char> filebuf;
+    using filebuf = basic_filebuf<char>;
+
+    /// Swap the basic_filebuf instances
+    template<typename CharType, typename Traits>
+    void swap(basic_filebuf<CharType, Traits>& lhs, basic_filebuf<CharType, Traits>& rhs)
+    {
+        lhs.swap(rhs);
+    }
 
 #endif // windows
 

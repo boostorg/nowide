@@ -10,11 +10,10 @@
 #include <nowide/cstdio.hpp>
 
 #include <nowide/convert.hpp>
+#include "test.hpp"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-
-#include "test.hpp"
 
 bool file_exists(const std::string& filename)
 {
@@ -47,9 +46,10 @@ void create_test_file(const std::string& filename)
 #if NOWIDE_MSVC
 #include <crtdbg.h> // For _CrtSetReportMode
 void noop_invalid_param_handler(const wchar_t*, const wchar_t*, const wchar_t*, unsigned, uintptr_t)
-{}
+{} // LCOV_EXCL_LINE
 #endif
 
+// coverity [root_function]
 void test_main(int, char** argv, char**)
 {
     const std::string prefix = argv[0];
