@@ -43,7 +43,8 @@ namespace nowide {
     {
         const wstackstring wname(file_name);
         const wshort_stackstring wmode(mode);
-        return _wfreopen(wname.get(), wmode.get(), stream); // coverity[var_deref_model]
+        // coverity[var_deref_model]
+        return _wfreopen(wname.get(), wmode.get(), stream);
     }
     ///
     /// \brief Same as fopen but file_name and mode are UTF-8 strings
@@ -52,7 +53,8 @@ namespace nowide {
     {
         const wstackstring wname(file_name);
         const wshort_stackstring wmode(mode);
-        return detail::wfopen(wname.get(), wmode.get()); // coverity[var_deref_model]
+        // coverity[var_deref_model]
+        return detail::wfopen(wname.get(), wmode.get());
     }
     ///
     /// \brief Same as rename but old_name and new_name are UTF-8 strings
