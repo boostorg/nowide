@@ -1,8 +1,9 @@
-# Copyright 2019 - 2020 Alexander Grund
+# Copyright 2019 - 2021 Alexander Grund
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE or copy at http://boost.org/LICENSE_1_0.txt)
 
 on:
+  pull_request:
   push:
     branches: [develop]
 
@@ -14,6 +15,7 @@ env:
 jobs:
   update:
     name: Update standalone branch
+    if: github.event_name == 'push' || contains(github.event.head_commit.message, 'standalone')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -27,19 +29,21 @@ jobs:
         run: |
           bash tools/create_standalone.sh /tmp/nowide_standalone
           git checkout "$STANDALONE_BRANCH_NAME" -- || git checkout -b "$STANDALONE_BRANCH_NAME"
-          git rm -r *
+          rm -r *
           mv /tmp/nowide_standalone/* .
           # Check if anything changed to avoid later failure.
           # E.g. nothing changes if only CI files are modified which are removed by the above
-          if git diff --quiet; then
+          if git diff --exit-code; then
             echo "::set-output name=changed::false"
           else
             echo "::set-output name=changed::true"
           fi
-      - name: Commit and push
+      - name: Commit changes
         if: steps.standalone.outputs.changed == 'true'
         run: |
           git add .
           git commit -m "Include '${{github.event.head_commit.message}}'"
+      -name: Push
+        if: github.event_name != 'pull_request' && steps.standalone.outputs.changed == 'true'
           remote_repo="https://${GITHUB_ACTOR}:${{secrets.GITHUB_TOKEN}}@github.com/${GITHUB_REPOSITORY}.git"
           git push "$remote_repo" HEAD:$STANDALONE_BRANCH_NAME
