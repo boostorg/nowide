@@ -10,7 +10,10 @@ on:
     branches:
       - master
       - develop
+      - bugfix/**
       - feature/**
+      - fix/**
+      - pr/**
 
 concurrency:
   group: ${{format('ci_tests{0}:{1}', github.repository, github.ref)}}
