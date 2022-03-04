@@ -7,8 +7,8 @@
 
 #define BOOST_NOWIDE_SOURCE
 
-#if(defined(__MINGW32__) || defined(__CYGWIN__)) && defined(__STRICT_ANSI__)
-// Need the _w* functions which are extensions on MinGW/Cygwin
+#if defined(__MINGW32__) && defined(__STRICT_ANSI__)
+// Need the _w* functions which are extensions on MinGW
 #undef __STRICT_ANSI__
 #endif
 
