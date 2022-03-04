@@ -62,6 +62,10 @@ void test_main(int, char** argv, char**)
         // Need to use the detail function directly
         TEST_EQ(boost::nowide::detail::stat(filename.c_str(), &stdStat, sizeof(stdStat) - 4u), EINVAL);
         TEST_EQ(errno, EINVAL);
+        // Same for our stat_t
+        boost::nowide::stat_t boostStat;
+        TEST_EQ(boost::nowide::detail::stat(filename.c_str(), &boostStat, sizeof(boostStat) - 4u), EINVAL);
+        TEST_EQ(errno, EINVAL);
     }
 #endif
 

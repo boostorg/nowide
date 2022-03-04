@@ -36,12 +36,17 @@ namespace nowide {
             const wstackstring wpath(path);
             return _wstat(wpath.get(), buffer);
         }
+        int stat(const char* path, stat_t* buffer, size_t buffer_size)
+        {
+            if(sizeof(*buffer) != buffer_size)
+            {
+                errno = EINVAL;
+                return EINVAL;
+            }
+            const wstackstring wpath(path);
+            return _wstat64(wpath.get(), buffer);
+        }
     } // namespace detail
-    int stat(const char* path, stat_t* buffer)
-    {
-        const wstackstring wpath(path);
-        return _wstat64(wpath.get(), buffer);
-    }
 } // namespace nowide
 } // namespace boost
 
