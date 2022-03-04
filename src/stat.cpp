@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2020 Alexander Grund
+//  Copyright (c) 2020-2022 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE or copy at  http://www.boost.org/LICENSE_1_0.txt)
@@ -8,13 +8,16 @@
 #define BOOST_NOWIDE_SOURCE
 
 #if defined(__MINGW32__) && defined(__STRICT_ANSI__)
-// Need the _w* functions which are extensions on MinGW
+// Need the _w* functions which are extensions on MinGW but not on MinGW-w64
+#include <_mingw.h>
+#ifndef __MINGW64_VERSION_MAJOR
 #undef __STRICT_ANSI__
+#endif
 #endif
 
 #include <boost/nowide/config.hpp>
 
-#if defined(BOOST_WINDOWS)
+#ifdef BOOST_WINDOWS
 
 #include <boost/nowide/stackstring.hpp>
 #include <boost/nowide/stat.hpp>
