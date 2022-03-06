@@ -37,6 +37,7 @@ local SOURCES = console_buffer cstdio cstdlib filebuf iostream stat ;
 
 lib boost_nowide
   : $(SOURCES).cpp
+  : <include>../src
   ;
 
 boost-install boost_nowide ;
