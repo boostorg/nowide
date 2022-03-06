@@ -9,9 +9,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include <nowide/cstdlib.hpp>
-
 #include <nowide/args.hpp>
+#include <nowide/cstdlib.hpp>
 #include <nowide/utf/convert.hpp>
 #include <nowide/utf/utf.hpp>
 #include "test.hpp"
