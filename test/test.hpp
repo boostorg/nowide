@@ -72,7 +72,7 @@ namespace nowide {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare"
 #endif
-                if(c >= std::numeric_limits<char>::min() && c <= std::numeric_limits<char>::max())
+                if(c >= (std::numeric_limits<char>::min)() && c <= (std::numeric_limits<char>::max)())
                     ss << static_cast<char>(c);
                 else
                     ss << "\\" << std::setw(sizeof(wchar_t) * 2) << static_cast<int>(c) << std::setw(defWidth);

@@ -64,7 +64,9 @@ run test_stackstring.cpp ;
 run test_stat.cpp ;
 run test_stdio.cpp ;
 run test_system.cpp : : : <define>BOOST_NOWIDE_TEST_USE_NARROW=1 <target-os>windows:<library>shell32 <target-os>darwin,<link>shared:<build>no : test_system_n ;
-run test_system.cpp : : : <define>BOOST_NOWIDE_TEST_USE_NARROW=0 <target-os>windows:<library>shell32 <conditional>@require-windows : test_system_w ;
+run test_system.cpp : : : <define>BOOST_NOWIDE_TEST_USE_NARROW=0 <library>shell32 <conditional>@require-windows : test_system_w ;
+run test_system.cpp : : : <define>BOOST_NOWIDE_TEST_USE_NARROW=0 <define>BOOST_USE_WINDOWS_H <library>shell32 <conditional>@require-windows : test_system_use_windows_h ;
+run test_system.cpp : : : <define>BOOST_NOWIDE_TEST_USE_NARROW=0 <define>BOOST_USE_WINDOWS_H <define>WIN32_LEAN_AND_MEAN <library>shell32 <conditional>@require-windows : test_system_use_windows_h_lean ;
 run test_traits.cpp : : : <define>BOOST_NOWIDE_TEST_BFS_PATH <library>/boost/filesystem//boost_filesystem/<warnings-as-errors>off ;
 
 compile benchmark_fstream.cpp : <define>BOOST_NOWIDE_USE_WIN_FSTREAM=1 [ requires cxx11_hdr_chrono ] ;

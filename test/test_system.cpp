@@ -9,9 +9,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include <boost/nowide/cstdlib.hpp>
-
 #include <boost/nowide/args.hpp>
+#include <boost/nowide/cstdlib.hpp>
 #include <boost/nowide/utf/convert.hpp>
 #include <boost/nowide/utf/utf.hpp>
 #include "test.hpp"
