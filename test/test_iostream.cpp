@@ -349,13 +349,16 @@ void test_ctrl_z_is_eof()
     TEST_MOCKED(value == "Reached after clear()");
 #ifndef NOWIDE_TEST_INTERACTIVE
     // CTRL+Z anywhere else but at the start of a line does not matter
+    nw::cout << "CTRL+Z Test:";
     for(int i = 1; i <= 1100; i++)
     {
+        nw::cout << '.' << std::flush; // Progress indicator
         const std::string expected = create_random_one_line_string(i) + "\x1a";
         mock_buf.inputs.push(std::wstring(expected.begin(), expected.end()) + L"\r\n");
         TEST(std::getline(nw::cin, value));
         TEST_EQ(value, expected);
     }
+    nw::cout << std::endl;
 #endif
 }
 

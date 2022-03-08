@@ -10,6 +10,7 @@
 #include <nowide/cstdio.hpp>
 #include "test.hpp"
 #include <algorithm>
+#include <iostream>
 #include <limits>
 #include <numeric>
 #include <random>
@@ -75,9 +76,16 @@ namespace nowide {
             return result;
         }
 
+        static std::minstd_rand make_rand_engine()
+        {
+            const auto seed = std::random_device{}();
+            std::cout << "RNG seed: " << seed << std::endl;
+            return std::minstd_rand(seed);
+        }
+
         std::string create_random_data(size_t num_chars, data_type type)
         {
-            static std::minstd_rand rng(std::random_device{}());
+            static std::minstd_rand rng = make_rand_engine();
             std::string result(num_chars, '\0');
             if(type == data_type::binary)
             {
