@@ -143,6 +143,11 @@ Hence it is only usable if the targetted system is Windows 10 after May 2019.
 The second method relies on user interaction prior to starting the program.
 Obviously this is not reliable when expecting only UTF-8 in the code.
 
+Also since Windows 10 1803 (i.e. since April 2018) it is possible to programmatically set the current code page to UTF-8 with e.g. `setlocale(LC_ALL, ".UTF8");`.
+This makes many functions accept or produce UTF-8 encoded strings which is especially useful for `std::filesystem::path` and its `string()` function.
+See <a href="https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?view=msvc-160#utf-8-support">the documentation</a> for details.
+While this works for most functions, it doesn't work for e.g. the program arguments (`argv` and `env` parameters of `main`).
+
 Hence under some circumstances (and hopefully always somewhen in the future) this library will not be required and even Windows I/O can be used with UTF-8 encoded text.
 
 \subsection main_reading Further Reading
@@ -255,7 +260,7 @@ The example above could be rewritten as:
 
 \code
 boost::nowide::basic_stackstring<wchar_t,char,64> wexisting_file(existing_file), wnew_file(new_file);
-CopyFileW(wexisting_file.c_str(),wnew_file.c_str(),TRUE);
+CopyFileW(wexisting_file.c_str(), wnew_file.c_str(), TRUE);
 \endcode
 
 \note There are a few convenience typedefs: \c stackstring and \c wstackstring using
@@ -276,11 +281,16 @@ Boost.Filesystem supports selection of narrow encoding.
 Unfortunatelly the default narrow encoding on Windows isn't UTF-8.
 But you can enable UTF-8 as default encoding on Boost.Filesystem by calling
 `boost::nowide::nowide_filesystem()` in the beginning of your program which
-imbues a locale with a UTF-8 conversion facet to convert between \c char \c wchar_t.
+imbues a locale with a UTF-8 conversion facet to convert between \c char and \c wchar_t.
 This interprets all narrow strings passed to and from \c boost::filesystem::path as UTF-8
 when converting them to wide strings (as required for internal storage).
 On POSIX this has usually no effect, as no conversion is done due to narrow strings being
 used as the storage format.
+
+For `std::filesystem::path` available since C++17 there is no way to imbue a locale.
+However the `u8string()` member function can be used to obtain an UTF-8 encoded string from a `path`.
+And to optain a `path` from an UTF-8 encoded string you may use `std::filesystem::u8path`
+or since C++20 one of the `path` constructors taking a `char8_t`-type input.
 
 
 \section technical Technical Details
