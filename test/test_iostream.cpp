@@ -381,7 +381,13 @@ public:
     {
         if(handleType == STD_INPUT_HANDLE)
         {
-            h = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+            h = CreateFile("CONIN$",
+                           GENERIC_READ | GENERIC_WRITE,
+                           FILE_SHARE_READ | FILE_SHARE_WRITE,
+                           nullptr,
+                           OPEN_EXISTING,
+                           0,
+                           0);
         } else
         {
             h = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
@@ -460,19 +466,26 @@ public:
 
 void test_console()
 {
-    std::cout << "Test cin console" << std::endl;
+    std::cout << "Test cin console: " << std::flush;
     {
         RedirectStdio stdinHandle(STD_INPUT_HANDLE);
+        std::cout << "stdin redirected, " << std::flush;
         // Recreate to react on redirected streams
         decltype(nw::cin) cin(nullptr);
+        std::cout << "cin recreated " << std::flush;
         TEST(cin.rdbuf() != std::cin.rdbuf());
+        std::cout << "and validated" << std::endl;
         const std::string testStringIn1 = "Hello std in ";
         const std::string testStringIn2 = "\xc3\xa4 - \xc3\xb6 - \xc3\xbc - \xd0\xbc - \xce\xbd";
+        std::cout << "Setting mock buffer data" << std::endl;
         stdinHandle.setBufferData(nw::widen(testStringIn1 + "\n" + testStringIn2 + "\n"));
+        std::cout << "Done" << std::endl;
         std::string line;
         TEST(std::getline(cin, line));
+        std::cout << "ASCII line read" << std::endl;
         TEST_EQ(line, testStringIn1);
         TEST(std::getline(cin, line));
+        std::cout << "UTF-8 line read" << std::endl;
         TEST_EQ(line, testStringIn2);
     }
     std::cout << "Test cout console" << std::endl;
