@@ -114,7 +114,7 @@ jobs:
             git config --global pack.threads 0
             ! command -v cmake &> /dev/null || echo "B2_FLAGS=--nowide-enable-cmake" >> $GITHUB_ENV
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           # For coverage builds fetch the whole history, else only 1 commit using a 'fake ternary'
           fetch-depth: ${{ matrix.coverage && '0' || '1' }}
@@ -127,7 +127,7 @@ jobs:
           key: ${{matrix.os}}-${{matrix.container}}-${{matrix.compiler}}
 
       - name: Fetch Boost.CI
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: boostorg/boost-ci
           ref: master
@@ -236,7 +236,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup MSYS2 environment
         uses: msys2/setup-msys2@v2
@@ -247,7 +247,7 @@ jobs:
           pacboy: gcc:p cmake:p ninja:p
 
       - name: Fetch Boost.CI
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: boostorg/boost-ci
           ref: master
@@ -296,9 +296,9 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Fetch Boost.CI
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: boostorg/boost-ci
           ref: master
