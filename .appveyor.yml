@@ -121,11 +121,6 @@ environment:
       configuration: Debug
       BOOST_ROOT: C:\Libraries\boost_1_60_0
     - CMAKE: true
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      GENERATOR: Visual Studio 16 2019
-      configuration: Debug
-      BOOST_ROOT: C:\Libraries\boost_1_73_0
-    - CMAKE: true
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
       GENERATOR: Visual Studio 17 2022
       configuration: Debug
