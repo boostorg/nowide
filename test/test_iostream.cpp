@@ -408,7 +408,7 @@ public:
         CONSOLE_SCREEN_BUFFER_INFO info;
         TEST(GetConsoleScreenBufferInfo(h, &info));
         TEST(info.dwSize.X > 0 && info.dwSize.Y > 0);
-        nw::cout << "Mock console buffer size: " << info.dwSize.X << "x" << info.dwSize.Y << "\n";
+        std::cout << "Mock console buffer size: " << info.dwSize.X << "x" << info.dwSize.Y << "\n";
 
         std::wstring result;
         std::vector<wchar_t> buffer(info.dwSize.X);
@@ -426,7 +426,7 @@ public:
         return result;
     }
 
-    void setBufferData(std::wstring data, int)
+    void setBufferData(const std::wstring& data)
     {
         std::vector<INPUT_RECORD> buffer;
         buffer.reserve(data.size() * 2 + 2);
@@ -460,7 +460,7 @@ public:
 
 void test_console()
 {
-    // cin
+    std::cout << "Test cin console" << std::endl;
     {
         RedirectStdio stdinHandle(STD_INPUT_HANDLE);
         // Recreate to react on redirected streams
@@ -468,14 +468,14 @@ void test_console()
         TEST(cin.rdbuf() != std::cin.rdbuf());
         const std::string testStringIn1 = "Hello std in ";
         const std::string testStringIn2 = "\xc3\xa4 - \xc3\xb6 - \xc3\xbc - \xd0\xbc - \xce\xbd";
-        stdinHandle.setBufferData(nw::widen(testStringIn1 + "\n" + testStringIn2 + "\n"), 0);
+        stdinHandle.setBufferData(nw::widen(testStringIn1 + "\n" + testStringIn2 + "\n"));
         std::string line;
         TEST(std::getline(cin, line));
         TEST_EQ(line, testStringIn1);
         TEST(std::getline(cin, line));
         TEST_EQ(line, testStringIn2);
     }
-    // cout
+    std::cout << "Test cout console" << std::endl;
     {
         RedirectStdio stdoutHandle(STD_OUTPUT_HANDLE);
         decltype(nw::cout) cout(true, nullptr);
@@ -487,7 +487,7 @@ void test_console()
         const auto data = stdoutHandle.getBufferData();
         TEST_EQ(data, nw::widen(testString));
     }
-    // cerr
+    std::cout << "Test cerr console" << std::endl;
     {
         RedirectStdio stderrHandle(STD_ERROR_HANDLE);
 
@@ -500,6 +500,7 @@ void test_console()
         const auto data = stderrHandle.getBufferData();
         TEST_EQ(data, nw::widen(testString));
     }
+    std::cout << "Console tests done" << std::endl;
 }
 
 #else
