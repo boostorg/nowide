@@ -381,7 +381,13 @@ public:
     {
         if(handleType == STD_INPUT_HANDLE)
         {
-            h = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+            h = CreateFile("CONIN$",
+                           GENERIC_READ | GENERIC_WRITE,
+                           FILE_SHARE_READ | FILE_SHARE_WRITE,
+                           nullptr,
+                           OPEN_EXISTING,
+                           0,
+                           0);
         } else
         {
             h = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
@@ -408,7 +414,7 @@ public:
         CONSOLE_SCREEN_BUFFER_INFO info;
         TEST(GetConsoleScreenBufferInfo(h, &info));
         TEST(info.dwSize.X > 0 && info.dwSize.Y > 0);
-        nw::cout << "Mock console buffer size: " << info.dwSize.X << "x" << info.dwSize.Y << "\n";
+        std::cout << "Mock console buffer size: " << info.dwSize.X << "x" << info.dwSize.Y << "\n";
 
         std::wstring result;
         std::vector<wchar_t> buffer(info.dwSize.X);
@@ -426,7 +432,7 @@ public:
         return result;
     }
 
-    void setBufferData(std::wstring data, int)
+    void setBufferData(const std::wstring& data)
     {
         std::vector<INPUT_RECORD> buffer;
         buffer.reserve(data.size() * 2 + 2);
@@ -460,22 +466,29 @@ public:
 
 void test_console()
 {
-    // cin
+    std::cout << "Test cin console: " << std::flush;
     {
         RedirectStdio stdinHandle(STD_INPUT_HANDLE);
+        std::cout << "stdin redirected, " << std::flush;
         // Recreate to react on redirected streams
         decltype(nw::cin) cin(nullptr);
+        std::cout << "cin recreated " << std::flush;
         TEST(cin.rdbuf() != std::cin.rdbuf());
+        std::cout << "and validated" << std::endl;
         const std::string testStringIn1 = "Hello std in ";
         const std::string testStringIn2 = "\xc3\xa4 - \xc3\xb6 - \xc3\xbc - \xd0\xbc - \xce\xbd";
-        stdinHandle.setBufferData(nw::widen(testStringIn1 + "\n" + testStringIn2 + "\n"), 0);
+        std::cout << "Setting mock buffer data" << std::endl;
+        stdinHandle.setBufferData(nw::widen(testStringIn1 + "\n" + testStringIn2 + "\n"));
+        std::cout << "Done" << std::endl;
         std::string line;
         TEST(std::getline(cin, line));
+        std::cout << "ASCII line read" << std::endl;
         TEST_EQ(line, testStringIn1);
         TEST(std::getline(cin, line));
+        std::cout << "UTF-8 line read" << std::endl;
         TEST_EQ(line, testStringIn2);
     }
-    // cout
+    std::cout << "Test cout console" << std::endl;
     {
         RedirectStdio stdoutHandle(STD_OUTPUT_HANDLE);
         decltype(nw::cout) cout(true, nullptr);
@@ -487,7 +500,7 @@ void test_console()
         const auto data = stdoutHandle.getBufferData();
         TEST_EQ(data, nw::widen(testString));
     }
-    // cerr
+    std::cout << "Test cerr console" << std::endl;
     {
         RedirectStdio stderrHandle(STD_ERROR_HANDLE);
 
@@ -500,6 +513,7 @@ void test_console()
         const auto data = stderrHandle.getBufferData();
         TEST_EQ(data, nw::widen(testString));
     }
+    std::cout << "Console tests done" << std::endl;
 }
 
 #else
