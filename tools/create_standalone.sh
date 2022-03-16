@@ -63,6 +63,7 @@ sed '/^if(NOT BOOST_SUPERPROJECT_SOURCE_DIR)/,/^endif/{/^if/d;/^endif/d}' -i "$t
 sed 's/NAMESPACE Nowide CONFIG_FILE.*$/NAMESPACE nowide)/' -i "$targetFolder/CMakeLists.txt"
 
 sed '/^if(NOT BOOST_SUPERPROJECT_SOURCE_DIR)/,/^endif/d' -i "$targetFolder/test/CMakeLists.txt"
+sed 's/ DEFINITIONS NOWIDE_TEST_BFS_PATH.*)/)/' -i "$targetFolder/test/CMakeLists.txt"
 sed '/Nowide::filesystem/d' -i "$targetFolder/test/CMakeLists.txt"
 
 sed '/^# Those 2 should work the same/,/^elseif/d' -i "$targetFolder/test/cmake_test/CMakeLists.txt"
