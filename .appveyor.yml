@@ -117,11 +117,13 @@ environment:
     # CMake builds using preinstalled Boost
     - CMAKE: true
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      CXXSTD: 14
       GENERATOR: Visual Studio 14 2015 Win64
       configuration: Debug
       BOOST_ROOT: C:\Libraries\boost_1_60_0
     - CMAKE: true
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+      CXXSTD: 17
       GENERATOR: Visual Studio 17 2022
       configuration: Debug
       BOOST_ROOT: C:\Libraries\boost_1_77_0
@@ -162,7 +164,7 @@ for:
       - if exist %INSTALL_DIR%\ (rmdir /S /Q %INSTALL_DIR%)
       - mkdir __build_cmake_test__
       - cd __build_cmake_test__
-      - cmake -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR% ..
+      - cmake -G "%GENERATOR%" -DCMAKE_CXX_STANDARD=%CXXSTD% -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR% ..
     build_script: cmake --build . --config %configuration% --parallel 4
     test_script:
       - ctest --output-on-failure -C %configuration% --parallel 4
@@ -173,7 +175,7 @@ for:
       # Build consumer example test
       - cmake --build . --config %configuration% --target install
       - del /F /S /Q *
-      - cmake -DBOOST_NOWIDE_INSTALL_TEST=ON -G "%GENERATOR%" -DCMAKE_PREFIX_PATH=%APPVEYOR_BUILD_FOLDER%\installed ../test/cmake_test
+      - cmake -DBOOST_NOWIDE_INSTALL_TEST=ON -G "%GENERATOR%" -DCMAKE_CXX_STANDARD=%CXXSTD% -DCMAKE_PREFIX_PATH=%APPVEYOR_BUILD_FOLDER%\installed ../test/cmake_test
       - cmake --build . --config %configuration%
       - ctest --output-on-failure -C %configuration% --parallel 4
 
