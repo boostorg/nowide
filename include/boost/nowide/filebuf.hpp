@@ -235,6 +235,7 @@ namespace nowide {
             {
                 if(std::fwrite(pbase(), 1, n, file_) != n)
                     return EOF;
+                assert(buffer_);
                 setp(buffer_, buffer_ + buffer_size_);
                 if(c != EOF)
                 {
