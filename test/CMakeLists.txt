@@ -13,6 +13,10 @@ if(NOT TARGET tests)
   add_custom_target(tests)
 endif()
   
+if(NOT BOOST_SUPERPROJECT_SOURCE_DIR)
+  find_package(Boost 1.56 REQUIRED COMPONENTS filesystem system)
+endif()
+
 function(boost_nowide_add_test name)
   cmake_parse_arguments(PARSE_ARGV 1 ARG "COMPILE_ONLY" "SRC" "LIBRARIES;DEFINITIONS;ARGS")
   if(NOT ARG_SRC)
@@ -37,6 +41,7 @@ boost_nowide_add_test(test_codecvt)
 boost_nowide_add_test(test_convert)
 boost_nowide_add_test(test_env)
 boost_nowide_add_test(test_env_win SRC test_env.cpp DEFINITIONS BOOST_NOWIDE_TEST_INCLUDE_WINDOWS)
+boost_nowide_add_test(test_fs LIBRARIES Boost::filesystem)
 boost_nowide_add_test(test_filebuf LIBRARIES boost_nowide_file_test_helpers)
 boost_nowide_add_test(test_ifstream LIBRARIES boost_nowide_file_test_helpers)
 boost_nowide_add_test(test_ofstream LIBRARIES boost_nowide_file_test_helpers)
@@ -57,7 +62,7 @@ else()
     boost_nowide_add_test(${test}_internal SRC ${test}.cpp DEFINITIONS BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT=1 LIBRARIES boost_nowide_file_test_helpers)
   endforeach()
 endif()
-boost_nowide_add_test(test_traits)
+boost_nowide_add_test(test_traits DEFINITIONS BOOST_NOWIDE_TEST_BFS_PATH LIBRARIES Boost::filesystem)
 
 # Test that passthrough writes everything from stdin to stdout
 # Needs to be done with CMake as the test driver to write any input to stdin and check output
@@ -68,9 +73,4 @@ add_test(
     -P ${CMAKE_CURRENT_SOURCE_DIR}/test_iostream_passthrough.cmake
 )
 
-if(NOT BOOST_SUPERPROJECT_SOURCE_DIR)
-  find_package(Boost 1.56 REQUIRED COMPONENTS filesystem system)
-endif()
-boost_nowide_add_test(test_fs LIBRARIES Boost::filesystem)
-boost_nowide_add_test(test_traits_fs SRC test_traits.cpp LIBRARIES Boost::filesystem DEFINITIONS BOOST_NOWIDE_TEST_BFS_PATH)
 boost_nowide_add_test(benchmark_fstream COMPILE_ONLY DEFINITIONS BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT=1)
