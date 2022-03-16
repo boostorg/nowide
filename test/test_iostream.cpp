@@ -398,7 +398,9 @@ public:
         }
         TEST(h != INVALID_HANDLE_VALUE);
         TEST(SetStdHandle(handleType, h));
-        if(handleType != STD_INPUT_HANDLE)
+        if(handleType == STD_INPUT_HANDLE)
+            TEST(SetConsoleMode(h, ENABLE_PROCESSED_INPUT | ENABLE_LINE_INPUT | ENABLE_EXTENDED_FLAGS));
+        else
             TEST(SetConsoleActiveScreenBuffer(h));
     }
     ~RedirectStdio()
