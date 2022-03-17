@@ -72,25 +72,25 @@ void test_main(int, char**, char**)
     {
         std::cout << "-- Default constructed string is NULL" << std::endl;
         const boost::nowide::short_stackstring s;
-        TEST(s.get() == NULL);
+        TEST(s.get() == nullptr);
     }
     {
-        std::cout << "-- NULL ptr passed to ctor results in NULL" << std::endl;
-        const boost::nowide::short_stackstring s(NULL);
-        TEST(s.get() == NULL);
-        const boost::nowide::short_stackstring s2(NULL, NULL);
-        TEST(s2.get() == NULL);
+        std::cout << "-- nullptr passed to ctor results in NULL" << std::endl;
+        const boost::nowide::short_stackstring s(nullptr);
+        TEST(s.get() == nullptr);
+        const boost::nowide::short_stackstring s2(nullptr, nullptr);
+        TEST(s2.get() == nullptr);
     }
     {
-        std::cout << "-- NULL ptr passed to convert results in NULL" << std::endl;
+        std::cout << "-- nullptr passed to convert results in NULL" << std::endl;
         boost::nowide::short_stackstring s(L"foo");
         TEST(s.get() == std::string("foo"));
-        s.convert(NULL);
-        TEST(s.get() == NULL);
+        s.convert(nullptr);
+        TEST(s.get() == nullptr);
         boost::nowide::short_stackstring s2(L"foo");
         TEST(s2.get() == std::string("foo"));
-        s2.convert(NULL, NULL);
-        TEST(s2.get() == NULL);
+        s2.convert(nullptr, nullptr);
+        TEST(s2.get() == nullptr);
     }
     {
         std::cout << "-- An empty string is accepted" << std::endl;
@@ -168,7 +168,7 @@ void test_main(int, char**, char**)
             TEST(sw3.get() == heapVal);
             // Assign empty
             sw3 = sEmpty; //-V820
-            TEST(sw3.get() == NULL);
+            TEST(sw3.get() == nullptr);
         }
         {
             stackstring sw2(stack), sw3, sEmpty;
@@ -180,7 +180,7 @@ void test_main(int, char**, char**)
             TEST(sw3.get() == stackVal);
             // Assign empty
             sw3 = sEmpty; //-V820
-            TEST(sw3.get() == NULL);
+            TEST(sw3.get() == nullptr);
         }
         {
             stackstring sw2(stack);
@@ -202,10 +202,10 @@ void test_main(int, char**, char**)
             TEST(sw3.get() == stackVal);
             swap(sw2, sEmpty1);
             TEST(sEmpty1.get() == heapVal);
-            TEST(sw2.get() == NULL);
+            TEST(sw2.get() == nullptr);
             swap(sw3, sEmpty2);
             TEST(sEmpty2.get() == stackVal);
-            TEST(sw3.get() == NULL);
+            TEST(sw3.get() == nullptr);
         }
         {
             stackstring sw2(heap), sw3(heap);

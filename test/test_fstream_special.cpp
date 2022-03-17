@@ -34,7 +34,7 @@ void test_with_different_buffer_sizes(const char* filepath)
         nw::fstream f;
         // Different conditions when setbuf might be called: Usually before opening a file is OK
         if(i >= 0)
-            f.rdbuf()->pubsetbuf((i == 0) ? NULL : buf, i);
+            f.rdbuf()->pubsetbuf((i == 0) ? nullptr : buf, i);
         f.open(filepath, std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
         TEST(f);
         remove_file_at_exit _(filepath);
