@@ -272,7 +272,7 @@ namespace nowide {
                 result = overflow() != EOF;
                 // Only flush if anything was written, otherwise behavior of fflush is undefined
                 if(std::fflush(file_) != 0)
-                    return result = false;
+                    result = false;
             } else
                 result = stop_reading();
             return result ? 0 : -1;
