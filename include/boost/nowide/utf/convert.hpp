@@ -56,7 +56,7 @@ namespace nowide {
                 size_t width = utf_traits<CharOut>::width(c);
                 if(buffer_size < width)
                 {
-                    rv = NULL;
+                    rv = nullptr;
                     break;
                 }
                 buffer = utf_traits<CharOut>::encode(c, buffer);

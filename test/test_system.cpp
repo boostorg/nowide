@@ -95,12 +95,12 @@ void run_child(int argc, char** argv, char** env)
     // Test arguments
     TEST_EQ(argc, 2);
     TEST_EQ(argv[1], example);
-    TEST(argv[2] == NULL);
+    TEST(argv[2] == nullptr);
 
     // Test getenv
     TEST(boost::nowide::getenv("BOOST_NOWIDE_TEST"));
     TEST_EQ(boost::nowide::getenv("BOOST_NOWIDE_TEST"), example);
-    TEST(boost::nowide::getenv("BOOST_NOWIDE_TEST_NONE") == NULL);
+    TEST(!boost::nowide::getenv("BOOST_NOWIDE_TEST_NONE"));
     // Empty variables are unreliable on windows, hence skip. E.g. using "set FOO=" unsets FOO
 #ifndef BOOST_WINDOWS
     TEST(boost::nowide::getenv("BOOST_NOWIDE_EMPTY"));
