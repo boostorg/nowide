@@ -468,6 +468,7 @@ public:
 
 void test_console()
 {
+#ifndef BOOST_NOWIDE_DISABLE_CIN_TEST
     std::cout << "Test cin console: " << std::flush;
     {
         RedirectStdio stdinHandle(STD_INPUT_HANDLE);
@@ -490,6 +491,7 @@ void test_console()
         std::cout << "UTF-8 line read" << std::endl;
         TEST_EQ(line, testStringIn2);
     }
+#endif
     std::cout << "Test cout console" << std::endl;
     {
         RedirectStdio stdoutHandle(STD_OUTPUT_HANDLE);
