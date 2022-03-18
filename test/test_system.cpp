@@ -95,12 +95,12 @@ void run_child(int argc, char** argv, char** env)
     // Test arguments
     TEST_EQ(argc, 2);
     TEST_EQ(argv[1], example);
-    TEST(argv[2] == NULL);
+    TEST(argv[2] == nullptr);
 
     // Test getenv
     TEST(nowide::getenv("NOWIDE_TEST"));
     TEST_EQ(nowide::getenv("NOWIDE_TEST"), example);
-    TEST(nowide::getenv("NOWIDE_TEST_NONE") == NULL);
+    TEST(!nowide::getenv("NOWIDE_TEST_NONE"));
     // Empty variables are unreliable on windows, hence skip. E.g. using "set FOO=" unsets FOO
 #ifndef NOWIDE_WINDOWS
     TEST(nowide::getenv("NOWIDE_EMPTY"));

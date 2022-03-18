@@ -13,6 +13,10 @@ if(NOT TARGET tests)
   add_custom_target(tests)
 endif()
   
+
+# In some environments this test (part) may fail, so allow to disable it
+option(NOWIDE_DISABLE_CIN_TEST "Disable integration test using console input" OFF)
+
 function(nowide_add_test name)
   cmake_parse_arguments(PARSE_ARGV 1 ARG "COMPILE_ONLY" "SRC" "LIBRARIES;DEFINITIONS;ARGS")
   if(NOT ARG_SRC)
@@ -43,6 +47,9 @@ nowide_add_test(test_ofstream LIBRARIES nowide_file_test_helpers)
 nowide_add_test(test_fstream LIBRARIES nowide_file_test_helpers)
 nowide_add_test(test_fstream_special LIBRARIES nowide_file_test_helpers)
 nowide_add_test(test_iostream LIBRARIES nowide_file_test_helpers)
+if(NOWIDE_DISABLE_CIN_TEST)
+    target_compile_definitions(${PROJECT_NAME}-test_iostream PRIVATE NOWIDE_DISABLE_CIN_TEST)
+endif()
 nowide_add_test(test_iostream_interactive COMPILE_ONLY SRC test_iostream.cpp DEFINITIONS NOWIDE_TEST_INTERACTIVE LIBRARIES nowide_file_test_helpers)
 nowide_add_test(test_stackstring)
 nowide_add_test(test_stat)

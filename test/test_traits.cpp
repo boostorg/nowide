@@ -26,7 +26,7 @@
 // Exclude apple as support there is target level specific -.-
 #if defined(__cpp_lib_filesystem) && !defined(__APPLE__)
 #include <filesystem>
-#define NOWIDE_TEST_SFS_PATH
+#define NOWIDE_TEST_STD_PATH
 #endif
 
 #ifdef NOWIDE_TEST_BFS_PATH
@@ -63,7 +63,7 @@ void test_main(int, char**, char**)
     static_assert(is_string_container<std::u16string_view, false>::value, "!");
     static_assert(is_string_container<std::u32string_view, false>::value, "!");
 #endif
-#ifdef NOWIDE_TEST_SFS_PATH
+#ifdef NOWIDE_TEST_STD_PATH
     std::cout << "Testing std::filesystem::path" << std::endl;
     static_assert(nowide::detail::is_path<std::filesystem::path>::value, "!");
 #endif

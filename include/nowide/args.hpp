@@ -112,7 +112,7 @@ namespace nowide {
             }
             operator bool() const
             {
-                return p != NULL;
+                return p != nullptr;
             }
             const wchar_t* operator[](size_t i) const
             {
