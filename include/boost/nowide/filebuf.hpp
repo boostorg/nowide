@@ -271,9 +271,12 @@ namespace nowide {
             bool result;
             if(pptr())
             {
+                // Only flush if anything was written, otherwise behavior of fflush is undefined. I.e.:
+                // - Buffered mode: pptr was set to buffer_ and advanced
+                // - Unbuffered mode: pptr set to last_char_
+                const bool has_prev_write = pptr() != buffer_;
                 result = overflow() != EOF;
-                // Only flush if anything was written, otherwise behavior of fflush is undefined
-                if(std::fflush(file_) != 0)
+                if(has_prev_write && std::fflush(file_) != 0)
                     result = false;
             } else
                 result = stop_reading();
