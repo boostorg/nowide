@@ -49,6 +49,12 @@
 #define NOWIDE_DECL
 #endif
 
+#if defined(NOWIDE_WINDOWS) || defined(__CYGWIN__)
+#define NOWIDE_USE_WCHAR_OVERLOADS 1
+#else
+#define NOWIDE_USE_WCHAR_OVERLOADS 0
+#endif
+
 #if defined(NOWIDE_WINDOWS)
 #ifdef NOWIDE_USE_FILEBUF_REPLACEMENT
 #undef NOWIDE_USE_FILEBUF_REPLACEMENT
