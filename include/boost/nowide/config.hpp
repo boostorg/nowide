@@ -1,6 +1,6 @@
 //
 //  Copyright (c) 2012 Artyom Beilis (Tonkikh)
-//  Copyright (c) 2019 - 2020 Alexander Grund
+//  Copyright (c) 2019 - 2022 Alexander Grund
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE or copy at
@@ -27,9 +27,7 @@
 #define BOOST_NOWIDE_DECL
 #endif // BOOST_NOWIDE_DYN_LINK
 
-//
 // Automatically link to the correct build variant where possible.
-//
 #if !defined(BOOST_ALL_NO_LIB) && !defined(BOOST_NOWIDE_NO_LIB) && !defined(BOOST_NOWIDE_SOURCE)
 //
 // Set the name of our library, this will get undef'ed by auto_link.hpp
@@ -79,7 +77,7 @@
 
 //! @cond Doxygen_Suppress
 
-#if BOOST_VERSION < 106500 && defined(BOOST_GCC) && __GNUC__ >= 7
+#if BOOST_VERSION < 106500 && defined(__GNUC__) && __GNUC__ >= 7
 #define BOOST_NOWIDE_FALLTHROUGH __attribute__((fallthrough))
 #else
 #define BOOST_NOWIDE_FALLTHROUGH BOOST_FALLTHROUGH
@@ -115,4 +113,4 @@ namespace boost {
 namespace nowide {}
 } // namespace boost
 
-#endif // boost/nowide/config.hpp
+#endif
