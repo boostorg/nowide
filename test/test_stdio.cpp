@@ -43,7 +43,7 @@ void create_test_file(const std::string& filename)
     std::fclose(f);
 }
 
-#if NOWIDE_MSVC
+#ifdef NOWIDE_MSVC
 #include <crtdbg.h> // For _CrtSetReportMode
 void noop_invalid_param_handler(const wchar_t*, const wchar_t*, const wchar_t*, unsigned, uintptr_t)
 {} // LCOV_EXCL_LINE
@@ -54,7 +54,7 @@ void test_main(int, char** argv, char**)
 {
     const std::string prefix = argv[0];
     const std::string filename = prefix + "\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
-#if NOWIDE_MSVC
+#ifdef NOWIDE_MSVC
     // Prevent abort on freopen(NULL, ...)
     _set_invalid_parameter_handler(noop_invalid_param_handler);
 #endif
