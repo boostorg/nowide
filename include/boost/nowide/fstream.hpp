@@ -68,6 +68,7 @@ namespace nowide {
     ///
     /// \brief Same as std::basic_ifstream<char> but accepts UTF-8 strings under Windows
     ///
+    /// Affected by #BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT and #BOOST_NOWIDE_USE_WCHAR_OVERLOADS
     template<typename CharType, typename Traits = std::char_traits<CharType>>
     class basic_ifstream : public detail::fstream_impl<CharType, Traits, detail::StreamTypeIn>
     {
@@ -118,7 +119,7 @@ namespace nowide {
     ///
     /// \brief Same as std::basic_ofstream<char> but accepts UTF-8 strings under Windows
     ///
-
+    /// Affected by #BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT and #BOOST_NOWIDE_USE_WCHAR_OVERLOADS
     template<typename CharType, typename Traits = std::char_traits<CharType>>
     class basic_ofstream : public detail::fstream_impl<CharType, Traits, detail::StreamTypeOut>
     {
@@ -171,6 +172,7 @@ namespace nowide {
     ///
     /// \brief Same as std::basic_fstream<char> but accepts UTF-8 strings under Windows
     ///
+    /// Affected by #BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT and #BOOST_NOWIDE_USE_WCHAR_OVERLOADS
     template<typename CharType, typename Traits = std::char_traits<CharType>>
     class basic_fstream : public detail::fstream_impl<CharType, Traits, detail::StreamTypeInOut>
     {

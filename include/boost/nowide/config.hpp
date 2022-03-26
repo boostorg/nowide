@@ -49,30 +49,34 @@
 //! @endcond
 
 /// @def BOOST_NOWIDE_USE_WCHAR_OVERLOADS
-/// @brief Whether to use the wchar_t* overloads in fstream/filebuf
-/// Enabled on Windows and Cygwin as the latter may use wchar_t in filesystem::path
-#if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
+/// @brief Whether to use the wchar_t* overloads in fstream-classes.
+///
+/// Enabled by default on Windows and Cygwin as the latter may use wchar_t in filesystem::path.
+#ifndef BOOST_NOWIDE_USE_WCHAR_OVERLOADS
+#if defined(BOOST_WINDOWS) || defined(__CYGWIN__) || defined(BOOST_NOWIDE_DOXYGEN)
 #define BOOST_NOWIDE_USE_WCHAR_OVERLOADS 1
 #else
 #define BOOST_NOWIDE_USE_WCHAR_OVERLOADS 0
 #endif
+#endif
 
 /// @def BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
-/// @brief Define to 1 to use internal class from filebuf.hpp
+/// @brief Define to 1 to use the class from <filebuf.hpp> that is used on Windows.
 ///
-/// - On Non-Windows platforms: Define to 1 to use the same class from header <filebuf.hpp>
-///   that is used on Windows.
 /// - On Windows: No effect, always overwritten to 1
+/// - Others (including Cygwin): Defaults to the value of #BOOST_NOWIDE_USE_WCHAR_OVERLOADS if not set.
+///
+/// When set to 0 boost::nowide::basic_filebuf will be an alias for std::basic_filebuf.
 ///
 /// Affects boost::nowide::basic_filebuf,
 /// boost::nowide::basic_ofstream, boost::nowide::basic_ifstream, boost::nowide::basic_fstream
-#if defined(BOOST_WINDOWS) || BOOST_NOWIDE_USE_WCHAR_OVERLOADS
+#if defined(BOOST_WINDOWS) || defined(BOOST_NOWIDE_DOXYGEN)
 #ifdef BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
 #undef BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
 #endif
 #define BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT 1
 #elif !defined(BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT)
-#define BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT 0
+#define BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT BOOST_NOWIDE_USE_WCHAR_OVERLOADS
 #endif
 
 //! @cond Doxygen_Suppress
