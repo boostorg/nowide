@@ -68,8 +68,8 @@ namespace nowide {
         /// Creates new filebuf
         ///
         basic_filebuf() :
-            buffer_size_(BUFSIZ), buffer_(nullptr), file_(nullptr), owns_buffer_(false), last_char_(),
-            mode_(std::ios_base::openmode(0))
+            file_(nullptr), buffer_(nullptr), buffer_size_(BUFSIZ), owns_buffer_(false),
+            last_char_(), mode_(std::ios_base::openmode(0))
         {
             setg(nullptr, nullptr, nullptr);
             setp(nullptr, nullptr);
@@ -93,9 +93,9 @@ namespace nowide {
         {
             std::basic_streambuf<char>::swap(rhs);
             using std::swap;
-            swap(buffer_size_, rhs.buffer_size_);
-            swap(buffer_, rhs.buffer_);
             swap(file_, rhs.file_);
+            swap(buffer_, rhs.buffer_);
+            swap(buffer_size_, rhs.buffer_size_);
             swap(owns_buffer_, rhs.owns_buffer_);
             swap(last_char_[0], rhs.last_char_[0]);
             swap(mode_, rhs.mode_);
@@ -189,23 +189,6 @@ namespace nowide {
             return file_ != nullptr;
         }
 
-    private:
-        void make_buffer()
-        {
-            if(buffer_)
-                return;
-            if(buffer_size_ > 0)
-            {
-                buffer_ = new char[buffer_size_];
-                owns_buffer_ = true;
-            }
-        }
-        void validate_cvt(const std::locale& loc)
-        {
-            if(!std::use_facet<std::codecvt<char, char, std::mbstate_t>>(loc).always_noconv())
-                throw std::runtime_error("Converting codecvts are not supported");
-        }
-
     protected:
         std::streambuf* setbuf(char* s, std::streamsize n) override
         {
@@ -222,6 +205,25 @@ namespace nowide {
             buffer_ = s;
             buffer_size_ = (n >= 0) ? static_cast<size_t>(n) : 0;
             return this;
+        }
+
+        int sync() override
+        {
+            if(!file_)
+                return 0;
+            bool result;
+            if(pptr())
+            {
+                // Only flush if anything was written, otherwise behavior of fflush is undefined. I.e.:
+                // - Buffered mode: pptr was set to buffer_ and advanced
+                // - Unbuffered mode: pptr set to last_char_
+                const bool has_prev_write = pptr() != buffer_;
+                result = overflow() != EOF;
+                if(has_prev_write && std::fflush(file_) != 0)
+                    result = false;
+            } else
+                result = stop_reading();
+            return result ? 0 : -1;
         }
 
         int overflow(int c = EOF) override
@@ -264,30 +266,9 @@ namespace nowide {
             return Traits::not_eof(c);
         }
 
-        int sync() override
-        {
-            if(!file_)
-                return 0;
-            bool result;
-            if(pptr())
-            {
-                // Only flush if anything was written, otherwise behavior of fflush is undefined. I.e.:
-                // - Buffered mode: pptr was set to buffer_ and advanced
-                // - Unbuffered mode: pptr set to last_char_
-                const bool has_prev_write = pptr() != buffer_;
-                result = overflow() != EOF;
-                if(has_prev_write && std::fflush(file_) != 0)
-                    result = false;
-            } else
-                result = stop_reading();
-            return result ? 0 : -1;
-        }
-
         int underflow() override
         {
-            if(!(mode_ & std::ios_base::in))
-                return EOF;
-            if(!stop_writing())
+            if(!(mode_ & std::ios_base::in) || !stop_writing())
                 return EOF;
             // In text mode we cannot use a buffer size of more than 1 (i.e. single char only)
             // This is due to the need to seek back in case of a sync to "put back" unread chars.
@@ -362,6 +343,23 @@ namespace nowide {
         }
 
     private:
+        void make_buffer()
+        {
+            if(buffer_)
+                return;
+            if(buffer_size_ > 0)
+            {
+                buffer_ = new char[buffer_size_];
+                owns_buffer_ = true;
+            }
+        }
+
+        void validate_cvt(const std::locale& loc)
+        {
+            if(!std::use_facet<std::codecvt<char, char, std::mbstate_t>>(loc).always_noconv())
+                throw std::runtime_error("Converting codecvts are not supported");
+        }
+
         /// Stop reading adjusting the file pointer if necessary
         /// Postcondition: gptr() == nullptr
         bool stop_reading()
@@ -447,9 +445,9 @@ namespace nowide {
             return nullptr;
         }
 
-        size_t buffer_size_;
-        char* buffer_;
         FILE* file_;
+        char* buffer_;
+        size_t buffer_size_;
         bool owns_buffer_;
         char last_char_[1];
         std::ios::openmode mode_;
