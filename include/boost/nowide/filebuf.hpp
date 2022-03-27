@@ -68,7 +68,7 @@ namespace nowide {
         /// Creates new filebuf
         ///
         basic_filebuf() :
-            file_(nullptr), buffer_(nullptr), buffer_size_(BUFSIZ), owns_buffer_(false),
+            file_(nullptr), buffer_(nullptr), buffer_size_(BUFSIZ), owns_buffer_(false), unbuffered_read_(false),
             last_char_(), mode_(std::ios_base::openmode(0))
         {
             setg(nullptr, nullptr, nullptr);
@@ -97,6 +97,7 @@ namespace nowide {
             swap(buffer_, rhs.buffer_);
             swap(buffer_size_, rhs.buffer_size_);
             swap(owns_buffer_, rhs.owns_buffer_);
+            swap(unbuffered_read_, rhs.unbuffered_read_);
             swap(last_char_[0], rhs.last_char_[0]);
             swap(mode_, rhs.mode_);
 
@@ -157,6 +158,7 @@ namespace nowide {
                 return nullptr;
             }
             mode_ = mode;
+            set_unbuffered_read();
             return this;
         }
         ///
@@ -204,6 +206,7 @@ namespace nowide {
             }
             buffer_ = s;
             buffer_size_ = (n >= 0) ? static_cast<size_t>(n) : 0;
+            set_unbuffered_read();
             return this;
         }
 
@@ -270,11 +273,7 @@ namespace nowide {
         {
             if(!(mode_ & std::ios_base::in) || !stop_writing())
                 return EOF;
-            // In text mode we cannot use a buffer size of more than 1 (i.e. single char only)
-            // This is due to the need to seek back in case of a sync to "put back" unread chars.
-            // However determining the number of chars to seek back is impossible in case there are newlines
-            // as we cannot know if those were converted.
-            if(buffer_size_ == 0 || !(mode_ & std::ios_base::binary))
+            if(unbuffered_read_)
             {
                 const int c = std::fgetc(file_);
                 if(c == EOF)
@@ -290,6 +289,38 @@ namespace nowide {
                     return EOF;
             }
             return Traits::to_int_type(*gptr());
+        }
+
+        std::streamsize xsgetn(char* s, std::streamsize n) override
+        {
+            // Only optimize when reading more than a buffer worth of data
+            if(n <= static_cast<std::streamsize>(unbuffered_read_ ? 1u : buffer_size_))
+                return std::basic_streambuf<char>::xsgetn(s, n);
+            if(!(mode_ & std::ios_base::in) || !stop_writing())
+                return 0;
+            std::streamsize num_copied = 0;
+            // First empty the remaining get area, if any
+            const auto num_buffered = egptr() - gptr();
+            if(num_buffered != 0)
+            {
+                const auto num_read = num_buffered > n ? n : num_buffered;
+                traits_type::copy(s, gptr(), static_cast<size_t>(num_read));
+                s += num_read;
+                n -= num_read;
+                num_copied = num_read;
+                setg(eback(), gptr() + num_read, egptr()); // i.e. gbump(num_read)
+            }
+            // Then read directly from file (loop as number of bytes read may be less than requested)
+            while(n > 0)
+            {
+                const auto num_read = std::fread(s, 1, static_cast<size_t>(n), file_);
+                if(num_read == 0) // EOF or error
+                    break;
+                s += num_read;
+                n -= num_read;
+                num_copied += num_read;
+            }
+            return num_copied;
         }
 
         int pbackfail(int c = EOF) override
@@ -352,6 +383,15 @@ namespace nowide {
                 buffer_ = new char[buffer_size_];
                 owns_buffer_ = true;
             }
+        }
+
+        void set_unbuffered_read()
+        {
+            // In text mode we cannot use buffering as we are required to know the (file) position of each
+            // char in the get area and to seek back in case of a sync to "put back" unread chars.
+            // However std::fseek with non-zero offsets is unsupported for text files and the (file) offset
+            // to seek back is unknown anyway due to newlines which may got converted.
+            unbuffered_read_ = !(mode_ & std::ios_base::binary) || buffer_size_ == 0u;
         }
 
         void validate_cvt(const std::locale& loc)
@@ -449,6 +489,7 @@ namespace nowide {
         char* buffer_;
         size_t buffer_size_;
         bool owns_buffer_;
+        bool unbuffered_read_; // True to read char by char
         char last_char_[1];
         std::ios::openmode mode_;
     };
