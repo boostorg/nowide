@@ -26,6 +26,35 @@ static_assert(std::is_same<nw::filebuf::int_type, nw::filebuf::traits_type::int_
 static_assert(std::is_same<nw::filebuf::pos_type, nw::filebuf::traits_type::pos_type>::value, "!");
 static_assert(std::is_same<nw::filebuf::off_type, nw::filebuf::traits_type::off_type>::value, "!");
 
+const auto eof = nw::filebuf::traits_type::eof();
+
+constexpr std::ios_base::openmode make_mode(std::ios_base::openmode flags, bool binary)
+{
+    return binary ? flags | std::ios_base::binary : flags;
+}
+
+template<class T_FileBuf, size_t T_size>
+bool open_with_buffer(T_FileBuf& filebuf,
+                      const std::string& filepath,
+                      std::ios_base::openmode flags,
+                      char (&buffer)[T_size])
+{
+    const bool bufferSet = filebuf.pubsetbuf(buffer, T_size) != nullptr;
+    return filebuf.open(filepath, flags) && (bufferSet || filebuf.pubsetbuf(buffer, sizeof(buffer)));
+}
+
+// Read the given number of chars from the buffer, checking that there are that many
+template<class T_Buf>
+bool skip_chars(T_Buf& buf, size_t num_chars)
+{
+    for(size_t i = 0; i < num_chars; ++i)
+    {
+        if(buf.sbumpc() == eof)
+            return false; // LCOV_EXCL_LINE
+    }
+    return true;
+}
+
 void test_open_close(const std::string& filepath)
 {
     const std::string filepath2 = filepath + ".2";
@@ -176,13 +205,9 @@ void test_64_bit_seek(const std::string& filepath)
 void test_read_write_switch(const std::string& filepath, bool binary)
 {
     // Switching between read and write requires a seek or (for W->R) a sync
-    remove_file_at_exit _(filepath);
     const std::string data = "1234567890";
-    auto flags = std::ios_base::in | std::ios_base::out | std::ios_base::trunc;
-    if(binary)
-        flags |= std::ios_base::binary;
     nw::filebuf buf;
-    TEST(buf.open(filepath, flags));
+    TEST(buf.open(filepath, make_mode(std::ios_base::in | std::ios_base::out | std::ios_base::trunc, binary)));
     TEST_EQ(buf.sputn(data.data(), data.size()), static_cast<std::streamsize>(data.size()));
     // W->R via seek
     buf.pubseekpos(0);
@@ -225,9 +250,7 @@ void subtest_sync(const std::string& filepath, bool binary, const std::string& d
     // Use a small buffer to force filling it up w/o requiring to write lot's of data
     char buffer[3];
     buf.pubsetbuf(buffer, sizeof(buffer));
-    auto flags = std::ios_base::out | std::ios_base::trunc;
-    if(binary)
-        flags |= std::ios_base::binary;
+    const auto flags = make_mode(std::ios_base::out | std::ios_base::trunc, binary);
 
     // Do a series of single-char and multi-char writes with varying size combinations
     // Especially test the case of only single-char and only multi-char ops
@@ -266,12 +289,9 @@ void subtest_singlechar_positioning(const std::string& filepath, bool binary, co
 {
     nw::filebuf buf;
     // Use a small buffer to force filling it up w/o requiring to write lot's of data
-    char buffer[3];
-    buf.pubsetbuf(buffer, sizeof(buffer));
-    auto flags = std::ios_base::in | std::ios_base::out | std::ios_base::trunc;
-    if(binary)
-        flags |= std::ios_base::binary;
-    TEST(buf.open(filepath, flags));
+    char buffer[3]{};
+    const auto mode = make_mode(std::ios_base::in | std::ios_base::out | std::ios_base::trunc, binary);
+    TEST(open_with_buffer(buf, filepath, mode, buffer));
 
     // Put each char and record its position
     std::vector<nw::filebuf::pos_type> pos(data.size());
@@ -296,12 +316,8 @@ void subtest_singlechar_multichar_reads(const std::string& filepath, bool binary
     create_file(filepath, data, binary ? data_type::binary : data_type::text);
     nw::filebuf buf;
     // Use a small buffer to force filling it up w/o requiring to write lot's of data
-    char buffer[3];
-    buf.pubsetbuf(buffer, sizeof(buffer));
-    std::ios_base::openmode flags = std::ios_base::in;
-    if(binary)
-        flags |= std::ios_base::binary;
-    TEST(buf.open(filepath, flags));
+    char buffer[3]{};
+    TEST(open_with_buffer(buf, filepath, make_mode(std::ios_base::in, binary), buffer));
 
     // Do a series of single-char and multi-char reads with varying size combinations
     // Especially test the case of only single-char and only multi-char ops
@@ -336,9 +352,112 @@ void subtest_singlechar_multichar_reads(const std::string& filepath, bool binary
     }
 }
 
+void test_sungetc(const std::string& filepath, bool binary)
+{
+    const std::string data = "012345\n6";
+    create_file(filepath, data, binary ? data_type::binary : data_type::text);
+
+    // Use a small buffer to force filling it up w/o requiring to write lot's of data
+    char buffer[4];
+    nw::filebuf buf;
+    TEST(open_with_buffer(buf, filepath, make_mode(std::ios_base::in, binary), buffer));
+
+    // Nothing to unget at beginning of file
+    TEST_EQ(buf.sungetc(), eof);
+
+    // Able to unget first char and get it again
+    TEST_EQ(buf.sbumpc(), '0');
+    TEST(buf.sungetc() != eof);
+    TEST_EQ(buf.sbumpc(), '0');
+
+    // Able to unget and reread after filling up new buffer
+    TEST(skip_chars(buf, sizeof(buffer) - 1u)); // skip remaining chars
+    TEST_EQ(buf.sbumpc(), '4');
+    TEST(buf.sungetc() != eof);
+    // Ungetting multiple chars may or may not be possible
+    if(buf.sungetc() != eof)
+        TEST_EQ(buf.sbumpc(), '3');
+    TEST_EQ(buf.sbumpc(), '4');
+
+    // \n also works
+    TEST_EQ(buf.sbumpc(), '5');
+    TEST_EQ(buf.sbumpc(), '\n');
+    TEST(buf.sungetc() != eof);
+    TEST_EQ(buf.sbumpc(), '\n');
+    TEST_EQ(buf.sbumpc(), '6');
+    TEST(buf.sungetc() != eof);
+    if(buf.sungetc() != eof)
+        TEST_EQ(buf.sbumpc(), '\n');
+    TEST_EQ(buf.sbumpc(), '6');
+
+    // Go back as far as possible
+    auto idx = data.size();
+    while(buf.sungetc() != eof)
+    {
+        TEST(idx > 0u);
+        --idx;
+    }
+    TEST(idx < data.size()); // At least 1
+    // Get all put back chars
+    for(; idx < data.size(); ++idx)
+        TEST_EQ(buf.sbumpc(), data[idx]);
+}
+
+void test_sputbackc(const std::string& filepath, bool binary)
+{
+    const std::string data = "012345\n6";
+    create_file(filepath, data, binary ? data_type::binary : data_type::text);
+
+    // Use a small buffer to force filling it up w/o requiring to write lot's of data
+    char buffer[4];
+    nw::filebuf buf;
+    TEST(open_with_buffer(buf, filepath, make_mode(std::ios_base::in, binary), buffer));
+    TEST(skip_chars(buf, data.size()));
+
+    // Put back same chars explicitly (as many as possible)
+    auto idx = data.size();
+    while(true)
+    {
+        auto res = buf.sputbackc((idx > 0u) ? data[idx - 1] : 'z');
+        if(res == eof)
+            break;
+        TEST(idx > 0u);
+        TEST_EQ(res, data[idx - 1]);
+        --idx;
+    }
+    TEST(idx < data.size()); // At least 1
+    // Get all put back chars
+    for(; idx < data.size(); ++idx)
+        TEST_EQ(buf.sbumpc(), data[idx]);
+
+    // Put back different chars (as many as possible)
+    const std::string data2 = "789\nab\nc";
+    TEST_EQ(data.size(), data2.size());
+    idx = data2.size();
+    while(true)
+    {
+        auto res = buf.sputbackc((idx > 0u) ? data2[idx - 1] : 'z');
+        if(res == eof)
+            break;
+        TEST(idx > 0u);
+        TEST_EQ(res, data2[idx - 1]);
+        --idx;
+#if !BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
+        break; // Some stdlibs fail on putting back multiple different chars
+#endif
+    }
+#if BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
+    // At least 1 when using custom filebuf
+    // But e.g. libc++ doesn't allow putting back a different char
+    TEST(idx < data2.size());
+#endif
+    // Get all put back chars
+    for(; idx < data2.size(); ++idx)
+        TEST_EQ(buf.sbumpc(), data2[idx]);
+}
+
 void test_textmode(const std::string& filepath)
 {
-    remove_file_at_exit _(filepath);
     // Test input, output and getting the file position works for text files with newlines
     const std::string data = []() {
         // Some simple test data
@@ -360,7 +479,6 @@ void test_textmode(const std::string& filepath)
 // Useful as the buffer handling is very different
 void test_binarymode(const std::string& filepath)
 {
-    remove_file_at_exit _(filepath);
     const std::string data = "123" + create_random_data(65, data_type::binary);
     subtest_singlechar_positioning(filepath, true, data);
     subtest_singlechar_multichar_reads(filepath, true, data);
@@ -373,7 +491,6 @@ void test_swap(const std::string& filepath)
     remove_file_at_exit _(filepath);
     remove_file_at_exit _2(filepath2);
 
-    const auto eof = nw::filebuf::traits_type::eof();
     // Note: Make sure to have en uneven number of swaps so the destructor runs on the others data
 
     // Check: FILE*, buffer, buffer_size
@@ -505,12 +622,15 @@ void test_main(int, char** argv, char**)
     test_pubseekpos(exampleFilename);
     test_pubseekoff(exampleFilename);
     test_64_bit_seek(exampleFilename);
-    std::cout << "Testing text mode\n";
-    test_read_write_switch(exampleFilename, false);
-    test_textmode(exampleFilename);
-    std::cout << "Testing binary mode\n";
-    test_read_write_switch(exampleFilename, true);
-    test_binarymode(exampleFilename);
+    for(const auto binary : {false, true})
+    {
+        std::cout << "Testing " << (binary ? "binary" : "text") << " mode\n";
+        remove_file_at_exit _(exampleFilename);
+        test_read_write_switch(exampleFilename, binary);
+        test_sungetc(exampleFilename, binary);
+        test_sputbackc(exampleFilename, binary);
+        binary ? test_binarymode(exampleFilename) : test_textmode(exampleFilename);
+    }
 // These tests are only useful for the nowide filebuf and are known to fail for
 // std::filebuf due to bugs in libc++
 #if BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
