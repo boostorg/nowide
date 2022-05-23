@@ -334,7 +334,7 @@ void test_codecvt_err()
         char* to = buf;
         char* to_end = buf + 32;
         char* to_next = to;
-        wchar_t err_buf[3] = {'1', 0xDC9E, 0}; // second surrogate not works both for UTF-16 and 32
+        wchar_t err_buf[] = {'1', 0xDC9E, 0}; // second value is invalid for UTF-16 and 32
         const wchar_t* err_utf = err_buf;
         {
             std::mbstate_t mb{};
@@ -344,7 +344,7 @@ void test_codecvt_err()
             TEST_EQ(cvt.out(mb, from, from_end, from_next, to, to_end, to_next), cvt_type::ok);
             TEST(from_next == from + 2);
             TEST(to_next == to + 4);
-            TEST_EQ(std::string(to, to_next), "1" + boost::nowide::narrow(wreplacement_str));
+            TEST_EQ(std::string(to, to_next), boost::nowide::narrow(err_buf));
         }
     }
 }

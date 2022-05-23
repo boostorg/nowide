@@ -120,10 +120,10 @@ void run_child(int argc, char** argv, char** env)
     std::cout << "Subprocess ok" << std::endl;
 }
 
-void run_parent(const char* exe_path)
+void run_parent(const std::string& exe_path)
 {
     TEST(boost::nowide::system(nullptr) != 0);
-    const std::string command = "\"" + std::string(exe_path) + "\" " + example;
+    const std::string command = "\"" + exe_path + "\" " + example;
 #if BOOST_NOWIDE_TEST_USE_NARROW
     TEST_EQ(boost::nowide::setenv("BOOST_NOWIDE_TEST", example.c_str(), 1), 0);
     TEST_EQ(boost::nowide::setenv("BOOST_NOWIDE_TEST_NONE", example.c_str(), 1), 0);
