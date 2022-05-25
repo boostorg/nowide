@@ -42,17 +42,33 @@ namespace nowide {
                 _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
 #endif
             }
+            std::string context;
         };
         inline test_monitor& test_mon()
         {
             static test_monitor instance;
             return instance;
         }
+        struct context
+        {
+            std::string oldCtx;
+            context(std::string ctx) : oldCtx(std::move(test_mon().context))
+            {
+                test_mon().context = std::move(ctx);
+            }
+            ~context()
+            {
+                test_mon().context = std::move(oldCtx);
+            }
+        };
         /// Function called when a test failed to be able set a breakpoint for debugging
         inline void test_failed(const char* expr, const char* file, const int line, const char* function)
         {
             std::ostringstream ss;
             ss << expr << " at " << file << ':' << line << " in " << function;
+            std::string& ctx = test_mon().context;
+            if(!ctx.empty())
+                ss << " context: " << ctx;
             throw test_error(ss.str());
         }
 
@@ -138,6 +154,10 @@ namespace nowide {
         break;                                                                   \
         DISABLE_CONST_EXPR_DETECTED                                              \
     } while(0) DISABLE_CONST_EXPR_DETECTED_POP
+
+#define TEST_CONTEXT(expr)                       \
+    boost::nowide::test::context _##__COUNTER__( \
+      static_cast<const std::stringstream&>(std::stringstream{} << expr).str())
 
 #ifndef BOOST_NOWIDE_TEST_NO_MAIN
 // Tests should implement this
