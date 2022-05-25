@@ -9,10 +9,12 @@
 
 #include "file_test_helpers.hpp"
 #include "test.hpp"
+#include <algorithm>
 #include <cstdint>
 #include <random>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 namespace nw = nowide;
 using namespace nowide::test;
@@ -171,6 +173,200 @@ void test_64_bit_seek(const std::string& filepath)
     }
 }
 
+void test_read_write_switch(const std::string& filepath, bool binary)
+{
+    // Switching between read and write requires a seek or (for W->R) a sync
+    remove_file_at_exit _(filepath);
+    const std::string data = "1234567890";
+    auto flags = std::ios_base::in | std::ios_base::out | std::ios_base::trunc;
+    if(binary)
+        flags |= std::ios_base::binary;
+    nw::filebuf buf;
+    TEST(buf.open(filepath, flags));
+    TEST_EQ(buf.sputn(data.data(), data.size()), static_cast<std::streamsize>(data.size()));
+    // W->R via seek
+    buf.pubseekpos(0);
+    TEST_EQ(buf.sbumpc(), '1');
+    // R->W via seek
+    const auto pos = buf.pubseekoff(0, std::ios_base::cur);
+    TEST(pos != std::streampos(-1));
+    buf.sputc('b');
+    // W->R via sync
+    TEST(buf.pubsync() == 0);
+    TEST_EQ(buf.sbumpc(), '3');
+    // R->W via seek
+    const auto pos2 = buf.pubseekoff(0, std::ios_base::cur);
+    buf.sputc('c');
+    // Read right back
+    TEST_EQ(buf.pubseekpos(pos2), pos2);
+    TEST_EQ(buf.sbumpc(), 'c');
+    // R->W
+    buf.pubseekoff(0, std::ios_base::cur);
+    buf.sputc('d');
+    // Sync & seek
+    TEST(buf.pubsync() == 0);
+    TEST(buf.pubseekoff(0, std::ios_base::cur) != std::streampos(-1));
+    TEST_EQ(buf.sbumpc(), '6');
+    // R->W
+    buf.pubseekoff(0, std::ios_base::cur);
+    buf.sputc('e');
+    // Seek & sync
+    TEST(buf.pubseekoff(0, std::ios_base::cur) != std::streampos(-1));
+    TEST(buf.pubsync() == 0);
+    TEST_EQ(buf.sbumpc(), '8');
+
+    buf.close();
+    TEST_EQ(read_file(filepath), "1b3cd6e890");
+}
+
+void subtest_sync(const std::string& filepath, bool binary, const std::string& data)
+{
+    nw::filebuf buf;
+    // Use a small buffer to force filling it up w/o requiring to write lot's of data
+    char buffer[3];
+    buf.pubsetbuf(buffer, sizeof(buffer));
+    auto flags = std::ios_base::out | std::ios_base::trunc;
+    if(binary)
+        flags |= std::ios_base::binary;
+
+    // Do a series of single-char and multi-char writes with varying size combinations
+    // Especially test the case of only single-char and only multi-char ops
+    for(unsigned singleCharOps = 0; singleCharOps <= 3; ++singleCharOps)
+    {
+        // Write less than buffer size, 1 or 2 buffers or even more, assuming buffer size of 3
+        for(size_t bufSize : {0, 2, 3, 6, 7})
+        {
+            if(singleCharOps + bufSize == 0u)
+                continue;
+            TEST(buf.open(filepath, flags));
+            for(size_t i = 0; i < data.size();)
+            {
+                TEST_CONTEXT("sc:" << singleCharOps << " buf:" << bufSize << " i:" << i);
+                for(unsigned j = 0; j < singleCharOps && i < data.size(); ++j, ++i)
+                {
+                    using CharTraits = nw::filebuf::traits_type;
+                    TEST_EQ(buf.sputc(data[i]), CharTraits::to_int_type(data[i]));
+                }
+                if(bufSize != 0u)
+                {
+                    const auto remainSize = static_cast<std::streamsize>(std::min(data.size() - i, bufSize));
+                    TEST_EQ(buf.sputn(&data[i], remainSize), remainSize);
+                    i += static_cast<size_t>(remainSize);
+                }
+                TEST_EQ(buf.pubsync(), 0);
+                TEST_EQ(read_file(filepath, binary ? data_type::binary : data_type::text), data.substr(0, i));
+            }
+            TEST(buf.close());
+            TEST_EQ(read_file(filepath, binary ? data_type::binary : data_type::text), data);
+        }
+    }
+}
+
+void subtest_singlechar_positioning(const std::string& filepath, bool binary, const std::string& data)
+{
+    nw::filebuf buf;
+    // Use a small buffer to force filling it up w/o requiring to write lot's of data
+    char buffer[3];
+    buf.pubsetbuf(buffer, sizeof(buffer));
+    auto flags = std::ios_base::in | std::ios_base::out | std::ios_base::trunc;
+    if(binary)
+        flags |= std::ios_base::binary;
+    TEST(buf.open(filepath, flags));
+
+    // Put each char and record its position
+    std::vector<nw::filebuf::pos_type> pos(data.size());
+    for(unsigned i = 0; i < data.size(); ++i)
+    {
+        buf.sputc(data[i]);
+        pos[i] = buf.pubseekoff(0, std::ios_base::cur);
+    }
+    // Go back to start and verify reading yields the same data and positions
+    buf.pubseekoff(0, std::ios_base::beg);
+    for(unsigned i = 0; i < data.size(); ++i)
+    {
+        TEST_CONTEXT("Position " << i);
+        using CharTraits = nw::filebuf::traits_type;
+        TEST_EQ(buf.sbumpc(), CharTraits::to_int_type(data[i]));
+        TEST_EQ(buf.pubseekoff(0, std::ios_base::cur), pos[i]);
+    }
+}
+
+void subtest_singlechar_multichar_reads(const std::string& filepath, bool binary, const std::string& data)
+{
+    create_file(filepath, data, binary ? data_type::binary : data_type::text);
+    nw::filebuf buf;
+    // Use a small buffer to force filling it up w/o requiring to write lot's of data
+    char buffer[3];
+    buf.pubsetbuf(buffer, sizeof(buffer));
+    std::ios_base::openmode flags = std::ios_base::in;
+    if(binary)
+        flags |= std::ios_base::binary;
+    TEST(buf.open(filepath, flags));
+
+    // Do a series of single-char and multi-char reads with varying size combinations
+    // Especially test the case of only single-char and only multi-char ops
+    for(unsigned singleCharOps = 0; singleCharOps <= 3; ++singleCharOps)
+    {
+        // Read less than buffer size, 1 or 2 buffers or even more, assuming buffer size of 3
+        for(size_t bufSize : {0, 2, 3, 6, 7})
+        {
+            if(singleCharOps + bufSize == 0u)
+                continue;
+
+            std::string outBuf(bufSize, '\0');
+            buf.pubseekoff(0, std::ios_base::beg);
+            for(size_t i = 0; i < data.size();)
+            {
+                TEST_CONTEXT("sc:" << singleCharOps << " buf:" << bufSize << " i:" << i);
+                for(unsigned j = 0; j < singleCharOps && i < data.size(); ++j, ++i)
+                {
+                    using CharTraits = nw::filebuf::traits_type;
+                    TEST_EQ(buf.sbumpc(), CharTraits::to_int_type(data[i]));
+                }
+                if(bufSize == 0u)
+                    continue;
+                const size_t readSize = std::min(data.size() - i, bufSize);
+                TEST_EQ(buf.sgetn(&outBuf.front(), bufSize), static_cast<std::streamsize>(readSize));
+                if(readSize < bufSize)
+                    outBuf.resize(readSize);
+                TEST_EQ(outBuf, data.substr(i, readSize));
+                i += bufSize;
+            }
+        }
+    }
+}
+
+void test_textmode(const std::string& filepath)
+{
+    remove_file_at_exit _(filepath);
+    // Test input, output and getting the file position works for text files with newlines
+    const std::string data = []() {
+        // Some simple test data
+        std::string result = "1234567890";
+        // Line break after every char
+        result.reserve(result.size() + 27 * 2);
+        for(char c = 'a'; c <= 'z'; ++c)
+            (result += c) += '\n';
+        // Some continuous line breaks
+        result.append(4, '\n');
+        return result;
+    }();
+    subtest_singlechar_positioning(filepath, false, data);
+    subtest_singlechar_multichar_reads(filepath, false, data);
+    subtest_sync(filepath, false, data);
+}
+
+// Almost the same test as test_textmode but uses a binary stream.
+// Useful as the buffer handling is very different
+void test_binarymode(const std::string& filepath)
+{
+    remove_file_at_exit _(filepath);
+    const std::string data = "123" + create_random_data(65, data_type::binary);
+    subtest_singlechar_positioning(filepath, true, data);
+    subtest_singlechar_multichar_reads(filepath, true, data);
+    subtest_sync(filepath, true, data);
+}
+
 void test_swap(const std::string& filepath)
 {
     const std::string filepath2 = filepath + ".2";
@@ -305,11 +501,16 @@ void test_swap(const std::string& filepath)
 void test_main(int, char** argv, char**)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
-
     test_open_close(exampleFilename);
     test_pubseekpos(exampleFilename);
     test_pubseekoff(exampleFilename);
     test_64_bit_seek(exampleFilename);
+    std::cout << "Testing text mode\n";
+    test_read_write_switch(exampleFilename, false);
+    test_textmode(exampleFilename);
+    std::cout << "Testing binary mode\n";
+    test_read_write_switch(exampleFilename, true);
+    test_binarymode(exampleFilename);
 // These tests are only useful for the nowide filebuf and are known to fail for
 // std::filebuf due to bugs in libc++
 #if NOWIDE_USE_FILEBUF_REPLACEMENT
