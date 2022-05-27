@@ -95,12 +95,12 @@ void run_child(int argc, char** argv, char** env)
     // Test arguments
     TEST_EQ(argc, 2);
     TEST_EQ(argv[1], example);
-    TEST(argv[2] == NULL);
+    TEST(argv[2] == nullptr);
 
     // Test getenv
     TEST(boost::nowide::getenv("BOOST_NOWIDE_TEST"));
     TEST_EQ(boost::nowide::getenv("BOOST_NOWIDE_TEST"), example);
-    TEST(boost::nowide::getenv("BOOST_NOWIDE_TEST_NONE") == NULL);
+    TEST(!boost::nowide::getenv("BOOST_NOWIDE_TEST_NONE"));
     // Empty variables are unreliable on windows, hence skip. E.g. using "set FOO=" unsets FOO
 #ifndef BOOST_WINDOWS
     TEST(boost::nowide::getenv("BOOST_NOWIDE_EMPTY"));
@@ -120,10 +120,10 @@ void run_child(int argc, char** argv, char** env)
     std::cout << "Subprocess ok" << std::endl;
 }
 
-void run_parent(const char* exe_path)
+void run_parent(const std::string& exe_path)
 {
     TEST(boost::nowide::system(nullptr) != 0);
-    const std::string command = "\"" + std::string(exe_path) + "\" " + example;
+    const std::string command = "\"" + exe_path + "\" " + example;
 #if BOOST_NOWIDE_TEST_USE_NARROW
     TEST_EQ(boost::nowide::setenv("BOOST_NOWIDE_TEST", example.c_str(), 1), 0);
     TEST_EQ(boost::nowide::setenv("BOOST_NOWIDE_TEST_NONE", example.c_str(), 1), 0);

@@ -38,9 +38,10 @@ namespace nowide {
     using std::filebuf;
 #else // Windows
     ///
-    /// \brief This forward declaration defines the basic_filebuf type.
+    /// \brief This forward declaration defines the basic_filebuf type
+    ///        which is used when #BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT is set, e.g. on Windows.
     ///
-    /// it is implemented and specialized for CharType = char, it
+    /// It is implemented and specialized for CharType = char, it
     /// implements std::filebuf over standard C I/O
     ///
     template<typename CharType, typename Traits = std::char_traits<CharType>>
@@ -48,8 +49,9 @@ namespace nowide {
 
     ///
     /// \brief This is the implementation of std::filebuf
+    ///        which is used when #BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT is set, e.g. on Windows.
     ///
-    /// it is implemented and specialized for CharType = char, it
+    /// It is implemented and specialized for CharType = char, it
     /// implements std::filebuf over standard C I/O
     ///
     template<>
@@ -66,11 +68,11 @@ namespace nowide {
         /// Creates new filebuf
         ///
         basic_filebuf() :
-            buffer_size_(BUFSIZ), buffer_(0), file_(0), owns_buffer_(false), last_char_(),
+            buffer_size_(BUFSIZ), buffer_(nullptr), file_(nullptr), owns_buffer_(false), last_char_(),
             mode_(std::ios_base::openmode(0))
         {
-            setg(0, 0, 0);
-            setp(0, 0);
+            setg(nullptr, nullptr, nullptr);
+            setp(nullptr, nullptr);
         }
 #ifdef BOOST_MSVC
 #pragma warning(pop)
@@ -138,21 +140,21 @@ namespace nowide {
         basic_filebuf* open(const wchar_t* s, std::ios_base::openmode mode)
         {
             if(is_open())
-                return NULL;
+                return nullptr;
             validate_cvt(this->getloc());
             const bool ate = (mode & std::ios_base::ate) != 0;
             if(ate)
                 mode &= ~std::ios_base::ate;
             const wchar_t* smode = get_mode(mode);
             if(!smode)
-                return 0;
+                return nullptr;
             file_ = detail::wfopen(s, smode);
             if(!file_)
-                return 0;
+                return nullptr;
             if(ate && detail::fseek(file_, 0, SEEK_END) != 0)
             {
                 close();
-                return 0;
+                return nullptr;
             }
             mode_ = mode;
             return this;
@@ -163,28 +165,28 @@ namespace nowide {
         basic_filebuf* close()
         {
             if(!is_open())
-                return NULL;
+                return nullptr;
             bool res = sync() == 0;
             if(std::fclose(file_) != 0)
                 res = false;
-            file_ = NULL;
+            file_ = nullptr;
             mode_ = std::ios_base::openmode(0);
             if(owns_buffer_)
             {
                 delete[] buffer_;
-                buffer_ = NULL;
+                buffer_ = nullptr;
                 owns_buffer_ = false;
             }
-            setg(0, 0, 0);
-            setp(0, 0);
-            return res ? this : NULL;
+            setg(nullptr, nullptr, nullptr);
+            setp(nullptr, nullptr);
+            return res ? this : nullptr;
         }
         ///
         /// Same as std::filebuf::is_open()
         ///
         bool is_open() const
         {
-            return file_ != NULL;
+            return file_ != nullptr;
         }
 
     private:
@@ -210,8 +212,8 @@ namespace nowide {
             assert(n >= 0);
             // Maximum compatibility: Discard all local buffers and use user-provided values
             // Users should call sync() before or better use it before any IO is done or any file is opened
-            setg(NULL, NULL, NULL);
-            setp(NULL, NULL);
+            setg(nullptr, nullptr, nullptr);
+            setp(nullptr, nullptr);
             if(owns_buffer_)
             {
                 delete[] buffer_;
@@ -235,6 +237,7 @@ namespace nowide {
             {
                 if(std::fwrite(pbase(), 1, n, file_) != n)
                     return EOF;
+                assert(buffer_);
                 setp(buffer_, buffer_ + buffer_size_);
                 if(c != EOF)
                 {
@@ -268,10 +271,13 @@ namespace nowide {
             bool result;
             if(pptr())
             {
+                // Only flush if anything was written, otherwise behavior of fflush is undefined. I.e.:
+                // - Buffered mode: pptr was set to buffer_ and advanced
+                // - Unbuffered mode: pptr set to last_char_
+                const bool has_prev_write = pptr() != buffer_;
                 result = overflow() != EOF;
-                // Only flush if anything was written, otherwise behavior of fflush is undefined
-                if(std::fflush(file_) != 0)
-                    return result = false;
+                if(has_prev_write && std::fflush(file_) != 0)
+                    result = false;
             } else
                 result = stop_reading();
             return result ? 0 : -1;
@@ -367,13 +373,13 @@ namespace nowide {
 
     private:
         /// Stop reading adjusting the file pointer if necessary
-        /// Postcondition: gptr() == NULL
+        /// Postcondition: gptr() == nullptr
         bool stop_reading()
         {
             if(!gptr())
                 return true;
             const auto off = gptr() - egptr();
-            setg(0, 0, 0);
+            setg(nullptr, nullptr, nullptr);
             if(!off)
                 return true;
 #if defined(__clang__)
@@ -381,7 +387,7 @@ namespace nowide {
 #pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare"
 #endif
             // coverity[result_independent_of_operands]
-            if(off > std::numeric_limits<std::streamoff>::max())
+            if(off < std::numeric_limits<std::streamoff>::min())
                 return false;
 #if defined(__clang__)
 #pragma clang diagnostic pop
@@ -390,29 +396,18 @@ namespace nowide {
         }
 
         /// Stop writing. If any bytes are to be written, writes them to file
-        /// Postcondition: pptr() == NULL
+        /// Postcondition: pptr() == nullptr
         bool stop_writing()
         {
             if(pptr())
             {
                 const char* const base = pbase();
                 const size_t n = pptr() - base;
-                setp(0, 0);
+                setp(nullptr, nullptr);
                 if(n && std::fwrite(base, 1, n, file_) != n)
                     return false;
             }
             return true;
-        }
-
-        void reset(FILE* f = 0)
-        {
-            sync();
-            if(file_)
-            {
-                fclose(file_);
-                file_ = 0;
-            }
-            file_ = f;
         }
 
         static const wchar_t* get_mode(std::ios_base::openmode mode)
@@ -459,7 +454,7 @@ namespace nowide {
                 return L"a+b";
             if(mode == (std::ios_base::binary | std::ios_base::in | std::ios_base::app))
                 return L"a+b";
-            return 0;
+            return nullptr;
         }
 
         size_t buffer_size_;

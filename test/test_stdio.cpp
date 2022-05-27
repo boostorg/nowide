@@ -43,7 +43,7 @@ void create_test_file(const std::string& filename)
     std::fclose(f);
 }
 
-#if BOOST_MSVC
+#ifdef BOOST_MSVC
 #include <crtdbg.h> // For _CrtSetReportMode
 void noop_invalid_param_handler(const wchar_t*, const wchar_t*, const wchar_t*, unsigned, uintptr_t)
 {} // LCOV_EXCL_LINE
@@ -54,7 +54,7 @@ void test_main(int, char** argv, char**)
 {
     const std::string prefix = argv[0];
     const std::string filename = prefix + "\xd7\xa9-\xd0\xbc-\xce\xbd.txt";
-#if BOOST_MSVC
+#ifdef BOOST_MSVC
     // Prevent abort on freopen(NULL, ...)
     _set_invalid_parameter_handler(noop_invalid_param_handler);
 #endif
@@ -80,7 +80,7 @@ void test_main(int, char** argv, char**)
     {
         boost::nowide::remove(filename.c_str());
         TEST(!file_exists(filename));
-        TEST(boost::nowide::fopen(filename.c_str(), "r") == NULL);
+        TEST(boost::nowide::fopen(filename.c_str(), "r") == nullptr);
         TEST(!file_exists(filename));
     }
     std::cout << " -- freopen" << std::endl;
@@ -99,7 +99,7 @@ void test_main(int, char** argv, char**)
         // Reopen in read mode
         // Note that changing the mode is not possibly on all implementations
         // E.g. MSVC disallows NULL completely as the file parameter
-        FILE* f2 = boost::nowide::freopen(NULL, "r", f);
+        FILE* f2 = boost::nowide::freopen(nullptr, "r", f);
         if(!f2)
             f2 = boost::nowide::freopen(filename.c_str(), "r", f);
         std::cout << " -- no write possible" << std::endl;

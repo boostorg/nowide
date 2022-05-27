@@ -249,8 +249,6 @@ void print_perf_data(const blocksize_to_performance& stdio_data,
 
 void test_perf(const char* file)
 {
-    perf_data nowide_data_txt2 = test_io_driver<io_fstream<nw::fstream>>(file, "std::fstream", false);
-    /*
     perf_data stdio_data = test_io_driver<io_stdio>(file, "stdio", true);
     perf_data std_data = test_io_driver<io_fstream<std::fstream>>(file, "std::fstream", true);
     perf_data nowide_data = test_io_driver<io_fstream<nw::fstream>>(file, "nowide::fstream", true);
@@ -265,7 +263,6 @@ void test_perf(const char* file)
     print_perf_data(stdio_data_txt.read, std_data_txt.read, nowide_data_txt.read);
     std::cout << "================== Write performance (text) ===================" << std::endl;
     print_perf_data(stdio_data_txt.write, std_data_txt.write, nowide_data_txt.write);
-    */
 }
 
 int main(int argc, char** argv)

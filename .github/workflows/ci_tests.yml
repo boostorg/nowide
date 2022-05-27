@@ -95,7 +95,13 @@ jobs:
         mkdir build
     - name: Configure
       working-directory: build
-      run: cmake -DBoost_DEBUG=ON -DCMAKE_BUILD_TYPE=${{matrix.buildType}} -DBUILD_SHARED_LIBS=${{matrix.shared_lib}} -DCMAKE_INSTALL_PREFIX=~/.local -G "${{matrix.generator}}" -DBoost_NO_BOOST_CMAKE=ON ..
+      run: |
+        extraFlags="-DBoost_DEBUG=ON -DBoost_NO_BOOST_CMAKE=ON -DCMAKE_INSTALL_PREFIX=~/.local"
+        if ! [[ "${{matrix.generator}}" =~ "Visual Studio" ]]; then
+          # Enable warning to find missing defines, especially important for the standalone version
+          extraFlags="$extraFlags -DCMAKE_CXX_FLAGS=-Wundef"
+        fi
+        cmake -DCMAKE_BUILD_TYPE=${{matrix.buildType}} -DBUILD_SHARED_LIBS=${{matrix.shared_lib}} -G "${{matrix.generator}}" $extraFlags ..
     - name: Build & Install
       run: cmake --build build --config ${{matrix.buildType}} --target install
 
