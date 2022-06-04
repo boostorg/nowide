@@ -55,8 +55,9 @@ jobs:
           - { compiler: gcc-9,     cxxstd: '03,11,14,17,2a', os: ubuntu-18.04 }
           - { compiler: gcc-10,    cxxstd: '03,11,14,17,20', os: ubuntu-20.04 }
           - { compiler: gcc-11,    cxxstd: '03,11,14,17,20', os: ubuntu-20.04 }
+          - { compiler: gcc-12,    cxxstd: '03,11,14,17,20', os: ubuntu-22.04 }
           - { name: GCC w/ sanitizers, sanitize: yes,
-              compiler: gcc-11,    cxxstd: '03,11,14,17,20', os: ubuntu-20.04 }
+              compiler: gcc-12,    cxxstd: '03,11,14,17,20', os: ubuntu-22.04 }
           - { name: Collect coverage, coverage: yes,
               compiler: gcc-8,     cxxstd: '03,11',          os: ubuntu-20.04, install: 'g++-8-multilib', address-model: '32,64' }
 
@@ -76,12 +77,14 @@ jobs:
           - { compiler: clang-10,  cxxstd: '03,11,14,17,20', os: ubuntu-20.04 }
           - { compiler: clang-11,  cxxstd: '03,11,14,17,20', os: ubuntu-20.04 }
           - { compiler: clang-12,  cxxstd: '03,11,14,17,20', os: ubuntu-20.04 }
+          - { compiler: clang-13,  cxxstd: '03,11,14,17,20', os: ubuntu-22.04 }
+          - { compiler: clang-14,  cxxstd: '03,11,14,17,20', os: ubuntu-22.04 }
 
           # libc++
           - { compiler: clang-6.0, cxxstd: '03,11,14',       os: ubuntu-18.04, stdlib: libc++, install: 'clang-6.0 libc++-dev libc++abi-dev' }
           - { compiler: clang-12,  cxxstd: '03,11,14,17,20', os: ubuntu-20.04, stdlib: libc++, install: 'clang-12 libc++-12-dev libc++abi-12-dev' }
           - { name: Clang w/ sanitizers, sanitize: yes,
-              compiler: clang-12,  cxxstd: '03,11,14,17,20', os: ubuntu-20.04, stdlib: libc++, install: 'clang-12 libc++-12-dev libc++abi-12-dev' }
+              compiler: clang-14,  cxxstd: '03,11,14,17,20', os: ubuntu-22.04, stdlib: libc++, install: 'clang-14 libc++-14-dev libc++abi-14-dev' }
 
           # OSX, clang
           - { compiler: clang,     cxxstd: '03,11,14,17,2a', os: macos-10.15, sanitize: yes }
@@ -107,7 +110,7 @@ jobs:
                 apt-get -o Acquire::Retries=$NET_RETRY_COUNT update
                 apt-get -o Acquire::Retries=$NET_RETRY_COUNT install -y g++ python libpython-dev git
             fi
-            # multiple job types are not compatible with ccache, they use "ccache: no" in the matrix
+            # For jobs not compatible with ccache, use "ccache: no" in the matrix
             if [[ "${{ matrix.ccache }}" == "no" ]]; then
                 echo "B2_USE_CCACHE=0" >> $GITHUB_ENV
             fi
@@ -120,11 +123,14 @@ jobs:
           fetch-depth: ${{ matrix.coverage && '0' || '1' }}
 
       - name: Cache ccache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         if: env.B2_USE_CCACHE
         with:
           path: ~/.ccache
-          key: ${{matrix.os}}-${{matrix.container}}-${{matrix.compiler}}
+          key: ${{matrix.os}}-${{matrix.container}}-${{matrix.compiler}}-${{github.sha}}
+          restore-keys: |
+            ${{matrix.os}}-${{matrix.container}}-${{matrix.compiler}}-
+            ${{matrix.os}}-${{matrix.container}}-${{matrix.compiler}}
 
       - name: Fetch Boost.CI
         uses: actions/checkout@v3
@@ -275,7 +281,7 @@ jobs:
             cd "$BOOST_ROOT"
             mkdir __build_cmake_test__ && cd __build_cmake_test__
             cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBOOST_INCLUDE_LIBRARIES=$SELF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON -DBoost_VERBOSE=ON ..
-            cmake --build . --target tests --config Debug
+            cmake --build . --target tests --config Debug -j$B2_JOBS
             ctest --output-on-failure --build-config Debug
 
   CMake:
@@ -317,7 +323,7 @@ jobs:
             cd "$BOOST_ROOT"
             mkdir __build_cmake_test__ && cd __build_cmake_test__
             cmake -G "${{matrix.generator}}" -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBOOST_INCLUDE_LIBRARIES=$SELF -DBUILD_SHARED_LIBS=${{matrix.build_shared}} -DBUILD_TESTING=ON -DBoost_VERBOSE=ON ..
-            cmake --build . --target tests --config ${{matrix.build_type}}
+            cmake --build . --target tests --config ${{matrix.build_type}} -j$B2_JOBS
             ctest --output-on-failure --build-config ${{matrix.build_type}}
 
       - name: Run CMake subdir tests
@@ -327,7 +333,7 @@ jobs:
             cd "$cmake_test_folder"
             mkdir __build_cmake_subdir_test__ && cd __build_cmake_subdir_test__
             cmake -G "${{matrix.generator}}" -DBOOST_CI_INSTALL_TEST=OFF -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_SHARED_LIBS=${{matrix.build_shared}} ..
-            cmake --build . --config ${{matrix.build_type}}
+            cmake --build . --config ${{matrix.build_type}} -j$B2_JOBS
             ctest --output-on-failure --build-config ${{matrix.build_type}}
 
       - name: Install Library
@@ -335,7 +341,7 @@ jobs:
             cd "$BOOST_ROOT"
             mkdir __build_cmake_install_test__ && cd __build_cmake_install_test__
             cmake -G "${{matrix.generator}}" -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBOOST_INCLUDE_LIBRARIES=$SELF -DBUILD_SHARED_LIBS=${{matrix.build_shared}} -DCMAKE_INSTALL_PREFIX=~/.local -DBoost_VERBOSE=ON -DBoost_DEBUG=ON ..
-            cmake --build . --target install --config ${{matrix.build_type}}
+            cmake --build . --target install --config ${{matrix.build_type}} -j$B2_JOBS
       - name: Run CMake install tests
         run: |
             cmake_test_folder="$BOOST_ROOT/libs/$SELF/test/cmake_test" # New unified folder
@@ -343,5 +349,5 @@ jobs:
             cd "$cmake_test_folder"
             mkdir __build_cmake_install_test__ && cd __build_cmake_install_test__
             cmake -G "${{matrix.generator}}" -DBOOST_CI_INSTALL_TEST=ON -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_SHARED_LIBS=${{matrix.build_shared}} -DCMAKE_PREFIX_PATH=~/.local ..
-            cmake --build . --config ${{matrix.build_type}}
+            cmake --build . --config ${{matrix.build_type}} -j$B2_JOBS
             ctest --output-on-failure --build-config ${{matrix.build_type}}
