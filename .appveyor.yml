@@ -1,12 +1,12 @@
 # Copyright 2016, 2017 Peter Dimov
 # Copyright 2017 - 2019 James E. King III
-# Copyright 2019 - 2020 Alexander Grund
+# Copyright 2019 - 2022 Alexander Grund
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE or copy at http://boost.org/LICENSE_1_0.txt)
 
 version: 1.0.{build}-{branch}
 
-shallow_clone: false
+shallow_clone: true
 
 branches:
   only:
@@ -37,17 +37,19 @@ environment:
     B2_VARIANT: release,debug
 
   matrix:
-    - FLAVOR: Visual Studio 2022
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-      B2_CXXFLAGS: -permissive-
-      B2_CXXSTD: 14,17,20
-      B2_TOOLSET: msvc-14.3
+    - FLAVOR: Visual Studio 2008, 2010, 2012
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      B2_TOOLSET: msvc-9.0,msvc-10.0,msvc-11.0
+      B2_ADDRESS_MODEL: 32 # No 64bit support
 
-    - FLAVOR: Visual Studio 2019
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      B2_CXXFLAGS: -permissive-
-      B2_CXXSTD: 14,17,2a
-      B2_TOOLSET: msvc-14.2
+    - FLAVOR: Visual Studio 2013, 2015
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      B2_TOOLSET: msvc-12.0,msvc-14.0
+
+    - FLAVOR: Visual Studio 2017 C++14/17
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      B2_CXXSTD: 14,17
+      B2_TOOLSET: msvc-14.1
 
     - FLAVOR: Visual Studio 2017 C++2a Strict
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
@@ -55,25 +57,23 @@ environment:
       B2_CXXSTD: 2a
       B2_TOOLSET: msvc-14.1
 
-    - FLAVOR: Visual Studio 2017 C++14/17
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      B2_CXXSTD: 14,17
-      B2_TOOLSET: msvc-14.1
+    - FLAVOR: Visual Studio 2019
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      B2_CXXFLAGS: -permissive-
+      B2_CXXSTD: 14,17,2a
+      B2_TOOLSET: msvc-14.2
+
+    - FLAVOR: Visual Studio 2022
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+      B2_CXXFLAGS: -permissive-
+      B2_CXXSTD: 14,17,20
+      B2_TOOLSET: msvc-14.3
 
     - FLAVOR: clang-cl
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       B2_ADDRESS_MODEL: 64
       B2_CXXSTD: 11,14,17
       B2_TOOLSET: clang-win
-
-    - FLAVOR: Visual Studio 2015, 2013
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      B2_TOOLSET: msvc-12.0,msvc-14.0
-
-    - FLAVOR: Visual Studio 2008, 2010, 2012
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      B2_TOOLSET: msvc-9.0,msvc-10.0,msvc-11.0
-      B2_ADDRESS_MODEL: 32 # No 64bit support
 
     - FLAVOR: cygwin (32-bit)
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
@@ -89,6 +89,8 @@ environment:
       B2_CXXSTD: 03,11,14,1z
       B2_TOOLSET: gcc
 
+    # (Currently) the images up to 2017 use an older Cygwin
+    # This tests that the library works with more recent versions
     - FLAVOR: cygwin (64-bit, latest)
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
       ADDPATH: C:\cygwin64\bin;
