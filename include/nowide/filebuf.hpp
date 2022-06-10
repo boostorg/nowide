@@ -312,25 +312,15 @@ namespace nowide {
 
         int pbackfail(int c = EOF) override
         {
-            if(!(mode_ & std::ios_base::in))
-                return EOF;
-            if(!stop_writing())
-                return EOF;
+            // For simplicity we only allow putting back into our read buffer
+            // So putting back more chars than we have read from the buffer will fail
             if(gptr() > eback())
                 gbump(-1);
-            else if(seekoff(-1, std::ios_base::cur) != std::streampos(std::streamoff(-1)))
-            {
-                if(underflow() == EOF)
-                    return EOF;
-            } else
+            else
                 return EOF;
 
-            // Case 1: Caller just wanted space for 1 char
-            if(c == EOF)
-                return Traits::not_eof(c);
-            // Case 2: Caller wants to put back different char
-            // gptr now points to the (potentially newly read) previous char
-            if(*gptr() != c)
+            // Assign the new value if requested
+            if(c != EOF && *gptr() != Traits::to_char_type(c))
                 *gptr() = Traits::to_char_type(c);
             return Traits::not_eof(c);
         }
