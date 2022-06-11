@@ -269,6 +269,31 @@ namespace nowide {
             return Traits::not_eof(c);
         }
 
+        std::streamsize xsputn(const char* s, std::streamsize n) override
+        {
+            // Only optimize when writing more than a buffer worth of data
+            if(n <= static_cast<std::streamsize>(buffer_size_))
+                return std::basic_streambuf<char>::xsputn(s, n);
+            if(!(mode_ & (std::ios_base::out | std::ios_base::app)) || !stop_reading())
+                return 0;
+
+            // First empty the remaining put area, if any
+            const char* const base = pbase();
+            const size_t num_buffered = pptr() - base;
+            if(num_buffered != 0)
+            {
+                const auto num_written = std::fwrite(base, 1, num_buffered, file_);
+                setp(const_cast<char*>(base + num_written), epptr()); // i.e. pbump(num_written)
+                if(num_written != num_buffered)
+                    return 0; // Error writing buffered chars
+            }
+            // Then write directly to file
+            const auto num_written = std::fwrite(s, 1, static_cast<size_t>(n), file_);
+            if(num_written > 0u && base != last_char_)
+                setp(last_char_, last_char_); // Mark as "written" if not done yet
+            return num_written;
+        }
+
         int underflow() override
         {
             if(!(mode_ & std::ios_base::in) || !stop_writing())
