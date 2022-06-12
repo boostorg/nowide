@@ -26,11 +26,23 @@ static_assert(std::is_same<nw::filebuf::int_type, nw::filebuf::traits_type::int_
 static_assert(std::is_same<nw::filebuf::pos_type, nw::filebuf::traits_type::pos_type>::value, "!");
 static_assert(std::is_same<nw::filebuf::off_type, nw::filebuf::traits_type::off_type>::value, "!");
 
-const auto eof = nw::filebuf::traits_type::eof();
+using CharTraits = nw::filebuf::traits_type;
+const auto eof = CharTraits::eof();
 
 constexpr std::ios_base::openmode make_mode(std::ios_base::openmode flags, bool binary)
 {
     return binary ? flags | std::ios_base::binary : flags;
+}
+
+template<class T_FileBuf>
+bool open_with_buffer(T_FileBuf& filebuf,
+                      const std::string& filepath,
+                      std::ios_base::openmode flags,
+                      char* buffer,
+                      size_t size)
+{
+    const bool bufferSet = filebuf.pubsetbuf(buffer, size) != nullptr;
+    return filebuf.open(filepath, flags) && (bufferSet || filebuf.pubsetbuf(buffer, size));
 }
 
 template<class T_FileBuf, size_t T_size>
@@ -39,8 +51,13 @@ bool open_with_buffer(T_FileBuf& filebuf,
                       std::ios_base::openmode flags,
                       char (&buffer)[T_size])
 {
-    const bool bufferSet = filebuf.pubsetbuf(buffer, T_size) != nullptr;
-    return filebuf.open(filepath, flags) && (bufferSet || filebuf.pubsetbuf(buffer, sizeof(buffer)));
+    return open_with_buffer(filebuf, filepath, flags, buffer, T_size);
+}
+
+template<class T_FileBuf>
+bool open_unbuffered(T_FileBuf& filebuf, const std::string& filepath, std::ios_base::openmode flags)
+{
+    return open_with_buffer(filebuf, filepath, flags, nullptr, 0);
 }
 
 // Read the given number of chars from the buffer, checking that there are that many
@@ -62,22 +79,62 @@ void test_open_close(const std::string& filepath)
     remove_file_at_exit _(filepath);
     remove_file_at_exit _2(filepath2);
 
-    nw::filebuf buf;
-    TEST(buf.open(filepath, std::ios_base::out) == &buf);
-    TEST(buf.is_open());
+    {
+        nw::filebuf buf;
+        TEST(buf.open(filepath, std::ios_base::out) == &buf);
+        TEST(buf.is_open());
 
-    // Opening when already open fails
-    TEST(buf.open(filepath2, std::ios_base::out) == nullptr);
-    // Still open
-    TEST(buf.is_open());
-    TEST(buf.close() == &buf);
-    // Failed opening did not create file
-    TEST(!file_exists(filepath2));
+        // Opening when already open fails
+        TEST(buf.open(filepath2, std::ios_base::out) == nullptr);
+        // Still open
+        TEST(buf.is_open());
+        TEST(buf.close() == &buf);
+        // Failed opening did not create file
+        TEST(!file_exists(filepath2));
 
-    // But it should work now:
-    TEST(buf.open(filepath2, std::ios_base::out) == &buf);
-    TEST(buf.close() == &buf);
-    TEST(file_exists(filepath2));
+        // But it should work now:
+        TEST(buf.open(filepath2, std::ios_base::out) == &buf);
+        TEST(buf.close() == &buf);
+        TEST(file_exists(filepath2));
+    }
+
+    const auto file_data = create_random_data(20, data_type::text);
+    create_file(filepath, file_data);
+    // Can't write to read-only buf
+    {
+        nw::filebuf buf;
+        TEST(buf.open(filepath, std::ios_base::in));
+        TEST_EQ(buf.sputc('a'), eof);
+        // Even if chars were copied to put area, they cannot be written (in sync)
+        TEST(buf.sputn("hello", 5) == 0 || buf.pubsync() == -1);
+    }
+    TEST_EQ(read_file(filepath), file_data); // File is unchanged
+    {
+        nw::filebuf buf;
+        char buffer[3];
+        TEST(open_with_buffer(buf, filepath, std::ios_base::in, buffer));
+        // Also doesn't write when using direct I/O due to data>buffersize (at least in Nowide)
+        TEST(buf.sputn("hello", 5) == 0 || buf.pubsync() == -1);
+    }
+    TEST_EQ(read_file(filepath), file_data); // File is unchanged
+
+    // Can't read from write-only buf
+    {
+        for(const auto flags : {std::ios_base::out, std::ios_base::app})
+        {
+            create_file(filepath, file_data);
+            nw::filebuf buf;
+            TEST(buf.open(filepath, flags));
+            TEST_EQ(buf.sgetc(), eof);
+            TEST_EQ(buf.sbumpc(), eof);
+            char str[3];
+            TEST_EQ(buf.sgetn(str, sizeof(str)), 0);
+            // Putback is also just for reading
+            TEST(buf.pubseekoff(0, std::ios_base::end) != std::streampos(-1));
+            TEST_EQ(buf.sungetc(), eof);
+            TEST_EQ(buf.sputbackc('t'), eof);
+        }
+    }
 }
 
 void test_pubseekpos(const std::string& filepath)
@@ -92,9 +149,8 @@ void test_pubseekpos(const std::string& filepath)
     using pos_type = nw::filebuf::pos_type;
     const auto eofPos = pos_type(data.size());
     std::uniform_int_distribution<size_t> distr(0, static_cast<size_t>(eofPos) - 1);
-    using traits = nw::filebuf::traits_type;
 
-    const auto getData = [&](pos_type pos) { return traits::to_int_type(data[static_cast<size_t>(pos)]); };
+    const auto getData = [&](pos_type pos) { return CharTraits::to_int_type(data[static_cast<size_t>(pos)]); };
 
     for(int i = 0; i < 100; i++)
     {
@@ -104,9 +160,9 @@ void test_pubseekpos(const std::string& filepath)
     }
     // Seek to first and last as corner case tests
     TEST_EQ(buf.pubseekpos(0), pos_type(0));
-    TEST_EQ(buf.sgetc(), traits::to_int_type(data[0]));
+    TEST_EQ(buf.sgetc(), CharTraits::to_int_type(data[0]));
     TEST_EQ(buf.pubseekpos(eofPos), eofPos);
-    TEST_EQ(buf.sgetc(), traits::eof());
+    TEST_EQ(buf.sgetc(), eof);
 }
 
 void test_pubseekoff(const std::string& filepath)
@@ -122,9 +178,8 @@ void test_pubseekoff(const std::string& filepath)
     using off_type = nw::filebuf::off_type;
     const auto eofPos = pos_type(data.size());
     std::uniform_int_distribution<size_t> distr(0, static_cast<size_t>(eofPos) - 1);
-    using traits = nw::filebuf::traits_type;
 
-    const auto getData = [&](pos_type pos) { return traits::to_int_type(data[static_cast<size_t>(pos)]); };
+    const auto getData = [&](pos_type pos) { return CharTraits::to_int_type(data[static_cast<size_t>(pos)]); };
     // tellg/tellp function as called by basic_[io]fstream
     const auto tellg = [&]() { return buf.pubseekoff(0, std::ios_base::cur); };
 
@@ -151,10 +206,10 @@ void test_pubseekoff(const std::string& filepath)
     // Seek to first and last as corner case tests
     TEST_EQ(buf.pubseekoff(0, std::ios_base::beg), pos_type(0));
     TEST_EQ(tellg(), pos_type(0));
-    TEST_EQ(buf.sgetc(), traits::to_int_type(data[0]));
+    TEST_EQ(buf.sgetc(), CharTraits::to_int_type(data[0]));
     TEST_EQ(buf.pubseekoff(0, std::ios_base::end), eofPos);
     TEST_EQ(tellg(), eofPos);
-    TEST_EQ(buf.sgetc(), traits::eof());
+    TEST_EQ(buf.sgetc(), eof);
 }
 
 void test_64_bit_seek(const std::string& filepath)
@@ -199,6 +254,134 @@ void test_64_bit_seek(const std::string& filepath)
 #endif
         TEST_EQ(newPos, offset + knownPos);
         TEST_EQ(buf.pubseekoff(0, std::ios_base::cur), newPos);
+    }
+}
+
+void test_xsgetn(const std::string& filepath, bool binary)
+{
+    char buffer[200]{};
+    const auto dataType = binary ? data_type::binary : data_type::text;
+    const std::string data = create_random_data(sizeof(buffer) + 50, dataType);
+    create_file(filepath, data, dataType);
+
+    for(const bool unbuffered : {false, true})
+    {
+        TEST_CONTEXT((unbuffered ? "unbuffered" : "buffered"));
+        nw::filebuf buf;
+        if(unbuffered)
+            TEST(open_unbuffered(buf, filepath, make_mode(std::ios_base::in, binary)));
+        else
+            TEST(open_with_buffer(buf, filepath, make_mode(std::ios_base::in, binary), buffer));
+
+        std::string strBuf(data.size() * 2, '\0');
+        // Reading stops at EOF
+        TEST_EQ(buf.sgetn(&strBuf[0], strBuf.size()), static_cast<std::streamsize>(data.size()));
+        strBuf.resize(data.size());
+        TEST_EQ(strBuf, data);
+        TEST(buf.pubseekpos(0) != std::streampos(-1));
+        // Read a bit using regular underflow, then via sgetn and again via underflow
+        TEST_EQ(buf.sbumpc(), CharTraits::to_int_type(data[0]));
+        TEST_EQ(buf.sbumpc(), CharTraits::to_int_type(data[1]));
+        strBuf.clear();
+        // Go definitely over a buffer boundary
+        strBuf.resize(sizeof(buffer));
+        TEST_EQ(buf.sgetn(&strBuf[0], strBuf.size()), static_cast<std::streamsize>(strBuf.size()));
+        TEST_EQ(strBuf, data.substr(2, strBuf.size()));
+        TEST_EQ(buf.sbumpc(), CharTraits::to_int_type(data[strBuf.size() + 2]));
+        TEST_EQ(buf.sbumpc(), CharTraits::to_int_type(data[strBuf.size() + 3]));
+    }
+    // Corner cases:
+    //   - sgetn with zero or negative count is a no-op
+    //   - sgetn fails on closed filebuf
+    for(const bool unbuffered : {false, true})
+    {
+        TEST_CONTEXT((unbuffered ? "unbuffered" : "buffered"));
+        create_file(filepath, "Hello World");
+        nw::filebuf buf;
+        // Set a buffer just to see if it is written to
+        if(unbuffered)
+            TEST(open_unbuffered(buf, filepath, make_mode(std::ios_base::in, binary)));
+        else
+            TEST(open_with_buffer(buf, filepath, make_mode(std::ios_base::in, binary), buffer));
+
+        std::string str = create_random_data(data.size(), data_type::binary);
+        const auto origStr = str;
+        buffer[0] = origStr[0];
+
+        TEST_EQ(buf.sgetn(&str[0], 0), 0);
+#if defined(__GNUC__) && __GNUC__ >= 7
+        // GCC may not detect that the negative value is checked by xsgetn
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wrestrict"
+#endif
+        TEST_EQ(buf.sgetn(&str[0], -1), 0);
+        TEST_EQ(buf.sgetn(&str[0], -999), 0);
+#if defined(__GNUC__) && __GNUC__ >= 12
+#pragma GCC diagnostic pop
+#endif
+        buf.close();
+        // No read when closed
+        TEST_EQ(buf.sgetn(&str[0], 1), 0);
+        TEST_EQ(str, origStr);
+        TEST_EQ(buffer[0], origStr[0]);
+        TEST_EQ(buf.sgetn(&str[0], str.size()), 0);
+        TEST_EQ(str, origStr);
+        TEST_EQ(buffer[0], origStr[0]);
+    }
+}
+
+void test_xsputn(const std::string& filepath, bool binary)
+{
+    char buffer[200]{};
+    const auto dataType = binary ? data_type::binary : data_type::text;
+    const std::string data = create_random_data(sizeof(buffer) + 50, dataType);
+
+    for(const bool unbuffered : {false, true})
+    {
+        TEST_CONTEXT((unbuffered ? "unbuffered" : "buffered"));
+        nw::filebuf buf;
+        const auto flags = make_mode(std::ios_base::out | std::ios_base::trunc, binary);
+        if(unbuffered)
+            TEST(open_unbuffered(buf, filepath, flags));
+        else
+            TEST(open_with_buffer(buf, filepath, flags, buffer));
+
+        TEST_EQ(buf.sputn(data.data(), data.size()), static_cast<std::streamsize>(data.size()));
+        buf.close();
+        TEST_EQ(read_file(filepath, dataType), data);
+
+        // Write a bit using regular overflow, then via sputn and back using overflow
+        TEST(buf.open(filepath, flags));
+        TEST_EQ(buf.sputc(data[0]), CharTraits::to_int_type(data[0]));
+        TEST_EQ(buf.sputc(data[1]), CharTraits::to_int_type(data[1]));
+        // This is more than 1 buffer size
+        std::streamsize numBytesToWrite = data.size() - 4;
+        TEST_EQ(buf.sputn(&data[2], numBytesToWrite), numBytesToWrite);
+        TEST_EQ(buf.sputc(data[data.size() - 2]), CharTraits::to_int_type(data[data.size() - 2]));
+        TEST_EQ(buf.sputc(data[data.size() - 1]), CharTraits::to_int_type(data[data.size() - 1]));
+        buf.close();
+        TEST_EQ(read_file(filepath, dataType), data);
+    }
+    // Corner cases:
+    //   - sputn with zero or negative count is a no-op
+    //   - sputn fails on closed filebuf
+    for(const bool unbuffered : {false, true})
+    {
+        TEST_CONTEXT((unbuffered ? "unbuffered" : "buffered"));
+        nw::filebuf buf;
+        if(unbuffered)
+            TEST(open_unbuffered(buf, filepath, make_mode(std::ios_base::out | std::ios_base::trunc, binary)));
+        else
+            TEST(open_with_buffer(buf, filepath, make_mode(std::ios_base::out | std::ios_base::trunc, binary), buffer));
+
+        TEST_EQ(buf.sputn(data.data(), 0), 0);
+        TEST_EQ(buf.sputn(data.data(), -1), 0);
+        TEST_EQ(buf.sputn(data.data(), -999), 0);
+        buf.close();
+        // No write when closed
+        TEST_EQ(buf.sputn(data.data(), 1), 0);
+        TEST_EQ(buf.sputn(data.data(), data.size()), 0);
+        TEST_EQ(read_file(filepath), "");
     }
 }
 
@@ -267,14 +450,13 @@ void subtest_sync(const std::string& filepath, bool binary, const std::string& d
                 TEST_CONTEXT("sc:" << singleCharOps << " buf:" << bufSize << " i:" << i);
                 for(unsigned j = 0; j < singleCharOps && i < data.size(); ++j, ++i)
                 {
-                    using CharTraits = nw::filebuf::traits_type;
                     TEST_EQ(buf.sputc(data[i]), CharTraits::to_int_type(data[i]));
                 }
                 if(bufSize != 0u)
                 {
-                    const auto remainSize = static_cast<std::streamsize>(std::min(data.size() - i, bufSize));
-                    TEST_EQ(buf.sputn(&data[i], remainSize), remainSize);
-                    i += static_cast<size_t>(remainSize);
+                    const auto remainSize = std::min(data.size() - i, bufSize);
+                    TEST_EQ(buf.sputn(&data[i], remainSize), static_cast<std::streamsize>(remainSize));
+                    i += remainSize;
                 }
                 TEST_EQ(buf.pubsync(), 0);
                 TEST_EQ(read_file(filepath, binary ? data_type::binary : data_type::text), data.substr(0, i));
@@ -305,7 +487,6 @@ void subtest_singlechar_positioning(const std::string& filepath, bool binary, co
     for(unsigned i = 0; i < data.size(); ++i)
     {
         TEST_CONTEXT("Position " << i);
-        using CharTraits = nw::filebuf::traits_type;
         TEST_EQ(buf.sbumpc(), CharTraits::to_int_type(data[i]));
         TEST_EQ(buf.pubseekoff(0, std::ios_base::cur), pos[i]);
     }
@@ -336,7 +517,6 @@ void subtest_singlechar_multichar_reads(const std::string& filepath, bool binary
                 TEST_CONTEXT("sc:" << singleCharOps << " buf:" << bufSize << " i:" << i);
                 for(unsigned j = 0; j < singleCharOps && i < data.size(); ++j, ++i)
                 {
-                    using CharTraits = nw::filebuf::traits_type;
                     TEST_EQ(buf.sbumpc(), CharTraits::to_int_type(data[i]));
                 }
                 if(bufSize == 0u)
@@ -626,6 +806,8 @@ void test_main(int, char** argv, char**)
     {
         std::cout << "Testing " << (binary ? "binary" : "text") << " mode\n";
         remove_file_at_exit _(exampleFilename);
+        test_xsgetn(exampleFilename, binary);
+        test_xsputn(exampleFilename, binary);
         test_read_write_switch(exampleFilename, binary);
         test_sungetc(exampleFilename, binary);
         test_sputbackc(exampleFilename, binary);

@@ -67,8 +67,8 @@ namespace nowide {
         /// Creates new filebuf
         ///
         basic_filebuf() :
-            buffer_size_(BUFSIZ), buffer_(nullptr), file_(nullptr), owns_buffer_(false), last_char_(),
-            mode_(std::ios_base::openmode(0))
+            file_(nullptr), buffer_(nullptr), buffer_size_(BUFSIZ), owns_buffer_(false), unbuffered_read_(false),
+            last_char_(), mode_(std::ios_base::openmode(0))
         {
             setg(nullptr, nullptr, nullptr);
             setp(nullptr, nullptr);
@@ -92,10 +92,11 @@ namespace nowide {
         {
             std::basic_streambuf<char>::swap(rhs);
             using std::swap;
-            swap(buffer_size_, rhs.buffer_size_);
-            swap(buffer_, rhs.buffer_);
             swap(file_, rhs.file_);
+            swap(buffer_, rhs.buffer_);
+            swap(buffer_size_, rhs.buffer_size_);
             swap(owns_buffer_, rhs.owns_buffer_);
+            swap(unbuffered_read_, rhs.unbuffered_read_);
             swap(last_char_[0], rhs.last_char_[0]);
             swap(mode_, rhs.mode_);
 
@@ -156,6 +157,7 @@ namespace nowide {
                 return nullptr;
             }
             mode_ = mode;
+            set_unbuffered_read();
             return this;
         }
         ///
@@ -188,23 +190,6 @@ namespace nowide {
             return file_ != nullptr;
         }
 
-    private:
-        void make_buffer()
-        {
-            if(buffer_)
-                return;
-            if(buffer_size_ > 0)
-            {
-                buffer_ = new char[buffer_size_];
-                owns_buffer_ = true;
-            }
-        }
-        void validate_cvt(const std::locale& loc)
-        {
-            if(!std::use_facet<std::codecvt<char, char, std::mbstate_t>>(loc).always_noconv())
-                throw std::runtime_error("Converting codecvts are not supported");
-        }
-
     protected:
         std::streambuf* setbuf(char* s, std::streamsize n) override
         {
@@ -220,7 +205,27 @@ namespace nowide {
             }
             buffer_ = s;
             buffer_size_ = (n >= 0) ? static_cast<size_t>(n) : 0;
+            set_unbuffered_read();
             return this;
+        }
+
+        int sync() override
+        {
+            if(!file_)
+                return 0;
+            bool result;
+            if(pptr())
+            {
+                // Only flush if anything was written, otherwise behavior of fflush is undefined. I.e.:
+                // - Buffered mode: pptr was set to buffer_ and advanced
+                // - Unbuffered mode: pptr set to last_char_
+                const bool has_prev_write = pptr() != buffer_;
+                result = overflow() != EOF;
+                if(has_prev_write && std::fflush(file_) != 0)
+                    result = false;
+            } else
+                result = stop_reading();
+            return result ? 0 : -1;
         }
 
         int overflow(int c = EOF) override
@@ -263,36 +268,36 @@ namespace nowide {
             return Traits::not_eof(c);
         }
 
-        int sync() override
+        std::streamsize xsputn(const char* s, std::streamsize n) override
         {
-            if(!file_)
+            // Only optimize when writing more than a buffer worth of data
+            if(n <= static_cast<std::streamsize>(buffer_size_))
+                return std::basic_streambuf<char>::xsputn(s, n);
+            if(!(mode_ & (std::ios_base::out | std::ios_base::app)) || !stop_reading())
                 return 0;
-            bool result;
-            if(pptr())
+
+            // First empty the remaining put area, if any
+            const char* const base = pbase();
+            const size_t num_buffered = pptr() - base;
+            if(num_buffered != 0)
             {
-                // Only flush if anything was written, otherwise behavior of fflush is undefined. I.e.:
-                // - Buffered mode: pptr was set to buffer_ and advanced
-                // - Unbuffered mode: pptr set to last_char_
-                const bool has_prev_write = pptr() != buffer_;
-                result = overflow() != EOF;
-                if(has_prev_write && std::fflush(file_) != 0)
-                    result = false;
-            } else
-                result = stop_reading();
-            return result ? 0 : -1;
+                const auto num_written = std::fwrite(base, 1, num_buffered, file_);
+                setp(const_cast<char*>(base + num_written), epptr()); // i.e. pbump(num_written)
+                if(num_written != num_buffered)
+                    return 0; // Error writing buffered chars
+            }
+            // Then write directly to file
+            const auto num_written = std::fwrite(s, 1, static_cast<size_t>(n), file_);
+            if(num_written > 0u && base != last_char_)
+                setp(last_char_, last_char_); // Mark as "written" if not done yet
+            return num_written;
         }
 
         int underflow() override
         {
-            if(!(mode_ & std::ios_base::in))
+            if(!(mode_ & std::ios_base::in) || !stop_writing())
                 return EOF;
-            if(!stop_writing())
-                return EOF;
-            // In text mode we cannot use a buffer size of more than 1 (i.e. single char only)
-            // This is due to the need to seek back in case of a sync to "put back" unread chars.
-            // However determining the number of chars to seek back is impossible in case there are newlines
-            // as we cannot know if those were converted.
-            if(buffer_size_ == 0 || !(mode_ & std::ios_base::binary))
+            if(unbuffered_read_)
             {
                 const int c = std::fgetc(file_);
                 if(c == EOF)
@@ -308,6 +313,38 @@ namespace nowide {
                     return EOF;
             }
             return Traits::to_int_type(*gptr());
+        }
+
+        std::streamsize xsgetn(char* s, std::streamsize n) override
+        {
+            // Only optimize when reading more than a buffer worth of data
+            if(n <= static_cast<std::streamsize>(unbuffered_read_ ? 1u : buffer_size_))
+                return std::basic_streambuf<char>::xsgetn(s, n);
+            if(!(mode_ & std::ios_base::in) || !stop_writing())
+                return 0;
+            std::streamsize num_copied = 0;
+            // First empty the remaining get area, if any
+            const auto num_buffered = egptr() - gptr();
+            if(num_buffered != 0)
+            {
+                const auto num_read = num_buffered > n ? n : num_buffered;
+                traits_type::copy(s, gptr(), static_cast<size_t>(num_read));
+                s += num_read;
+                n -= num_read;
+                num_copied = num_read;
+                setg(eback(), gptr() + num_read, egptr()); // i.e. gbump(num_read)
+            }
+            // Then read directly from file (loop as number of bytes read may be less than requested)
+            while(n > 0)
+            {
+                const auto num_read = std::fread(s, 1, static_cast<size_t>(n), file_);
+                if(num_read == 0) // EOF or error
+                    break;
+                s += num_read;
+                n -= num_read;
+                num_copied += num_read;
+            }
+            return num_copied;
         }
 
         int pbackfail(int c = EOF) override
@@ -361,6 +398,32 @@ namespace nowide {
         }
 
     private:
+        void make_buffer()
+        {
+            if(buffer_)
+                return;
+            if(buffer_size_ > 0)
+            {
+                buffer_ = new char[buffer_size_];
+                owns_buffer_ = true;
+            }
+        }
+
+        void set_unbuffered_read()
+        {
+            // In text mode we cannot use buffering as we are required to know the (file) position of each
+            // char in the get area and to seek back in case of a sync to "put back" unread chars.
+            // However std::fseek with non-zero offsets is unsupported for text files and the (file) offset
+            // to seek back is unknown anyway due to newlines which may got converted.
+            unbuffered_read_ = !(mode_ & std::ios_base::binary) || buffer_size_ == 0u;
+        }
+
+        void validate_cvt(const std::locale& loc)
+        {
+            if(!std::use_facet<std::codecvt<char, char, std::mbstate_t>>(loc).always_noconv())
+                throw std::runtime_error("Converting codecvts are not supported");
+        }
+
         /// Stop reading adjusting the file pointer if necessary
         /// Postcondition: gptr() == nullptr
         bool stop_reading()
@@ -446,10 +509,11 @@ namespace nowide {
             return nullptr;
         }
 
-        size_t buffer_size_;
-        char* buffer_;
         FILE* file_;
+        char* buffer_;
+        size_t buffer_size_;
         bool owns_buffer_;
+        bool unbuffered_read_; // True to read char by char
         char last_char_[1];
         std::ios::openmode mode_;
     };
