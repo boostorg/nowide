@@ -141,10 +141,9 @@ environment:
 
     # Coverity
     - COVERITY: true
-      # Coverity doesn't really support MSVC 2019 yet
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      GENERATOR: Visual Studio 15 2017
-      BOOST_ROOT: C:\Libraries\boost_1_69_0
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      GENERATOR: Visual Studio 16 2019
+      BOOST_ROOT: C:\Libraries\boost_1_77_0
       COVERITY_SCAN_TOKEN:
         secure: FzhGUr+AR/VOBGUta7dDLMDruolChnvyMSvsM/zLvPY=
       COVERITY_SCAN_NOTIFICATION_EMAIL:
