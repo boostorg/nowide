@@ -209,9 +209,14 @@ for:
               $host.SetShouldExit($LastExitCode)
             }
             7z a -tzip cov-int.zip cov-int
-            curl.exe --form token="$env:COVERITY_SCAN_TOKEN" `
+            curl.exe --fail --silent --show-error `
+                     --form token="$env:COVERITY_SCAN_TOKEN" `
                      --form email="$env:COVERITY_SCAN_NOTIFICATION_EMAIL" `
                      --form file=@cov-int.zip `
                      --form version="$env:APPVEYOR_REPO_BRANCH" `
                      --form description="Appveyor build for $env:APPVEYOR_REPO_BRANCH" `
                      https://scan.coverity.com/builds?project=$env:APPVEYOR_REPO_NAME
+            If ($LastExitCode -ne 0) {
+              echo "Upload failed"
+              $host.SetShouldExit($LastExitCode)
+            }
