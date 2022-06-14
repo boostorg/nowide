@@ -141,7 +141,7 @@ void run_parent(const std::string& exe_path)
 #endif
 }
 
-// coverity [root_function]
+// coverity[root_function]
 void test_main(int argc, char** argv, char** env)
 {
     const int old_argc = argc;

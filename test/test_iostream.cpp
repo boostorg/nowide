@@ -526,7 +526,7 @@ void test_console()
 #endif
 #endif
 
-// coverity [root_function]
+// coverity[root_function]
 void test_main(int argc, char** argv, char**)
 {
     // LCOV_EXCL_START

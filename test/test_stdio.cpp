@@ -49,7 +49,7 @@ void noop_invalid_param_handler(const wchar_t*, const wchar_t*, const wchar_t*, 
 {} // LCOV_EXCL_LINE
 #endif
 
-// coverity [root_function]
+// coverity[root_function]
 void test_main(int, char** argv, char**)
 {
     const std::string prefix = argv[0];
