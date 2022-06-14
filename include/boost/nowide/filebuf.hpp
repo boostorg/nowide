@@ -277,6 +277,7 @@ namespace nowide {
             if(!(mode_ & (std::ios_base::out | std::ios_base::app)) || !stop_reading())
                 return 0;
 
+            assert(n >= 0);
             // First empty the remaining put area, if any
             const char* const base = pbase();
             const size_t num_buffered = pptr() - base;
@@ -323,6 +324,7 @@ namespace nowide {
                 return std::basic_streambuf<char>::xsgetn(s, n);
             if(!(mode_ & std::ios_base::in) || !stop_writing())
                 return 0;
+            assert(n >= 0);
             std::streamsize num_copied = 0;
             // First empty the remaining get area, if any
             const auto num_buffered = egptr() - gptr();
