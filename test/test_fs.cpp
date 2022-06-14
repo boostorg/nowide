@@ -21,7 +21,7 @@
 #endif
 #include <nowide/filesystem/operations.hpp>
 
-// coverity [root_function]
+// coverity[root_function]
 void test_main(int, char** argv, char**)
 {
     nowide::nowide_filesystem();

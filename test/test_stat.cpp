@@ -13,7 +13,7 @@
 #include <errno.h>
 #endif
 
-// coverity [root_function]
+// coverity[root_function]
 void test_main(int, char** argv, char**)
 {
     const std::string prefix = argv[0];

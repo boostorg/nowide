@@ -314,7 +314,9 @@ void test_xsgetn(const std::string& filepath, bool binary)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wrestrict"
 #endif
+        // coverity[negative_returns]
         TEST_EQ(buf.sgetn(&str[0], -1), 0);
+        // coverity[negative_returns]
         TEST_EQ(buf.sgetn(&str[0], -999), 0);
 #if defined(__GNUC__) && __GNUC__ >= 12
 #pragma GCC diagnostic pop
@@ -375,7 +377,9 @@ void test_xsputn(const std::string& filepath, bool binary)
             TEST(open_with_buffer(buf, filepath, make_mode(std::ios_base::out | std::ios_base::trunc, binary), buffer));
 
         TEST_EQ(buf.sputn(data.data(), 0), 0);
+        // coverity[negative_returns]
         TEST_EQ(buf.sputn(data.data(), -1), 0);
+        // coverity[negative_returns]
         TEST_EQ(buf.sputn(data.data(), -999), 0);
         buf.close();
         // No write when closed
@@ -794,7 +798,7 @@ void test_swap(const std::string& filepath)
     }
 }
 
-// coverity [root_function]
+// coverity[root_function]
 void test_main(int, char** argv, char**)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";

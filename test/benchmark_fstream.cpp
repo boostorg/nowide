@@ -279,7 +279,7 @@ int main(int argc, char** argv)
     try
     {
         test_perf(filename.c_str());
-    } catch(const std::runtime_error& err)
+    } catch(const std::exception& err)
     {
         std::cerr << "Benchmarking failed: " << err.what() << std::endl;
         return 1;
