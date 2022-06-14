@@ -202,22 +202,16 @@ for:
       - cd build
       - cmake -G "%GENERATOR%" ..
       - ps: |
-            nuget install -ExcludeVersion PublishCoverity
             cov-configure --msvc
-            cov-build.exe --dir cov-int cmake --build . --config $env:configuration
+            cov-build --dir cov-int cmake --build . --config $env:configuration
             If ($LastExitCode -ne 0) {
               cat cov-int/build-log.txt
               $host.SetShouldExit($LastExitCode)
             }
-            PublishCoverity\tools\PublishCoverity.exe compress --nologo -i cov-int -o cov-int.zip --overwrite
-
-            # This may fail due to a wrong HTTP 500 code from coverity, hence the stderr redirection via cmd
-            # to make the build succeed anyway
-            cmd /c PublishCoverity\tools\PublishCoverity.exe publish --nologo `
-              -t "$env:COVERITY_SCAN_TOKEN" `
-              -e "$env:COVERITY_SCAN_NOTIFICATION_EMAIL" `
-              -r "$env:APPVEYOR_REPO_NAME" `
-              -z "cov-int.zip" `
-              -d "Appveyor build for $env:APPVEYOR_REPO_BRANCH" `
-              --codeVersion "$env:APPVEYOR_REPO_BRANCH" 2`>`&1
-            Write-Host "Done"
+            7z a -tzip cov-int.zip cov-int
+            curl.exe --form token="$env:COVERITY_SCAN_TOKEN" `
+                     --form email="$env:COVERITY_SCAN_NOTIFICATION_EMAIL" `
+                     --form file=@cov-int.zip `
+                     --form version="$env:APPVEYOR_REPO_BRANCH" `
+                     --form description="Appveyor build for $env:APPVEYOR_REPO_BRANCH" `
+                     https://scan.coverity.com/builds?project=$env:APPVEYOR_REPO_NAME
