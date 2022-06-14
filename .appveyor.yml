@@ -143,6 +143,7 @@ environment:
     - COVERITY: true
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       GENERATOR: Visual Studio 16 2019
+      configuration: Debug
       BOOST_ROOT: C:\Libraries\boost_1_77_0
       COVERITY_SCAN_TOKEN:
         secure: FzhGUr+AR/VOBGUta7dDLMDruolChnvyMSvsM/zLvPY=
@@ -202,6 +203,7 @@ for:
       - cmake -G "%GENERATOR%" ..
       - ps: |
             nuget install -ExcludeVersion PublishCoverity
+            cov-configure --msvc
             cov-build.exe --dir cov-int cmake --build . --config $env:configuration
             If ($LastExitCode -ne 0) {
               cat cov-int/build-log.txt
