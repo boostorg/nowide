@@ -15,7 +15,7 @@
 
 cmake_minimum_required(VERSION 3.9)
 # Version number starts at 10 to avoid conflicts with Nowide version
-set(_version 11.1.4)
+set(_version 11.2.0)
 project(nowide VERSION ${_version} LANGUAGES CXX)
 
 if(POLICY CMP0074)
