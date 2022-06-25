@@ -12,6 +12,7 @@
 #include <boost/nowide/config.hpp>
 #if BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
 #include <boost/nowide/cstdio.hpp>
+#include <boost/nowide/detail/is_path.hpp>
 #include <boost/nowide/stackstring.hpp>
 #include <cassert>
 #include <cstdio>
@@ -160,6 +161,11 @@ namespace nowide {
             mode_ = mode;
             set_unbuffered_read();
             return this;
+        }
+        template<typename Path>
+        detail::enable_if_path_t<Path, basic_filebuf*> open(const Path& file_name, std::ios_base::openmode mode)
+        {
+            return open(file_name.c_str(), mode);
         }
         ///
         /// Same as std::filebuf::close()
