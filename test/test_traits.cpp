@@ -8,6 +8,7 @@
 
 #include <nowide/detail/is_path.hpp>
 #include <nowide/detail/is_string_container.hpp>
+#include <nowide/fstream.hpp>
 #include "test.hpp"
 #include <iostream>
 #include <string>
@@ -28,6 +29,11 @@
 #include <filesystem>
 #define NOWIDE_TEST_STD_PATH
 #endif
+#if defined(__cpp_lib_experimental_filesystem)
+#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
+#include <experimental/filesystem>
+#define NOWIDE_TEST_STD_EXPERIMENTAL_PATH
+#endif
 
 #ifdef NOWIDE_TEST_BFS_PATH
 #if defined(__GNUC__) && __GNUC__ >= 7
@@ -38,6 +44,17 @@
 #endif
 #include <nowide/filesystem/path.hpp>
 #endif
+
+template<class T_Class, class T_Arg, typename = void>
+struct has_open : std::false_type
+{};
+using nowide::detail::void_t;
+template<class T_Class, class T_Arg>
+struct has_open<T_Class,
+                T_Arg,
+                void_t<decltype(std::declval<T_Class>().open(std::declval<T_Arg>(), std::ios_base::openmode{}))>>
+    : std::true_type
+{};
 
 using nowide::detail::is_string_container;
 static_assert(is_string_container<std::string, true>::value, "!");
@@ -65,10 +82,65 @@ void test_main(int, char**, char**)
 #endif
 #ifdef NOWIDE_TEST_STD_PATH
     std::cout << "Testing std::filesystem::path" << std::endl;
-    static_assert(nowide::detail::is_path<std::filesystem::path>::value, "!");
+    using fs_path = std::filesystem::path;
+    static_assert(nowide::detail::is_path<fs_path>::value, "!");
+#if NOWIDE_USE_FILEBUF_REPLACEMENT
+    static_assert(has_open<nowide::filebuf, fs_path>::value, "!");
+#endif
+    static_assert(has_open<nowide::ifstream, fs_path>::value, "!");
+    static_assert(has_open<nowide::ofstream, fs_path>::value, "!");
+    static_assert(has_open<nowide::fstream, fs_path>::value, "!");
+    static_assert(std::is_constructible<nowide::ifstream, fs_path>::value, "!");
+    static_assert(std::is_constructible<nowide::ofstream, fs_path>::value, "!");
+    static_assert(std::is_constructible<nowide::fstream, fs_path>::value, "!");
+    static_assert(has_open<nowide::filebuf, const fs_path::value_type*>::value, "!");
+    static_assert(has_open<nowide::ifstream, const fs_path::value_type*>::value, "!");
+    static_assert(has_open<nowide::ofstream, const fs_path::value_type*>::value, "!");
+    static_assert(has_open<nowide::fstream, const fs_path::value_type*>::value, "!");
+    static_assert(std::is_constructible<nowide::ifstream, const fs_path::value_type*>::value, "!");
+    static_assert(std::is_constructible<nowide::ofstream, const fs_path::value_type*>::value, "!");
+    static_assert(std::is_constructible<nowide::fstream, const fs_path::value_type*>::value, "!");
+#endif
+#ifdef NOWIDE_TEST_STD_EXPERIMENTAL_PATH
+    std::cout << "Testing std::experimental::filesystem::path" << std::endl;
+    using exfs_path = std::experimental::filesystem::path;
+    static_assert(nowide::detail::is_path<exfs_path>::value, "!");
+#if NOWIDE_USE_FILEBUF_REPLACEMENT
+    static_assert(has_open<nowide::filebuf, exfs_path>::value, "!");
+#endif
+    static_assert(has_open<nowide::ifstream, exfs_path>::value, "!");
+    static_assert(has_open<nowide::ofstream, exfs_path>::value, "!");
+    static_assert(has_open<nowide::fstream, exfs_path>::value, "!");
+    static_assert(std::is_constructible<nowide::ifstream, exfs_path>::value, "!");
+    static_assert(std::is_constructible<nowide::ofstream, exfs_path>::value, "!");
+    static_assert(std::is_constructible<nowide::fstream, exfs_path>::value, "!");
+    static_assert(has_open<nowide::filebuf, const exfs_path::value_type*>::value, "!");
+    static_assert(has_open<nowide::ifstream, const exfs_path::value_type*>::value, "!");
+    static_assert(has_open<nowide::ofstream, const exfs_path::value_type*>::value, "!");
+    static_assert(has_open<nowide::fstream, const exfs_path::value_type*>::value, "!");
+    static_assert(std::is_constructible<nowide::ifstream, const exfs_path::value_type*>::value, "!");
+    static_assert(std::is_constructible<nowide::ofstream, const exfs_path::value_type*>::value, "!");
+    static_assert(std::is_constructible<nowide::fstream, const exfs_path::value_type*>::value, "!");
 #endif
 #ifdef NOWIDE_TEST_BFS_PATH
     std::cout << "Testing nowide::filesystem::path" << std::endl;
-    static_assert(nowide::detail::is_path<nowide::filesystem::path>::value, "!");
+    using bfs_path = nowide::filesystem::path;
+    static_assert(nowide::detail::is_path<bfs_path>::value, "!");
+#if NOWIDE_USE_FILEBUF_REPLACEMENT
+    static_assert(has_open<nowide::filebuf, bfs_path>::value, "!");
+#endif
+    static_assert(has_open<nowide::ifstream, bfs_path>::value, "!");
+    static_assert(has_open<nowide::ofstream, bfs_path>::value, "!");
+    static_assert(has_open<nowide::fstream, bfs_path>::value, "!");
+    static_assert(std::is_constructible<nowide::ifstream, bfs_path>::value, "!");
+    static_assert(std::is_constructible<nowide::ofstream, bfs_path>::value, "!");
+    static_assert(std::is_constructible<nowide::fstream, bfs_path>::value, "!");
+    static_assert(has_open<nowide::filebuf, const bfs_path::value_type*>::value, "!");
+    static_assert(has_open<nowide::ifstream, const bfs_path::value_type*>::value, "!");
+    static_assert(has_open<nowide::ofstream, const bfs_path::value_type*>::value, "!");
+    static_assert(has_open<nowide::fstream, const bfs_path::value_type*>::value, "!");
+    static_assert(std::is_constructible<nowide::ifstream, const bfs_path::value_type*>::value, "!");
+    static_assert(std::is_constructible<nowide::ofstream, const bfs_path::value_type*>::value, "!");
+    static_assert(std::is_constructible<nowide::fstream, const bfs_path::value_type*>::value, "!");
 #endif
 }
