@@ -202,7 +202,7 @@ void test_reopen(const std::string& filename)
     TEST_EQ(read_file(filename3, data_type::binary), testData3);
 }
 
-// coverity [root_function]
+// coverity[root_function]
 void test_main(int, char** argv, char**)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";

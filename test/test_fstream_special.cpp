@@ -29,6 +29,8 @@ void test_with_different_buffer_sizes(const char* filepath)
     */
     for(int i = -1; i < 16; i++)
     {
+        remove_file_at_exit _(filepath);
+
         std::cout << "Buffer size = " << i << std::endl;
         char buf[16];
         nw::fstream f;
@@ -37,16 +39,12 @@ void test_with_different_buffer_sizes(const char* filepath)
             f.rdbuf()->pubsetbuf((i == 0) ? nullptr : buf, i);
         f.open(filepath, std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
         TEST(f);
-        remove_file_at_exit _(filepath);
 
         // Add 'abcdefg'
         TEST(f.put('a'));
         TEST(f.put('b'));
         TEST(f.put('c'));
-        TEST(f.put('d'));
-        TEST(f.put('e'));
-        TEST(f.put('f'));
-        TEST(f.put('g'));
+        TEST(f.write("defg", 4));
         // Read first char
         TEST(f.seekg(0));
         TEST_EQ(f.get(), 'a');
@@ -86,18 +84,25 @@ void test_with_different_buffer_sizes(const char* filepath)
         TEST_EQ(f.get(), 'e');
 
         // Putback after flush is implementation defined
-        // Boost.Nowide: Works
-#if BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
         TEST(f << std::flush);
-        TEST(f.putback('e'));
-        TEST(f.putback('d'));
-        TEST_EQ(f.get(), 'd');
-        TEST_EQ(f.get(), 'e');
+        if(f.putback('e'))
+        {
+            if(f.putback('d'))
+                TEST_EQ(f.get(), 'd');
+            else
+                f.clear(); // LCOV_EXCL_LINE
+            TEST_EQ(f.get(), 'e');
+        } else
+            f.clear();
         TEST(f << std::flush);
-        TEST(f.unget());
-        TEST_EQ(f.get(), 'e');
-#endif
+        if(f.unget())
+            TEST_EQ(f.get(), 'e');
+        else
+            f.clear();
+
         // Put back different char
+        TEST(f.seekg(-1, std::ios::cur));
+        TEST_EQ(f.get(), 'e');
         TEST(f.putback('x'));
         TEST_EQ(f.get(), 'x');
         // Rest of sequence
@@ -112,11 +117,15 @@ void test_with_different_buffer_sizes(const char* filepath)
         TEST(f.putback('B'));
         // Putting back multiple chars is not possible on all implementations after a seek/flush
 #if BOOST_NOWIDE_USE_FILEBUF_REPLACEMENT
-        TEST(f.putback('a'));
-        TEST(!f.putback('x')); // At beginning of file -> No putback possible
-        // Get characters that were putback to avoid MSVC bug https://github.com/microsoft/STL/issues/342
-        f.clear();
-        TEST_EQ(f.get(), 'a');
+        if(f.putback('a'))
+        {
+            // At beginning of file -> No putback possible
+            TEST(!f.putback('x')); // LCOV_EXCL_LINE
+            f.clear();             // LCOV_EXCL_LINE
+            // Get characters that were putback to avoid MSVC bug https://github.com/microsoft/STL/issues/342
+            TEST_EQ(f.get(), 'a'); // LCOV_EXCL_LINE
+        } else
+            f.clear();
 #endif
         TEST_EQ(f.get(), 'B');
         f.close();
@@ -257,7 +266,7 @@ void testPutback(const char* filename)
     }
 }
 
-// coverity [root_function]
+// coverity[root_function]
 void test_main(int, char** argv, char**)
 {
     const std::string exampleFilename = std::string(argv[0]) + "-\xd7\xa9-\xd0\xbc-\xce\xbd.txt";

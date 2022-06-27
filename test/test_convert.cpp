@@ -127,7 +127,7 @@ std::string narrow_string_view(const std::wstring& s)
 }
 #endif
 
-// coverity [root_function]
+// coverity[root_function]
 void test_main(int, char**, char**)
 {
     std::string hello = "\xd7\xa9\xd7\x9c\xd7\x95\xd7\x9d";
