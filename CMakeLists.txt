@@ -1,6 +1,6 @@
 # Copyright 2019 - 2020 Alexander Grund
 # Distributed under the Nowide Software License, Version 1.0.
-# (See accompanying file LICENSE or copy at http://boost.org/LICENSE_1_0.txt)
+# https://www.boost.org/LICENSE_1_0.txt
 
 # Builds the libraries for Nowide.Nowide
 #
