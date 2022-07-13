@@ -1,8 +1,9 @@
 # Copyright 2016, 2017 Peter Dimov
 # Copyright 2017 - 2019 James E. King III
 # Copyright 2019 - 2022 Alexander Grund
+#
 # Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE or copy at http://boost.org/LICENSE_1_0.txt)
+# https://www.boost.org/LICENSE_1_0.txt
 
 version: 1.0.{build}-{branch}
 
@@ -27,7 +28,7 @@ environment:
   global:
     B2_CI_VERSION: 1
     GIT_FETCH_JOBS: 4
-    # see: http://www.boost.org/build/doc/html/bbv2/overview/invocation.html#bbv2.overview.invocation.properties
+    # see: https://www.boost.org/build/doc/html/bbv2/overview/invocation.html#bbv2.overview.invocation.properties
     # to use the default for a given environment, comment it out; recommend you build debug and release however:
     # on Windows it is important to exercise all the possibilities, especially shared vs static, however most
     # libraries that care about this exercise it in their Jamfiles...

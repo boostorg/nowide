@@ -1,6 +1,6 @@
 # Copyright 2019 - 2021 Alexander Grund
 # Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE or copy at http://boost.org/LICENSE_1_0.txt)
+# https://www.boost.org/LICENSE_1_0.txt
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag(-Wsuggest-override _BOOST_NOWIDE_SUGGEST_OVERRIDE_SUPPORTED)
