@@ -1,9 +1,8 @@
-//  Copyright (c) 2015 Artyom Beilis (Tonkikh)
-//  Copyright (c) 2019-2021 Alexander Grund
+// Copyright (c) 2015 Artyom Beilis (Tonkikh)
+// Copyright (c) 2019-2021 Alexander Grund
 //
-//  Distributed under the Boost Software License, Version 1.0.
-//  (See accompanying file LICENSE or copy at
-//  http://www.boost.org/LICENSE_1_0.txt)
+// Distributed under the Boost Software License, Version 1.0.
+// https://www.boost.org/LICENSE_1_0.txt
 
 #include <boost/nowide/fstream.hpp>
 
@@ -223,6 +222,7 @@ void test_swap(const char* filename, const char* filename2)
     {
         const int curChar1 = f1.peek();
         const int curChar2 = f2.peek();
+        TEST_CONTEXT("ctr " << ctr << ": c1=" << curChar1 << " c2=" << curChar2);
         // Randomly do a no-op seek of either or both streams to flush internal buffer
         if(ctr % 10 == 0)
             TEST(f1.seekg(f1.tellg()));
@@ -235,9 +235,9 @@ void test_swap(const char* filename, const char* filename2)
             TEST(f1.seekg(f1.tellg()));
         else if(ctr % 15 == 4)
             TEST(f2.seekg(f2.tellg()));
-        TEST_EQ(f1.get(), char(curChar2));
+        TEST_EQ(f1.get(), curChar2);
         f1.swap(f2);
-        TEST_EQ(f1.get(), char(curChar1));
+        TEST_EQ(f1.get(), curChar1);
         ++ctr;
     }
 }
