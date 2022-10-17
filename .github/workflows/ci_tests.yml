@@ -31,17 +31,17 @@ jobs:
         shell: bash
     strategy:
       matrix:
-        os: [ubuntu-18.04, windows-2019]
+        os: [ubuntu-22.04, windows-2019]
         buildType: [Debug, Release]
         standalone: [Boost, Standalone]
         shared_lib: [ON, OFF]
         generator: ['Visual Studio 16 2019', 'MinGW Makefiles', 'Unix Makefiles']
         exclude:
-          - os: ubuntu-18.04
+          - os: ubuntu-22.04
             generator: MinGW Makefiles
-          - os: ubuntu-18.04
+          - os: ubuntu-22.04
             generator: Visual Studio 16 2019
-          - os: ubuntu-18.04
+          - os: ubuntu-22.04
             buildType: Debug
     runs-on: ${{matrix.os}}
     env:
