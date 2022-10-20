@@ -47,13 +47,13 @@ jobs:
           - { compiler: gcc-4.4,   cxxstd: '98,0x',          os: ubuntu-20.04, container: 'ubuntu:16.04' }
           - { compiler: gcc-4.6,   cxxstd: '03,0x',          os: ubuntu-20.04, container: 'ubuntu:16.04' }
           - { compiler: gcc-4.7,   cxxstd: '03,11',          os: ubuntu-20.04, container: 'ubuntu:16.04' }
-          - { compiler: gcc-4.8,   cxxstd: '03,11',          os: ubuntu-18.04 }
+          - { compiler: gcc-4.8,   cxxstd: '03,11',          os: ubuntu-22.04, container: 'ubuntu:18.04' }
           - { compiler: gcc-4.9,   cxxstd: '03,11',          os: ubuntu-20.04, container: 'ubuntu:16.04' }
-          - { compiler: gcc-5,     cxxstd: '03,11,14,1z',    os: ubuntu-18.04 }
-          - { compiler: gcc-6,     cxxstd: '03,11,14,17',    os: ubuntu-18.04 }
-          - { compiler: gcc-7,     cxxstd: '03,11,14,17',    os: ubuntu-18.04 }
-          - { compiler: gcc-8,     cxxstd: '03,11,14,17,2a', os: ubuntu-18.04 }
-          - { compiler: gcc-9,     cxxstd: '03,11,14,17,2a', os: ubuntu-18.04 }
+          - { compiler: gcc-5,     cxxstd: '03,11,14,1z',    os: ubuntu-22.04, container: 'ubuntu:18.04' }
+          - { compiler: gcc-6,     cxxstd: '03,11,14,17',    os: ubuntu-22.04, container: 'ubuntu:18.04' }
+          - { compiler: gcc-7,     cxxstd: '03,11,14,17',    os: ubuntu-22.04, container: 'ubuntu:18.04' }
+          - { compiler: gcc-8,     cxxstd: '03,11,14,17,2a', os: ubuntu-22.04, container: 'ubuntu:18.04' }
+          - { compiler: gcc-9,     cxxstd: '03,11,14,17,2a', os: ubuntu-22.04, container: 'ubuntu:18.04' }
           - { compiler: gcc-10,    cxxstd: '03,11,14,17,20', os: ubuntu-20.04 }
           - { compiler: gcc-11,    cxxstd: '03,11,14,17,20', os: ubuntu-20.04 }
           - { compiler: gcc-12,    cxxstd: '03,11,14,17,20', os: ubuntu-22.04 }
@@ -67,13 +67,13 @@ jobs:
           - { compiler: clang-3.6, cxxstd: '03,11,14',       os: ubuntu-20.04, container: 'ubuntu:16.04' }
           - { compiler: clang-3.7, cxxstd: '03,11,14',       os: ubuntu-20.04, container: 'ubuntu:16.04' }
           - { compiler: clang-3.8, cxxstd: '03,11,14',       os: ubuntu-20.04, container: 'ubuntu:16.04' }
-          - { compiler: clang-3.9, cxxstd: '03,11,14',       os: ubuntu-18.04 }
-          - { compiler: clang-4.0, cxxstd: '03,11,14',       os: ubuntu-18.04 }
-          - { compiler: clang-5.0, cxxstd: '03,11,14,1z',    os: ubuntu-18.04 }
-          - { compiler: clang-6.0, cxxstd: '03,11,14,17',    os: ubuntu-18.04 }
-          - { compiler: clang-7,   cxxstd: '03,11,14,17',    os: ubuntu-18.04 }
+          - { compiler: clang-3.9, cxxstd: '03,11,14',       os: ubuntu-22.04, container: 'ubuntu:18.04' }
+          - { compiler: clang-4.0, cxxstd: '03,11,14',       os: ubuntu-22.04, container: 'ubuntu:18.04' }
+          - { compiler: clang-5.0, cxxstd: '03,11,14,1z',    os: ubuntu-22.04, container: 'ubuntu:18.04' }
+          - { compiler: clang-6.0, cxxstd: '03,11,14,17',    os: ubuntu-22.04, container: 'ubuntu:18.04' }
+          - { compiler: clang-7,   cxxstd: '03,11,14,17',    os: ubuntu-22.04, container: 'ubuntu:18.04' }
           # Note: clang-8 does not fully support C++20, so it is not compatible with some libstdc++ versions in this mode
-          - { compiler: clang-8,   cxxstd: '03,11,14,17,2a', os: ubuntu-18.04, install: 'clang-8 g++-7', gcc_toolchain: 7 }
+          - { compiler: clang-8,   cxxstd: '03,11,14,17,2a', os: ubuntu-22.04, container: 'ubuntu:18.04', install: 'clang-8 g++-7', gcc_toolchain: 7 }
           - { compiler: clang-9,   cxxstd: '03,11,14,17,2a', os: ubuntu-20.04 }
           - { compiler: clang-10,  cxxstd: '03,11,14,17,20', os: ubuntu-20.04 }
           - { compiler: clang-11,  cxxstd: '03,11,14,17,20', os: ubuntu-20.04 }
@@ -82,7 +82,7 @@ jobs:
           - { compiler: clang-14,  cxxstd: '03,11,14,17,20', os: ubuntu-22.04 }
 
           # libc++
-          - { compiler: clang-6.0, cxxstd: '03,11,14',       os: ubuntu-18.04, stdlib: libc++, install: 'clang-6.0 libc++-dev libc++abi-dev' }
+          - { compiler: clang-6.0, cxxstd: '03,11,14',       os: ubuntu-22.04, container: 'ubuntu:18.04', stdlib: libc++, install: 'clang-6.0 libc++-dev libc++abi-dev' }
           - { compiler: clang-12,  cxxstd: '03,11,14,17,20', os: ubuntu-20.04, stdlib: libc++, install: 'clang-12 libc++-12-dev libc++abi-12-dev' }
           - { name: Clang w/ sanitizers, sanitize: yes,
               compiler: clang-14,  cxxstd: '03,11,14,17,20', os: ubuntu-22.04, stdlib: libc++, install: 'clang-14 libc++-14-dev libc++abi-14-dev' }
@@ -155,7 +155,8 @@ jobs:
             SOURCES+=(ppa:ubuntu-toolchain-r/test)
             for key in "${SOURCE_KEYS[@]}"; do
                 for i in {1..$NET_RETRY_COUNT}; do
-                    wget -O - "$key" | sudo apt-key add - && break || sleep 10
+                    keyfilename=$(basename -s .key $key)
+                    curl -sSL --retry ${NET_RETRY_COUNT:-5} "$key" | sudo gpg --dearmor > /etc/apt/trusted.gpg.d/${keyfilename} && break || sleep 10
                 done
             done
             for source in "${SOURCES[@]}"; do
@@ -177,6 +178,9 @@ jobs:
         run: |
             GCC_TOOLCHAIN_ROOT="$HOME/gcc-toolchain"
             echo "GCC_TOOLCHAIN_ROOT=$GCC_TOOLCHAIN_ROOT" >> $GITHUB_ENV
+            if ! command -v dpkg-architecture; then
+                apt-get install -y dpkg-dev
+            fi
             MULTIARCH_TRIPLET="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
             mkdir -p "$GCC_TOOLCHAIN_ROOT"
             ln -s /usr/include "$GCC_TOOLCHAIN_ROOT/include"
