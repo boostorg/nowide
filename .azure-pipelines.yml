@@ -5,21 +5,6 @@
 # Distributed under the Boost Software License, Version 1.0.
 # https://www.boost.org/LICENSE_1_0.txt
 
-#
-# Generic Azure Pipelines build script for boostorg repositories
-# See: https://github.com/boostorg/boost-ci/
-#
-# Instructions for customizing this script for your library:
-#
-# 1. Customize the compilers and language levels you want.
-# 2. If you have more than include/, src/, test/, example/, examples/,
-#    benchmark/ or tools/ directories, set the environment variable DEPINST.
-#    For example if your build uses code in "bench/" and "fog/" directories:
-#      - DEPINST: --include bench --include fog
-# 3. Enable pull request builds in your boostorg/<library> account.
-#
-# That's it - the script will do everything else for you.
-
 trigger:
   branches:
     include:
@@ -44,44 +29,42 @@ parameters:
   - name: jobs
     type: object
     default:
-      - { compiler: gcc-4.8,   cxxstd: '11',       os: ubuntu-18.04 }
-      - { compiler: gcc-4.9,   cxxstd: '11',       os: ubuntu-18.04, container: 'ubuntu:16.04' }
-      - { compiler: gcc-5,     cxxstd: '11',       os: ubuntu-18.04 }
-      - { compiler: gcc-6,     cxxstd: '11,14',    os: ubuntu-18.04 }
-      - { compiler: gcc-7,     cxxstd: '11,14,17', os: ubuntu-18.04 }
+      - { compiler: gcc-4.8,   cxxstd: '11',       os: ubuntu-20.04, container: 'ubuntu:16.04' }
+      - { compiler: gcc-4.9,   cxxstd: '11',       os: ubuntu-20.04, container: 'ubuntu:16.04' }
+      - { compiler: gcc-5,     cxxstd: '11',       os: ubuntu-20.04, container: 'ubuntu:18.04' }
+      - { compiler: gcc-6,     cxxstd: '11,14',    os: ubuntu-20.04, container: 'ubuntu:18.04' }
+      - { compiler: gcc-7,     cxxstd: '11,14,17', os: ubuntu-20.04 }
       - { compiler: gcc-8,     cxxstd: '14,17,2a', os: ubuntu-20.04 }
       - { compiler: gcc-9,     cxxstd: '14,17,2a', os: ubuntu-20.04 }
       - { compiler: gcc-10,    cxxstd: '14,17,20', os: ubuntu-20.04 }
       - { compiler: gcc-11,    cxxstd: '14,17,20', os: ubuntu-20.04 }
-      - { compiler: clang-3.5, cxxstd: '11',       os: ubuntu-18.04, container: 'ubuntu:16.04' }
-      - { compiler: clang-3.6, cxxstd: '11',       os: ubuntu-18.04, container: 'ubuntu:16.04' }
-      - { compiler: clang-3.7, cxxstd: '11',       os: ubuntu-18.04, container: 'ubuntu:16.04' }
-      - { compiler: clang-3.8, cxxstd: '11,14',    os: ubuntu-18.04, container: 'ubuntu:16.04' }
-      - { compiler: clang-3.9, cxxstd: '11,14',    os: ubuntu-18.04 }
-      - { compiler: clang-4.0, cxxstd: '11,14',    os: ubuntu-18.04 }
-      - { compiler: clang-5.0, cxxstd: '11,14,17', os: ubuntu-18.04 }
-      - { compiler: clang-6.0, cxxstd: '11,14,17', os: ubuntu-18.04, install: 'clang-6.0 libc6-dbg libc++-dev libc++abi-dev libstdc++-8-dev' }
-      - { compiler: clang-7,   cxxstd: '14,17',    os: ubuntu-18.04, install: 'clang-7 libc6-dbg libc++-dev libstdc++-8-dev' }
-      - { compiler: clang-8,   cxxstd: '14,17',    os: ubuntu-18.04, install: 'clang-8 libc6-dbg libc++-dev libstdc++-8-dev' }
+      - { compiler: clang-3.5, cxxstd: '11',       os: ubuntu-20.04, container: 'ubuntu:16.04' }
+      - { compiler: clang-3.6, cxxstd: '11',       os: ubuntu-20.04, container: 'ubuntu:16.04' }
+      - { compiler: clang-3.7, cxxstd: '11',       os: ubuntu-20.04, container: 'ubuntu:16.04' }
+      - { compiler: clang-3.8, cxxstd: '11,14',    os: ubuntu-20.04, container: 'ubuntu:16.04' }
+      - { compiler: clang-3.9, cxxstd: '11,14',    os: ubuntu-20.04, container: 'ubuntu:16.04' }
+      - { compiler: clang-4.0, cxxstd: '11,14',    os: ubuntu-20.04, container: 'ubuntu:16.04' }
+      - { compiler: clang-5.0, cxxstd: '11,14,17', os: ubuntu-20.04, container: 'ubuntu:16.04' }
+      - { compiler: clang-6.0, cxxstd: '11,14,17', os: ubuntu-20.04 }
+      - { compiler: clang-7,   cxxstd: '14,17',    os: ubuntu-20.04 }
+      - { compiler: clang-8,   cxxstd: '14,17',    os: ubuntu-20.04 }
       - { compiler: clang-9,   cxxstd: '14,17,2a', os: ubuntu-20.04 }
       - { compiler: clang-10,  cxxstd: '14,17,20', os: ubuntu-20.04 }
-      - { compiler: clang-11,  cxxstd: '14,17,20', os: ubuntu-20.04 }
-      - { compiler: clang-12,  cxxstd: '14,17,20', os: ubuntu-20.04 }
+      - { compiler: clang-11,  cxxstd: '14,17,20', os: ubuntu-22.04 }
+      - { compiler: clang-12,  cxxstd: '14,17,20', os: ubuntu-22.04 }
       - { name: Linux_clang_6_libcxx,
-          compiler: clang-6.0, cxxstd: '11,14,17', os: ubuntu-18.04, install: 'clang-6.0 libc6-dbg libc++-dev libc++abi-dev libstdc++-8-dev', env: {B2_STDLIB: libc++ } }
+          compiler: clang-6.0, cxxstd: '11,14,17', os: ubuntu-20.04, container: 'ubuntu:18.04', install: 'clang-6.0 libc++-dev libc++abi-dev', env: {B2_STDLIB: libc++ } }
       # OSX
-      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 11.2.1 }
-      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 11.3 }
-      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 11.3.1 }
-      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 11.4.1 }
-      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 11.5 }
-      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 11.6 }
-      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 11.7 }
-      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 12.0.1 }
-      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 12.1.1 }
-      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 12.2 }
-      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 12.3 }
-      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-10.15, xcode: 12.4 }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-11, xcode: '11.7' }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-11, xcode: '12.4' }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-11, xcode: '12.5.1' }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-11, xcode: '13.0' }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-12, xcode: '13.1' }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-12, xcode: '13.2.1' }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-12, xcode: '13.3.1' }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-12, xcode: '13.4' }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-12, xcode: '13.4.1' }
+      - { compiler: clang, cxxstd: '14,17,2a',    os: macOS-12, xcode: '14.0.1' }
 
 stages:
   - stage: Test

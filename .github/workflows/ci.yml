@@ -44,16 +44,16 @@ jobs:
       matrix:
         include:
           # Linux, gcc
-          - { compiler: gcc-4.4,   cxxstd: '98,0x',          os: ubuntu-20.04, container: 'ubuntu:16.04' }
-          - { compiler: gcc-4.6,   cxxstd: '03,0x',          os: ubuntu-20.04, container: 'ubuntu:16.04' }
-          - { compiler: gcc-4.7,   cxxstd: '03,11',          os: ubuntu-20.04, container: 'ubuntu:16.04' }
-          - { compiler: gcc-4.8,   cxxstd: '03,11',          os: ubuntu-22.04, container: 'ubuntu:18.04' }
-          - { compiler: gcc-4.9,   cxxstd: '03,11',          os: ubuntu-20.04, container: 'ubuntu:16.04' }
+          - { compiler: gcc-4.4,   cxxstd: '98,0x',          os: ubuntu-22.04, container: 'ubuntu:16.04' }
+          - { compiler: gcc-4.6,   cxxstd: '03,0x',          os: ubuntu-22.04, container: 'ubuntu:16.04' }
+          - { compiler: gcc-4.7,   cxxstd: '03,11',          os: ubuntu-22.04, container: 'ubuntu:16.04' }
+          - { compiler: gcc-4.8,   cxxstd: '03,11',          os: ubuntu-22.04, container: 'ubuntu:16.04' }
+          - { compiler: gcc-4.9,   cxxstd: '03,11',          os: ubuntu-22.04, container: 'ubuntu:16.04' }
           - { compiler: gcc-5,     cxxstd: '03,11,14,1z',    os: ubuntu-22.04, container: 'ubuntu:18.04' }
           - { compiler: gcc-6,     cxxstd: '03,11,14,17',    os: ubuntu-22.04, container: 'ubuntu:18.04' }
-          - { compiler: gcc-7,     cxxstd: '03,11,14,17',    os: ubuntu-22.04, container: 'ubuntu:18.04' }
-          - { compiler: gcc-8,     cxxstd: '03,11,14,17,2a', os: ubuntu-22.04, container: 'ubuntu:18.04' }
-          - { compiler: gcc-9,     cxxstd: '03,11,14,17,2a', os: ubuntu-22.04, container: 'ubuntu:18.04' }
+          - { compiler: gcc-7,     cxxstd: '03,11,14,17',    os: ubuntu-20.04 }
+          - { compiler: gcc-8,     cxxstd: '03,11,14,17,2a', os: ubuntu-20.04 }
+          - { compiler: gcc-9,     cxxstd: '03,11,14,17,2a', os: ubuntu-20.04 }
           - { compiler: gcc-10,    cxxstd: '03,11,14,17,20', os: ubuntu-20.04 }
           - { compiler: gcc-11,    cxxstd: '03,11,14,17,20', os: ubuntu-20.04 }
           - { compiler: gcc-12,    cxxstd: '03,11,14,17,20', os: ubuntu-22.04 }
@@ -63,10 +63,10 @@ jobs:
               compiler: gcc-8,     cxxstd: '03,11,14,17,2a', os: ubuntu-20.04, install: 'g++-8-multilib', address-model: '32,64' }
 
           # Linux, clang
-          - { compiler: clang-3.5, cxxstd: '03,11',          os: ubuntu-20.04, container: 'ubuntu:16.04' }
-          - { compiler: clang-3.6, cxxstd: '03,11,14',       os: ubuntu-20.04, container: 'ubuntu:16.04' }
-          - { compiler: clang-3.7, cxxstd: '03,11,14',       os: ubuntu-20.04, container: 'ubuntu:16.04' }
-          - { compiler: clang-3.8, cxxstd: '03,11,14',       os: ubuntu-20.04, container: 'ubuntu:16.04' }
+          - { compiler: clang-3.5, cxxstd: '03,11',          os: ubuntu-22.04, container: 'ubuntu:16.04' }
+          - { compiler: clang-3.6, cxxstd: '03,11,14',       os: ubuntu-22.04, container: 'ubuntu:16.04' }
+          - { compiler: clang-3.7, cxxstd: '03,11,14',       os: ubuntu-22.04, container: 'ubuntu:16.04' }
+          - { compiler: clang-3.8, cxxstd: '03,11,14',       os: ubuntu-22.04, container: 'ubuntu:16.04' }
           - { compiler: clang-3.9, cxxstd: '03,11,14',       os: ubuntu-22.04, container: 'ubuntu:18.04' }
           - { compiler: clang-4.0, cxxstd: '03,11,14',       os: ubuntu-22.04, container: 'ubuntu:18.04' }
           - { compiler: clang-5.0, cxxstd: '03,11,14,1z',    os: ubuntu-22.04, container: 'ubuntu:18.04' }
@@ -88,7 +88,7 @@ jobs:
               compiler: clang-14,  cxxstd: '03,11,14,17,20', os: ubuntu-22.04, stdlib: libc++, install: 'clang-14 libc++-14-dev libc++abi-14-dev' }
 
           # OSX, clang
-          - { compiler: clang,     cxxstd: '03,11,14,17,2a', os: macos-10.15, sanitize: yes }
+          - { compiler: clang,     cxxstd: '03,11,14,17,2a', os: macos-11, sanitize: yes }
 
     timeout-minutes: 120
     runs-on: ${{matrix.os}}
