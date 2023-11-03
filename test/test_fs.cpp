@@ -13,8 +13,10 @@
 #include <boost/nowide/convert.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/nowide/fstream.hpp>
-#include <boost/nowide/quoted.hpp>
 #include <boost/nowide/utf/convert.hpp>
+#if defined(__cpp_lib_quoted_string_io) && __cpp_lib_quoted_string_io >= 201304
+#include <boost/nowide/quoted.hpp>
+#endif
 #include "test.hpp"
 #include <iomanip>
 #include <sstream>
