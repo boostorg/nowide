@@ -94,6 +94,8 @@ stages:
               XCODE_APP: /Applications/Xcode_${{ item.xcode }}.app
             ${{ if item.install }}:
               PACKAGES: ${{ item.install }}
+            ${{ if item.gcc_toolchain }}:
+              GCC_TOOLCHAIN: ${{ item.gcc_toolchain }}
             ${{ each var in item.env }}:
               ${{var.Key}}: ${{var.Value}}
           steps:
