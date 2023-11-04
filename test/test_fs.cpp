@@ -14,11 +14,14 @@
 #include <boost/nowide/cstdio.hpp>
 #include <boost/nowide/fstream.hpp>
 #include <boost/nowide/utf/convert.hpp>
+#include "test.hpp"
+
+#include <iomanip> // Required for feature macro check below
+// Conditional include to avoid warning/message
 #if defined(__cpp_lib_quoted_string_io) && __cpp_lib_quoted_string_io >= 201304
 #include <boost/nowide/quoted.hpp>
 #endif
-#include "test.hpp"
-#include <iomanip>
+
 #include <sstream>
 #include <type_traits>
 #if defined(_MSC_VER)
