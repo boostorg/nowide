@@ -50,8 +50,8 @@ parameters:
       - { compiler: clang-8,   cxxstd: '14,17',    os: ubuntu-20.04 }
       - { compiler: clang-9,   cxxstd: '14,17,2a', os: ubuntu-20.04 }
       - { compiler: clang-10,  cxxstd: '14,17,20', os: ubuntu-20.04 }
-      - { compiler: clang-11,  cxxstd: '14,17,20', os: ubuntu-22.04 }
-      - { compiler: clang-12,  cxxstd: '14,17,20', os: ubuntu-22.04 }
+      - { compiler: clang-11,  cxxstd: '14,17,20', os: ubuntu-20.04 }
+      - { compiler: clang-14,  cxxstd: '14,17,20', os: ubuntu-22.04, gcc_toolchain: 12 }
       - { name: Linux_clang_6_libcxx,
           compiler: clang-6.0, cxxstd: '11,14,17', os: ubuntu-20.04, container: 'ubuntu:18.04', install: 'clang-6.0 libc++-dev libc++abi-dev', env: {B2_STDLIB: libc++ } }
       # OSX
@@ -94,6 +94,8 @@ stages:
               XCODE_APP: /Applications/Xcode_${{ item.xcode }}.app
             ${{ if item.install }}:
               PACKAGES: ${{ item.install }}
+            ${{ if item.gcc_toolchain }}:
+              GCC_TOOLCHAIN: ${{ item.gcc_toolchain }}
             ${{ each var in item.env }}:
               ${{var.Key}}: ${{var.Value}}
           steps:

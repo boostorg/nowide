@@ -78,8 +78,9 @@ jobs:
           - { compiler: clang-10,  cxxstd: '03,11,14,17,20', os: ubuntu-20.04 }
           - { compiler: clang-11,  cxxstd: '03,11,14,17,20', os: ubuntu-20.04 }
           - { compiler: clang-12,  cxxstd: '03,11,14,17,20', os: ubuntu-20.04 }
-          - { compiler: clang-13,  cxxstd: '03,11,14,17,20', os: ubuntu-22.04 }
-          - { compiler: clang-14,  cxxstd: '03,11,14,17,20', os: ubuntu-22.04 }
+          # Clang isn't compatible with libstdc++-13, so use the slightly older one
+          - { compiler: clang-13,  cxxstd: '03,11,14,17,20', os: ubuntu-22.04, install: 'clang-13 g++-12', gcc_toolchain: 12 }
+          - { compiler: clang-14,  cxxstd: '03,11,14,17,20', os: ubuntu-22.04, install: 'clang-14 g++-12', gcc_toolchain: 12 }
 
           # libc++
           - { compiler: clang-6.0, cxxstd: '03,11,14',       os: ubuntu-22.04, container: 'ubuntu:18.04', stdlib: libc++, install: 'clang-6.0 libc++-dev libc++abi-dev' }
@@ -104,9 +105,9 @@ jobs:
             fi
             if [ -n "${{matrix.container}}" ] && [ -f "/etc/debian_version" ]; then
                 apt-get -o Acquire::Retries=$NET_RETRY_COUNT update
-                apt-get -o Acquire::Retries=$NET_RETRY_COUNT install -y sudo software-properties-common
+                apt-get -o Acquire::Retries=$NET_RETRY_COUNT install -y sudo software-properties-common curl
                 # Need (newer) git, and the older Ubuntu container may require requesting the key manually using port 80
-                apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E1DD270288B4E6030699E45FA1715D88E1DF1F24
+                curl -sSL --retry ${NET_RETRY_COUNT:-5} 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xE1DD270288B4E6030699E45FA1715D88E1DF1F24' | sudo gpg --dearmor > /etc/apt/trusted.gpg.d/git-core_ubuntu_ppa.gpg
                 for i in {1..${NET_RETRY_COUNT:-3}}; do sudo -E add-apt-repository -y ppa:git-core/ppa && break || sleep 10; done
                 apt-get -o Acquire::Retries=$NET_RETRY_COUNT update
                 apt-get -o Acquire::Retries=$NET_RETRY_COUNT install -y g++ python libpython-dev git
