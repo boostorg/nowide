@@ -13,10 +13,15 @@
 #include <nowide/convert.hpp>
 #include <nowide/cstdio.hpp>
 #include <nowide/fstream.hpp>
-#include <nowide/quoted.hpp>
 #include <nowide/utf/convert.hpp>
 #include "test.hpp"
-#include <iomanip>
+
+#include <iomanip> // Required for feature macro check below
+// Conditional include to avoid warning/message
+#if defined(__cpp_lib_quoted_string_io) && __cpp_lib_quoted_string_io >= 201304
+#include <nowide/quoted.hpp>
+#endif
+
 #include <sstream>
 #include <type_traits>
 #if defined(_MSC_VER)
