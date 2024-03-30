@@ -7,8 +7,8 @@ import project ;
 
 project /boost/nowide
     : common-requirements
-        <source>/boost/config//boost_config
-        <source>/boost/filesystem//boost_filesystem
+        <library>/boost/config//boost_config
+        <library>/boost/filesystem//boost_filesystem
         <include>include
     ;
 
