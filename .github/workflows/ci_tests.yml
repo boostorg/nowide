@@ -48,10 +48,10 @@ jobs:
       DEP_DIR: ${{github.workspace}}/dependencies
       BOOST_VERSION: 1.56.0
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Sanity check version
       run: grep -E 'set\(_version [0-9]' CMakeLists.txt
-    - uses: actions/cache@v1
+    - uses: actions/cache@v4
       id: cache-boost
       with:
         path: ${{env.DEP_DIR}}
@@ -64,7 +64,7 @@ jobs:
       if: matrix.standalone == 'Boost'
       run: echo "BOOST_ROOT=${DEP_DIR//\\/\/}/boost_${BOOST_VERSION//./_}" >> $GITHUB_ENV
     # Install Boost
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true'
       with:
         repository: boostorg/boost
@@ -125,7 +125,7 @@ jobs:
   CreateDocuTest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Create documentation
         run: |
             sudo apt-get install -y doxygen
@@ -134,9 +134,9 @@ jobs:
   CreateBoostDocuTest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Fetch Boost.CI
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: boostorg/boost-ci
           ref: master
@@ -153,7 +153,7 @@ jobs:
   CheckFormatting:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: DoozyX/clang-format-lint-action@v0.11
         with:
           exclude: './doc'
