@@ -89,7 +89,7 @@ jobs:
               compiler: clang-14,  cxxstd: '03,11,14,17,20', os: ubuntu-22.04, stdlib: libc++, install: 'clang-14 libc++-14-dev libc++abi-14-dev' }
 
           # OSX, clang
-          - { compiler: clang,     cxxstd: '03,11,14,17,2a', os: macos-11, sanitize: yes }
+          - { compiler: clang,     cxxstd: '11,14,17,20', os: macos-12, sanitize: yes }
 
     timeout-minutes: 120
     runs-on: ${{matrix.os}}
@@ -223,9 +223,21 @@ jobs:
           B2_FLAGS: boost.nowide.lfs=no
         run: ci/build.sh
 
-      - name: Upload coverage
+      - name: Collect coverage
         if: matrix.coverage
         run: ci/codecov.sh "upload"
+        env:
+          BOOST_CI_CODECOV_IO_UPLOAD: skip
+
+      - name: Upload coverage
+        if: matrix.coverage
+        uses: codecov/codecov-action@v4
+        with:
+          disable_search: true
+          file: coverage.info
+          name: Github Actions
+          token: ${{secrets.CODECOV_TOKEN}}
+          verbose: true
 
       - name: Run coverity
         if: matrix.coverity && github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'master')
