@@ -119,14 +119,38 @@ jobs:
             git config --global pack.threads 0
             ! command -v cmake &> /dev/null || echo "B2_FLAGS=--nowide-enable-cmake" >> $GITHUB_ENV
 
+            if [[ "${{matrix.container}}" == "ubuntu:16.04" ]] || [[ "${{matrix.container}}" == "ubuntu:18.04" ]]; then
+              # Ubuntu 16/18 can't run Node 20, so stick to older actions: https://github.com/actions/checkout/issues/1590
+              echo "GHA_USE_NODE_20=false" >> $GITHUB_ENV
+            else
+              echo "GHA_USE_NODE_20=true" >> $GITHUB_ENV
+            fi
+
+      - uses: actions/checkout@v3
+        if: env.GHA_USE_NODE_20 == 'false'
+        with:
+          # For coverage builds fetch the whole history, else only 1 commit using a 'fake ternary'
+          fetch-depth: ${{ matrix.coverage && '0' || '1' }}
+
       - uses: actions/checkout@v4
+        if: env.GHA_USE_NODE_20 == 'true'
         with:
           # For coverage builds fetch the whole history, else only 1 commit using a 'fake ternary'
           fetch-depth: ${{ matrix.coverage && '0' || '1' }}
 
       - name: Cache ccache
+        uses: actions/cache@v3
+        if: env.B2_USE_CCACHE && env.GHA_USE_NODE_20 == 'false'
+        with:
+          path: ~/.ccache
+          key: ${{matrix.os}}-${{matrix.container}}-${{matrix.compiler}}-${{github.sha}}
+          restore-keys: |
+            ${{matrix.os}}-${{matrix.container}}-${{matrix.compiler}}-
+            ${{matrix.os}}-${{matrix.container}}-${{matrix.compiler}}
+
+      - name: Cache ccache
         uses: actions/cache@v4
-        if: env.B2_USE_CCACHE
+        if: env.B2_USE_CCACHE && env.GHA_USE_NODE_20 == 'true'
         with:
           path: ~/.ccache
           key: ${{matrix.os}}-${{matrix.container}}-${{matrix.compiler}}-${{github.sha}}
@@ -135,7 +159,16 @@ jobs:
             ${{matrix.os}}-${{matrix.container}}-${{matrix.compiler}}
 
       - name: Fetch Boost.CI
+        uses: actions/checkout@v3
+        if: env.GHA_USE_NODE_20 == 'false'
+        with:
+          repository: boostorg/boost-ci
+          ref: master
+          path: boost-ci-cloned
+
+      - name: Fetch Boost.CI
         uses: actions/checkout@v4
+        if: env.GHA_USE_NODE_20 == 'true'
         with:
           repository: boostorg/boost-ci
           ref: master
