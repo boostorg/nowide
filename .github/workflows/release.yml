@@ -18,7 +18,7 @@ jobs:
       DEP_DIR: ${{github.workspace}}/dependencies
       BOOST_VERSION: 1.56.0
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Extract tag name
         id: get_tag
         run: |
