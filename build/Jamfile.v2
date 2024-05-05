@@ -7,6 +7,7 @@
 #
 # See library home page at https://www.boost.org/libs/nowide
 
+import-search /boost/config/checks ;
 import config : requires ;
 import configure ;
 import feature ;
