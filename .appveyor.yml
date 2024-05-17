@@ -204,7 +204,7 @@ for:
       - cmake -G "%GENERATOR%" ..
       - ps: |
             cov-configure --msvc
-            cov-build --dir cov-int cmake --build --target tests . --config $env:configuration
+            cov-build --dir cov-int cmake --build . --target tests --config $env:configuration
             If ($LastExitCode -ne 0) {
               cat cov-int/build-log.txt
               $host.SetShouldExit($LastExitCode)
