@@ -21,6 +21,7 @@ local requirements =
 
 project
   : source-location ../src
+  : common-requirements <library>$(boost_dependencies)
   : requirements $(requirements)
     [ requires
       cxx11_auto_declarations

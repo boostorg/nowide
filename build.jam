@@ -5,10 +5,12 @@
 
 require-b2 5.2 ;
 
+constant boost_dependencies :
+    /boost/config//boost_config
+    /boost/filesystem//boost_filesystem ;
+
 project /boost/nowide
     : common-requirements
-        <library>/boost/config//boost_config
-        <library>/boost/filesystem//boost_filesystem
         <include>include
     ;
 
@@ -20,3 +22,4 @@ explicit
 call-if : boost-library nowide
     : install boost_nowide
     ;
+
