@@ -10,9 +10,6 @@
 import-search /boost/config/checks ;
 import config : requires ;
 import configure ;
-import feature ;
-
-feature.feature boost.nowide.lfs : auto no : optional propagated ;
 
 local requirements =
   <link>shared:<define>BOOST_NOWIDE_DYN_LINK=1
