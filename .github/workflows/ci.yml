@@ -122,6 +122,7 @@ jobs:
             if [[ "${{matrix.container}}" == "ubuntu:16.04" ]] || [[ "${{matrix.container}}" == "ubuntu:18.04" ]]; then
               # Ubuntu 16/18 can't run Node 20, so stick to older actions: https://github.com/actions/checkout/issues/1590
               echo "GHA_USE_NODE_20=false" >> $GITHUB_ENV
+              echo "ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true" >> $GITHUB_ENV
             else
               echo "GHA_USE_NODE_20=true" >> $GITHUB_ENV
             fi
