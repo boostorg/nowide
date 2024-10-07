@@ -94,6 +94,9 @@ jobs:
 
           # OSX, clang
           - { compiler: clang,     cxxstd: '11,14,17,20', os: macos-12, sanitize: yes }
+          - { name: MacOS w/ clang and sanitizers,
+              compiler: clang,     cxxstd: '11,14,17,20,2b', os: macos-13, sanitize: yes }
+          - { compiler: clang,     cxxstd: '11,14,17,20,2b', os: macos-14 }
 
     timeout-minutes: 120
     runs-on: ${{matrix.os}}
