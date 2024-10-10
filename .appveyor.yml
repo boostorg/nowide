@@ -145,7 +145,7 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       GENERATOR: Visual Studio 16 2019
       configuration: Debug
-      BOOST_ROOT: C:\Libraries\boost_1_77_0
+      BOOST_ROOT: C:\Libraries\boost_1_85_0
       COVERITY_SCAN_TOKEN:
         secure: FzhGUr+AR/VOBGUta7dDLMDruolChnvyMSvsM/zLvPY=
       COVERITY_SCAN_NOTIFICATION_EMAIL:
