@@ -35,6 +35,11 @@ const std::string outputString =
 const bool usesNowideRdBufIn = nw::cin.rdbuf() != std::cin.rdbuf();
 const bool usesNowideRdBufOut = nw::cout.rdbuf() != std::cout.rdbuf();
 
+bool is_buffered(const std::ostream& os)
+{
+    return (os.flags() & std::ios_base::unitbuf) == 0;
+}
+
 #ifndef BOOST_NOWIDE_TEST_INTERACTIVE
 class mock_output_buffer final : public nw::detail::console_output_buffer_base
 {
@@ -134,12 +139,14 @@ void test_is_valid_UTF8()
     TEST(!is_valid_UTF8(invalid_utf8_tests[0].utf8));        // Detect invalid
 }
 
-void test_tie()
+void test_tie_and_buffered()
 {
     TEST(nw::cin.tie() == &nw::cout);
     TEST(nw::cerr.tie() == &nw::cout);
-    TEST((nw::cerr.flags() & std::ios_base::unitbuf) != 0);
     TEST(nw::clog.tie() == nullptr);
+    TEST(is_buffered(nw::cout));
+    TEST(!is_buffered(nw::cerr));
+    TEST(is_buffered(nw::clog));
 }
 
 void test_putback_and_get()
@@ -231,6 +238,17 @@ void test_cerr()
     TEST_MOCKED(mock_buf.output == nw::widen("a"));
     TEST_MOCKED(nw::cerr << "Hello World");
     TEST_MOCKED(mock_buf.output == nw::widen("aHello World"));
+}
+
+void test_clog()
+{
+    if(usesNowideRdBufOut)                           // Only executed when attached to a real terminal, i.e. not on CI
+        TEST(nw::clog.rdbuf() != std::clog.rdbuf()); // LCOV_EXCL_STOP
+
+    TEST(nw::clog.rdbuf() != std::cout.rdbuf());
+    TEST(nw::clog.rdbuf() != nw::cin.rdbuf());
+    TEST(nw::clog.rdbuf() != nw::cout.rdbuf());
+    TEST(nw::clog.rdbuf() == nw::cerr.rdbuf());
 }
 
 void test_cerr_single_char()
@@ -494,7 +512,8 @@ void test_console()
     std::cout << "Test cout console" << std::endl;
     {
         RedirectStdio stdoutHandle(STD_OUTPUT_HANDLE);
-        decltype(nw::cout) cout(true, nullptr);
+        using cout_t = decltype(nw::cout);
+        cout_t cout(cout_t::target_stream::output, true, nullptr);
         TEST(cout.rdbuf() != std::cout.rdbuf());
 
         const std::string testString = "Hello std out\n\xc3\xa4-\xc3\xb6-\xc3\xbc\n";
@@ -507,7 +526,8 @@ void test_console()
     {
         RedirectStdio stderrHandle(STD_ERROR_HANDLE);
 
-        decltype(nw::cerr) cerr(false, nullptr);
+        using cerr_t = decltype(nw::cerr);
+        cerr_t cerr(cerr_t::target_stream::error, false, nullptr);
         TEST(cerr.rdbuf() != std::cerr.rdbuf());
 
         const std::string testString = "Hello std err\n\xc3\xa4-\xc3\xb6-\xc3\xbc\n";
@@ -573,12 +593,13 @@ void test_main(int argc, char** argv, char**)
     test_ctrl_z_is_eof();                    // LCOV_EXCL_LINE
 #else
     test_is_valid_UTF8();
-    test_tie();
+    test_tie_and_buffered();
     test_putback_and_get();
     test_cout();
     test_cout_single_char();
     test_cerr();
     test_cerr_single_char();
+    test_clog();
     test_cin();
     test_cin_getline();
     test_ctrl_z_is_eof();
