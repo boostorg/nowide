@@ -242,13 +242,16 @@ void test_cerr()
 
 void test_clog()
 {
-    if(usesNowideRdBufOut)                           // Only executed when attached to a real terminal, i.e. not on CI
-        TEST(nw::clog.rdbuf() != std::clog.rdbuf()); // LCOV_EXCL_STOP
+    if(usesNowideRdBufOut) // Only executed when attached to a real terminal, i.e. not on CI
+    {
+        TEST(nw::clog.rdbuf() != std::clog.rdbuf()); // LCOV_EXCL_LINE
+        // for the std:: streams this is not true for all implementations, so only check when using custom buffers
+        TEST(nw::clog.rdbuf() != nw::cerr.rdbuf()); // LCOV_EXCL_LINE
+    }
 
-    TEST(nw::clog.rdbuf() != std::cout.rdbuf());
     TEST(nw::clog.rdbuf() != nw::cin.rdbuf());
     TEST(nw::clog.rdbuf() != nw::cout.rdbuf());
-    TEST(nw::clog.rdbuf() == nw::cerr.rdbuf());
+    TEST(nw::clog.rdbuf() != std::cout.rdbuf());
 }
 
 void test_cerr_single_char()
