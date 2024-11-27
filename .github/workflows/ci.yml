@@ -100,7 +100,11 @@ jobs:
 
     timeout-minutes: 120
     runs-on: ${{matrix.os}}
-    container: ${{matrix.container}}
+    container:
+      image: ${{matrix.container}}
+      volumes:
+        - /node20217:/node20217:rw,rshared
+        - ${{ startsWith(matrix.container, 'ubuntu:1') && '/node20217:/__e/node20:ro,rshared' || ' ' }}
     env: {B2_USE_CCACHE: 1}
 
     steps:
@@ -132,41 +136,20 @@ jobs:
                 echo "B2_USE_CCACHE=0" >> $GITHUB_ENV
             fi
             git config --global pack.threads 0
+            if [[ "${{matrix.container}}" == "ubuntu:1"* ]]; then
+              # Node 20 doesn't work with Ubuntu 16/18 glibc: https://github.com/actions/checkout/issues/1590
+              curl -sL https://unofficial-builds.nodejs.org/download/release/v20.9.0/node-v20.9.0-linux-x64-glibc-217.tar.xz | tar -xJ --strip-components 1 -C /node20217
+            fi
             ! command -v cmake &> /dev/null || echo "B2_FLAGS=--nowide-enable-cmake" >> $GITHUB_ENV
 
-            if [[ "${{matrix.container}}" == "ubuntu:16.04" ]] || [[ "${{matrix.container}}" == "ubuntu:18.04" ]]; then
-              # Ubuntu 16/18 can't run Node 20, so stick to older actions: https://github.com/actions/checkout/issues/1590
-              echo "GHA_USE_NODE_20=false" >> $GITHUB_ENV
-              echo "ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true" >> $GITHUB_ENV
-            else
-              echo "GHA_USE_NODE_20=true" >> $GITHUB_ENV
-            fi
-
-      - uses: actions/checkout@v3
-        if: env.GHA_USE_NODE_20 == 'false'
-        with:
-          # For coverage builds fetch the whole history, else only 1 commit using a 'fake ternary'
-          fetch-depth: ${{ matrix.coverage && '0' || '1' }}
-
       - uses: actions/checkout@v4
-        if: env.GHA_USE_NODE_20 == 'true'
         with:
           # For coverage builds fetch the whole history, else only 1 commit using a 'fake ternary'
           fetch-depth: ${{ matrix.coverage && '0' || '1' }}
-
-      - name: Cache ccache
-        uses: actions/cache@v3
-        if: env.B2_USE_CCACHE && env.GHA_USE_NODE_20 == 'false'
-        with:
-          path: ~/.ccache
-          key: ${{matrix.os}}-${{matrix.container}}-${{matrix.compiler}}-${{github.sha}}
-          restore-keys: |
-            ${{matrix.os}}-${{matrix.container}}-${{matrix.compiler}}-
-            ${{matrix.os}}-${{matrix.container}}-${{matrix.compiler}}
 
       - name: Cache ccache
         uses: actions/cache@v4
-        if: env.B2_USE_CCACHE && env.GHA_USE_NODE_20 == 'true'
+        if: env.B2_USE_CCACHE
         with:
           path: ~/.ccache
           key: ${{matrix.os}}-${{matrix.container}}-${{matrix.compiler}}-${{github.sha}}
@@ -175,16 +158,7 @@ jobs:
             ${{matrix.os}}-${{matrix.container}}-${{matrix.compiler}}
 
       - name: Fetch Boost.CI
-        uses: actions/checkout@v3
-        if: env.GHA_USE_NODE_20 == 'false'
-        with:
-          repository: boostorg/boost-ci
-          ref: master
-          path: boost-ci-cloned
-
-      - name: Fetch Boost.CI
         uses: actions/checkout@v4
-        if: env.GHA_USE_NODE_20 == 'true'
         with:
           repository: boostorg/boost-ci
           ref: master
