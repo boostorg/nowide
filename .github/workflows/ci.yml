@@ -82,9 +82,10 @@ jobs:
           - { compiler: clang-13,  cxxstd: '11,14,17,20',    os: ubuntu-22.04, install: 'clang-13 g++-12', gcc_toolchain: 12 }
           - { compiler: clang-14,  cxxstd: '11,14,17,20',    os: ubuntu-22.04, install: 'clang-14 g++-12', gcc_toolchain: 12 }
           - { compiler: clang-15,  cxxstd: '11,14,17,20',    os: ubuntu-22.04, install: 'clang-15 g++-12', gcc_toolchain: 12 }
-          - { compiler: clang-16,  cxxstd: '11,14,17,20,2b', os: ubuntu-latest, container: 'ubuntu:23.04' }
-          - { compiler: clang-17,  cxxstd: '11,14,17,20,2b', os: ubuntu-latest, container: 'ubuntu:23.10' }
-          - { compiler: clang-18,  cxxstd: '11,14,17,20,2b', os: ubuntu-latest, container: 'ubuntu:24.04' }
+          - { compiler: clang-16,  cxxstd: '11,14,17,20,2b', os: ubuntu-24.04 }
+          # https://github.com/llvm/llvm-project/issues/59827: disabled 2b/23 for clang-17 with libstdc++13 in 24.04
+          - { compiler: clang-17,  cxxstd: '11,14,17,20',    os: ubuntu-24.04 }
+          - { compiler: clang-18,  cxxstd: '11,14,17,20,23,2c', os: ubuntu-24.04 }
 
           # libc++
           - { compiler: clang-6.0, cxxstd: '03,11,14',       os: ubuntu-latest, container: 'ubuntu:18.04', stdlib: libc++, install: 'clang-6.0 libc++-dev libc++abi-dev' }
