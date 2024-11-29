@@ -52,7 +52,7 @@ namespace boost {
 namespace nowide {
     char* getenv(const char* key)
     {
-        static stackstring value;
+        thread_local stackstring value;
 
         const wshort_stackstring name(key);
 
