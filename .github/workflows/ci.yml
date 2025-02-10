@@ -25,6 +25,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  LCOV_VERSION: v2.1
   GIT_FETCH_JOBS: 8
   NET_RETRY_COUNT: 5
   B2_CI_VERSION: 1
