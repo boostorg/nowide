@@ -75,7 +75,8 @@ jobs:
           - { compiler: clang-5.0, cxxstd: '11,14,1z',       os: ubuntu-latest, container: 'ubuntu:18.04' }
           - { compiler: clang-6.0, cxxstd: '11,14,17',       os: ubuntu-latest, container: 'ubuntu:20.04' }
           - { compiler: clang-7,   cxxstd: '11,14,17',       os: ubuntu-latest, container: 'ubuntu:20.04' }
-          - { compiler: clang-8,   cxxstd: '11,14,17,2a',    os: ubuntu-latest, container: 'ubuntu:20.04' }
+          # Note: clang-8 does not fully support C++20, so it is not compatible with some libstdc++ versions in this mode
+          - { compiler: clang-8,   cxxstd: '11,14,17',       os: ubuntu-latest, container: 'ubuntu:20.04' }
           - { compiler: clang-9,   cxxstd: '11,14,17,2a',    os: ubuntu-latest, container: 'ubuntu:20.04' }
           - { compiler: clang-10,  cxxstd: '11,14,17,20',    os: ubuntu-latest, container: 'ubuntu:20.04' }
           - { compiler: clang-11,  cxxstd: '11,14,17,20',    os: ubuntu-latest, container: 'ubuntu:22.04' }
