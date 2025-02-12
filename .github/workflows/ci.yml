@@ -51,9 +51,9 @@ jobs:
           - { compiler: gcc-4.9,   cxxstd: '03,11',          os: ubuntu-latest, container: 'ubuntu:16.04' }
           - { compiler: gcc-5,     cxxstd: '03,11,14,1z',    os: ubuntu-latest, container: 'ubuntu:18.04' }
           - { compiler: gcc-6,     cxxstd: '11,14,17',       os: ubuntu-latest, container: 'ubuntu:18.04' }
-          - { compiler: gcc-7,     cxxstd: '11,14,17',       os: ubuntu-20.04 }
-          - { compiler: gcc-8,     cxxstd: '11,14,17,2a',    os: ubuntu-20.04 }
-          - { compiler: gcc-9,     cxxstd: '11,14,17,2a',    os: ubuntu-20.04 }
+          - { compiler: gcc-7,     cxxstd: '11,14,17',       os: ubuntu-latest, container: 'ubuntu:20.04' }
+          - { compiler: gcc-8,     cxxstd: '11,14,17,2a',    os: ubuntu-latest, container: 'ubuntu:20.04' }
+          - { compiler: gcc-9,     cxxstd: '11,14,17,2a',    os: ubuntu-22.04 }
           - { compiler: gcc-10,    cxxstd: '11,14,17,20',    os: ubuntu-22.04 }
           - { compiler: gcc-11,    cxxstd: '11,14,17,20',    os: ubuntu-22.04 }
           - { compiler: gcc-12,    cxxstd: '11,14,17,20',    os: ubuntu-22.04 }
@@ -63,7 +63,7 @@ jobs:
           - { name: GCC w/ sanitizers, sanitize: yes,
               compiler: gcc-13,    cxxstd: '11,14,17,20',    os: ubuntu-24.04 }
           - { name: Collect coverage, coverage: yes,
-              compiler: gcc-8,     cxxstd: '11,14,17,2a',    os: ubuntu-20.04, install: 'g++-8-multilib', address-model: '32,64' }
+              compiler: gcc-8,     cxxstd: '11,2a',          os: ubuntu-latest, container: 'ubuntu:20.04', install: 'g++-8-multilib', address-model: '32,64' }
 
           # Linux, clang
           - { compiler: clang-3.5, cxxstd: '11',             os: ubuntu-latest, container: 'ubuntu:16.04' }
@@ -73,13 +73,13 @@ jobs:
           - { compiler: clang-3.9, cxxstd: '11,14',          os: ubuntu-latest, container: 'ubuntu:18.04' }
           - { compiler: clang-4.0, cxxstd: '11,14',          os: ubuntu-latest, container: 'ubuntu:18.04' }
           - { compiler: clang-5.0, cxxstd: '11,14,1z',       os: ubuntu-latest, container: 'ubuntu:18.04' }
-          - { compiler: clang-6.0, cxxstd: '11,14,17',       os: ubuntu-20.04 }
-          - { compiler: clang-7,   cxxstd: '11,14,17',       os: ubuntu-20.04 }
-          - { compiler: clang-8,   cxxstd: '11,14,17,2a',    os: ubuntu-20.04 }
-          - { compiler: clang-9,   cxxstd: '11,14,17,2a',    os: ubuntu-20.04 }
-          - { compiler: clang-10,  cxxstd: '11,14,17,20',    os: ubuntu-20.04 }
-          - { compiler: clang-11,  cxxstd: '11,14,17,20',    os: ubuntu-20.04 }
-          - { compiler: clang-12,  cxxstd: '11,14,17,20',    os: ubuntu-20.04 }
+          - { compiler: clang-6.0, cxxstd: '11,14,17',       os: ubuntu-latest, container: 'ubuntu:20.04' }
+          - { compiler: clang-7,   cxxstd: '11,14,17',       os: ubuntu-latest, container: 'ubuntu:20.04' }
+          - { compiler: clang-8,   cxxstd: '11,14,17,2a',    os: ubuntu-latest, container: 'ubuntu:20.04' }
+          - { compiler: clang-9,   cxxstd: '11,14,17,2a',    os: ubuntu-latest, container: 'ubuntu:20.04' }
+          - { compiler: clang-10,  cxxstd: '11,14,17,20',    os: ubuntu-latest, container: 'ubuntu:20.04' }
+          - { compiler: clang-11,  cxxstd: '11,14,17,20',    os: ubuntu-latest, container: 'ubuntu:22.04' }
+          - { compiler: clang-12,  cxxstd: '11,14,17,20',    os: ubuntu-latest, container: 'ubuntu:22.04' }
           - { compiler: clang-13,  cxxstd: '11,14,17,20',    os: ubuntu-latest, container: 'ubuntu:22.04' }
           - { compiler: clang-14,  cxxstd: '11,14,17,20',    os: ubuntu-latest, container: 'ubuntu:22.04' }
           - { compiler: clang-15,  cxxstd: '11,14,17,20',    os: ubuntu-latest, container: 'ubuntu:22.04' }
@@ -89,7 +89,7 @@ jobs:
 
           # libc++
           - { compiler: clang-6.0, cxxstd: '11,14',          os: ubuntu-latest, container: 'ubuntu:18.04', stdlib: libc++, install: 'clang-6.0 libc++-dev libc++abi-dev' }
-          - { compiler: clang-12,  cxxstd: '11,14,17,20',    os: ubuntu-20.04, stdlib: libc++, install: 'clang-12 libc++-12-dev libc++abi-12-dev' }
+          - { compiler: clang-12,  cxxstd: '11,14,17,20',    os: ubuntu-22.04, stdlib: libc++, install: 'clang-12 libc++-12-dev libc++abi-12-dev' }
           - { name: Clang w/ sanitizers, sanitize: yes,
               compiler: clang-14,  cxxstd: '11,14,17,20',    os: ubuntu-22.04, stdlib: libc++, install: 'clang-14 libc++-14-dev libc++abi-14-dev' }
 
@@ -125,7 +125,7 @@ jobs:
                 osver=$(lsb_release -sr | cut -f1 -d.)
                 pkgs="g++ git xz-utils"
                 # Ubuntu 22+ has only Python 3 in the repos
-                if [ -n "$osver" ] && [ "$osver" -ge "22" ]; then
+                if [ -n "$osver" ] && [ "$osver" -ge "20" ]; then
                   pkgs+=" python-is-python3 libpython3-dev"
                 else
                   pkgs+=" python libpython-dev"
@@ -335,8 +335,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: ubuntu-20.04, build_shared: ON,  build_type: Debug, generator: 'Unix Makefiles' }
-          - { os: ubuntu-20.04, build_shared: OFF, build_type: Debug, generator: 'Unix Makefiles' }
+          - { os: ubuntu-latest, build_shared: ON,  build_type: Debug, generator: 'Unix Makefiles' }
+          - { os: ubuntu-latest, build_shared: OFF, build_type: Debug, generator: 'Unix Makefiles' }
           - { os: windows-2019, build_shared: ON,  build_type: Debug, generator: 'Visual Studio 16 2019' }
           - { os: windows-2019, build_shared: OFF, build_type: Debug, generator: 'Visual Studio 16 2019' }
 
