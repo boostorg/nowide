@@ -264,6 +264,7 @@ jobs:
           name: Github Actions
           token: ${{secrets.CODECOV_TOKEN}}
           verbose: true
+          working-directory: ${{env.BOOST_CI_SRC_FOLDER}}
 
       - name: Run coverity
         if: matrix.coverity && github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'master')
