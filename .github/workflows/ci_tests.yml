@@ -1,4 +1,4 @@
-# Copyright 2019 - 2024 Alexander Grund
+# Copyright 2019 - 2025 Alexander Grund
 # Distributed under the Boost Software License, Version 1.0.
 # https://www.boost.org/LICENSE_1_0.txt
 
@@ -31,16 +31,16 @@ jobs:
         shell: bash
     strategy:
       matrix:
-        os: [ubuntu-22.04, windows-2019]
+        os: [ubuntu-22.04, windows-2022]
         buildType: [Debug, Release]
         standalone: [Boost, Standalone]
         shared_lib: [ON, OFF]
-        generator: ['Visual Studio 16 2019', 'MinGW Makefiles', 'Unix Makefiles']
+        generator: ['Visual Studio 17 2022', 'MinGW Makefiles', 'Unix Makefiles']
         exclude:
           - os: ubuntu-22.04
             generator: MinGW Makefiles
           - os: ubuntu-22.04
-            generator: Visual Studio 16 2019
+            generator: Visual Studio 17 2022
           - os: ubuntu-22.04
             buildType: Debug
     runs-on: ${{matrix.os}}
@@ -71,7 +71,7 @@ jobs:
         ref: boost-${{env.BOOST_VERSION}}
         path: __buildBoost
         fetch-depth: 1
-    - name: Build Boost
+    - name: Bootstrap Boost
       if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true'
       run: |
         cd __buildBoost
@@ -81,9 +81,15 @@ jobs:
         [[ "${{matrix.os}}" =~ "windows" ]] && toolset=mingw || toolset=gcc
         ./bootstrap.sh --with-toolset="$toolset" --with-libraries=system,filesystem threading=multi || (cat bootstrap.log && false)
         sed -i 's/mingw/gcc/' project-config.jam
-        [[ "${{matrix.generator}}" =~ "Visual Studio" ]] && toolset=msvc-14.0 || toolset=gcc
+        [[ "${{matrix.generator}}" =~ "Visual Studio" ]] && toolset=msvc-14.3 || toolset=gcc
+        echo "B2_TOOLSET=$toolset" >> $GITHUB_ENV
         ./b2 headers
-        ./b2 link=static toolset=$toolset address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install
+    - name: Build Boost
+      if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true'
+      shell: "${{ startsWith(matrix.os, 'ubuntu:1') && 'bash' || 'cmd' }}"
+      run: |
+        cd __buildBoost
+        ./b2 link=static toolset=$B2_TOOLSET address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install
         cd ..
         rm -r __buildBoost || true
     - name: Create standalone
