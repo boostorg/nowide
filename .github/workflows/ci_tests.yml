@@ -71,7 +71,7 @@ jobs:
         ref: boost-${{env.BOOST_VERSION}}
         path: __buildBoost
         fetch-depth: 1
-    - name: Build Boost
+    - name: Bootstrap Boost
       if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true'
       run: |
         cd __buildBoost
@@ -82,8 +82,14 @@ jobs:
         ./bootstrap.sh --with-toolset="$toolset" --with-libraries=system,filesystem threading=multi || (cat bootstrap.log && false)
         sed -i 's/mingw/gcc/' project-config.jam
         [[ "${{matrix.generator}}" =~ "Visual Studio" ]] && toolset=msvc-14.3 || toolset=gcc
+        echo "B2_TOOLSET=$toolset" >> $GITHUB_ENV
         ./b2 headers
-        ./b2 link=static toolset=$toolset address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install
+    - name: Build Boost
+      if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true'
+      shell: "${{ startsWith(matrix.os, 'ubuntu:1') && 'bash' || 'cmd' }}"
+      run: |
+        cd __buildBoost
+        ./b2 link=static toolset=$B2_TOOLSET address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install
         cd ..
         rm -r __buildBoost || true
     - name: Create standalone
