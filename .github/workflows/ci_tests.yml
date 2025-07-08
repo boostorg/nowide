@@ -13,7 +13,12 @@ on:
       - bugfix/**
       - feature/**
       - fix/**
+      - github/**
       - pr/**
+    paths-ignore:
+      - LICENSE
+      - meta/**
+      - README.md
 
 concurrency:
   group: ${{format('ci_tests{0}:{1}', github.repository, github.ref)}}
