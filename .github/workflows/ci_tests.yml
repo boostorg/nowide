@@ -89,9 +89,18 @@ jobs:
         [[ "${{matrix.generator}}" =~ "Visual Studio" ]] && toolset=msvc-14.3 || toolset=gcc
         echo "B2_TOOLSET=$toolset" >> $GITHUB_ENV
         ./b2 headers
-    - name: Build Boost
-      if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true'
-      shell: "${{ startsWith(matrix.os, 'ubuntu:1') && 'bash' || 'cmd' }}"
+    - name: Build Boost (Linux)
+      if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true' && startsWith(matrix.os, 'ubuntu')
+      shell: bash
+      run: |
+        cd __buildBoost
+        ./b2 link=static toolset=$B2_TOOLSET address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install
+        cd ..
+        rm -r __buildBoost || true
+    # Requires cmd shell as on windows-2022 with msvc-14.3 'cl' won't be found with bash
+    - name: Build Boost (Windows)
+      if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true' && startsWith(matrix.os, 'windows')
+      shell: cmd
       run: |
         cd __buildBoost
         ./b2 link=static toolset=$B2_TOOLSET address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install
