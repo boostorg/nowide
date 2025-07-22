@@ -97,15 +97,15 @@ jobs:
         ./b2 link=static toolset=$B2_TOOLSET address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install
         cd ..
         rm -r __buildBoost || true
-    # Requires cmd shell as on windows-2022 with msvc-14.3 'cl' won't be found with bash
+    # On windows-2022 with msvc-14.3 'cl' won't be found with the bash shell
     - name: Build Boost (Windows)
       if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true' && startsWith(matrix.os, 'windows')
-      shell: cmd
+      shell: pwsh
       run: |
         cd __buildBoost
-        ./b2 link=static toolset=$B2_TOOLSET address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install
+        ./b2 link=static toolset=$Env:B2_TOOLSET address-model=64 --prefix="$Env:BOOST_ROOT" install
         cd ..
-        rm -r __buildBoost || true
+        rm -r -force __buildBoost
     - name: Create standalone
       if: matrix.standalone == 'Standalone'
       run: |
