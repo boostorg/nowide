@@ -76,36 +76,42 @@ jobs:
         ref: boost-${{env.BOOST_VERSION}}
         path: __buildBoost
         fetch-depth: 1
-    - name: Bootstrap Boost
+    - name: Download Boost
       if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true'
       run: |
         cd __buildBoost
         git submodule update --init --jobs 3 tools/boostdep libs/filesystem tools/inspect libs/wave # Last 2 are required for pre-1.64
-        (cd tools/boostdep && git fetch && git checkout boost-1.73.0 && git checkout boost-1.63.0 -- depinst/exceptions.txt)
-        python tools/boostdep/depinst/depinst.py --include tools --exclude test --git_args '--jobs 3' filesystem
-        [[ "${{matrix.os}}" =~ "windows" ]] && toolset=mingw || toolset=gcc
-        ./bootstrap.sh --with-toolset="$toolset" --with-libraries=system,filesystem threading=multi || (cat bootstrap.log && false)
-        sed -i 's/mingw/gcc/' project-config.jam
-        [[ "${{matrix.generator}}" =~ "Visual Studio" ]] && toolset=msvc-14.3 || toolset=gcc
+        if [[ $BOOST_VERSION < '1.73.0' ]]; then
+          (cd tools/boostdep && git fetch && git checkout boost-1.73.0 && git checkout boost-1.63.0 -- depinst/exceptions.txt)
+        fi
+        if [[ "${{matrix.generator}}" =~ "Visual Studio" ]]; then
+          toolset=msvc-14.3
+          # Boost.Build doesn't support MSVC 2022 (14.3) until 1.78
+          [[ ! $BOOST_VERSION < '1.78.0' ]] || (cd tools/build && git fetch && git checkout boost-1.78.0)
+        else
+          toolset=gcc
+        fi
         echo "B2_TOOLSET=$toolset" >> $GITHUB_ENV
-        ./b2 headers
+        python tools/boostdep/depinst/depinst.py --include tools --exclude test --git_args '--jobs 3' filesystem
     - name: Build Boost (Linux)
       if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true' && startsWith(matrix.os, 'ubuntu')
       shell: bash
       run: |
         cd __buildBoost
+        ./bootstrap.sh --with-libraries=system,filesystem threading=multi || (cat bootstrap.log && false)
         ./b2 link=static toolset=$B2_TOOLSET address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install
         cd ..
         rm -r __buildBoost || true
-    # Requires cmd shell as on windows-2022 with msvc-14.3 'cl' won't be found with bash
+    # On windows-2022 with msvc-14.3 'cl' won't be found with the bash shell
     - name: Build Boost (Windows)
       if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true' && startsWith(matrix.os, 'windows')
-      shell: cmd
+      shell: pwsh
       run: |
         cd __buildBoost
-        ./b2 link=static toolset=$B2_TOOLSET address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install
+        ./bootstrap.sh --with-libraries=system,filesystem threading=multi
+        ./b2 link=static toolset=$Env:B2_TOOLSET address-model=64 --prefix="$Env:BOOST_ROOT" install
         cd ..
-        rm -r __buildBoost || true
+        rm -r -force __buildBoost
     - name: Create standalone
       if: matrix.standalone == 'Standalone'
       run: |
