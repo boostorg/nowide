@@ -48,6 +48,8 @@ jobs:
             generator: Visual Studio 17 2022
           - os: ubuntu-22.04
             buildType: Debug
+          - os: windows-2022
+            standalone: Boost
     runs-on: ${{matrix.os}}
     env:
       DEP_DIR: ${{github.workspace}}/dependencies
