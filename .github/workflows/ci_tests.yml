@@ -103,7 +103,7 @@ jobs:
       shell: cmd
       run: |
         cd __buildBoost
-        ./b2 link=static toolset=$B2_TOOLSET address-model=64 -j$(nproc) --prefix="$BOOST_ROOT" install
+        .\b2 link=static toolset=%B2_TOOLSET% address-model=64 -j 3 --prefix="%BOOST_ROOT%" install
         cd ..
         rm -r __buildBoost || true
     - name: Create standalone
