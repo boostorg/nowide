@@ -51,7 +51,9 @@ jobs:
     runs-on: ${{matrix.os}}
     env:
       DEP_DIR: ${{github.workspace}}/dependencies
-      BOOST_VERSION: 1.56.0
+      # VS 2022 only supported by Boost.Build 1.78+ with changes to build files (e.g. in Boost.Thread) required that are introduced in Boost 1.66
+      # Boost.Iostreams doesn't support VS 2022 until 1.69
+      BOOST_VERSION: ${{ startsWith(matrix.generator, 'Visual Studio') && '1.69.0' || '1.56.0' }}
     steps:
     - uses: actions/checkout@v4
     - name: Sanity check version
