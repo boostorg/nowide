@@ -13,7 +13,7 @@
 #
 # When not using CMake to link against the shared library on windows define -DBOOST_NOWIDE_DYN_LINK
 
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.9...3.20)
 # Version number starts at 10 to avoid conflicts with Boost version
 set(_version 11.3.0)
 if(BOOST_SUPERPROJECT_SOURCE_DIR)
