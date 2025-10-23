@@ -97,9 +97,7 @@ jobs:
           fi
         else
           toolset=gcc
-          [[ "${{matrix.os}}" =~ "windows" ]] && botstrap_toolset=mingw || botstrap_toolset=gcc
-          ./bootstrap.sh --with-toolset="$botstrap_toolset" --with-libraries=system,filesystem threading=multi || (cat bootstrap.log && false)
-          sed -i 's/mingw/gcc/' project-config.jam
+          ./bootstrap.sh --with-toolset=$toolset --with-libraries=system,filesystem threading=multi || (cat bootstrap.log && false)
           ./b2 headers
         fi
         echo "B2_TOOLSET=$toolset" >> $GITHUB_ENV
