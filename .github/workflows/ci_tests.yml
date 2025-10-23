@@ -145,7 +145,8 @@ jobs:
         extraFlags="-DBoost_DEBUG=ON -DBoost_NO_BOOST_CMAKE=ON -DCMAKE_INSTALL_PREFIX=$HOME/local"
         if ! [[ "${{matrix.generator}}" =~ "Visual Studio" ]]; then
           # Enable warning to find missing defines, especially important for the standalone version
-          extraFlags="$extraFlags -DCMAKE_CXX_FLAGS=-Wundef"
+          extraFlags+=" -DCMAKE_CXX_FLAGS=-Wundef"
+          extraFlags+=" -DBoost_ARCHITECTURE=-x64" # ABI tag for MinGW
         fi
         cmake -DCMAKE_BUILD_TYPE=${{matrix.buildType}} -DBUILD_SHARED_LIBS=${{matrix.shared_lib}} -G "${{matrix.generator}}" $extraFlags ..
     - name: Build
