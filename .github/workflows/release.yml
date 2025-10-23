@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DEP_DIR: ${{github.workspace}}/dependencies
-      BOOST_VERSION: 1.56.0
+      BOOST_VERSION: 1.66.0
     steps:
       - uses: actions/checkout@v4
       - name: Extract tag name
