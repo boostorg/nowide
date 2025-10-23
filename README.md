@@ -36,7 +36,7 @@ This is different to the version available prior to the inclusion in Boost.
 
 ### Requirements (Boost version)
 
-* Boost (>= 1.56)
+* Boost (>= 1.66)
 * CMake (when not using as part of Boost) or B2 (otherwise)
 
 ### Requirements (Standalone version)

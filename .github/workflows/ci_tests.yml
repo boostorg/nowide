@@ -53,7 +53,7 @@ jobs:
       DEP_DIR: ${{github.workspace}}/dependencies
       # VS 2022 only supported by Boost.Build 1.78+ with changes to build files (e.g. in Boost.Thread) required that are introduced in Boost 1.66
       # Boost.Iostreams doesn't support VS 2022 until 1.69
-      BOOST_VERSION: ${{ startsWith(matrix.generator, 'Visual Studio') && '1.69.0' || '1.56.0' }}
+      BOOST_VERSION: ${{ startsWith(matrix.generator, 'Visual Studio') && '1.69.0' || '1.66.0' }}
     steps:
     - uses: actions/checkout@v4
     - name: Sanity check version
@@ -83,11 +83,11 @@ jobs:
       if: matrix.standalone == 'Boost' && steps.cache-boost.outputs.cache-hit != 'true'
       working-directory: __buildBoost
       run: |
-        git submodule update --init --jobs 3 tools/boostdep libs/filesystem tools/inspect libs/wave # Last 2 are required for pre-1.64
+        git submodule update --init --jobs 3 tools/boostdep libs/filesystem
         if [[ $BOOST_VERSION < '1.73.0' ]]; then
           (cd tools/boostdep && git fetch origin && git checkout boost-1.73.0 && git checkout boost-1.63.0 -- depinst/exceptions.txt)
         fi
-        python tools/boostdep/depinst/depinst.py --include tools --exclude test --git_args '--jobs 3 --depth 1' wave # Should be filesystem, but works because that is a dependency of wave
+        python tools/boostdep/depinst/depinst.py --include tools --exclude test --git_args '--jobs 3 --depth 1' filesystem
         if [[ "${{matrix.generator}}" =~ "Visual Studio" ]]; then
           toolset=msvc-14.3
           # Boost.Build doesn't support MSVC 2022 (14.3) until 1.78
