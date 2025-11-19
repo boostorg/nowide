@@ -1,4 +1,4 @@
-# Copyright 2019 - 2020 Alexander Grund
+# Copyright 2019 - 2025 Alexander Grund
 # Distributed under the Boost Software License, Version 1.0.
 # https://www.boost.org/LICENSE_1_0.txt
 
@@ -15,7 +15,7 @@
 
 cmake_minimum_required(VERSION 3.9)
 # Version number starts at 10 to avoid conflicts with Boost version
-set(_version 11.3.0)
+set(_version 11.3.1)
 if(BOOST_SUPERPROJECT_SOURCE_DIR)
   set(_version ${BOOST_SUPERPROJECT_VERSION})
 endif()
