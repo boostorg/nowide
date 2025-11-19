@@ -15,7 +15,7 @@
 
 cmake_minimum_required(VERSION 3.9...3.20)
 # Version number starts at 10 to avoid conflicts with Boost version
-set(_version 11.3.0)
+set(_version 11.4.0)
 if(BOOST_SUPERPROJECT_SOURCE_DIR)
   set(_version ${BOOST_SUPERPROJECT_VERSION})
 endif()
