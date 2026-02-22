@@ -26,10 +26,10 @@ jobs:
         run: |
           echo "Running for $GITHUB_EVENT_NAME event"
           if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
-            echo "::set-output name=tag::${GITHUB_REF#refs/tags/}"
+            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
           else
             version=$(grep "set(_version " CMakeLists.txt | head -n1 | sed 's/^.* \([0-9]*\.[0-9]*\.[0-9]*\).*$/\1/')
-            echo "::set-output name=tag::v$version"
+            echo "tag=v$version" >> $GITHUB_OUTPUT
           fi
       - name: Sanity check version
         run: |
