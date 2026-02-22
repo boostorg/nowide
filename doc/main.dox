@@ -164,7 +164,7 @@ If that happens unexpectatly watch the configuration check output for anything l
 This means your compiler doesn't use C++11 (or higher), e.g. because it defaults to C++03.
 You can pass `cxxstd=11` to `b2` to build in C++11 mode.
 
-Experimental support for building with the Boost CMake build system is also available.   
+Support for building with the Boost CMake build system is also available.   
 For that run e.g. `cmake -DBOOST_INCLUDE_LIBRARIES=nowide <path-to-boost-root> <other options>`.
 
 \subsection using_standard Standard Features
