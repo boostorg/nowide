@@ -1,4 +1,4 @@
-# Copyright 2019 - 2021 Alexander Grund
+# Copyright 2019 - 2026 Alexander Grund
 # Distributed under the Boost Software License, Version 1.0.
 # https://www.boost.org/LICENSE_1_0.txt
 
@@ -40,6 +40,6 @@ jobs:
         if: steps.standalone.outputs.changed == 'true'
         run: |
           git add .
-          git commit -m "Include '${{github.event.head_commit.message}}'"
+          git commit -m "Include '${{github.event.head_commit.message}}'" -m "Source commit: ${SHORT_SHA}"
           remote_repo="https://${GITHUB_ACTOR}:${{secrets.GITHUB_TOKEN}}@github.com/${GITHUB_REPOSITORY}.git"
           git push "$remote_repo" HEAD:$STANDALONE_BRANCH_NAME
