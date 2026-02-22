@@ -1,4 +1,4 @@
-# Copyright 2019 - 2025 Alexander Grund
+# Copyright 2019 - 2026 Alexander Grund
 # Distributed under the Boost Software License, Version 1.0.
 # https://www.boost.org/LICENSE_1_0.txt
 
@@ -18,19 +18,33 @@ jobs:
       contents: write
     env:
       DEP_DIR: ${{github.workspace}}/dependencies
-      BOOST_VERSION: 1.66.0
     steps:
       - uses: actions/checkout@v4
-      - name: Extract tag name
+      - name: Extract tag name and matching commit on standalone branch
         id: get_tag
         run: |
           echo "Running for $GITHUB_EVENT_NAME event"
+          git fetch origin master develop standalone
           if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
             echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+            SOURCE_SHA=$(git merge-base "${{github.sha}}" origin/develop)
           else
             version=$(grep "set(_version " CMakeLists.txt | head -n1 | sed 's/^.* \([0-9]*\.[0-9]*\.[0-9]*\).*$/\1/')
             echo "tag=v$version" >> $GITHUB_OUTPUT
+            SOURCE_SHA=$(git rev-parse origin/develop)
           fi
+          SOURCE_SHA=$(git rev-parse --short "$SOURCE_SHA")
+          # Find matching standalone commit hash
+          standalone_commit_matches=$(git log origin/standalone --format="%H" --grep="^Source commit: $SOURCE_SHA\$")
+          if ! count=$(grep -c . <<<"$standalone_commit_matches"); then
+            echo "ERROR: Did not found source commit for $SOURCE_SHA"
+            exit 1
+          elif [[ $count -ne 1 ]]; then
+            echo "ERROR: Found more than 1 related commit: $standalone_commit_matches"
+            exit 1
+          fi
+          echo "source_commit=$SOURCE_SHA" >> $GITHUB_OUTPUT
+          echo "standalone_commit=$standalone_commit_matches" >> $GITHUB_OUTPUT
       - name: Sanity check version
         run: |
           version=${{steps.get_tag.outputs.tag}}
@@ -87,6 +101,20 @@ jobs:
           mv nowide.tar.gz nowide_${{steps.get_tag.outputs.tag}}.tar.gz
           mv nowide_standalone.tar.gz nowide_standalone_${{steps.get_tag.outputs.tag}}.tar.gz
           mv documentation.tar.gz nowide_docu.tar.gz
+
+      - name: Tag standalone branch
+        run: |
+          git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config --global user.name "$GITHUB_ACTOR"
+          version=${{steps.get_tag.outputs.tag}}
+          tag_name=standalone-$version
+          git tag -a "$tag_name" "${{steps.get_tag.outputs.standalone_commit}}" \
+            -m "Standalone version for v$version" \
+            -m "Source-Commit: ${{steps.get_tag.outputs.source_commit}}"
+          git show "$tag_name"
+          if [[ "{{github.event_name}}" == "push" ]]; then
+            git push origin "$tag_name"
+          fi
 
       - name: Create Release
         if: github.event_name == 'push'
