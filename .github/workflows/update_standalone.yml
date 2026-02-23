@@ -25,7 +25,7 @@ jobs:
       - name: Create standalone version
         id: standalone
         run: |
-          bash tools/create_standalone.sh /tmp/nowide_standalone
+          tools/create_standalone.sh /tmp/nowide_standalone
           git checkout "$STANDALONE_BRANCH_NAME" -- || git checkout -b "$STANDALONE_BRANCH_NAME"
           rm -r *
           mv /tmp/nowide_standalone/* .

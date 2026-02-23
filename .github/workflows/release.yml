@@ -48,7 +48,7 @@ jobs:
 
       - name: Create standalone version
         run: |
-          bash tools/create_standalone.sh nowide_standalone_${{steps.get_tag.outputs.tag}}
+          tools/create_standalone.sh nowide_standalone_${{steps.get_tag.outputs.tag}}
           tar -czf  nowide_standalone.tar.gz nowide_standalone_${{steps.get_tag.outputs.tag}}
       - name: Test standalone release tarball
         run: |
