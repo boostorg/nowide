@@ -490,12 +490,12 @@ public:
 
 void test_console()
 {
-#ifndef BOOST_NOWIDE_DISABLE_CIN_TEST
 #ifdef __MINGW32__
     bool isMinGW_CI = std::getenv("CI");
 #else
     bool isMinGW_CI = false;
 #endif
+#ifndef BOOST_NOWIDE_DISABLE_CIN_TEST
     std::cout << "Test cin console: " << std::flush;
     {
         RedirectStdio stdinHandle(STD_INPUT_HANDLE);
