@@ -465,6 +465,9 @@ int main(int argc,char **argv)
 }
 \endcode
 
+The standalone version only supports building with CMake.
+The CMake options are prefixed with `NOWIDE_`, i.e. `-DNOWIDE_INSTALL=ON/OFF` and `-DNOWIDE_WERROR=ON/OFF`.
+
 \subsection sources Sources and Downloads
 
 The upstream sources can be found at GitHub: <a href="https://github.com/boostorg/nowide">https://github.com/boostorg/nowide</a>
