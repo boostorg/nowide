@@ -135,7 +135,7 @@ jobs:
     - name: Create standalone
       if: matrix.standalone == 'Standalone'
       run: |
-        bash tools/create_standalone.sh "$PWD/../nowide_standalone"
+        tools/create_standalone.sh "$PWD/../nowide_standalone"
         rm -rf *
         cp -r ../nowide_standalone/* .
         mkdir build
