@@ -2,6 +2,9 @@
 # Distributed under the Boost Software License, Version 1.0.
 # https://www.boost.org/LICENSE_1_0.txt
 
+permissions:
+  contents: write
+
 on:
   push:
     tags:
@@ -14,8 +17,6 @@ jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     env:
       DEP_DIR: ${{github.workspace}}/dependencies
     steps:
