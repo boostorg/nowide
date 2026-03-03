@@ -119,7 +119,7 @@ jobs:
           version=${{steps.get_tag.outputs.tag}}
           tag_name=standalone-$version
           git tag -a "$tag_name" "${{steps.get_tag.outputs.standalone_commit}}" \
-            -m "Standalone version for v$version" \
+            -m "Standalone version for $version" \
             -m "Source-Commit: ${{steps.get_tag.outputs.source_commit}}"
           git show "$tag_name"
           if [[ "{{github.event_name}}" == "push" ]]; then
