@@ -491,9 +491,9 @@ public:
 void test_console()
 {
 #ifdef __MINGW32__
-    bool isMinGW_CI = std::getenv("CI");
+    const bool isMinGW_CI = std::getenv("CI");
 #else
-    bool isMinGW_CI = false;
+    const bool isMinGW_CI = false;
 #endif
 #ifndef NOWIDE_DISABLE_CIN_TEST
     std::cout << "Test cin console: " << std::flush;
