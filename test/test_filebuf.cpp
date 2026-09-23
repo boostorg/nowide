@@ -26,7 +26,6 @@ static_assert(std::is_same<nw::filebuf::pos_type, nw::filebuf::traits_type::pos_
 static_assert(std::is_same<nw::filebuf::off_type, nw::filebuf::traits_type::off_type>::value, "!");
 
 using CharTraits = nw::filebuf::traits_type;
-const auto eof = CharTraits::eof();
 
 constexpr std::ios_base::openmode make_mode(std::ios_base::openmode flags, bool binary)
 {
@@ -65,7 +64,7 @@ bool skip_chars(T_Buf& buf, size_t num_chars)
 {
     for(size_t i = 0; i < num_chars; ++i)
     {
-        if(buf.sbumpc() == eof)
+        if(buf.sbumpc() == CharTraits::eof())
             return false; // LCOV_EXCL_LINE
     }
     return true;
@@ -103,7 +102,7 @@ void test_open_close(const std::string& filepath)
     {
         nw::filebuf buf;
         TEST(buf.open(filepath, std::ios_base::in));
-        TEST_EQ(buf.sputc('a'), eof);
+        TEST_EQ(buf.sputc('a'), CharTraits::eof());
         // Even if chars were copied to put area, they cannot be written (in sync)
         TEST(buf.sputn("hello", 5) == 0 || buf.pubsync() == -1);
     }
@@ -124,14 +123,14 @@ void test_open_close(const std::string& filepath)
             create_file(filepath, file_data);
             nw::filebuf buf;
             TEST(buf.open(filepath, flags));
-            TEST_EQ(buf.sgetc(), eof);
-            TEST_EQ(buf.sbumpc(), eof);
+            TEST_EQ(buf.sgetc(), CharTraits::eof());
+            TEST_EQ(buf.sbumpc(), CharTraits::eof());
             char str[3];
             TEST_EQ(buf.sgetn(str, sizeof(str)), 0);
             // Putback is also just for reading
             TEST(buf.pubseekoff(0, std::ios_base::end) != std::streampos(-1));
-            TEST_EQ(buf.sungetc(), eof);
-            TEST_EQ(buf.sputbackc('t'), eof);
+            TEST_EQ(buf.sungetc(), CharTraits::eof());
+            TEST_EQ(buf.sputbackc('t'), CharTraits::eof());
         }
     }
 }
@@ -161,7 +160,7 @@ void test_pubseekpos(const std::string& filepath)
     TEST_EQ(buf.pubseekpos(0), pos_type(0));
     TEST_EQ(buf.sgetc(), CharTraits::to_int_type(data[0]));
     TEST_EQ(buf.pubseekpos(eofPos), eofPos);
-    TEST_EQ(buf.sgetc(), eof);
+    TEST_EQ(buf.sgetc(), CharTraits::eof());
 }
 
 void test_pubseekoff(const std::string& filepath)
@@ -208,7 +207,7 @@ void test_pubseekoff(const std::string& filepath)
     TEST_EQ(buf.sgetc(), CharTraits::to_int_type(data[0]));
     TEST_EQ(buf.pubseekoff(0, std::ios_base::end), eofPos);
     TEST_EQ(tellg(), eofPos);
-    TEST_EQ(buf.sgetc(), eof);
+    TEST_EQ(buf.sgetc(), CharTraits::eof());
 }
 
 void test_64_bit_seek(const std::string& filepath)
@@ -546,36 +545,36 @@ void test_sungetc(const std::string& filepath, bool binary)
     TEST(open_with_buffer(buf, filepath, make_mode(std::ios_base::in, binary), buffer));
 
     // Nothing to unget at beginning of file
-    TEST_EQ(buf.sungetc(), eof);
+    TEST_EQ(buf.sungetc(), CharTraits::eof());
 
     // Able to unget first char and get it again
     TEST_EQ(buf.sbumpc(), '0');
-    TEST(buf.sungetc() != eof);
+    TEST(buf.sungetc() != CharTraits::eof());
     TEST_EQ(buf.sbumpc(), '0');
 
     // Able to unget and reread after filling up new buffer
     TEST(skip_chars(buf, sizeof(buffer) - 1u)); // skip remaining chars
     TEST_EQ(buf.sbumpc(), '4');
-    TEST(buf.sungetc() != eof);
+    TEST(buf.sungetc() != CharTraits::eof());
     // Ungetting multiple chars may or may not be possible
-    if(buf.sungetc() != eof)
+    if(buf.sungetc() != CharTraits::eof())
         TEST_EQ(buf.sbumpc(), '3');
     TEST_EQ(buf.sbumpc(), '4');
 
     // \n also works
     TEST_EQ(buf.sbumpc(), '5');
     TEST_EQ(buf.sbumpc(), '\n');
-    TEST(buf.sungetc() != eof);
+    TEST(buf.sungetc() != CharTraits::eof());
     TEST_EQ(buf.sbumpc(), '\n');
     TEST_EQ(buf.sbumpc(), '6');
-    TEST(buf.sungetc() != eof);
-    if(buf.sungetc() != eof)
+    TEST(buf.sungetc() != CharTraits::eof());
+    if(buf.sungetc() != CharTraits::eof())
         TEST_EQ(buf.sbumpc(), '\n');
     TEST_EQ(buf.sbumpc(), '6');
 
     // Go back as far as possible
     auto idx = data.size();
-    while(buf.sungetc() != eof)
+    while(buf.sungetc() != CharTraits::eof())
     {
         TEST(idx > 0u);
         --idx;
@@ -602,7 +601,7 @@ void test_sputbackc(const std::string& filepath, bool binary)
     while(true)
     {
         auto res = buf.sputbackc((idx > 0u) ? data[idx - 1] : 'z');
-        if(res == eof)
+        if(res == CharTraits::eof())
             break;
         TEST(idx > 0u);
         TEST_EQ(res, data[idx - 1]);
@@ -620,7 +619,7 @@ void test_sputbackc(const std::string& filepath, bool binary)
     while(true)
     {
         auto res = buf.sputbackc((idx > 0u) ? data2[idx - 1] : 'z');
-        if(res == eof)
+        if(res == CharTraits::eof())
             break;
         TEST(idx > 0u);
         TEST_EQ(res, data2[idx - 1]);
@@ -722,13 +721,13 @@ void test_swap(const std::string& filepath)
         TEST_EQ(buf2.sbumpc(), 'H');
         buf1.swap(buf2);
         // Trying to read in write mode or other way round should fail
-        TEST_EQ(buf1.sputc('x'), eof);
-        TEST_EQ(buf2.sbumpc(), eof);
+        TEST_EQ(buf1.sputc('x'), CharTraits::eof());
+        TEST_EQ(buf2.sbumpc(), CharTraits::eof());
         TEST_EQ(buf1.sbumpc(), 'e');
         TEST_EQ(buf2.sputc('a'), 'a');
         buf2.swap(buf1);
-        TEST_EQ(buf2.sputc('x'), eof);
-        TEST_EQ(buf1.sbumpc(), eof);
+        TEST_EQ(buf2.sputc('x'), CharTraits::eof());
+        TEST_EQ(buf1.sbumpc(), CharTraits::eof());
         TEST_EQ(buf2.sbumpc(), 'l');
         TEST_EQ(buf1.sputn("zXYZ", 4), 4);
         swap(buf2, buf1);
