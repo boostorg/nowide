@@ -20,7 +20,7 @@ jobs:
     env:
       DEP_DIR: ${{github.workspace}}/dependencies
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Extract tag name and matching commit on standalone branch
         id: get_tag
         run: |
@@ -129,7 +129,7 @@ jobs:
 
       - name: Create Release
         if: github.event_name == 'push'
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
