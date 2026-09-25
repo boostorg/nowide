@@ -38,6 +38,7 @@ jobs:
     uses: boostorg/boost-ci/.github/workflows/reusable.yml@master
     with:
       branch_coverage: false
+      timeout: 180
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       COVERITY_SCAN_NOTIFICATION_EMAIL: ${{ secrets.COVERITY_SCAN_NOTIFICATION_EMAIL }}
